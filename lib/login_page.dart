@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      const url = 'https://foxgeen.com/HRIS/api/login';
+      const url = 'https://foxgeen.com/HRIS/mobileapi/login';
 
       final response = await http
           .post(
@@ -178,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (authenticated) {
         final biometricToken = const Uuid().v4();
-        const url = 'https://foxgeen.com/HRIS/api/register_biometric';
+        const url = 'https://foxgeen.com/HRIS/mobileapi/register_biometric';
 
         final response = await http.post(
           Uri.parse(url),
@@ -194,6 +194,7 @@ class _LoginPageState extends State<LoginPage> {
         if (data['status'] == true) {
           debugPrint('Writing token to storage: $biometricToken');
           await storage.write(key: 'biometric_token', value: biometricToken);
+          await storage.write(key: 'fingerprint_enabled', value: 'true');
 
           // Verifikasi langsung setelah nulis
           final verify = await storage.read(key: 'biometric_token');
@@ -229,13 +230,14 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loginWithBiometric() async {
     final token = await storage.read(key: 'biometric_token');
-    debugPrint('Reading token for login: $token');
+    final enabled = await storage.read(key: 'fingerprint_enabled');
+    debugPrint('Reading token for login: $token, enabled: $enabled');
 
-    if (token == null) {
+    if (token == null || enabled != 'true') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Fingerprint belum diaktifkan. Silakan login dengan password dulu.',
+            'Fingerprint belum diaktifkan atau dinonaktifkan di pengaturan.',
           ),
         ),
       );
@@ -253,7 +255,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (authenticated) {
         setState(() => _isLoading = true);
-        const url = 'https://foxgeen.com/HRIS/api/login_biometric';
+        const url = 'https://foxgeen.com/HRIS/mobileapi/login_biometric';
         final response = await http.post(
           Uri.parse(url),
           body: {'biometric_token': token},

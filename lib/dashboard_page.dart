@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'widgets/custom_bottom_nav.dart';
+import 'widgets/custom_app_bar.dart';
+import 'widgets/side_drawer.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -26,7 +28,7 @@ class _DashboardPageState extends State<DashboardPage> {
     try {
       final userId = widget.userData['id'];
       final url =
-          'https://foxgeen.com/HRIS/api/get_dashboard_data?user_id=$userId';
+          'https://foxgeen.com/HRIS/mobileapi/get_dashboard_data?user_id=$userId';
 
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
@@ -47,54 +49,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'ServerHub',
-          style: TextStyle(
-            color: Color(0xFF7E57C2),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.grey),
-            onPressed: () {},
-          ),
-          ClipOval(
-            child: Container(
-              width: 36,
-              height: 36,
-              color: const Color(0xFFE6D4FA),
-              child:
-                  (_dashboardData['user']?['profile_photo'] != null &&
-                      _dashboardData['user']!['profile_photo']
-                          .toString()
-                          .isNotEmpty)
-                  ? Image.network(
-                      'https://foxgeen.com/HRIS/public/uploads/users/thumb/${_dashboardData['user']!['profile_photo']}',
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Icon(
-                          Icons.person,
-                          size: 20,
-                          color: Colors.white,
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.person,
-                        size: 20,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.person, size: 20, color: Colors.white),
-            ),
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
+      appBar: CustomAppBar(userData: _dashboardData['user'] ?? widget.userData),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -113,13 +68,15 @@ class _DashboardPageState extends State<DashboardPage> {
                             height: 60,
                             color: const Color(0xFFE6D4FA),
                             child:
-                                (_dashboardData['user']?['profile_photo'] !=
+                                ((_dashboardData['user']?['profile_photo'] ??
+                                            widget.userData['profile_photo']) !=
                                         null &&
-                                    _dashboardData['user']!['profile_photo']
+                                    (_dashboardData['user']?['profile_photo'] ??
+                                            widget.userData['profile_photo'])
                                         .toString()
                                         .isNotEmpty)
                                 ? Image.network(
-                                    'https://foxgeen.com/HRIS/public/uploads/users/thumb/${_dashboardData['user']!['profile_photo']}',
+                                    'https://foxgeen.com/HRIS/public/uploads/users/thumb/${_dashboardData['user']?['profile_photo'] ?? widget.userData['profile_photo']}',
                                     fit: BoxFit.cover,
                                     loadingBuilder:
                                         (context, child, loadingProgress) {
@@ -152,7 +109,9 @@ class _DashboardPageState extends State<DashboardPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _dashboardData['user']?['nama'] ?? 'User',
+                                _dashboardData['user']?['nama'] ??
+                                    widget.userData['nama'] ??
+                                    'User',
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -160,8 +119,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                _dashboardData['user']?['username'] ??
-                                    '@username',
+                                '@${_dashboardData['user']?['username'] ?? widget.userData['username'] ?? 'username'}',
                                 style: const TextStyle(color: Colors.grey),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -360,21 +318,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          Container(
-                            height: 150,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Chart Placeholder',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ),
-                          ),
+                          const SizedBox(height: 4),
                         ],
                       ),
                     ),
@@ -382,6 +326,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
             ),
+      endDrawer: SideDrawer(
+        userData: _dashboardData['user'] ?? widget.userData,
+        activePage: 'dashboard',
+      ),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: 0,
         onTap: (index) {

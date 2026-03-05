@@ -3,6 +3,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:uuid/uuid.dart';
+import 'dashboard_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -23,6 +27,28 @@ class _RegisterPageState extends State<RegisterPage> {
   File? _image;
   bool _isLoading = false;
   final _picker = ImagePicker();
+
+  final LocalAuthentication auth = LocalAuthentication();
+  final storage = const FlutterSecureStorage();
+  bool _canCheckBiometrics = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometrics();
+  }
+
+  Future<void> _checkBiometrics() async {
+    try {
+      final canCheck = await auth.canCheckBiometrics;
+      final isSupported = await auth.isDeviceSupported();
+      setState(() {
+        _canCheckBiometrics = canCheck && isSupported;
+      });
+    } catch (e) {
+      debugPrint('Error checking biometrics: $e');
+    }
+  }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -96,7 +122,25 @@ class _RegisterPageState extends State<RegisterPage> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // Back to login
+
+        // Auto-login logic
+        final userData = data['data'];
+        final identifier = _usernameController.text;
+        final password = _passwordController.text;
+
+        // Tawarkan aktifkan fingerprint
+        if (_canCheckBiometrics) {
+          await _showEnableFingerprintDialog(identifier, password);
+        }
+
+        if (!mounted) return;
+        // Langsung masuk Dashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardPage(userData: userData),
+          ),
+        );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -135,22 +179,87 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Silakan isi form di bawah untuk mendaftar sebagai customer.',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.grey, fontSize: 15),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
+
+              // Profile Photo Picker (Merged)
+              Center(
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xFF7E57C2).withOpacity(0.2),
+                                width: 4,
+                              ),
+                            ),
+                            child: CircleAvatar(
+                              radius: 55,
+                              backgroundColor: const Color(0xFFF3F6FF),
+                              backgroundImage: _image != null
+                                  ? FileImage(_image!)
+                                  : null,
+                              child: _image == null
+                                  ? const Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 40,
+                                      color: Colors.grey,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF7E57C2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Tentukan Foto Profil',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
               Row(
                 children: [
                   Expanded(
                     child: _buildTextField(
                       controller: _firstNameController,
                       label: 'First Name',
-                      hint: 'FIRST NAME',
+                      hint: 'First Name',
                       icon: Icons.person_outline,
                       autoCapitalize: true,
                     ),
@@ -160,7 +269,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: _buildTextField(
                       controller: _lastNameController,
                       label: 'Last Name',
-                      hint: 'LAST NAME',
+                      hint: 'Last Name',
                       icon: Icons.person_outline,
                       autoCapitalize: true,
                     ),
@@ -174,16 +283,16 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: _buildTextField(
                       controller: _usernameController,
                       label: 'Username',
-                      hint: 'fabian',
-                      icon: Icons.person_outline,
+                      hint: 'Username',
+                      icon: Icons.alternate_email,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildTextField(
                       controller: _emailController,
-                      label: 'Email',
-                      hint: 'example@mail.com',
+                      label: 'Email Address',
+                      hint: 'Email Address',
                       icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                     ),
@@ -197,7 +306,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: _buildTextField(
                       controller: _passwordController,
                       label: 'Password',
-                      hint: '••••••••••••',
+                      hint: 'Password',
                       icon: Icons.lock_outline,
                       isPassword: true,
                     ),
@@ -206,8 +315,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _contactController,
-                      label: 'Contact Number',
-                      hint: 'Nomor Telepon',
+                      label: 'Contact',
+                      hint: 'Contact',
                       icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                     ),
@@ -220,19 +329,24 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   const Text(
                     'Gender',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF3F6FF),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: _selectedGender,
                         isExpanded: true,
+                        icon: const Icon(Icons.keyboard_arrow_down),
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                        ),
                         items: ['Male', 'Female'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
@@ -249,65 +363,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'Profile Picture Preview',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: const Color(0xFFF3F6FF),
-                  backgroundImage: _image != null ? FileImage(_image!) : null,
-                  child: _image == null
-                      ? const Icon(Icons.person, size: 50, color: Colors.grey)
-                      : null,
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Profile Picture',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          _image == null
-                              ? 'Choose file'
-                              : _image!.path.split('/').last,
-                          style: TextStyle(color: Colors.grey.shade600),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey.shade200,
-                        foregroundColor: Colors.black87,
-                        elevation: 0,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(8),
-                            bottomRight: Radius.circular(8),
-                          ),
-                        ),
-                      ),
-                      child: const Text('Browse'),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
@@ -315,25 +370,40 @@ class _RegisterPageState extends State<RegisterPage> {
                   onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7E57C2),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
                       : const Text(
-                          'Register',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          'Buat Akun Sekarang',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Sudah punya akun? '),
+                    const Text(
+                      'Sudah punya akun? ',
+                      style: TextStyle(color: Colors.grey),
+                    ),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: const Text(
@@ -347,11 +417,97 @@ class _RegisterPageState extends State<RegisterPage> {
                   ],
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _showEnableFingerprintDialog(
+    String identifier,
+    String password,
+  ) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Aktifkan Fingerprint?'),
+        content: const Text(
+          'Selamat! Akun Anda berhasil dibuat. Apakah Anda ingin mengaktifkan login dengan sidik jari sekarang?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Nanti'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _registerBiometric(identifier, password);
+              if (context.mounted) Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF7E57C2),
+            ),
+            child: const Text(
+              'Aktifkan',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _registerBiometric(String identifier, String password) async {
+    try {
+      bool authenticated = await auth.authenticate(
+        localizedReason: 'Scan sidik jari untuk mengaktifkan login biometrik',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+
+      if (authenticated) {
+        final biometricToken = const Uuid().v4();
+        const url = 'https://foxgeen.com/HRIS/mobileapi/register_biometric';
+
+        final response = await http.post(
+          Uri.parse(url),
+          body: {
+            'identifier': identifier,
+            'password': password,
+            'biometric_token': biometricToken,
+            'device_info': 'Android Device (After Registration)',
+          },
+        );
+
+        final data = json.decode(response.body);
+        if (data['status'] == true) {
+          await storage.write(key: 'biometric_token', value: biometricToken);
+          await storage.write(key: 'fingerprint_enabled', value: 'true');
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Fingerprint berhasil diaktifkan!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal mendaftarkan: ${data['message']}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error registering biometric: $e');
+    }
   }
 
   Widget _buildTextField({
@@ -368,7 +524,7 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -391,10 +547,11 @@ class _RegisterPageState extends State<RegisterPage> {
           decoration: InputDecoration(
             prefixIcon: Icon(icon, size: 20),
             hintText: hint,
+            hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
             filled: true,
             fillColor: const Color(0xFFF3F6FF),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
             contentPadding: const EdgeInsets.symmetric(
