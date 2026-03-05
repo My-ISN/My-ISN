@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -59,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      const url = 'https://foxgeen.com/HRIS/mobileapi/login';
+      const url = 'https://foxgeen.com/HRIS/api/login';
 
       final response = await http
           .post(
@@ -68,7 +69,20 @@ class _LoginPageState extends State<LoginPage> {
           )
           .timeout(const Duration(seconds: 15));
 
-      final data = json.decode(response.body);
+      var data;
+      try {
+        data = json.decode(response.body);
+      } catch (e) {
+        debugPrint('Failed to decode JSON. Raw response: ${response.body}');
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Server Error. Check console logs.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
 
       if (response.statusCode == 200 && data['status'] == true) {
         if (!mounted) return;
@@ -82,10 +96,17 @@ class _LoginPageState extends State<LoginPage> {
         // Setelah login sukses, tawarkan aktifkan fingerprint jika belum aktif
         final storedToken = await storage.read(key: 'biometric_token');
         if (storedToken == null && _canCheckBiometrics) {
-          _showEnableFingerprintDialog(identifier, password);
+          // Kita await dialog agar proses registrasi selesai dulu
+          await _showEnableFingerprintDialog(identifier, password);
         }
 
-        // TODO: Navigate to Dashboard
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardPage(userData: data['data']),
+          ),
+        );
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -126,9 +147,10 @@ class _LoginPageState extends State<LoginPage> {
             child: const Text('Nanti'),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _registerBiometric(identifier, password);
+            onPressed: () async {
+              // Show loading if you want, but at least await the process
+              await _registerBiometric(identifier, password);
+              if (context.mounted) Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF7E57C2),
@@ -155,7 +177,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (authenticated) {
         final biometricToken = const Uuid().v4();
-        const url = 'https://foxgeen.com/HRIS/mobileapi/register_biometric';
+        const url = 'https://foxgeen.com/HRIS/api/register_biometric';
 
         final response = await http.post(
           Uri.parse(url),
@@ -163,14 +185,19 @@ class _LoginPageState extends State<LoginPage> {
             'identifier': identifier,
             'password': password,
             'biometric_token': biometricToken,
-            'device_info':
-                'Android Device', // Bisa dikembangkan pakai device_info_plus
+            'device_info': 'Android Device',
           },
         );
 
         final data = json.decode(response.body);
         if (data['status'] == true) {
+          debugPrint('Writing token to storage: $biometricToken');
           await storage.write(key: 'biometric_token', value: biometricToken);
+
+          // Verifikasi langsung setelah nulis
+          final verify = await storage.read(key: 'biometric_token');
+          debugPrint('Verification read: $verify');
+
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -178,7 +205,21 @@ class _LoginPageState extends State<LoginPage> {
               backgroundColor: Colors.green,
             ),
           );
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gagal mendaftarkan: ${data['message']}'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
+      } else {
+        // Jika user membatalkan scan
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Aktivasi fingerprint dibatalkan.')),
+        );
       }
     } catch (e) {
       debugPrint('Error registering biometric: $e');
@@ -187,6 +228,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loginWithBiometric() async {
     final token = await storage.read(key: 'biometric_token');
+    debugPrint('Reading token for login: $token');
+
     if (token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -209,7 +252,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (authenticated) {
         setState(() => _isLoading = true);
-        const url = 'https://foxgeen.com/HRIS/mobileapi/login_biometric';
+        const url = 'https://foxgeen.com/HRIS/api/login_biometric';
         final response = await http.post(
           Uri.parse(url),
           body: {'biometric_token': token},
@@ -224,7 +267,13 @@ class _LoginPageState extends State<LoginPage> {
               backgroundColor: Colors.green,
             ),
           );
-          // TODO: Navigate to Dashboard
+          // Navigate to Dashboard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DashboardPage(userData: data['data']),
+            ),
+          );
         } else {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
