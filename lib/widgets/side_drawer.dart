@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import '../login_page.dart';
 import '../settings_page.dart';
+import '../profile/profile_page.dart';
 
 class SideDrawer extends StatelessWidget {
   final Map<String, dynamic> userData;
   final String activePage;
+  final Function(int)? onTabSelected;
 
   const SideDrawer({
     super.key,
     required this.userData,
     required this.activePage,
+    this.onTabSelected,
   });
 
   @override
@@ -30,9 +33,29 @@ class SideDrawer extends StatelessWidget {
                   isActive: activePage == 'dashboard',
                   onTap: () {
                     Navigator.pop(context);
-                    if (activePage != 'dashboard') {
-                      // If we're coming from another page, we might want to go back to dashboard
+                    if (onTabSelected != null) {
+                      onTabSelected!(0);
+                    } else if (activePage != 'dashboard') {
                       Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.person_outline,
+                  title: 'Profil Saya',
+                  isActive: activePage == 'profile',
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (onTabSelected != null) {
+                      onTabSelected!(3);
+                    } else if (activePage != 'profile') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfilePage(userData: userData),
+                        ),
+                      );
                     }
                   },
                 ),
@@ -66,45 +89,65 @@ class SideDrawer extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 20),
-      color: const Color(0xFF7E57C2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 35,
-            backgroundColor: Colors.white.withOpacity(0.2),
-            backgroundImage:
-                (userData['profile_photo'] != null &&
-                    userData['profile_photo'].toString().isNotEmpty)
-                ? NetworkImage(
-                    'https://foxgeen.com/HRIS/public/uploads/users/thumb/${userData['profile_photo']}',
-                  )
-                : null,
-            child:
-                (userData['profile_photo'] == null ||
-                    userData['profile_photo'].toString().isEmpty)
-                ? const Icon(Icons.person, size: 40, color: Colors.white)
-                : null,
-          ),
-          const SizedBox(height: 15),
-          Text(
-            userData['nama'] ?? 'User',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        if (onTabSelected != null) {
+          onTabSelected!(3);
+        } else if (activePage != 'profile') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfilePage(userData: userData),
             ),
-          ),
-          Text(
-            '@${userData['username'] ?? 'username'}',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 14,
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.only(
+          top: 60,
+          left: 20,
+          right: 20,
+          bottom: 20,
+        ),
+        color: const Color(0xFF7E57C2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 35,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundImage:
+                  (userData['profile_photo'] != null &&
+                      userData['profile_photo'].toString().isNotEmpty)
+                  ? NetworkImage(
+                      'https://foxgeen.com/HRIS/public/uploads/users/thumb/${userData['profile_photo']}',
+                    )
+                  : null,
+              child:
+                  (userData['profile_photo'] == null ||
+                      userData['profile_photo'].toString().isEmpty)
+                  ? const Icon(Icons.person, size: 40, color: Colors.white)
+                  : null,
             ),
-          ),
-        ],
+            const SizedBox(height: 15),
+            Text(
+              userData['nama'] ?? 'User',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              '@${userData['username'] ?? 'username'}',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

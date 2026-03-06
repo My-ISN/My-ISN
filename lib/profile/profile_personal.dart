@@ -1,0 +1,113 @@
+import 'package:flutter/material.dart';
+
+class ProfilePersonalPage extends StatelessWidget {
+  final Map<String, dynamic> data;
+  const ProfilePersonalPage({super.key, required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FD),
+      appBar: AppBar(
+        title: const Text(
+          'Personal Information',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildInfoCard([
+              _buildInfoRow('Bio', data['bio'] ?? '-'),
+              _buildInfoRow(
+                'Experience',
+                _getExperienceLabel(data['experience']),
+              ),
+              _buildInfoRow('LinkedIn', data['linkedin_profile'] ?? '-'),
+              _buildInfoRow('Facebook', data['fb_profile'] ?? '-', last: true),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getExperienceLabel(dynamic exp) {
+    if (exp == null) return '-';
+    int years = int.tryParse(exp.toString()) ?? 0;
+
+    if (years == 0) {
+      return 'Startup';
+    } else if (years == 1) {
+      return '1 year';
+    } else if (years > 10) {
+      return '10+ years';
+    } else {
+      return '$years years';
+    }
+  }
+
+  Widget _buildInfoCard(List<Widget> children) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, {bool last = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        border: last
+            ? null
+            : Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.1))),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Color(0xFF1A1F36),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
