@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'dashboard_page.dart';
 import 'register_page.dart';
 
@@ -24,6 +25,10 @@ class _LoginPageState extends State<LoginPage> {
   final LocalAuthentication auth = LocalAuthentication();
   final storage = const FlutterSecureStorage();
   bool _canCheckBiometrics = false;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'https://www.googleapis.com/auth/userinfo.profile'],
+  );
 
   @override
   void initState() {
@@ -300,6 +305,75 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      setState(() => _isLoading = true);
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      final String email = googleUser.email;
+      final String displayName = googleUser.displayName ?? '';
+      final List<String> nameParts = displayName.split(' ');
+      final String firstName = nameParts.first;
+      final String lastName = nameParts.length > 1
+          ? nameParts.sublist(1).join(' ')
+          : '';
+      final String picture = googleUser.photoUrl ?? '';
+
+      const url = 'https://foxgeen.com/HRIS/mobileapi/google_login';
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'email': email,
+          'first_name': firstName,
+          'last_name': lastName,
+          'profile_photo': picture,
+        },
+      );
+
+      final data = json.decode(response.body);
+      if (data['status'] == true) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login Google Berhasil: ${data['data']['nama']}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashboardPage(userData: data['data']),
+          ),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? 'Login Google Gagal'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (error) {
+      debugPrint('Google Sign-In Error: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Login Error: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   void dispose() {
     _identifierController.dispose();
@@ -506,7 +580,7 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: _isLoading ? null : _handleGoogleSignIn,
                     icon: Image.network(
                       'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
                       height: 20,
