@@ -4,6 +4,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -485,13 +486,17 @@ class _SettingsPageState extends State<SettingsPage> {
                       _buildInfoTile(
                         icon: Icons.shield_outlined,
                         title: 'Kebijakan Privasi',
-                        onTap: () {},
+                        onTap: () =>
+                            _launchURL('https://foxgeen.com/HRIS/erp/privacy'),
                       ),
                       const Divider(height: 1, indent: 70),
                       _buildInfoTile(
                         icon: Icons.help_outline,
                         title: 'Bantuan & Dukungan',
-                        onTap: () {},
+                        onTap: () => _launchWhatsApp(
+                          '0895384314416',
+                          'Halo admin Foxgeen, saya butuh bantuan terkait akun saya...',
+                        ),
                       ),
                       const Divider(height: 1, indent: 70),
                       _buildInfoTile(
@@ -534,5 +539,50 @@ class _SettingsPageState extends State<SettingsPage> {
                 : null),
       onTap: onTap,
     );
+  }
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $url');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Tidak dapat membuka link: $e')));
+      }
+    }
+  }
+
+  Future<void> _launchWhatsApp(String phone, String message) async {
+    // Remove leading 0 and replace with 62
+    String formattedPhone = phone;
+    if (phone.startsWith('0')) {
+      formattedPhone = '62${phone.substring(1)}';
+    }
+
+    final String urlString =
+        "whatsapp://send?phone=$formattedPhone&text=${Uri.encodeComponent(message)}";
+    final Uri url = Uri.parse(urlString);
+
+    try {
+      if (!await launchUrl(url)) {
+        // Fallback to web link if whatsapp app is not installed
+        final String webUrlString =
+            "https://wa.me/$formattedPhone?text=${Uri.encodeComponent(message)}";
+        final Uri webUrl = Uri.parse(webUrlString);
+        if (!await launchUrl(webUrl, mode: LaunchMode.externalApplication)) {
+          throw Exception('Could not launch WhatsApp');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Tidak dapat membuka WhatsApp: $e')),
+        );
+      }
+    }
   }
 }
