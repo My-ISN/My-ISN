@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'profile_edit.dart';
 
 class ProfileBankPage extends StatelessWidget {
   final Map<String, dynamic> data;
-  const ProfileBankPage({super.key, required this.data});
+  final Map<String, dynamic> userData;
+  final Map<String, dynamic> fullProfileData;
+
+  const ProfileBankPage({
+    super.key,
+    required this.data,
+    required this.userData,
+    required this.fullProfileData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +28,27 @@ class ProfileBankPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: Color(0xFF7E57C2)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileEditPage(
+                    userData: userData,
+                    profileData: fullProfileData,
+                    section: 'bank',
+                  ),
+                ),
+              ).then((value) {
+                if (value == true) {
+                  Navigator.pop(context, true);
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

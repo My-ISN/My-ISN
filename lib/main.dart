@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'widgets/connectivity_wrapper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,6 +18,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF7E57C2)),
         useMaterial3: true,
       ),
+      builder: (context, child) {
+        return ConnectivityWrapper(child: child!);
+      },
       home: const LoginPage(),
     );
   }

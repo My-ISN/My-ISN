@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'profile_edit.dart';
 
 class ProfilePersonalPage extends StatelessWidget {
   final Map<String, dynamic> data;
-  const ProfilePersonalPage({super.key, required this.data});
+  final Map<String, dynamic> userData;
+  final Map<String, dynamic> fullProfileData;
+
+  const ProfilePersonalPage({
+    super.key,
+    required this.data,
+    required this.userData,
+    required this.fullProfileData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,17 +28,40 @@ class ProfilePersonalPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: Color(0xFF7E57C2)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileEditPage(
+                    userData: userData,
+                    profileData: fullProfileData,
+                    section: 'personal',
+                  ),
+                ),
+              ).then((value) {
+                if (value == true) {
+                  Navigator.pop(context, true);
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             _buildInfoCard([
-              _buildInfoRow('Bio', data['bio'] ?? '-'),
-              _buildInfoRow(
-                'Experience',
-                _getExperienceLabel(data['experience']),
-              ),
+              if (data['user_type'] != 'customer') ...[
+                _buildInfoRow('Bio', data['bio'] ?? '-'),
+                _buildInfoRow(
+                  'Experience',
+                  _getExperienceLabel(data['experience']),
+                ),
+              ],
               _buildInfoRow('LinkedIn', data['linkedin_profile'] ?? '-'),
               _buildInfoRow('Facebook', data['fb_profile'] ?? '-', last: true),
             ]),

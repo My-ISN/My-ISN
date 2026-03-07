@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'profile/profile_page.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -432,56 +431,37 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ],
                   ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ProfilePage(userData: widget.userData),
-                          ),
-                        );
-                      },
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          radius: 28,
-                          backgroundColor: const Color(0xFF7E57C2),
-                          backgroundImage:
-                              (widget.userData['profile_photo'] != null &&
-                                  widget.userData['profile_photo']
-                                      .toString()
-                                      .isNotEmpty)
-                              ? NetworkImage(
-                                  'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
-                                )
-                              : null,
-                          child:
-                              (widget.userData['profile_photo'] == null ||
-                                  widget.userData['profile_photo']
-                                      .toString()
-                                      .isEmpty)
-                              ? Text(
-                                  (widget.userData['nama'] ?? 'U')
-                                      .substring(0, 1)
-                                      .toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                  ),
-                                )
-                              : null,
-                        ),
-                        title: Text(widget.userData['nama'] ?? 'User'),
-                        subtitle: Text(widget.userData['email'] ?? ''),
-                        trailing: const Icon(
-                          Icons.chevron_right,
-                          color: Colors.grey,
-                        ),
-                      ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      radius: 28,
+                      backgroundColor: const Color(0xFF7E57C2),
+                      backgroundImage:
+                          (widget.userData['profile_photo'] != null &&
+                              widget.userData['profile_photo']
+                                  .toString()
+                                  .isNotEmpty)
+                          ? NetworkImage(
+                              'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
+                            )
+                          : null,
+                      child:
+                          (widget.userData['profile_photo'] == null ||
+                              widget.userData['profile_photo']
+                                  .toString()
+                                  .isEmpty)
+                          ? Text(
+                              (widget.userData['nama'] ?? 'U')
+                                  .substring(0, 1)
+                                  .toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            )
+                          : null,
                     ),
+                    title: Text(widget.userData['nama'] ?? 'User'),
+                    subtitle: Text(widget.userData['email'] ?? ''),
                   ),
                 ),
                 // ── Informasi Aplikasi ────────────────────────────

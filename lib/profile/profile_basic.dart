@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'profile_edit.dart';
 
 class ProfileBasicPage extends StatelessWidget {
   final Map<String, dynamic> data;
-  const ProfileBasicPage({super.key, required this.data});
+  final Map<String, dynamic> userData;
+  final Map<String, dynamic> fullProfileData;
+
+  const ProfileBasicPage({
+    super.key,
+    required this.data,
+    required this.userData,
+    required this.fullProfileData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +28,35 @@ class ProfileBasicPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: Color(0xFF7E57C2)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileEditPage(
+                    userData: userData,
+                    profileData: fullProfileData,
+                    section: 'basic',
+                  ),
+                ),
+              ).then((value) {
+                if (value == true) {
+                  Navigator.pop(context, true);
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             _buildInfoCard([
-              _buildInfoRow('Employee ID', data['employee_id'] ?? '-'),
+              if (data['user_type'] != 'customer')
+                _buildInfoRow('Employee ID', data['employee_id'] ?? '-'),
               _buildInfoRow(
                 'Gender',
                 data['gender'] == '1' ? 'Male' : 'Female',

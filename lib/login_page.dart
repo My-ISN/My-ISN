@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dashboard_page.dart';
 import 'register_page.dart';
+import 'widgets/connectivity_wrapper.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -124,9 +125,16 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-      );
+      if (ConnectivityStatus.of(context)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Gagal menghubungi server. Periksa koneksi internet Anda.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -230,6 +238,15 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       debugPrint('Error registering biometric: $e');
+      if (mounted && ConnectivityStatus.of(context)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Gagal meregistrasi sidik jari. Periksa koneksi internet.',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -295,8 +312,10 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Biometric error: $e'),
+        const SnackBar(
+          content: Text(
+            'Gagal login sidik jari. Periksa koneksi internet Anda.',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -363,8 +382,8 @@ class _LoginPageState extends State<LoginPage> {
       debugPrint('Google Sign-In Error: $error');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Google Login Error: $error'),
+          const SnackBar(
+            content: Text('Gagal login Google. Periksa koneksi internet Anda.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -581,12 +600,7 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: _isLoading ? null : _handleGoogleSignIn,
-                    icon: Image.network(
-                      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-                      height: 20,
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Icon(Icons.g_mobiledata),
-                    ),
+                    icon: Image.asset('assets/images/google.webp', height: 24),
                     label: const Text(
                       'Masuk dengan Google',
                       style: TextStyle(color: Colors.black87),

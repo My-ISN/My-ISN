@@ -40,10 +40,9 @@ class ProfileContractPage extends StatelessWidget {
                 '$currency ${data['hourly_rate'] ?? '0'}',
               ),
               _buildInfoRow('Office Shift', data['shift_name'] ?? '-'),
-              _buildInfoRow('Contract End', data['date_of_leaving'] ?? '-'),
               _buildInfoRow(
-                'Description',
-                data['role_description'] ?? '-',
+                'Contract End',
+                data['date_of_leaving'] ?? '-',
                 last: true,
               ),
             ]),

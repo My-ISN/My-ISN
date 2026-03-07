@@ -6,6 +6,7 @@ import 'widgets/custom_bottom_nav.dart';
 import 'widgets/custom_app_bar.dart';
 import 'widgets/side_drawer.dart';
 import 'profile/profile_page.dart';
+import 'widgets/connectivity_wrapper.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -45,7 +46,16 @@ class _DashboardPageState extends State<DashboardPage> {
       }
     } catch (e) {
       debugPrint('Error fetching dashboard data: $e');
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Gagal memuat dashboard. Periksa koneksi internet Anda.',
+            ),
+          ),
+        );
+      }
     }
   }
 

@@ -7,6 +7,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'dashboard_page.dart';
+import 'widgets/connectivity_wrapper.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -153,7 +154,10 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Gagal mendaftar. Periksa koneksi internet Anda.'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -507,6 +511,15 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     } catch (e) {
       debugPrint('Error registering biometric: $e');
+      if (mounted && ConnectivityStatus.of(context)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Gagal mengaktifkan sidik jari. Periksa koneksi internet.',
+            ),
+          ),
+        );
+      }
     }
   }
 
