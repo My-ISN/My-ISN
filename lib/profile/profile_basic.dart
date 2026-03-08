@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'profile_edit.dart';
+import '../localization/app_localizations.dart';
 
 class ProfileBasicPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -18,9 +19,9 @@ class ProfileBasicPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
-        title: const Text(
-          'Basic Information',
-          style: TextStyle(color: Colors.black),
+        title: Text(
+          'profile.basic_info'.tr(context),
+          style: const TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -56,22 +57,39 @@ class ProfileBasicPage extends StatelessWidget {
           children: [
             _buildInfoCard([
               if (data['user_type'] != 'customer')
-                _buildInfoRow('Employee ID', data['employee_id'] ?? '-'),
+                _buildInfoRow(
+                  'profile.employee_id'.tr(context),
+                  data['employee_id'] ?? '-',
+                ),
               _buildInfoRow(
-                'Gender',
-                data['gender'] == '1' ? 'Male' : 'Female',
+                'profile.gender'.tr(context),
+                data['gender'] == '1'
+                    ? 'profile.male'.tr(context)
+                    : 'profile.female'.tr(context),
               ),
-              _buildInfoRow('Date of Birth', data['date_of_birth'] ?? '-'),
               _buildInfoRow(
-                'Marital Status',
-                _getMaritalStatus(data['marital_status']),
+                'profile.dob'.tr(context),
+                data['date_of_birth'] ?? '-',
               ),
-              _buildInfoRow('Religion', data['religion_name'] ?? '-'),
-              _buildInfoRow('Blood Group', data['blood_group'] ?? '-'),
-              _buildInfoRow('Nationality', 'Indonesia'),
-              _buildInfoRow('Address', data['address_1'] ?? '-'),
               _buildInfoRow(
-                'City/State',
+                'profile.marital_status'.tr(context),
+                _getMaritalStatus(data['marital_status'], context),
+              ),
+              _buildInfoRow(
+                'profile.religion'.tr(context),
+                data['religion_name'] ?? '-',
+              ),
+              _buildInfoRow(
+                'profile.blood_group'.tr(context),
+                data['blood_group'] ?? '-',
+              ),
+              _buildInfoRow('profile.nationality'.tr(context), 'Indonesia'),
+              _buildInfoRow(
+                'profile.address'.tr(context),
+                data['address_1'] ?? '-',
+              ),
+              _buildInfoRow(
+                'profile.city_state'.tr(context),
                 '${data['city'] ?? ''}, ${data['state'] ?? ''}',
                 last: true,
               ),
@@ -139,18 +157,18 @@ class ProfileBasicPage extends StatelessWidget {
     );
   }
 
-  String _getMaritalStatus(dynamic status) {
+  String _getMaritalStatus(dynamic status, BuildContext context) {
     switch (status?.toString()) {
       case '0':
-        return 'Single';
+        return 'profile.single'.tr(context);
       case '1':
-        return 'Married';
+        return 'profile.married'.tr(context);
       case '2':
-        return 'Widowed';
+        return 'profile.widowed'.tr(context);
       case '3':
-        return 'Separated';
+        return 'profile.separated'.tr(context);
       default:
-        return 'Single';
+        return 'profile.single'.tr(context);
     }
   }
 }

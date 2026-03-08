@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../widgets/connectivity_wrapper.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
+import '../localization/app_localizations.dart';
 
 class ProfileEditPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -23,6 +26,8 @@ class ProfileEditPage extends StatefulWidget {
 class _ProfileEditPageState extends State<ProfileEditPage> {
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
+  File? _image;
+  final _picker = ImagePicker();
 
   // Location Data
   List<dynamic> _provinces = [];
@@ -102,6 +107,56 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      _cropImage(pickedFile.path);
+    }
+  }
+
+  Future<void> _cropImage(String filePath) async {
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: filePath,
+      maxHeight: 1024,
+      maxWidth: 1024,
+      compressQuality: 70,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Edit Foto',
+          toolbarColor: const Color(0xFF7E57C2),
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: false,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        IOSUiSettings(
+          title: 'Edit Foto',
+          cancelButtonTitle: 'Batal',
+          doneButtonTitle: 'Selesai',
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+      ],
+    );
+
+    if (croppedFile != null) {
+      setState(() {
+        _image = File(croppedFile.path);
+      });
+    }
+  }
+
   void _initControllers() {
     final basic = widget.profileData['basic_info'] ?? {};
     final personal = widget.profileData['personal_info'] ?? {};
@@ -135,7 +190,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         text: basic['gender']?.toString() ?? '1',
       );
       _controllers['nationality'] = TextEditingController(
-        text: basic['nationality']?.toString() ?? 'Indonesia',
+        text:
+            basic['nationality']?.toString() ?? 'profile.indonesia'.tr(context),
       );
       _controllers['address_1'] = TextEditingController(
         text: basic['address_1'] ?? '',
@@ -216,23 +272,28 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       if (data['status'] == true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile updated successfully')),
+            SnackBar(content: Text('profile.update_success'.tr(context))),
           );
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: ${data['message']}')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'main.error_with_msg'.tr(
+                  context,
+                  args: {'message': data['message'].toString()},
+                ),
+              ),
+            ),
+          );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal menyimpan. Periksa koneksi internet Anda.'),
-          ),
+          SnackBar(content: Text('profile.conn_error'.tr(context))),
         );
       }
     } finally {
@@ -240,16 +301,81 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     }
   }
 
-  String _getPageTitle() {
+  Future<void> _saveHeaderSection() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    _controllers['first_name']!.text = _controllers['first_name']!.text
+        .toUpperCase();
+    _controllers['last_name']!.text = _controllers['last_name']!.text
+        .toUpperCase();
+
+    setState(() => _isSaving = true);
+
+    try {
+      final userId = widget.userData['id'] ?? widget.userData['user_id'];
+      const url = 'https://foxgeen.com/HRIS/mobileapi/update_profile';
+
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+
+      request.fields['user_id'] = userId.toString();
+      request.fields['section'] = widget.section;
+
+      _controllers.forEach((key, controller) {
+        request.fields[key] = controller.text;
+      });
+
+      if (_image != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('profile_photo', _image!.path),
+        );
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      final data = json.decode(response.body);
+
+      if (data['status'] == true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('profile.update_success'.tr(context))),
+          );
+          Navigator.pop(context, true);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'main.error_with_msg'.tr(
+                  context,
+                  args: {'message': data['message'].toString()},
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('profile.conn_error'.tr(context))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  String _getPageTitle(BuildContext context) {
     switch (widget.section) {
       case 'basic':
-        return 'Edit Basic Info';
+        return 'profile.edit_basic'.tr(context);
       case 'personal':
-        return 'Edit Personal Info';
+        return 'profile.edit_personal'.tr(context);
       case 'bank':
-        return 'Edit Bank Account';
+        return 'profile.edit_bank'.tr(context);
       default:
-        return 'Edit Profile';
+        return 'profile.edit_profile'.tr(context);
     }
   }
 
@@ -259,7 +385,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
         title: Text(
-          _getPageTitle(),
+          _getPageTitle(context),
           style: const TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
@@ -282,10 +408,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             )
           else
             TextButton(
-              onPressed: _saveProfile,
-              child: const Text(
-                'SAVE',
-                style: TextStyle(
+              onPressed: widget.section == 'header'
+                  ? _saveHeaderSection
+                  : _saveProfile,
+              child: Text(
+                'profile.save'.tr(context),
+                style: const TextStyle(
                   color: Color(0xFF7E57C2),
                   fontWeight: FontWeight.bold,
                 ),
@@ -309,30 +437,108 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   List<Widget> _buildFormFields() {
     if (widget.section == 'header') {
       return [
+        Center(
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _pickImage,
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFF7E57C2).withOpacity(0.2),
+                          width: 4,
+                        ),
+                      ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: const Color(0xFFF3F6FF),
+                        backgroundImage: _image != null
+                            ? FileImage(_image!)
+                            : (widget.profileData['basic_info']?['profile_photo'] !=
+                                          null &&
+                                      widget
+                                          .profileData['basic_info']['profile_photo']
+                                          .toString()
+                                          .isNotEmpty
+                                  ? NetworkImage(
+                                      'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.profileData['basic_info']['profile_photo']}',
+                                    )
+                                  : null),
+                        child:
+                            _image == null &&
+                                (widget.profileData['basic_info']?['profile_photo'] ==
+                                        null ||
+                                    widget
+                                        .profileData['basic_info']['profile_photo']
+                                        .toString()
+                                        .isEmpty)
+                            ? const Icon(
+                                Icons.person_outline,
+                                size: 40,
+                                color: Colors.grey,
+                              )
+                            : null,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF7E57C2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'profile.edit_photo'.tr(context),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF7E57C2),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
         _buildTextField(
-          label: 'First Name',
+          label: 'profile.first_name'.tr(context),
           controller: _controllers['first_name']!,
-          validator: (v) => v!.isEmpty ? 'Required' : null,
+          validator: (v) => v!.isEmpty ? 'profile.required'.tr(context) : null,
           textCapitalization: TextCapitalization.characters,
           inputFormatters: [UpperCaseTextFormatter()],
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Last Name',
+          label: 'profile.last_name'.tr(context),
           controller: _controllers['last_name']!,
           textCapitalization: TextCapitalization.characters,
           inputFormatters: [UpperCaseTextFormatter()],
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Email',
+          label: 'profile.email'.tr(context),
           controller: _controllers['email']!,
           keyboardType: TextInputType.emailAddress,
-          validator: (v) => v!.isEmpty ? 'Required' : null,
+          validator: (v) => v!.isEmpty ? 'profile.required'.tr(context) : null,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Contact Number',
+          label: 'profile.phone'.tr(context),
           controller: _controllers['contact_number']!,
           keyboardType: TextInputType.phone,
         ),
@@ -343,7 +549,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           onTap: _selectDate,
           child: AbsorbPointer(
             child: _buildTextField(
-              label: 'Date of Birth',
+              label: 'profile.dob'.tr(context),
               controller: _controllers['date_of_birth']!,
               suffixIcon: const Icon(Icons.calendar_today, size: 20),
             ),
@@ -351,59 +557,62 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         ),
         const SizedBox(height: 16),
         _buildDropdownField(
-          label: 'Gender',
+          label: 'profile.gender'.tr(context),
           value: _controllers['gender']!.text,
-          items: const {'1': 'Male', '2': 'Female'},
+          items: {
+            '1': 'profile.male'.tr(context),
+            '2': 'profile.female'.tr(context),
+          },
           onChanged: (v) => setState(() => _controllers['gender']!.text = v!),
         ),
         const SizedBox(height: 16),
         _buildDropdownField(
-          label: 'Marital Status',
+          label: 'profile.marital_status'.tr(context),
           value: _controllers['marital_status']!.text,
-          items: const {
-            '0': 'Single',
-            '1': 'Married',
-            '2': 'Widowed',
-            '3': 'Separated',
+          items: {
+            '0': 'profile.single'.tr(context),
+            '1': 'profile.married'.tr(context),
+            '2': 'profile.widowed'.tr(context),
+            '3': 'profile.separated'.tr(context),
           },
           onChanged: (v) =>
               setState(() => _controllers['marital_status']!.text = v!),
         ),
         const SizedBox(height: 16),
         _buildDropdownField(
-          label: 'Religion',
+          label: 'profile.religion'.tr(context),
           value: _controllers['religion_id']!.text,
-          items: const {
-            '': 'Select Religion',
-            '23': 'Islam',
-            '20': 'Christianity',
-            '19': 'Buddhism',
-            '22': 'Hinduism',
-            '21': 'Humanism',
+          items: {
+            '': 'profile.select_religion'.tr(context),
+            '23': 'profile.islam'.tr(context),
+            '20': 'profile.christianity'.tr(context),
+            '19': 'profile.buddhism'.tr(context),
+            '22': 'profile.hinduism'.tr(context),
+            '21': 'profile.humanism'.tr(context),
           },
           onChanged: (v) =>
               setState(() => _controllers['religion_id']!.text = v!),
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Blood Group',
+          label: 'profile.blood_group'.tr(context),
           controller: _controllers['blood_group']!,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Nationality',
+          label: 'profile.nationality'.tr(context),
           controller: _controllers['nationality']!,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Address',
+          label: 'profile.address'.tr(context),
           controller: _controllers['address_1']!,
           maxLines: 2,
         ),
         const SizedBox(height: 16),
         // State Dropdown
         _buildLocationDropdown(
-          label: 'State (Province)',
+          label: 'profile.state_province'.tr(context),
           items: _provinces,
           currentValue: _controllers['state']!.text,
           isLoading: _isLoadingProvinces,
@@ -417,14 +626,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         const SizedBox(height: 16),
         // City Dropdown
         _buildLocationDropdown(
-          label: 'City (Regency)',
+          label: 'profile.city_regency'.tr(context),
           items: _regencies,
           currentValue: _controllers['city']!.text,
           isLoading: _isLoadingRegencies,
           enabled: _regencies.isNotEmpty,
           hint: _controllers['state']!.text.isEmpty
-              ? 'Select state first'
-              : 'Select city',
+              ? 'profile.select_state_first'.tr(context)
+              : 'profile.select_city'.tr(context),
           onChanged: (val, name) {
             setState(() {
               _controllers['city']!.text = name;
@@ -433,7 +642,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Zip Code',
+          label: 'profile.zip_code'.tr(context),
           controller: _controllers['zipcode']!,
           keyboardType: TextInputType.number,
         ),
@@ -441,54 +650,57 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     } else if (widget.section == 'personal') {
       return [
         _buildTextField(
-          label: 'Bio',
+          label: 'profile.bio'.tr(context),
           controller: _controllers['bio']!,
           maxLines: 3,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Experience',
+          label: 'profile.experience'.tr(context),
           controller: _controllers['experience']!,
           maxLines: 3,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Facebook Profile URL',
+          label: 'profile.fb_url'.tr(context),
           controller: _controllers['fb_profile']!,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'LinkedIn Profile URL',
+          label: 'profile.linkedin_url'.tr(context),
           controller: _controllers['linkedin_profile']!,
         ),
       ];
     } else if (widget.section == 'bank') {
       return [
         _buildTextField(
-          label: 'Account Title',
+          label: 'profile.account_title'.tr(context),
           controller: _controllers['account_title']!,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Account Number',
+          label: 'profile.account_number'.tr(context),
           controller: _controllers['account_number']!,
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Bank Name',
+          label: 'profile.bank_name'.tr(context),
           controller: _controllers['bank_name']!,
         ),
         const SizedBox(height: 16),
-        _buildTextField(label: 'IBAN', controller: _controllers['iban']!),
+        _buildTextField(
+          label: 'profile.iban'.tr(context),
+          controller: _controllers['iban']!,
+        ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Swift Code',
+          label: 'profile.swift_code'.tr(context),
           controller: _controllers['swift_code']!,
         ),
         const SizedBox(height: 16),
         _buildTextField(
-          label: 'Bank Branch',
+          label: 'profile.bank_branch'.tr(context),
           controller: _controllers['bank_branch']!,
         ),
       ];
@@ -651,7 +863,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           decoration: InputDecoration(
             filled: true,
             fillColor: enabled ? Colors.white : Colors.grey[100],
-            hintText: isLoading ? 'Loading...' : (hint ?? 'Select $label'),
+            hintText: isLoading
+                ? 'profile.loading'.tr(context)
+                : (hint ??
+                      'profile.select_item'.tr(context, args: {'item': label})),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 8,

@@ -4,10 +4,18 @@ import 'dart:convert';
 import 'widgets/connectivity_wrapper.dart';
 import 'widgets/custom_app_bar.dart';
 
-class AnnouncementPage extends StatefulWidget {
-  final Map<String, dynamic> userData;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'localization/app_localizations.dart';
 
-  const AnnouncementPage({super.key, required this.userData});
+class AnnouncementPage extends StatefulWidget {
+  final Map<String, dynamic>? userData;
+  final int? initialAnnouncementId;
+
+  const AnnouncementPage({
+    super.key,
+    this.userData,
+    this.initialAnnouncementId,
+  });
 
   @override
   State<AnnouncementPage> createState() => _AnnouncementPageState();
@@ -16,19 +24,44 @@ class AnnouncementPage extends StatefulWidget {
 class _AnnouncementPageState extends State<AnnouncementPage> {
   List<dynamic> _announcements = [];
   bool _isLoading = true;
+  Map<String, dynamic>? _currentUserData;
 
   @override
   void initState() {
     super.initState();
-    _fetchAnnouncements();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    if (widget.userData != null) {
+      _currentUserData = widget.userData;
+      _fetchAnnouncements();
+    } else {
+      const storage = FlutterSecureStorage();
+      final userDataStr = await storage.read(key: 'user_data');
+      if (userDataStr != null) {
+        if (mounted) {
+          setState(() {
+            _currentUserData = json.decode(userDataStr);
+          });
+          _fetchAnnouncements();
+        }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _fetchAnnouncements() async {
-    final userId = widget.userData['user_id'] ?? widget.userData['id'];
+    if (_currentUserData == null) return;
+
+    final userId = _currentUserData!['user_id'] ?? _currentUserData!['id'];
     final deptId =
-        widget.userData['department_id'] ?? widget.userData['dept_id'] ?? 0;
+        _currentUserData!['department_id'] ?? _currentUserData!['dept_id'] ?? 0;
     final desigId =
-        widget.userData['designation_id'] ?? widget.userData['desig_id'] ?? 0;
+        _currentUserData!['designation_id'] ??
+        _currentUserData!['desig_id'] ??
+        0;
 
     final url = Uri.parse(
       'https://foxgeen.com/HRIS/mobileapi/get_announcements?user_id=$userId&department_id=$deptId&designation_id=$desigId',
@@ -44,6 +77,22 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             _announcements = data['data'];
             _isLoading = false;
           });
+
+          // Handle initialAnnouncementId for deep linking
+          if (widget.initialAnnouncementId != null) {
+            try {
+              final initialAnnouncement = _announcements.firstWhere(
+                (element) =>
+                    element['announcement_id'].toString() ==
+                    widget.initialAnnouncementId.toString(),
+              );
+              _showDetail(initialAnnouncement);
+            } catch (e) {
+              debugPrint(
+                'Initial announcement not found: ${widget.initialAnnouncementId}',
+              );
+            }
+          }
         }
       } else {
         throw Exception(data['message']);
@@ -53,11 +102,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         setState(() => _isLoading = false);
         if (ConnectivityStatus.of(context)) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Gagal memuat pengumuman. Periksa koneksi internet Anda.',
-              ),
-            ),
+            SnackBar(content: Text('announcement.fetch_error'.tr(context))),
           );
         }
       }
@@ -65,14 +110,15 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   }
 
   Future<void> _markAsSeen(int announcementId) async {
-    final userId = widget.userData['user_id'] ?? widget.userData['id'];
+    if (_currentUserData == null) return;
+    final userId = _currentUserData!['user_id'] ?? _currentUserData!['id'];
     const url = 'https://foxgeen.com/HRIS/mobileapi/mark_announcement_seen';
 
     // Optimistic update for global count
     NotificationManager().decrement();
 
     try {
-      final response = await http.post(
+      await http.post(
         Uri.parse(url),
         body: {
           'user_id': userId.toString(),
@@ -99,85 +145,125 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
       _markAsSeen(int.parse(announcement['announcement_id'].toString()));
     }
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              Text(
-                announcement['title'] ?? '',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF7E57C2),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                announcement['created_at'] ?? '',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
-              ),
-              const Divider(height: 32),
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (announcement['summary'] != null) ...[
-                        Text(
-                          announcement['summary'],
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                      Text(
-                        announcement['description'] ?? '',
-                        style: const TextStyle(fontSize: 15, height: 1.5),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    // Show loading indicator
+    if (!mounted) return;
+    final loaderContext = context;
+    showDialog(
+      context: loaderContext,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
+
+    // Lazy load full description
+    final detailUrl = Uri.parse(
+      'https://foxgeen.com/HRIS/mobileapi/get_announcement_details?announcement_id=${announcement['announcement_id']}',
+    );
+
+    try {
+      final response = await http.get(detailUrl);
+
+      // Close loader immediately after request returns
+      if (mounted) Navigator.of(loaderContext).pop();
+
+      final data = json.decode(response.body);
+
+      if (data['status'] == true) {
+        final fullData = data['data'];
+        if (!mounted) return;
+
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            maxChildSize: 0.9,
+            minChildSize: 0.5,
+            builder: (context, scrollController) => Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    fullData['title'] ?? '',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF7E57C2),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    fullData['created_at'] ?? '',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                  const Divider(height: 32),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (fullData['summary'] != null &&
+                              fullData['summary'].toString().isNotEmpty) ...[
+                            Text(
+                              fullData['summary'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          Text(
+                            fullData['description'] ??
+                                'announcement.no_description'.tr(context),
+                            style: const TextStyle(fontSize: 15, height: 1.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('announcement.fetch_error'.tr(context))),
+        );
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(loaderContext).pop();
+      debugPrint('Error: $e');
+    }
   }
 
   Future<void> _markAllAsRead() async {
-    final userId = widget.userData['user_id'] ?? widget.userData['id'];
+    if (_currentUserData == null) return;
+    final userId = _currentUserData!['user_id'] ?? _currentUserData!['id'];
     final deptId =
-        widget.userData['department_id'] ?? widget.userData['dept_id'] ?? 0;
+        _currentUserData!['department_id'] ?? _currentUserData!['dept_id'] ?? 0;
     final desigId =
-        widget.userData['designation_id'] ?? widget.userData['desig_id'] ?? 0;
+        _currentUserData!['designation_id'] ??
+        _currentUserData!['desig_id'] ??
+        0;
 
     const url =
         'https://foxgeen.com/HRIS/mobileapi/mark_all_announcements_seen';
@@ -214,7 +300,11 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   }
 
   Future<void> _clearSeen() async {
-    final userId = widget.userData['user_id'] ?? widget.userData['id'];
+    if (_currentUserData == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+    final userId = _currentUserData!['user_id'] ?? _currentUserData!['id'];
     const url = 'https://foxgeen.com/HRIS/mobileapi/clear_seen_announcements';
 
     setState(() {
@@ -237,9 +327,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context, true),
         ),
-        title: const Text(
-          'Pengumuman',
-          style: TextStyle(
+        title: Text(
+          'announcement.title'.tr(context),
+          style: const TextStyle(
             color: Color(0xFF7E57C2),
             fontWeight: FontWeight.bold,
           ),
@@ -247,26 +337,24 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all, color: Color(0xFF7E57C2)),
-            tooltip: 'Lihat semua',
+            tooltip: 'announcement.mark_all_tooltip'.tr(context),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Tandai semua?'),
-                  content: const Text(
-                    'Tandai semua pengumuman sebagai sudah dibaca?',
-                  ),
+                  title: Text('announcement.mark_all'.tr(context)),
+                  content: Text('announcement.mark_all_desc'.tr(context)),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Batal'),
+                      child: Text('announcement.cancel'.tr(context)),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                         _markAllAsRead();
                       },
-                      child: const Text('Ya'),
+                      child: Text('announcement.yes'.tr(context)),
                     ),
                   ],
                 ),
@@ -275,26 +363,24 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           ),
           IconButton(
             icon: const Icon(Icons.delete_sweep, color: Colors.redAccent),
-            tooltip: 'Hapus yang sudah dibaca',
+            tooltip: 'announcement.clear_seen_tooltip'.tr(context),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Hapus yang dibaca?'),
-                  content: const Text(
-                    'Sembunyikan semua pengumuman yang sudah dibaca dari daftar?',
-                  ),
+                  title: Text('announcement.delete_seen'.tr(context)),
+                  content: Text('announcement.delete_seen_desc'.tr(context)),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Batal'),
+                      child: Text('announcement.cancel'.tr(context)),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                         _clearSeen();
                       },
-                      child: const Text('Hapus'),
+                      child: Text('announcement.delete'.tr(context)),
                     ),
                   ],
                 ),
@@ -321,7 +407,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Belum ada pengumuman',
+                    'announcement.no_announcements'.tr(context),
                     style: TextStyle(color: Colors.grey[500], fontSize: 16),
                   ),
                 ],

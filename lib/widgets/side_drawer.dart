@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../login_page.dart';
 import '../settings_page.dart';
 import '../profile/profile_page.dart';
+import '../attendance_page.dart';
+import '../localization/app_localizations.dart';
 
 class SideDrawer extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -29,7 +32,7 @@ class SideDrawer extends StatelessWidget {
                 _buildMenuItem(
                   context,
                   icon: Icons.dashboard_outlined,
-                  title: 'Dashboard',
+                  title: 'main.xin_dashboard'.tr(context),
                   isActive: activePage == 'dashboard',
                   onTap: () {
                     Navigator.pop(context);
@@ -42,8 +45,42 @@ class SideDrawer extends StatelessWidget {
                 ),
                 _buildMenuItem(
                   context,
+                  icon: Icons.calendar_today_outlined,
+                  title: 'main.xin_attendance'.tr(context),
+                  isActive: activePage == 'attendance',
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (onTabSelected != null) {
+                      onTabSelected!(1);
+                    } else if (activePage != 'attendance') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AttendancePage(userData: userData),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.assignment_outlined,
+                  title: 'main.xin_tasks'.tr(context),
+                  isActive: activePage == 'tasks',
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (onTabSelected != null) {
+                      onTabSelected!(2);
+                    } else if (activePage != 'tasks') {
+                      // Navigate to tasks page if needed (but currently it's a tab)
+                    }
+                  },
+                ),
+                _buildMenuItem(
+                  context,
                   icon: Icons.person_outline,
-                  title: 'Profil Saya',
+                  title: 'main.xin_profile'.tr(context),
                   isActive: activePage == 'profile',
                   onTap: () {
                     Navigator.pop(context);
@@ -62,7 +99,7 @@ class SideDrawer extends StatelessWidget {
                 _buildMenuItem(
                   context,
                   icon: Icons.settings_outlined,
-                  title: 'Pengaturan',
+                  title: 'main.xin_settings'.tr(context),
                   isActive: activePage == 'settings',
                   onTap: () {
                     Navigator.pop(context);
@@ -197,7 +234,13 @@ class SideDrawer extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: InkWell(
-        onTap: () {
+        onTap: () async {
+          // Clear user session
+          const storage = FlutterSecureStorage();
+          await storage.delete(key: 'user_data');
+
+          if (!context.mounted) return;
+
           // Fix for black screen: use pushAndRemoveUntil to clear stack
           Navigator.pushAndRemoveUntil(
             context,
@@ -208,12 +251,12 @@ class SideDrawer extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: const Row(
+          child: Row(
             children: [
               Icon(Icons.logout, color: Colors.redAccent, size: 24),
               const SizedBox(width: 16),
               Text(
-                'Logout',
+                'main.xin_logout'.tr(context),
                 style: TextStyle(
                   color: Colors.redAccent,
                   fontSize: 16,

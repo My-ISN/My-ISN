@@ -6,6 +6,10 @@ import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
+import 'localization/app_localizations.dart';
+import 'providers/language_provider.dart';
+import 'diagnosis_page.dart';
 
 class SettingsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -88,8 +92,8 @@ class _SettingsPageState extends State<SettingsPage> {
               SnackBar(
                 content: Text(
                   value
-                      ? 'Fingerprint diaktifkan'
-                      : 'Fingerprint dinonaktifkan',
+                      ? 'settings.fingerprint_enabled_msg'.tr(context)
+                      : 'settings.fingerprint_disabled_msg'.tr(context),
                 ),
                 backgroundColor: value ? Colors.green : Colors.orange,
               ),
@@ -127,18 +131,19 @@ class _SettingsPageState extends State<SettingsPage> {
     bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Fingerprint?'),
-        content: const Text(
-          'Ini akan menghapus data sidik jari Anda dari aplikasi ini.',
-        ),
+        title: Text('settings.delete_confirm_title'.tr(context)),
+        content: Text('settings.delete_confirm_desc'.tr(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
+            child: Text('settings.cancel'.tr(context)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: Text(
+              'settings.delete'.tr(context),
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -163,10 +168,8 @@ class _SettingsPageState extends State<SettingsPage> {
           });
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Data fingerprint berhasil dihapus secara permanen',
-                ),
+              SnackBar(
+                content: Text('settings.delete_success'.tr(context)),
                 backgroundColor: Colors.red,
               ),
             );
@@ -203,18 +206,16 @@ class _SettingsPageState extends State<SettingsPage> {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Daftarkan Fingerprint'),
-        content: const Text(
-          'Anda perlu mendaftarkan sidik jari Anda terlebih dahulu.',
-        ),
+        title: Text('settings.register_title'.tr(context)),
+        content: Text('settings.register_desc'.tr(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
+            child: Text('settings.cancel'.tr(context)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Lanjut'),
+            child: Text('settings.continue_label'.tr(context)),
           ),
         ],
       ),
@@ -224,7 +225,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _registerBiometric() async {
     try {
       bool authenticated = await auth.authenticate(
-        localizedReason: 'Scan sidik jari untuk mendaftarkan login biometrik',
+        localizedReason: 'settings.scan_reason'.tr(context),
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
@@ -265,8 +266,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Fingerprint berhasil didaftarkan!'),
+              SnackBar(
+                content: Text('settings.reg_success'.tr(context)),
                 backgroundColor: Colors.green,
               ),
             );
@@ -294,23 +295,67 @@ class _SettingsPageState extends State<SettingsPage> {
     return showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Password'),
+        title: Text('settings.confirm_password'.tr(context)),
         content: TextField(
           controller: passwordController,
           obscureText: true,
-          decoration: const InputDecoration(hintText: 'Masukkan password Anda'),
+          decoration: InputDecoration(
+            hintText: 'settings.enter_password'.tr(context),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+            child: Text('settings.cancel'.tr(context)),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(context, passwordController.text.trim()),
-            child: const Text('Konfirmasi'),
+            child: Text('settings.confirm'.tr(context)),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _showLanguageDialog() async {
+    final languageProvider = Provider.of<LanguageProvider>(
+      context,
+      listen: false,
+    );
+    String currentLang = languageProvider.locale.languageCode;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('settings.select_language'.tr(context)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<String>(
+              title: const Text('Bahasa Indonesia'),
+              value: 'id',
+              groupValue: currentLang,
+              onChanged: (value) {
+                if (value != null) {
+                  languageProvider.setLanguage(value);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            RadioListTile<String>(
+              title: const Text('English'),
+              value: 'en',
+              groupValue: currentLang,
+              onChanged: (value) {
+                if (value != null) {
+                  languageProvider.setLanguage(value);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -320,9 +365,12 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFF),
       appBar: AppBar(
-        title: const Text(
-          'Pengaturan',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          'main.xin_settings'.tr(context),
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -336,9 +384,56 @@ class _SettingsPageState extends State<SettingsPage> {
           : ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                const Text(
-                  'Keamanan & Biometrik',
-                  style: TextStyle(
+                Text(
+                  'settings.language'.tr(context),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1F36),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7E57C2).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.language,
+                        color: Color(0xFF7E57C2),
+                      ),
+                    ),
+                    title: Text('settings.language'.tr(context)),
+                    subtitle: Text(
+                      Provider.of<LanguageProvider>(
+                                context,
+                              ).locale.languageCode ==
+                              'id'
+                          ? 'Bahasa Indonesia'
+                          : 'English',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: _showLanguageDialog,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'settings.fingerprint'.tr(context),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1A1F36),
@@ -372,9 +467,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             color: Color(0xFF7E57C2),
                           ),
                         ),
-                        title: const Text('Login dengan Fingerprint'),
+                        title: Text('settings.fingerprint'.tr(context)),
                         subtitle: Text(
-                          _hasToken ? 'Sudah terdaftar' : 'Belum terdaftar',
+                          _hasToken
+                              ? 'settings.registered'.tr(context)
+                              : 'settings.not_registered'.tr(context),
                         ),
                         trailing: Switch(
                           value: _isFingerprintEnabled,
@@ -386,9 +483,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         const Divider(height: 1, indent: 70),
                         ListTile(
                           leading: const SizedBox(width: 40),
-                          title: const Text(
-                            'Daftarkan Ulang Sidik Jari',
-                            style: TextStyle(color: Color(0xFF7E57C2)),
+                          title: Text(
+                            'settings.re_register'.tr(context),
+                            style: const TextStyle(color: Color(0xFF7E57C2)),
                           ),
                           onTap: () async {
                             // Only call _registerBiometric, it will handle the scan
@@ -398,9 +495,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         const Divider(height: 1, indent: 70),
                         ListTile(
                           leading: const SizedBox(width: 40),
-                          title: const Text(
-                            'Hapus Data Fingerprint',
-                            style: TextStyle(color: Colors.red),
+                          title: Text(
+                            'settings.delete_fingerprint'.tr(context),
+                            style: const TextStyle(color: Colors.red),
                           ),
                           onTap: _deleteFingerprint,
                         ),
@@ -410,9 +507,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
 
                 const SizedBox(height: 32),
-                const Text(
-                  'Akun',
-                  style: TextStyle(
+                Text(
+                  'settings.account'.tr(context),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1A1F36),
@@ -466,9 +563,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 // ── Informasi Aplikasi ────────────────────────────
                 const SizedBox(height: 32),
-                const Text(
-                  'Informasi Aplikasi',
-                  style: TextStyle(
+                Text(
+                  'settings.app_info'.tr(context),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1A1F36),
@@ -491,20 +588,20 @@ class _SettingsPageState extends State<SettingsPage> {
                     children: [
                       _buildInfoTile(
                         icon: Icons.info_outline,
-                        title: 'Versi Aplikasi',
+                        title: 'settings.app_version'.tr(context),
                         trailing: _appVersion,
                       ),
                       const Divider(height: 1, indent: 70),
                       _buildInfoTile(
                         icon: Icons.shield_outlined,
-                        title: 'Kebijakan Privasi',
+                        title: 'settings.privacy_policy'.tr(context),
                         onTap: () =>
                             _launchURL('https://foxgeen.com/HRIS/erp/privacy'),
                       ),
                       const Divider(height: 1, indent: 70),
                       _buildInfoTile(
                         icon: Icons.help_outline,
-                        title: 'Bantuan & Dukungan',
+                        title: 'settings.help_support'.tr(context),
                         onTap: () => _launchWhatsApp(
                           '0895384314416',
                           'Halo admin Foxgeen, saya butuh bantuan terkait akun saya...',
@@ -513,8 +610,61 @@ class _SettingsPageState extends State<SettingsPage> {
                       const Divider(height: 1, indent: 70),
                       _buildInfoTile(
                         icon: Icons.business_outlined,
-                        title: 'Foxgeen HRIS',
+                        title: 'Foxgeen',
                         trailing: '© 2026',
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+                Text(
+                  'settings.diagnosis'.tr(context),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1F36),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7E57C2).withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.notifications_active_outlined,
+                            color: Color(0xFF7E57C2),
+                          ),
+                        ),
+                        title: Text('settings.diagnosis'.tr(context)),
+                        subtitle: Text('settings.diagnosis_desc'.tr(context)),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const PushNotificationDiagnosisPage(),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -561,9 +711,13 @@ class _SettingsPageState extends State<SettingsPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Tidak dapat membuka link: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'settings.link_error'.tr(context, args: {'error': e.toString()}),
+            ),
+          ),
+        );
       }
     }
   }
@@ -592,7 +746,11 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tidak dapat membuka WhatsApp: $e')),
+          SnackBar(
+            content: Text(
+              'settings.wa_error'.tr(context, args: {'error': e.toString()}),
+            ),
+          ),
         );
       }
     }

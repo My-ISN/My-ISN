@@ -7,7 +7,9 @@ import 'package:uuid/uuid.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dashboard_page.dart';
 import 'register_page.dart';
+import 'services/notification_service.dart';
 import 'widgets/connectivity_wrapper.dart';
+import 'localization/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -55,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (identifier.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(content: Text('login.fill_all_fields'.tr(context))),
       );
       return;
     }
@@ -84,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Server Error. Check console logs.'),
+            content: Text('login.server_error'.tr(context)),
             backgroundColor: Colors.red,
           ),
         );
@@ -95,7 +97,12 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login success: ${data['data']['nama']}'),
+            content: Text(
+              'login.login_success'.tr(
+                context,
+                args: {'name': data['data']['nama']},
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -106,6 +113,12 @@ class _LoginPageState extends State<LoginPage> {
           // Kita await dialog agar proses registrasi selesai dulu
           await _showEnableFingerprintDialog(identifier, password);
         }
+
+        // Save user data for persistence (deep linking etc)
+        await storage.write(key: 'user_data', value: json.encode(data['data']));
+
+        // Update FCM Token
+        NotificationService().updateTokenOnServer(data['data']);
 
         if (!mounted) return;
         Navigator.pushReplacement(
@@ -118,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(data['message'] ?? 'Login failed'),
+            content: Text(data['message'] ?? 'login.login_failed'.tr(context)),
             backgroundColor: Colors.red,
           ),
         );
@@ -127,10 +140,8 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       if (ConnectivityStatus.of(context)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Gagal menghubungi server. Periksa koneksi internet Anda.',
-            ),
+          SnackBar(
+            content: Text('login.conn_error'.tr(context)),
             backgroundColor: Colors.red,
           ),
         );
@@ -151,14 +162,12 @@ class _LoginPageState extends State<LoginPage> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Aktifkan Fingerprint?'),
-        content: const Text(
-          'Apakah Anda ingin mengaktifkan login dengan sidik jari untuk akun ini?',
-        ),
+        title: Text('login.enable_fingerprint'.tr(context)),
+        content: Text('login.enable_fingerprint_desc'.tr(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Nanti'),
+            child: Text('login.later'.tr(context)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -169,9 +178,9 @@ class _LoginPageState extends State<LoginPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF7E57C2),
             ),
-            child: const Text(
-              'Aktifkan',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              'login.enable'.tr(context),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -182,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _registerBiometric(String identifier, String password) async {
     try {
       bool authenticated = await auth.authenticate(
-        localizedReason: 'Scan sidik jari untuk mengaktifkan login biometrik',
+        localizedReason: 'login.scan_fingerprint_enable'.tr(context),
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
@@ -215,8 +224,8 @@ class _LoginPageState extends State<LoginPage> {
 
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Fingerprint berhasil diaktifkan!'),
+            SnackBar(
+              content: Text('login.fingerprint_enabled'.tr(context)),
               backgroundColor: Colors.green,
             ),
           );
@@ -224,7 +233,12 @@ class _LoginPageState extends State<LoginPage> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Gagal mendaftarkan: ${data['message']}'),
+              content: Text(
+                'login.fingerprint_failed'.tr(
+                  context,
+                  args: {'message': data['message']},
+                ),
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -233,18 +247,14 @@ class _LoginPageState extends State<LoginPage> {
         // Jika user membatalkan scan
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Aktivasi fingerprint dibatalkan.')),
+          SnackBar(content: Text('login.fingerprint_cancelled'.tr(context))),
         );
       }
     } catch (e) {
       debugPrint('Error registering biometric: $e');
       if (mounted && ConnectivityStatus.of(context)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Gagal meregistrasi sidik jari. Periksa koneksi internet.',
-            ),
-          ),
+          SnackBar(content: Text('login.fingerprint_conn_error'.tr(context))),
         );
       }
     }
@@ -257,18 +267,14 @@ class _LoginPageState extends State<LoginPage> {
 
     if (token == null || enabled != 'true') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Fingerprint belum diaktifkan atau dinonaktifkan di pengaturan.',
-          ),
-        ),
+        SnackBar(content: Text('login.fingerprint_not_enabled'.tr(context))),
       );
       return;
     }
 
     try {
       bool authenticated = await auth.authenticate(
-        localizedReason: 'Scan sidik jari untuk masuk',
+        localizedReason: 'login.scan_fingerprint_login'.tr(context),
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
@@ -288,10 +294,24 @@ class _LoginPageState extends State<LoginPage> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Welcome back, ${data['data']['nama']}'),
+              content: Text(
+                'login.welcome_back_name'.tr(
+                  context,
+                  args: {'name': data['data']['nama']},
+                ),
+              ),
               backgroundColor: Colors.green,
             ),
           );
+          // Save user data for persistence (deep linking etc)
+          await storage.write(
+            key: 'user_data',
+            value: json.encode(data['data']),
+          );
+
+          // Update FCM Token
+          NotificationService().updateTokenOnServer(data['data']);
+
           // Navigate to Dashboard
           Navigator.pushReplacement(
             context,
@@ -303,7 +323,9 @@ class _LoginPageState extends State<LoginPage> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(data['message']),
+              content: Text(
+                data['message'] ?? 'login.login_failed'.tr(context),
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -312,10 +334,8 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Gagal login sidik jari. Periksa koneksi internet Anda.',
-          ),
+        SnackBar(
+          content: Text('login.conn_error'.tr(context)),
           backgroundColor: Colors.red,
         ),
       );
@@ -358,7 +378,11 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login Google Berhasil: ${data['data']['nama']}'),
+            content: Text(
+              'login.google_success'
+                  .tr(context)
+                  .replaceFirst('{name}', data['data']['nama']),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -373,7 +397,7 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(data['message'] ?? 'Login Google Gagal'),
+            content: Text(data['message'] ?? 'login.google_failed'.tr(context)),
             backgroundColor: Colors.red,
           ),
         );
@@ -382,8 +406,8 @@ class _LoginPageState extends State<LoginPage> {
       debugPrint('Google Sign-In Error: $error');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal login Google. Periksa koneksi internet Anda.'),
+          SnackBar(
+            content: Text('login.conn_error'.tr(context)),
             backgroundColor: Colors.red,
           ),
         );
@@ -416,25 +440,25 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                const Text(
-                  'Super Apps',
-                  style: TextStyle(
+                Text(
+                  'main.app_name'.tr(context),
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF7E57C2),
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Welcome back, Please login into an account',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                Text(
+                  'login.welcome_back'.tr(context),
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 const SizedBox(height: 40),
                 TextFormField(
                   controller: _identifierController,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.person_outline),
-                    hintText: 'Username or Email',
+                    hintText: 'login.username_email'.tr(context),
                     filled: true,
                     fillColor: const Color(0xFFF3F6FF),
                     border: OutlineInputBorder(
@@ -458,7 +482,7 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
                     ),
-                    hintText: 'Password',
+                    hintText: 'login.password'.tr(context),
                     filled: true,
                     fillColor: const Color(0xFFF3F6FF),
                     border: OutlineInputBorder(
@@ -479,14 +503,14 @@ class _LoginPageState extends State<LoginPage> {
                               setState(() => _rememberMe = value ?? false),
                           activeColor: const Color(0xFF7E57C2),
                         ),
-                        const Text('Remember Me'),
+                        Text('login.remember_me'.tr(context)),
                       ],
                     ),
                     TextButton(
                       onPressed: () {},
-                      child: const Text(
-                        'Forgot password?',
-                        style: TextStyle(color: Color(0xFF7E57C2)),
+                      child: Text(
+                        'login.forgot_password'.tr(context),
+                        style: const TextStyle(color: Color(0xFF7E57C2)),
                       ),
                     ),
                   ],
@@ -511,9 +535,9 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
-                          'Register',
-                          style: TextStyle(color: Color(0xFF7E57C2)),
+                        child: Text(
+                          'login.register'.tr(context),
+                          style: const TextStyle(color: Color(0xFF7E57C2)),
                         ),
                       ),
                     ),
@@ -537,18 +561,18 @@ class _LoginPageState extends State<LoginPage> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Row(
+                            : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.login,
                                     color: Colors.white,
                                     size: 20,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'Login',
-                                    style: TextStyle(
+                                    'login.login'.tr(context),
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
@@ -564,9 +588,9 @@ class _LoginPageState extends State<LoginPage> {
                   Center(
                     child: Column(
                       children: [
-                        const Text(
-                          'Atau masuk dengan sidik jari',
-                          style: TextStyle(color: Colors.grey),
+                        Text(
+                          'login.login_fingerprint'.tr(context),
+                          style: const TextStyle(color: Colors.grey),
                         ),
                         const SizedBox(height: 16),
                         IconButton(
@@ -588,7 +612,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'atau',
+                        'login.or'.tr(context),
                         style: TextStyle(color: Colors.grey.shade400),
                       ),
                     ),
@@ -601,9 +625,9 @@ class _LoginPageState extends State<LoginPage> {
                   child: OutlinedButton.icon(
                     onPressed: _isLoading ? null : _handleGoogleSignIn,
                     icon: Image.asset('assets/images/google.webp', height: 24),
-                    label: const Text(
-                      'Masuk dengan Google',
-                      style: TextStyle(color: Colors.black87),
+                    label: Text(
+                      'login.login_google'.tr(context),
+                      style: const TextStyle(color: Colors.black87),
                     ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),

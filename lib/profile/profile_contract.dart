@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../localization/app_localizations.dart';
 
 class ProfileContractPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -12,9 +13,9 @@ class ProfileContractPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
-        title: const Text(
-          'Contract Details',
-          style: TextStyle(color: Colors.black),
+        title: Text(
+          'profile.contract_details'.tr(context),
+          style: const TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -28,20 +29,32 @@ class ProfileContractPage extends StatelessWidget {
         child: Column(
           children: [
             _buildInfoCard([
-              _buildInfoRow('Contract Date', data['date_of_joining'] ?? '-'),
-              _buildInfoRow('Department', data['department_name'] ?? '-'),
-              _buildInfoRow('Designation', data['designation_name'] ?? '-'),
               _buildInfoRow(
-                'Basic Salary',
-                '$currency ${NumberFormat.decimalPattern('id').format(double.tryParse(data['basic_salary']?.toString() ?? '0') ?? 0)}',
+                'profile.contract_date'.tr(context),
+                data['date_of_joining'] ?? '-',
               ),
               _buildInfoRow(
-                'Hourly Rate',
+                'profile.department'.tr(context),
+                data['department_name'] ?? '-',
+              ),
+              _buildInfoRow(
+                'profile.designation'.tr(context),
+                data['designation_name'] ?? '-',
+              ),
+              _buildInfoRow(
+                'profile.basic_salary'.tr(context),
+                '$currency ${NumberFormat.decimalPattern(Localizations.localeOf(context).languageCode).format(double.tryParse(data['basic_salary']?.toString() ?? '0') ?? 0)}',
+              ),
+              _buildInfoRow(
+                'profile.hourly_rate'.tr(context),
                 '$currency ${data['hourly_rate'] ?? '0'}',
               ),
-              _buildInfoRow('Office Shift', data['shift_name'] ?? '-'),
               _buildInfoRow(
-                'Contract End',
+                'profile.office_shift'.tr(context),
+                data['shift_name'] ?? '-',
+              ),
+              _buildInfoRow(
+                'profile.contract_end'.tr(context),
                 data['date_of_leaving'] ?? '-',
                 last: true,
               ),

@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'dashboard_page.dart';
 import 'widgets/connectivity_wrapper.dart';
+import 'localization/app_localizations.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -68,7 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
         _passwordController.text.isEmpty ||
         _contactController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(content: Text('login.fill_all_fields'.tr(context))),
       );
       return;
     }
@@ -105,11 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
         debugPrint('RAW RESPONSE: ${response.body}');
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Server Error: ${response.body.substring(0, response.body.length > 50 ? 50 : response.body.length)}...',
-            ),
-          ),
+          SnackBar(content: Text('login.server_error'.tr(context))),
         );
         setState(() => _isLoading = false);
         return;
@@ -146,7 +143,7 @@ class _RegisterPageState extends State<RegisterPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(data['message'] ?? 'Registration failed'),
+            content: Text(data['message'] ?? 'login.conn_error'.tr(context)),
             backgroundColor: Colors.red,
           ),
         );
@@ -154,8 +151,8 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Gagal mendaftar. Periksa koneksi internet Anda.'),
+        SnackBar(
+          content: Text('login.conn_error'.tr(context)),
           backgroundColor: Colors.red,
         ),
       );
@@ -177,9 +174,12 @@ class _RegisterPageState extends State<RegisterPage> {
             icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
-            'Daftar Akun Baru',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          title: Text(
+            'register.title'.tr(context),
+            style: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         body: SingleChildScrollView(
@@ -187,9 +187,9 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Silakan isi form di bawah untuk mendaftar sebagai customer.',
-                style: TextStyle(color: Colors.grey, fontSize: 15),
+              Text(
+                'register.subtitle'.tr(context),
+                style: const TextStyle(color: Colors.grey, fontSize: 15),
               ),
               const SizedBox(height: 32),
 
@@ -244,9 +244,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Tentukan Foto Profil',
-                      style: TextStyle(
+                    Text(
+                      'register.set_profile_photo'.tr(context),
+                      style: const TextStyle(
                         fontSize: 13,
                         color: Colors.grey,
                         fontWeight: FontWeight.w500,
@@ -262,8 +262,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _firstNameController,
-                      label: 'First Name',
-                      hint: 'First Name',
+                      label: 'register.first_name'.tr(context),
+                      hint: 'register.first_name'.tr(context),
                       icon: Icons.person_outline,
                       autoCapitalize: true,
                     ),
@@ -272,8 +272,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _lastNameController,
-                      label: 'Last Name',
-                      hint: 'Last Name',
+                      label: 'register.last_name'.tr(context),
+                      hint: 'register.last_name'.tr(context),
                       icon: Icons.person_outline,
                       autoCapitalize: true,
                     ),
@@ -286,8 +286,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _usernameController,
-                      label: 'Username',
-                      hint: 'Username',
+                      label: 'register.username'.tr(context),
+                      hint: 'register.username'.tr(context),
                       icon: Icons.alternate_email,
                     ),
                   ),
@@ -295,8 +295,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _emailController,
-                      label: 'Email Address',
-                      hint: 'Email Address',
+                      label: 'register.email'.tr(context),
+                      hint: 'register.email'.tr(context),
                       icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                     ),
@@ -309,8 +309,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _passwordController,
-                      label: 'Password',
-                      hint: 'Password',
+                      label: 'register.password'.tr(context),
+                      hint: 'register.password'.tr(context),
                       icon: Icons.lock_outline,
                       isPassword: true,
                     ),
@@ -319,8 +319,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   Expanded(
                     child: _buildTextField(
                       controller: _contactController,
-                      label: 'Contact',
-                      hint: 'Contact',
+                      label: 'register.contact'.tr(context),
+                      hint: 'register.contact'.tr(context),
                       icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                     ),
@@ -331,9 +331,12 @@ class _RegisterPageState extends State<RegisterPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Gender',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  Text(
+                    'register.gender'.tr(context),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Container(
@@ -354,7 +357,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         items: ['Male', 'Female'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value),
+                            child: Text(
+                              value == 'Male'
+                                  ? 'register.male'.tr(context)
+                                  : 'register.female'.tr(context),
+                            ),
                           );
                         }).toList(),
                         onChanged: (newValue) {
@@ -390,9 +397,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'Buat Akun Sekarang',
-                          style: TextStyle(
+                      : Text(
+                          'register.create_account'.tr(context),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -404,15 +411,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Sudah punya akun? ',
-                      style: TextStyle(color: Colors.grey),
+                    Text(
+                      'register.have_account'.tr(context),
+                      style: const TextStyle(color: Colors.grey),
                     ),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
+                      child: Text(
+                        'register.login'.tr(context),
+                        style: const TextStyle(
                           color: Color(0xFF7E57C2),
                           fontWeight: FontWeight.bold,
                         ),
@@ -437,14 +444,12 @@ class _RegisterPageState extends State<RegisterPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Aktifkan Fingerprint?'),
-        content: const Text(
-          'Selamat! Akun Anda berhasil dibuat. Apakah Anda ingin mengaktifkan login dengan sidik jari sekarang?',
-        ),
+        title: Text('login.enable_fingerprint'.tr(context)),
+        content: Text('register.reg_success_fingerprint'.tr(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Nanti'),
+            child: Text('login.later'.tr(context)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -454,9 +459,9 @@ class _RegisterPageState extends State<RegisterPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF7E57C2),
             ),
-            child: const Text(
-              'Aktifkan',
-              style: TextStyle(color: Colors.white),
+            child: Text(
+              'login.enable'.tr(context),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -467,7 +472,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _registerBiometric(String identifier, String password) async {
     try {
       bool authenticated = await auth.authenticate(
-        localizedReason: 'Scan sidik jari untuk mengaktifkan login biometrik',
+        localizedReason: 'login.scan_fingerprint_enable'.tr(context),
         options: const AuthenticationOptions(
           stickyAuth: true,
           biometricOnly: true,
@@ -494,8 +499,8 @@ class _RegisterPageState extends State<RegisterPage> {
           await storage.write(key: 'fingerprint_enabled', value: 'true');
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Fingerprint berhasil diaktifkan!'),
+            SnackBar(
+              content: Text('login.fingerprint_enabled'.tr(context)),
               backgroundColor: Colors.green,
             ),
           );
@@ -503,7 +508,12 @@ class _RegisterPageState extends State<RegisterPage> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Gagal mendaftarkan: ${data['message']}'),
+              content: Text(
+                'login.fingerprint_failed'.tr(
+                  context,
+                  args: {'message': data['message']},
+                ),
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -513,11 +523,7 @@ class _RegisterPageState extends State<RegisterPage> {
       debugPrint('Error registering biometric: $e');
       if (mounted && ConnectivityStatus.of(context)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Gagal mengaktifkan sidik jari. Periksa koneksi internet.',
-            ),
-          ),
+          SnackBar(content: Text('login.fingerprint_conn_error'.tr(context))),
         );
       }
     }

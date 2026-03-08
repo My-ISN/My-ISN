@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../localization/app_localizations.dart';
 import 'profile_contract.dart';
 import 'profile_basic.dart';
 import 'profile_personal.dart';
@@ -61,9 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted && ConnectivityStatus.of(context)) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal memuat data. Periksa koneksi internet Anda.'),
-          ),
+          SnackBar(content: Text('profile.conn_error'.tr(context))),
         );
       } else if (mounted) {
         setState(() => _isLoading = false);
@@ -92,8 +91,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         if (basic['user_type'] != 'customer') ...[
                           _buildMenuTile(
                             icon: Icons.assignment_outlined,
-                            title: 'Contract',
-                            subtitle: 'Informasi kontrak & gaji',
+                            title: 'profile.contract'.tr(context),
+                            subtitle: 'profile.contract_desc'.tr(context),
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -107,8 +106,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                         _buildMenuTile(
                           icon: Icons.person_outline,
-                          title: 'Basic Information',
-                          subtitle: 'Detail data diri dasar',
+                          title: 'profile.basic_info'.tr(context),
+                          subtitle: 'profile.basic_info_desc'.tr(context),
                           onTap: () =>
                               Navigator.push(
                                 context,
@@ -126,8 +125,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         const SizedBox(height: 10),
                         _buildMenuTile(
                           icon: Icons.info_outline,
-                          title: 'Personal Information',
-                          subtitle: 'Sosial media & pengalaman',
+                          title: 'profile.personal_info'.tr(context),
+                          subtitle: 'profile.personal_info_desc'.tr(context),
                           onTap: () =>
                               Navigator.push(
                                 context,
@@ -145,8 +144,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         const SizedBox(height: 10),
                         _buildMenuTile(
                           icon: Icons.account_balance_outlined,
-                          title: 'Bank Account',
-                          subtitle: 'Informasi rekening bank',
+                          title: 'profile.bank_account'.tr(context),
+                          subtitle: 'profile.bank_account_desc'.tr(context),
                           onTap: () =>
                               Navigator.push(
                                 context,
@@ -378,7 +377,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildEnhancedInfoRow(
                         Icons.business_rounded,
                         contract['department_name'] ?? '-',
-                        "Department",
+                        "profile.department".tr(context),
                       ),
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
@@ -388,7 +387,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     _buildEnhancedInfoRow(
                       Icons.email_rounded,
                       basic['email'] ?? widget.userData['email'] ?? '-',
-                      "Email Address",
+                      "profile.email".tr(context),
                     ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
@@ -399,7 +398,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       basic['contact_number'] ??
                           widget.userData['contact_number'] ??
                           '-',
-                      "Phone Number",
+                      "profile.phone".tr(context),
                     ),
                     if (basic['user_type'] != 'customer') ...[
                       const Padding(
@@ -409,7 +408,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildEnhancedInfoRow(
                         Icons.person_pin_rounded,
                         contract['manager_name'] ?? '-',
-                        "Direct Manager",
+                        "profile.manager".tr(context),
                       ),
                     ],
                   ],

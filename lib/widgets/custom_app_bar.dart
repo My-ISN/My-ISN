@@ -19,7 +19,9 @@ class NotificationManager {
     int count, {
     int? latestId,
     String? latestTitle,
+    String? latestSummary,
     BuildContext? context,
+    Map<String, dynamic>? userData,
   }) {
     // Avoid showing notification on first load (initial state)
     if (_lastKnownId == -1) {
@@ -42,10 +44,22 @@ class NotificationManager {
         if (context.mounted) {
           TopNotification.show(
             context,
-            title: 'Pengumuman Baru!',
-            message: latestTitle,
+            title: latestTitle,
+            message: (latestSummary != null && latestSummary.isNotEmpty)
+                ? latestSummary
+                : 'Ketuk untuk melihat detail pengumuman baru.',
             onTap: () {
-              // Navigation can be added here
+              if (userData != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AnnouncementPage(
+                      userData: userData,
+                      initialAnnouncementId: latestId,
+                    ),
+                  ),
+                );
+              }
             },
           );
         }
@@ -131,7 +145,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
             data['unread_count'] ?? 0,
             latestId: data['latest_announcement_id'],
             latestTitle: data['latest_title'],
+            latestSummary: data['latest_summary'],
             context: context,
+            userData: widget.userData,
           );
         }
       }

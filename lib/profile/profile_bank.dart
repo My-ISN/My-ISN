@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'profile_edit.dart';
+import '../localization/app_localizations.dart';
 
 class ProfileBankPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -18,9 +19,9 @@ class ProfileBankPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
-        title: const Text(
-          'Bank Account',
-          style: TextStyle(color: Colors.black),
+        title: Text(
+          'profile.bank_account'.tr(context),
+          style: const TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -55,13 +56,25 @@ class ProfileBankPage extends StatelessWidget {
         child: Column(
           children: [
             _buildInfoCard([
-              _buildInfoRow('Account Title', data['account_title'] ?? '-'),
-              _buildInfoRow('Account Number', data['account_number'] ?? '-'),
-              _buildInfoRow('Bank Name', data['bank_name'] ?? '-'),
-              _buildInfoRow('IBAN', data['iban'] ?? '-'),
-              _buildInfoRow('Swift Code', data['swift_code'] ?? '-'),
               _buildInfoRow(
-                'Bank Branch',
+                'profile.account_title'.tr(context),
+                data['account_title'] ?? '-',
+              ),
+              _buildInfoRow(
+                'profile.account_number'.tr(context),
+                data['account_number'] ?? '-',
+              ),
+              _buildInfoRow(
+                'profile.bank_name'.tr(context),
+                data['bank_name'] ?? '-',
+              ),
+              _buildInfoRow('profile.iban'.tr(context), data['iban'] ?? '-'),
+              _buildInfoRow(
+                'profile.swift_code'.tr(context),
+                data['swift_code'] ?? '-',
+              ),
+              _buildInfoRow(
+                'profile.bank_branch'.tr(context),
                 data['bank_branch'] ?? '-',
                 last: true,
               ),

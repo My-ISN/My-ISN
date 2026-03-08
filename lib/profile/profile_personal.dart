@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'profile_edit.dart';
+import '../localization/app_localizations.dart';
 
 class ProfilePersonalPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -18,9 +19,9 @@ class ProfilePersonalPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FD),
       appBar: AppBar(
-        title: const Text(
-          'Personal Information',
-          style: TextStyle(color: Colors.black),
+        title: Text(
+          'profile.personal_info'.tr(context),
+          style: const TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -56,10 +57,10 @@ class ProfilePersonalPage extends StatelessWidget {
           children: [
             _buildInfoCard([
               if (data['user_type'] != 'customer') ...[
-                _buildInfoRow('Bio', data['bio'] ?? '-'),
+                _buildInfoRow('profile.bio'.tr(context), data['bio'] ?? '-'),
                 _buildInfoRow(
-                  'Experience',
-                  _getExperienceLabel(data['experience']),
+                  'profile.experience'.tr(context),
+                  _getExperienceLabel(data['experience'], context),
                 ),
               ],
               _buildInfoRow('LinkedIn', data['linkedin_profile'] ?? '-'),
@@ -71,18 +72,21 @@ class ProfilePersonalPage extends StatelessWidget {
     );
   }
 
-  String _getExperienceLabel(dynamic exp) {
+  String _getExperienceLabel(dynamic exp, BuildContext context) {
     if (exp == null) return '-';
     int years = int.tryParse(exp.toString()) ?? 0;
 
     if (years == 0) {
-      return 'Startup';
+      return 'profile.startup'.tr(context);
     } else if (years == 1) {
-      return '1 year';
+      return 'profile.year_1'.tr(context);
     } else if (years > 10) {
-      return '10+ years';
+      return 'profile.years_10_plus'.tr(context);
     } else {
-      return '$years years';
+      return 'profile.years_count'.tr(
+        context,
+        args: {'count': years.toString()},
+      );
     }
   }
 

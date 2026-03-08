@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'connectivity_wrapper.dart';
+import '../localization/app_localizations.dart';
 
 class CustomBottomNav extends StatefulWidget {
   final int currentIndex;
@@ -40,16 +41,22 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
       unselectedItemColor: Colors.grey,
       currentIndex: widget.currentIndex,
       onTap: widget.onTap,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_month),
-          label: 'Attendance',
+          icon: const Icon(Icons.home),
+          label: 'main.xin_dashboard'.tr(context),
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.task_alt), label: 'Tasks'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline),
-          label: 'Profile',
+          icon: const Icon(Icons.calendar_month),
+          label: 'main.xin_attendance'.tr(context),
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.task_alt),
+          label: 'main.xin_tasks'.tr(context),
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.person_outline),
+          label: 'main.xin_profile'.tr(context),
         ),
       ],
     );
