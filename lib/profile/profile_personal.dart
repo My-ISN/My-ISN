@@ -17,16 +17,19 @@ class ProfilePersonalPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'profile.personal_info'.tr(context),
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0.5,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -55,16 +58,30 @@ class ProfilePersonalPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildInfoCard([
+            _buildInfoCard(context, [
               if (data['user_type'] != 'customer') ...[
-                _buildInfoRow('profile.bio'.tr(context), data['bio'] ?? '-'),
                 _buildInfoRow(
+                  context,
+                  'profile.bio'.tr(context),
+                  data['bio'] ?? '-',
+                ),
+                _buildInfoRow(
+                  context,
                   'profile.experience'.tr(context),
                   _getExperienceLabel(data['experience'], context),
                 ),
               ],
-              _buildInfoRow('LinkedIn', data['linkedin_profile'] ?? '-'),
-              _buildInfoRow('Facebook', data['fb_profile'] ?? '-', last: true),
+              _buildInfoRow(
+                context,
+                'LinkedIn',
+                data['linkedin_profile'] ?? '-',
+              ),
+              _buildInfoRow(
+                context,
+                'Facebook',
+                data['fb_profile'] ?? '-',
+                last: true,
+              ),
             ]),
           ],
         ),
@@ -90,11 +107,11 @@ class ProfilePersonalPage extends StatelessWidget {
     }
   }
 
-  Widget _buildInfoCard(List<Widget> children) {
+  Widget _buildInfoCard(BuildContext context, List<Widget> children) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -108,7 +125,12 @@ class ProfilePersonalPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {bool last = false}) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool last = false,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -134,8 +156,8 @@ class ProfilePersonalPage extends StatelessWidget {
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
-                color: Color(0xFF1A1F36),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),

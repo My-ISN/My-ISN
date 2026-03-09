@@ -37,8 +37,7 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF7E57C2),
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: Theme.of(context).colorScheme.primary,
       currentIndex: widget.currentIndex,
       onTap: widget.onTap,
       items: [
@@ -51,8 +50,8 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
           label: 'main.xin_attendance'.tr(context),
         ),
         BottomNavigationBarItem(
-          icon: const Icon(Icons.task_alt),
-          label: 'main.xin_tasks'.tr(context),
+          icon: const Icon(Icons.payments_outlined),
+          label: 'main.xin_payroll'.tr(context),
         ),
         BottomNavigationBarItem(
           icon: const Icon(Icons.person_outline),

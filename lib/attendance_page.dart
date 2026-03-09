@@ -79,34 +79,39 @@ class _AttendancePageState extends State<AttendancePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           const SizedBox(height: 16),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildMonthSelector(),
-                        const SizedBox(height: 20),
-                        _buildCalendarGrid(),
-                        const SizedBox(height: 32),
-                        Text(
-                          'attendance.summary'.tr(context),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A1F36),
+                : RefreshIndicator(
+                    onRefresh: _fetchAttendance,
+                    color: _primaryColor,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildMonthSelector(),
+                          const SizedBox(height: 20),
+                          _buildCalendarGrid(),
+                          const SizedBox(height: 32),
+                          Text(
+                            'attendance.summary'.tr(context),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildSummaryCard(),
-                        const SizedBox(height: 100), // Space for bottom nav
-                      ],
+                          const SizedBox(height: 16),
+                          _buildSummaryCard(),
+                          const SizedBox(height: 100), // Space for bottom nav
+                        ],
+                      ),
                     ),
                   ),
           ),
@@ -119,8 +124,11 @@ class _AttendancePageState extends State<AttendancePage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(30),
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white24)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -138,10 +146,10 @@ class _AttendancePageState extends State<AttendancePage> {
           ),
           Text(
             '${'attendance.months.${_selectedMonth.month}'.tr(context)} ${_selectedMonth.year}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1F36),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           IconButton(
@@ -166,8 +174,11 @@ class _AttendancePageState extends State<AttendancePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white24)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -230,15 +241,22 @@ class _AttendancePageState extends State<AttendancePage> {
   }
 
   Widget _buildDayCell(int day, Map<String, dynamic>? record) {
-    bool isPresent = record != null && record['status'] == 'Present';
-    bool isLate = record != null && record['is_late'] == true;
+    final bool isPresent =
+        record != null &&
+        (record['status'] == 'Present' ||
+            record['attendance_status'] == 'Present');
+    final bool isLate = record != null && record['is_late'] == true;
 
-    // Check if it's weekend (Saturday or Sunday)
+    final DateTime now = DateTime.now();
+    final bool isToday =
+        now.year == _selectedMonth.year &&
+        now.month == _selectedMonth.month &&
+        now.day == day;
+
     final date = DateTime(_selectedMonth.year, _selectedMonth.month, day);
     final bool isWeekend =
         date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
 
-    // Check if it's a holiday from JSON data
     final dateStr =
         '${date.year}-${date.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
     final bool isHoliday =
@@ -251,45 +269,42 @@ class _AttendancePageState extends State<AttendancePage> {
       onTap: () => _showDayDetails(day, record),
       child: Container(
         decoration: BoxDecoration(
-          color: isPresent
-              ? (isLate
-                    ? const Color(0xFF7E57C2).withOpacity(0.1)
-                    : _primaryColor.withOpacity(0.1))
-              : Colors.grey.withOpacity(0.05),
+          color: isToday ? _primaryColor.withOpacity(0.15) : Colors.transparent,
           shape: BoxShape.circle,
-          border: isPresent
-              ? Border.all(
-                  color: isLate ? const Color(0xFF7E57C2) : _primaryColor,
-                  width: 1.5,
-                )
-              : null,
+          border: isToday ? Border.all(color: _primaryColor, width: 2.2) : null,
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: Text(
                 day.toString(),
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: (isWeekend || isHoliday)
-                      ? Colors.red.shade400
-                      : (isPresent ? _textColor : Colors.grey.shade400),
-                  fontSize: 14,
+                  fontWeight: isToday ? FontWeight.bold : FontWeight.w600,
+                  color: isToday
+                      ? _primaryColor
+                      : (isWeekend || isHoliday
+                            ? Colors.red.shade400
+                            : (isPresent
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : Colors.grey.shade400)),
+                  fontSize: 15,
                 ),
               ),
-              if (isPresent)
-                Container(
-                  width: 4,
-                  height: 4,
-                  margin: const EdgeInsets.only(top: 2),
+            ),
+            if (isPresent)
+              Align(
+                alignment: const Alignment(0, 0.82),
+                child: Container(
+                  width: 4.5,
+                  height: 4.5,
                   decoration: BoxDecoration(
-                    color: isLate ? const Color(0xFF7E57C2) : _primaryColor,
+                    color: isLate ? Colors.orange : Colors.green,
                     shape: BoxShape.circle,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
@@ -311,9 +326,9 @@ class _AttendancePageState extends State<AttendancePage> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(32),
             topRight: Radius.circular(32),
           ),
@@ -328,7 +343,9 @@ class _AttendancePageState extends State<AttendancePage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white24
+                      : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -341,10 +358,10 @@ class _AttendancePageState extends State<AttendancePage> {
                 Expanded(
                   child: Text(
                     '$dayLabel, $day $monthLabel ${_selectedMonth.year}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A1F36),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -357,13 +374,13 @@ class _AttendancePageState extends State<AttendancePage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade50,
+                        color: Theme.of(context).colorScheme.errorContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         holiday['name'],
                         style: TextStyle(
-                          color: Colors.red.shade700,
+                          color: Theme.of(context).colorScheme.onErrorContainer,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -403,15 +420,14 @@ class _AttendancePageState extends State<AttendancePage> {
               ],
             ),
             const SizedBox(height: 16),
-            if (record?['is_late'] == true)
+            if (record?['is_late'] == true || record?['is_early'] == true)
               SizedBox(
                 width: double.infinity,
                 child: _buildDetailItem(
                   'attendance.notes'.tr(context),
-                  'attendance.late_with_time'.tr(
-                    context,
-                    args: {'time': record?['late_time']},
-                  ),
+                  "${record?['is_late'] == true ? 'attendance.late_with_time'.tr(context, args: {'time': record?['late_time']}) : ''}"
+                  "${record?['is_late'] == true && record?['is_early'] == true ? ' & ' : ''}"
+                  "${record?['is_early'] == true ? 'attendance.early_with_time'.tr(context, args: {'time': record?['early_time']}) : ''}",
                 ),
               ),
             const SizedBox(height: 32),
@@ -425,7 +441,9 @@ class _AttendancePageState extends State<AttendancePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFF),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.05)
+            : const Color(0xFFF8FAFF),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -454,8 +472,11 @@ class _AttendancePageState extends State<AttendancePage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white24)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -473,6 +494,7 @@ class _AttendancePageState extends State<AttendancePage> {
               painter: DonutPainter(
                 percent: percent / 100,
                 color: _primaryColor,
+                brightness: Theme.of(context).brightness,
               ),
               child: Center(
                 child: Text(
@@ -493,13 +515,13 @@ class _AttendancePageState extends State<AttendancePage> {
                 _buildSummaryStat(
                   'attendance.present'.tr(context),
                   present,
-                  _primaryColor,
+                  const Color(0xFF2ECC71),
                 ),
                 const SizedBox(height: 12),
                 _buildSummaryStat(
                   'attendance.late'.tr(context),
                   summary['late'] ?? 0,
-                  const Color(0xFFF39C12),
+                  Colors.orange,
                 ),
               ],
             ),
@@ -518,7 +540,13 @@ class _AttendancePageState extends State<AttendancePage> {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 12),
-        Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
         const Spacer(),
         Text(
           value.toString(),
@@ -527,15 +555,18 @@ class _AttendancePageState extends State<AttendancePage> {
       ],
     );
   }
-
-  final Color _textColor = const Color(0xFF1A1F36);
 }
 
 class DonutPainter extends CustomPainter {
   final double percent;
   final Color color;
+  final Brightness brightness;
 
-  DonutPainter({required this.percent, required this.color});
+  DonutPainter({
+    required this.percent,
+    required this.color,
+    required this.brightness,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -544,7 +575,9 @@ class DonutPainter extends CustomPainter {
     const strokeWidth = 10.0;
 
     final bgPaint = Paint()
-      ..color = Colors.grey.withOpacity(0.1)
+      ..color = brightness == Brightness.dark
+          ? Colors.white12
+          : Colors.grey.withOpacity(0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 

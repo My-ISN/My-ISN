@@ -17,16 +17,19 @@ class ProfileBankPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'profile.bank_account'.tr(context),
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0.5,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -55,25 +58,34 @@ class ProfileBankPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildInfoCard([
+            _buildInfoCard(context, [
               _buildInfoRow(
+                context,
                 'profile.account_title'.tr(context),
                 data['account_title'] ?? '-',
               ),
               _buildInfoRow(
+                context,
                 'profile.account_number'.tr(context),
                 data['account_number'] ?? '-',
               ),
               _buildInfoRow(
+                context,
                 'profile.bank_name'.tr(context),
                 data['bank_name'] ?? '-',
               ),
-              _buildInfoRow('profile.iban'.tr(context), data['iban'] ?? '-'),
               _buildInfoRow(
+                context,
+                'profile.iban'.tr(context),
+                data['iban'] ?? '-',
+              ),
+              _buildInfoRow(
+                context,
                 'profile.swift_code'.tr(context),
                 data['swift_code'] ?? '-',
               ),
               _buildInfoRow(
+                context,
                 'profile.bank_branch'.tr(context),
                 data['bank_branch'] ?? '-',
                 last: true,
@@ -85,11 +97,11 @@ class ProfileBankPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(List<Widget> children) {
+  Widget _buildInfoCard(BuildContext context, List<Widget> children) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -103,7 +115,12 @@ class ProfileBankPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {bool last = false}) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool last = false,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
@@ -129,8 +146,8 @@ class ProfileBankPage extends StatelessWidget {
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
-                color: Color(0xFF1A1F36),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),

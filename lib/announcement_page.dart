@@ -445,7 +445,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFE6D4FA).withOpacity(0.5),
+                              color: const Color(0xFF7E57C2).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(

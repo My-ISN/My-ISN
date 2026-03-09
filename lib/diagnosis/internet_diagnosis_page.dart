@@ -1,30 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'localization/app_localizations.dart';
+import '../localization/app_localizations.dart';
 
-class PushNotificationDiagnosisPage extends StatefulWidget {
-  const PushNotificationDiagnosisPage({super.key});
+class InternetDiagnosisPage extends StatefulWidget {
+  const InternetDiagnosisPage({super.key});
 
   @override
-  State<PushNotificationDiagnosisPage> createState() =>
-      _PushNotificationDiagnosisPageState();
+  State<InternetDiagnosisPage> createState() => _InternetDiagnosisPageState();
 }
 
-class _PushNotificationDiagnosisPageState
-    extends State<PushNotificationDiagnosisPage> {
+class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
   int _currentStep = 0;
   bool _step1Success = false;
   bool _step2Success = false;
-  bool _step3Success = false;
   String? _step1Error;
   String? _step2Error;
-  String? _step3Error;
+  String _latency = '-';
 
-  final Color _primaryColor = const Color(0xFF7E57C2);
-  final Color _backgroundColor = const Color(0xFFF8FAFF);
-  final Color _textColor = const Color(0xFF1A1F36);
+  final Color _primaryColor = Colors.blue;
 
   @override
   void initState() {
@@ -33,76 +26,75 @@ class _PushNotificationDiagnosisPageState
   }
 
   Future<void> _startDiagnosis() async {
-    // Step 1: Check Permission
+    // Step 1: Check Server Status
     setState(() => _currentStep = 1);
     try {
-      NotificationSettings settings = await FirebaseMessaging.instance
-          .requestPermission(alert: true, badge: true, sound: true);
-      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional) {
-        setState(() => _step1Success = true);
+      final startTime = DateTime.now();
+      final response = await http
+          .get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/status'))
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final endTime = DateTime.now();
+        final duration = endTime.difference(startTime).inMilliseconds;
+
+        setState(() {
+          _step1Success = true;
+          _latency = '$duration ms';
+        });
       } else {
-        throw Exception('diagnosis.permission_denied'.tr(context));
+        throw Exception('Server returned ${response.statusCode}');
       }
     } catch (e) {
-      if (mounted) setState(() => _step1Error = e.toString());
+      if (mounted)
+        setState(() => _step1Error = 'diagnosis.internet_error'.tr(context));
       return;
     }
 
     await Future.delayed(const Duration(seconds: 1));
 
-    // Step 2: Check Token
+    // Step 2: Stability Test (Multiple requests)
     if (mounted) setState(() => _currentStep = 2);
     try {
-      String? token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
+      int successCount = 0;
+      for (int i = 0; i < 3; i++) {
+        final response = await http
+            .get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/status'))
+            .timeout(const Duration(seconds: 5));
+        if (response.statusCode == 200) successCount++;
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
+      if (successCount >= 2) {
         if (mounted) setState(() => _step2Success = true);
-        _sendTestNotification(token);
       } else {
-        throw Exception('diagnosis.token_failed'.tr(context));
+        throw Exception('Connection unstable');
       }
     } catch (e) {
-      if (mounted) setState(() => _step2Error = e.toString());
-      return;
-    }
-  }
-
-  Future<void> _sendTestNotification(String token) async {
-    // Step 3: Send Test
-    if (mounted) setState(() => _currentStep = 3);
-    try {
-      final url = Uri.parse(
-        'https://foxgeen.com/HRIS/mobileapi/test_push_direct?token=$token',
-      );
-      final response = await http.get(url);
-      final data = json.decode(response.body);
-
-      if (data['status'] == true) {
-        if (mounted) setState(() => _step3Success = true);
-      } else {
-        throw Exception(data['message'] ?? 'diagnosis.test_failed'.tr(context));
-      }
-    } catch (e) {
-      if (mounted) setState(() => _step3Error = e.toString());
+      if (mounted)
+        setState(() => _step2Error = 'diagnosis.internet_error'.tr(context));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'diagnosis.title'.tr(context),
-          style: const TextStyle(
-            color: Colors.black,
+          'diagnosis.internet_title'.tr(context),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).cardColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -119,27 +111,23 @@ class _PushNotificationDiagnosisPageState
                   color: _primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.notifications_active_outlined,
-                  size: 64,
-                  color: _primaryColor,
-                ),
+                child: Icon(Icons.wifi, size: 64, color: _primaryColor),
               ),
             ),
             const SizedBox(height: 32),
             Text(
-              'diagnosis.checking'.tr(context),
+              'diagnosis.internet_checking'.tr(context),
               style: TextStyle(
-                color: _textColor,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'diagnosis.verifying'.tr(context),
+              'diagnosis.internet_verifying'.tr(context),
               style: TextStyle(
-                color: _textColor.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
             ),
@@ -147,8 +135,11 @@ class _PushNotificationDiagnosisPageState
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
+                border: Theme.of(context).brightness == Brightness.dark
+                    ? Border.all(color: Colors.white24)
+                    : null,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -160,32 +151,24 @@ class _PushNotificationDiagnosisPageState
               child: Column(
                 children: [
                   _buildStep(
-                    'diagnosis.permission'.tr(context),
-                    'diagnosis.permission_desc'.tr(context),
+                    'diagnosis.server_status'.tr(context),
+                    'diagnosis.server_desc'.tr(context),
                     _currentStep >= 1,
                     _step1Success,
                     _step1Error,
                   ),
                   const Divider(height: 32),
                   _buildStep(
-                    'diagnosis.token'.tr(context),
-                    'diagnosis.token_desc'.tr(context),
+                    'diagnosis.latency'.tr(context),
+                    '${'diagnosis.latency_desc'.tr(context)} ($_latency)',
                     _currentStep >= 2,
                     _step2Success,
                     _step2Error,
                   ),
-                  const Divider(height: 32),
-                  _buildStep(
-                    'diagnosis.test_sending'.tr(context),
-                    'diagnosis.test_desc'.tr(context),
-                    _currentStep >= 3,
-                    _step3Success,
-                    _step3Error,
-                  ),
                 ],
               ),
             ),
-            if (_step3Success)
+            if (_step2Success)
               Padding(
                 padding: const EdgeInsets.only(top: 32),
                 child: Container(
@@ -201,7 +184,7 @@ class _PushNotificationDiagnosisPageState
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'diagnosis.success'.tr(context),
+                          'diagnosis.internet_success'.tr(context),
                           style: TextStyle(
                             color: Colors.green.shade800,
                             fontWeight: FontWeight.w500,
@@ -258,7 +241,11 @@ class _PushNotificationDiagnosisPageState
               Text(
                 title,
                 style: TextStyle(
-                  color: isStarted ? _textColor : _textColor.withOpacity(0.3),
+                  color: isStarted
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.3),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -269,7 +256,7 @@ class _PushNotificationDiagnosisPageState
                 style: TextStyle(
                   color: error != null
                       ? Colors.red
-                      : _textColor.withOpacity(0.5),
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 13,
                 ),
               ),

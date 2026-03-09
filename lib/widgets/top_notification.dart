@@ -106,7 +106,7 @@ class _TopNotificationState extends State<TopNotification>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE6D4FA),
+                      color: const Color(0xFF7E57C2).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.campaign, color: Color(0xFF7E57C2)),

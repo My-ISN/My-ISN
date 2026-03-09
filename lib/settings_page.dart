@@ -9,7 +9,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'localization/app_localizations.dart';
 import 'providers/language_provider.dart';
-import 'diagnosis_page.dart';
+import 'providers/theme_provider.dart';
+import 'diagnosis/diagnosis_hub_page.dart';
 
 class SettingsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -360,22 +361,73 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Future<void> _showThemeDialog() async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    ThemeMode currentMode = themeProvider.themeMode;
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('settings.theme'.tr(context)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<ThemeMode>(
+              title: Text('settings.theme_system'.tr(context)),
+              value: ThemeMode.system,
+              groupValue: currentMode,
+              onChanged: (value) {
+                if (value != null) {
+                  themeProvider.setThemeMode(value);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: Text('settings.theme_light'.tr(context)),
+              value: ThemeMode.light,
+              groupValue: currentMode,
+              onChanged: (value) {
+                if (value != null) {
+                  themeProvider.setThemeMode(value);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: Text('settings.theme_dark'.tr(context)),
+              value: ThemeMode.dark,
+              groupValue: currentMode,
+              onChanged: (value) {
+                if (value != null) {
+                  themeProvider.setThemeMode(value);
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFF),
       appBar: AppBar(
         title: Text(
           'main.xin_settings'.tr(context),
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -386,17 +438,20 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 Text(
                   'settings.language'.tr(context),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1F36),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? Border.all(color: Colors.white24)
+                        : null,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -409,12 +464,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withOpacity(0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.language,
-                        color: Color(0xFF7E57C2),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     title: Text('settings.language'.tr(context)),
@@ -432,19 +489,75 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'settings.fingerprint'.tr(context),
-                  style: const TextStyle(
+                  'settings.theme'.tr(context),
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1F36),
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? Border.all(color: Colors.white24)
+                        : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.dark_mode_outlined,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    title: Text('settings.theme'.tr(context)),
+                    subtitle: Text(
+                      Provider.of<ThemeProvider>(context).themeMode ==
+                              ThemeMode.system
+                          ? 'settings.theme_system'.tr(context)
+                          : Provider.of<ThemeProvider>(context).themeMode ==
+                                ThemeMode.light
+                          ? 'settings.theme_light'.tr(context)
+                          : 'settings.theme_dark'.tr(context),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: _showThemeDialog,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'settings.fingerprint'.tr(context),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? Border.all(color: Colors.white24)
+                        : null,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -459,12 +572,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         leading: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7E57C2).withOpacity(0.1),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.fingerprint,
-                            color: Color(0xFF7E57C2),
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                         title: Text('settings.fingerprint'.tr(context)),
@@ -476,7 +591,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         trailing: Switch(
                           value: _isFingerprintEnabled,
                           onChanged: _toggleFingerprint,
-                          activeColor: const Color(0xFF7E57C2),
+                          activeColor: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       if (_hasToken) ...[
@@ -485,7 +600,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           leading: const SizedBox(width: 40),
                           title: Text(
                             'settings.re_register'.tr(context),
-                            style: const TextStyle(color: Color(0xFF7E57C2)),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
                           onTap: () async {
                             // Only call _registerBiometric, it will handle the scan
@@ -509,17 +626,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 32),
                 Text(
                   'settings.account'.tr(context),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1F36),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? Border.all(color: Colors.white24)
+                        : null,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -565,17 +685,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 32),
                 Text(
                   'settings.app_info'.tr(context),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1F36),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? Border.all(color: Colors.white24)
+                        : null,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -620,17 +743,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 32),
                 Text(
                   'settings.diagnosis'.tr(context),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1F36),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? Border.all(color: Colors.white24)
+                        : null,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -660,8 +786,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const PushNotificationDiagnosisPage(),
+                              builder: (context) => const DiagnosisHubPage(),
                             ),
                           );
                         },

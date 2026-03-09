@@ -174,7 +174,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(
         userData: _profileData['basic_info'] ?? widget.userData,
         showBackButton: true,
@@ -240,12 +240,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7E57C2).withOpacity(0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.edit_outlined,
-                    color: Color(0xFF7E57C2),
+                    color: Theme.of(context).colorScheme.primary,
                     size: 20,
                   ),
                 ),
@@ -257,8 +259,10 @@ class _ProfilePageState extends State<ProfilePage> {
               top: 10,
               child: Container(
                 padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Theme.of(context).cardColor,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -270,7 +274,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 child: CircleAvatar(
                   radius: 55,
-                  backgroundColor: const Color(0xFFE6D4FA),
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFFF1F5F9)
+                      : Theme.of(context).cardColor,
                   backgroundImage:
                       (basic['profile_photo'] != null &&
                           basic['profile_photo'].toString().isNotEmpty)
@@ -308,11 +315,11 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               Text(
                 fullName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
-                  color: Color(0xFF1E293B),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -333,13 +340,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7E57C2), Color(0xFF9575CD)],
-                  ),
+                  color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Colors.green.withOpacity(0.2)),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF7E57C2).withOpacity(0.3),
+                      color: Colors.black.withOpacity(0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -348,7 +354,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Text(
                   basic['role_name'] ?? widget.userData['role_name'] ?? 'Staff',
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.green,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -361,8 +367,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(20),
+                  border: Theme.of(context).brightness == Brightness.dark
+                      ? Border.all(color: Colors.white24)
+                      : null,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.03),
@@ -381,7 +390,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        child: Divider(height: 1),
                       ),
                     ],
                     _buildEnhancedInfoRow(
@@ -391,7 +400,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      child: Divider(height: 1),
                     ),
                     _buildEnhancedInfoRow(
                       Icons.phone_android_rounded,
@@ -403,7 +412,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     if (basic['user_type'] != 'customer') ...[
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        child: Divider(height: 1),
                       ),
                       _buildEnhancedInfoRow(
                         Icons.person_pin_rounded,
@@ -427,10 +436,16 @@ class _ProfilePageState extends State<ProfilePage> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2).withOpacity(0.05),
+            color: Theme.of(context).colorScheme.primary.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.15 : 0.05,
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, size: 20, color: const Color(0xFF7E57C2)),
+          child: Icon(
+            icon,
+            size: 20,
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -449,8 +464,8 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 2),
               Text(
                 text,
-                style: const TextStyle(
-                  color: Color(0xFF1E293B),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -471,8 +486,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white24)
+            : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -486,10 +504,14 @@ class _ProfilePageState extends State<ProfilePage> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2).withOpacity(0.1),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: const Color(0xFF7E57C2), size: 22),
+          child: Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: 22,
+          ),
         ),
         title: Text(
           title,

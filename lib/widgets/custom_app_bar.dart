@@ -159,13 +159,14 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
       elevation: 0,
       automaticallyImplyLeading: widget.showBackButton,
-      iconTheme: const IconThemeData(color: Colors.black),
-      title: const Text(
+      title: Text(
         'ServerHub',
-        style: TextStyle(color: Color(0xFF7E57C2), fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       actions: [
         ValueListenableBuilder<int>(
@@ -228,7 +229,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
             child: Container(
               width: 36,
               height: 36,
-              color: const Color(0xFFE6D4FA),
+              color: Theme.of(context).colorScheme.primaryContainer,
               child:
                   (widget.userData['profile_photo'] != null &&
                       widget.userData['profile_photo'].toString().isNotEmpty)

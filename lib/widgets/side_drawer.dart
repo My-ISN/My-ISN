@@ -22,6 +22,7 @@ class SideDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.75,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         children: [
           _buildHeader(context),
@@ -65,15 +66,15 @@ class SideDrawer extends StatelessWidget {
                 ),
                 _buildMenuItem(
                   context,
-                  icon: Icons.assignment_outlined,
-                  title: 'main.xin_tasks'.tr(context),
-                  isActive: activePage == 'tasks',
+                  icon: Icons.payments_outlined,
+                  title: 'main.xin_payroll'.tr(context),
+                  isActive: activePage == 'payroll',
                   onTap: () {
                     Navigator.pop(context);
                     if (onTabSelected != null) {
                       onTabSelected!(2);
-                    } else if (activePage != 'tasks') {
-                      // Navigate to tasks page if needed (but currently it's a tab)
+                    } else if (activePage != 'payroll') {
+                      // Navigate to payroll page if needed (but currently it's a tab)
                     }
                   },
                 ),
@@ -147,13 +148,22 @@ class SideDrawer extends StatelessWidget {
           right: 20,
           bottom: 20,
         ),
-        color: const Color(0xFF7E57C2),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          border: Border(
+            bottom: BorderSide(
+              color: Theme.of(context).dividerColor.withOpacity(0.1),
+            ),
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
               radius: 35,
-              backgroundColor: Colors.white.withOpacity(0.2),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.primary.withOpacity(0.1),
               backgroundImage:
                   (userData['profile_photo'] != null &&
                       userData['profile_photo'].toString().isNotEmpty)
@@ -164,14 +174,18 @@ class SideDrawer extends StatelessWidget {
               child:
                   (userData['profile_photo'] == null ||
                       userData['profile_photo'].toString().isEmpty)
-                  ? const Icon(Icons.person, size: 40, color: Colors.white)
+                  ? Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
                   : null,
             ),
             const SizedBox(height: 15),
             Text(
               userData['nama'] ?? 'User',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -179,7 +193,7 @@ class SideDrawer extends StatelessWidget {
             Text(
               '@${userData['username'] ?? 'username'}',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 fontSize: 14,
               ),
             ),
@@ -204,21 +218,27 @@ class SideDrawer extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFF7E57C2).withOpacity(0.1) : null,
+            color: isActive
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.12)
+                : null,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             children: [
               Icon(
                 icon,
-                color: isActive ? const Color(0xFF7E57C2) : Colors.grey[700],
+                color: isActive
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 size: 24,
               ),
               const SizedBox(width: 16),
               Text(
                 title,
                 style: TextStyle(
-                  color: isActive ? const Color(0xFF7E57C2) : Colors.grey[800],
+                  color: isActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurface,
                   fontSize: 16,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                 ),

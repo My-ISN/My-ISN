@@ -11,15 +11,16 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'localization/app_localizations.dart';
 import 'providers/language_provider.dart';
+import 'providers/theme_provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  
+
   final languageProvider = LanguageProvider();
-  // We don't wait for _loadSavedLanguage since it's called in constructor and notifyListeners will trigger rebuild
+  final themeProvider = ThemeProvider();
 
   try {
     await NotificationService().initialize(navigatorKey);
@@ -44,8 +45,11 @@ void main() async {
   }
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => languageProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => languageProvider),
+        ChangeNotifierProvider(create: (_) => themeProvider),
+      ],
       child: MyApp(initialUserData: userData),
     ),
   );
@@ -58,16 +62,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       title: 'Foxgeen Mobile',
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       locale: languageProvider.locale,
-      supportedLocales: const [
-        Locale('id', ''),
-        Locale('en', ''),
-      ],
+      supportedLocales: const [Locale('id', ''), Locale('en', '')],
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -83,9 +85,40 @@ class MyApp extends StatelessWidget {
         return supportedLocales.first;
       },
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF7E57C2)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF7E57C2),
+          primary: const Color(0xFF7E57C2),
+          brightness: Brightness.light,
+          surface: Colors.white,
+          surfaceContainerHighest: const Color(
+            0xFFF1F5F9,
+          ), // Light blueish gray
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF8FAFF),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
+        cardColor: Colors.white,
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF7E57C2),
+          primary: const Color(0xFF7E57C2),
+          brightness: Brightness.dark,
+          surface: const Color(0xFF000000),
+          surfaceContainerHighest: const Color(0xFF000000),
+        ),
+        scaffoldBackgroundColor: const Color(0xFF1E1E1E),
+        cardColor: const Color(0xFF000000),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF000000),
+          elevation: 0,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: themeProvider.themeMode,
       builder: (context, child) {
         return ConnectivityWrapper(child: child!);
       },

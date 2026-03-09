@@ -382,16 +382,19 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           _getPageTitle(context),
-          style: const TextStyle(color: Colors.black),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0.5,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -454,7 +457,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       ),
                       child: CircleAvatar(
                         radius: 50,
-                        backgroundColor: const Color(0xFFF3F6FF),
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFFF3F6FF)
+                            : Theme.of(context).cardColor,
                         backgroundImage: _image != null
                             ? FileImage(_image!)
                             : (widget.profileData['basic_info']?['profile_photo'] !=
@@ -755,7 +761,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           validator: validator,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Theme.of(context).cardColor,
             suffixIcon: suffixIcon,
             contentPadding: const EdgeInsets.all(16),
             border: OutlineInputBorder(
@@ -802,7 +808,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           onChanged: onChanged,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Theme.of(context).cardColor,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 8,
@@ -862,7 +868,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           onChanged: enabled ? (val) {} : null,
           decoration: InputDecoration(
             filled: true,
-            fillColor: enabled ? Colors.white : Colors.grey[100],
+            fillColor: enabled
+                ? Theme.of(context).cardColor
+                : (Theme.of(context).brightness == Brightness.light
+                      ? Colors.grey[100]
+                      : Colors.white10),
             hintText: isLoading
                 ? 'profile.loading'.tr(context)
                 : (hint ??
