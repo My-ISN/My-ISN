@@ -738,7 +738,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: 'settings.help_support'.tr(context),
                         onTap: () => _launchWhatsApp(
                           '0895384314416',
-                          'Halo admin Foxgeen, saya butuh bantuan terkait akun saya...',
+                          'Halo admin MyISN, saya butuh bantuan terkait akun saya...',
                         ),
                       ),
                       const Divider(height: 1, indent: 70),

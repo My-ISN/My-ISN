@@ -7,7 +7,7 @@
     "settings": "Pengaturan",
     "logout": "Keluar",
     "xin_notification": "Notifikasi",
-    "app_name": "Super Apps",
+    "app_name": "MyISN",
     "xin_attendance": "Absensi",
     "xin_dashboard": "Beranda",
     "xin_payroll": "Payroll",
@@ -18,7 +18,7 @@
     "success_with_msg": "Berhasil: {message}",
     "update_available": "Pembaruan Tersedia",
     "new_version": "Versi Baru",
-    "update_desc": "Versi baru aplikasi Foxgeen telah tersedia. Silakan perbarui untuk mendapatkan fitur terbaru dan stabilitas yang lebih baik.",
+    "update_desc": "Versi baru aplikasi MyISN telah tersedia. Silakan perbarui untuk mendapatkan fitur terbaru dan stabilitas yang lebih baik.",
     "later": "Nanti",
     "update_now": "Perbarui Sekarang"
   },

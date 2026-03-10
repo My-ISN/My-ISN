@@ -162,7 +162,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
       elevation: 0,
       automaticallyImplyLeading: widget.showBackButton,
       title: Text(
-        'ServerHub',
+        'MyISN',
         style: TextStyle(
           color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.bold,

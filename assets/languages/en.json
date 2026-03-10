@@ -7,7 +7,7 @@
     "settings": "Settings",
     "logout": "Logout",
     "xin_notification": "Notifications",
-    "app_name": "Super Apps",
+    "app_name": "MyISN",
     "xin_attendance": "Attendance",
     "xin_dashboard": "Dashboard",
     "xin_payroll": "Payroll",
@@ -18,7 +18,7 @@
     "success_with_msg": "Success: {message}",
     "update_available": "Update Available",
     "new_version": "New Version",
-    "update_desc": "A new version of the Foxgeen app is available. Please update to get the latest features and better stability.",
+    "update_desc": "A new version of the MyISN app is available. Please update to get the latest features and better stability.",
     "later": "Later",
     "update_now": "Update Now"
   },
