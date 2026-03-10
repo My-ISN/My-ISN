@@ -292,6 +292,8 @@
     "internet_desc": "Cek stabilitas koneksi ke server",
     "storage_title": "Diagnosis Penyimpanan",
     "storage_desc": "Cek penggunaan cache dan bersihkan ruang",
+    "version_title": "Diagnosis Versi",
+    "version_desc": "Cek apakah versi aplikasi Anda adalah yang terbaru",
     "checking_notif": "Mengecek Pengaturan Notifikasi",
     "verifying_notif": "Kami sedang memverifikasi apakah perangkat Anda siap menerima notifikasi push.",
     "permission": "Izin Notifikasi",
@@ -319,7 +321,17 @@
     "clear_cache": "Bersihkan Cache",
     "clear_success": "Cache berhasil dibersihkan!",
     "clear_confirm_title": "Hapus Cache?",
-    "clear_confirm_desc": "Ini akan menghapus file sementara. Anda tidak akan keluar dari akun."
+    "clear_confirm_desc": "Ini akan menghapus file sementara. Anda tidak akan keluar dari akun.",
+    "version_checking": "Mengecek Versi Aplikasi",
+    "version_verifying": "Kami sedang membandingkan versi aplikasi Anda dengan versi terbaru di server.",
+    "current_version": "Versi Saat Ini",
+    "current_version_desc": "Versi yang terpasang di perangkat ini",
+    "latest_version": "Versi Terbaru",
+    "latest_version_desc": "Versi terbaru yang tersedia di server",
+    "update_status": "Status Pembaruan",
+    "up_to_date": "Aplikasi sudah dalam versi terbaru.",
+    "update_needed": "Versi baru tersedia untuk diunduh.",
+    "version_fetch_failed": "Gagal mengambil data versi dari server"
   },
   "payroll": {
     "title": "Payroll",

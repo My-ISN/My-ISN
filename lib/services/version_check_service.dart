@@ -28,45 +28,69 @@ class AppUpdateInfo {
 class VersionCheckService {
   // Replace with actual API endpoint when available
   static const String _updateUrl =
-      'https://foxgeen.com/HRIS/mobileapi/app_version';
+      'https://foxgeen.com/HRIS/mobileapi/status';
 
   static Future<AppUpdateInfo?> checkForUpdate() async {
-    try {
-      // 1. Get current app version
-      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      final String currentVersion = packageInfo.version;
+    final latestUpdate = await getLatestVersionInfo();
+    if (latestUpdate == null) return null;
 
-      // 2. Fetch latest version from server
-      // Note: This is an assumption of how the API will look.
-      // For now, it might fail if the endpoint doesn't exist yet.
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final String currentVersion = "${packageInfo.version}+${packageInfo.buildNumber}";
+
+    if (_isVersionNewer(currentVersion, latestUpdate.version)) {
+      return latestUpdate;
+    }
+    return null;
+  }
+
+  static Future<AppUpdateInfo?> getLatestVersionInfo() async {
+    try {
       final response = await http
           .get(Uri.parse(_updateUrl))
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final latestUpdate = AppUpdateInfo.fromJson(data);
-
-        // 3. Compare versions
-        if (_isVersionNewer(currentVersion, latestUpdate.version)) {
-          return latestUpdate;
+        // Handle both old flat structure and new nested structure
+        if (data['version_info'] != null) {
+          return AppUpdateInfo.fromJson(data['version_info']);
         }
+        // Fallback for direct app_version endpoint or matching structure
+        return AppUpdateInfo.fromJson(data);
+      } else {
+        print('VersionCheckService: Server returned ${response.statusCode}');
       }
     } catch (e) {
-      print('Error checking for update: $e');
+      print('VersionCheckService: Error fetching info: $e');
     }
     return null;
   }
 
   static bool _isVersionNewer(String current, String latest) {
-    List<int> currentParts = current.split('.').map(int.parse).toList();
-    List<int> latestParts = latest.split('.').map(int.parse).toList();
+    try {
+      // Normalize versions (remove build number + if present)
+      String cleanCurrent = current.split('+')[0];
+      String cleanLatest = latest.split('+')[0];
 
-    for (int i = 0; i < latestParts.length; i++) {
-      int currentPart = i < currentParts.length ? currentParts[i] : 0;
-      if (latestParts[i] > currentPart) return true;
-      if (latestParts[i] < currentPart) return false;
+      List<int> currentParts = cleanCurrent.split('.').map((s) => int.tryParse(s) ?? 0).toList();
+      List<int> latestParts = cleanLatest.split('.').map((s) => int.tryParse(s) ?? 0).toList();
+
+      for (int i = 0; i < latestParts.length; i++) {
+        int currentPart = i < currentParts.length ? currentParts[i] : 0;
+        if (latestParts[i] > currentPart) return true;
+        if (latestParts[i] < currentPart) return false;
+      }
+
+      // If version parts are equal, check build number if available
+      if (current.contains('+') && latest.contains('+')) {
+        int currentBuild = int.tryParse(current.split('+')[1]) ?? 0;
+        int latestBuild = int.tryParse(latest.split('+')[1]) ?? 0;
+        return latestBuild > currentBuild;
+      }
+
+      return false;
+    } catch (e) {
+      return false;
     }
-    return false;
   }
 }

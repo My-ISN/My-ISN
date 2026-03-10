@@ -12,6 +12,8 @@ import 'payroll/payroll_page.dart';
 import 'localization/app_localizations.dart';
 import 'services/version_check_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -25,6 +27,7 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _isLoading = true;
   Map<String, dynamic> _dashboardData = {};
   int _currentIndex = 0;
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -34,15 +37,85 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> _checkAppUpdate() async {
-    // Small delay to ensure context is ready if needed,
-    // though for dialogs it's better to wait a bit after build.
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
+    // 1. Check for newer version (Update Popup)
     final updateInfo = await VersionCheckService.checkForUpdate();
     if (updateInfo != null && mounted) {
       _showUpdateDialog(updateInfo);
+      return; // If update available, don't show changelog yet
     }
+
+    // 2. Check if user just updated (Changelog/What's New)
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final String currentVersionWithBuild = "${packageInfo.version}+${packageInfo.buildNumber}";
+    final String? lastSeenVersion = await storage.read(key: 'last_seen_version');
+
+    if (lastSeenVersion != null && lastSeenVersion != currentVersionWithBuild) {
+      // Version changed! Show what's new if the server has notes for this current version
+      final latestInfo = await VersionCheckService.getLatestVersionInfo();
+      if (latestInfo != null && 
+          latestInfo.version == currentVersionWithBuild && 
+          latestInfo.releaseNotes != null && 
+          mounted) {
+        _showChangelogDialog(latestInfo);
+      }
+    }
+
+    // Update last seen version
+    await storage.write(key: 'last_seen_version', value: currentVersionWithBuild);
+  }
+
+  void _showChangelogDialog(AppUpdateInfo info) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        scrollable: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.celebration, color: Color(0xFF7E57C2)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text('What\'s New in ${info.version.split('+')[0]}'),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Terima kasih telah memperbarui aplikasi! Berikut adalah perubahan terbaru:',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+            const SizedBox(height: 15),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                info.releaseNotes ?? 'Peningkatan stabilitas dan performa.',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF7E57C2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Mantap!', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showUpdateDialog(AppUpdateInfo updateInfo) {
@@ -52,6 +125,7 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context) => WillPopScope(
         onWillPop: () async => !updateInfo.isForceUpdate,
         child: AlertDialog(
+          scrollable: true,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -59,7 +133,9 @@ class _DashboardPageState extends State<DashboardPage> {
             children: [
               const Icon(Icons.system_update, color: Color(0xFF7E57C2)),
               const SizedBox(width: 10),
-              Text('main.update_available'.tr(context)),
+              Expanded(
+                child: Text('main.update_available'.tr(context)),
+              ),
             ],
           ),
           content: Column(
@@ -67,7 +143,7 @@ class _DashboardPageState extends State<DashboardPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${'main.new_version'.tr(context)}: ${updateInfo.version}',
+                '${'main.new_version'.tr(context)}: ${updateInfo.version.split('+')[0]}',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               if (updateInfo.releaseNotes != null) ...[
@@ -564,40 +640,6 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 24),
 
-            // Payroll Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'dashboard.payroll_report'.tr(context),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _buildPayrollStat(
-                        'IDR ${_dashboardData['payroll']?['total'] ?? 0}',
-                        'dashboard.total'.tr(context),
-                      ),
-                      const SizedBox(width: 32),
-                      _buildPayrollStat(
-                        'IDR ${_dashboardData['payroll']?['this_month'] ?? 0}',
-                        'dashboard.this_month'.tr(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -656,19 +698,6 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPayrollStat(String value, String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-      ],
     );
   }
 

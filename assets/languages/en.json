@@ -292,6 +292,8 @@
     "internet_desc": "Check connection stability to server",
     "storage_title": "Storage Diagnosis",
     "storage_desc": "Check cache usage and clear space",
+    "version_title": "Version Diagnosis",
+    "version_desc": "Check if your app version is up to date",
     "checking_notif": "Checking Notification Settings",
     "verifying_notif": "We are verifying if your device is ready to receive push notifications.",
     "permission": "Notification Permission",
@@ -319,7 +321,17 @@
     "clear_cache": "Clear Cache",
     "clear_success": "Cache cleared successfully!",
     "clear_confirm_title": "Clear Cache?",
-    "clear_confirm_desc": "This will delete temporary files. You will not be logged out."
+    "clear_confirm_desc": "This will delete temporary files. You will not be logged out.",
+    "version_checking": "Checking App Version",
+    "version_verifying": "We are comparing your app version with the latest version on the server.",
+    "current_version": "Current Version",
+    "current_version_desc": "Version installed on this device",
+    "latest_version": "Latest Version",
+    "latest_version_desc": "Latest version available on server",
+    "update_status": "Update Status",
+    "up_to_date": "The app is already in the latest version.",
+    "update_needed": "New version available to download.",
+    "version_fetch_failed": "Failed to fetch version data from server"
   },
   "payroll": {
     "title": "Payroll",

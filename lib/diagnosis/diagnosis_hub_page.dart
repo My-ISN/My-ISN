@@ -3,6 +3,7 @@ import '../localization/app_localizations.dart';
 import 'notification_diagnosis_page.dart';
 import 'internet_diagnosis_page.dart';
 import 'storage_diagnosis_page.dart';
+import 'version_diagnosis_page.dart';
 
 class DiagnosisHubPage extends StatelessWidget {
   const DiagnosisHubPage({super.key});
@@ -57,6 +58,20 @@ class DiagnosisHubPage extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => const InternetDiagnosisPage(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildDiagnosisCard(
+            context,
+            title: 'diagnosis.version_title'.tr(context),
+            desc: 'diagnosis.version_desc'.tr(context),
+            icon: Icons.system_update_alt_outlined,
+            color: Colors.teal,
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const VersionDiagnosisPage(),
               ),
             ),
           ),
