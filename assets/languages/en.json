@@ -15,6 +15,7 @@
     "xin_settings": "Settings",
     "xin_logout": "Logout",
     "error_with_msg": "Error: {message}",
+    "success_with_msg": "Success: {message}",
     "update_available": "Update Available",
     "new_version": "New Version",
     "update_desc": "A new version of the Foxgeen app is available. Please update to get the latest features and better stability.",
@@ -151,7 +152,8 @@
       "4": "Thu",
       "5": "Fri",
       "6": "Sat"
-    }
+    },
+    "error_with_msg": "Error: {message}"
   },
   "announcement": {
     "title": "Announcement",

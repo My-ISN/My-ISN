@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math' as math;
 import 'localization/app_localizations.dart';
+import 'widgets/connectivity_wrapper.dart';
 
 class AttendancePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -51,12 +52,23 @@ class _AttendancePageState extends State<AttendancePage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
+
+        // Don't show redundant snackbar if we are offline
+        if (!ConnectivityStatus.of(context)) return;
+
+        String errorMessage = e.toString();
+        if (errorMessage.contains('SocketException') ||
+            errorMessage.contains('ClientException') ||
+            errorMessage.contains('HandshakeException')) {
+          errorMessage = 'login.conn_error'.tr(context);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'attendance.error_with_msg'.tr(
+              'main.error_with_msg'.tr(
                 context,
-                args: {'message': e.toString()},
+                args: {'message': errorMessage},
               ),
             ),
             backgroundColor: Colors.red,

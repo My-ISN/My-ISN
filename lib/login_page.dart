@@ -332,13 +332,14 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('login.conn_error'.tr(context)),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted && ConnectivityStatus.of(context)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('login.conn_error'.tr(context)),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -379,9 +380,10 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'login.google_success'
-                  .tr(context)
-                  .replaceFirst('{name}', data['data']['nama']),
+              'login.google_success'.tr(
+                context,
+                args: {'name': data['data']['nama']?.toString() ?? ''},
+              ),
             ),
             backgroundColor: Colors.green,
           ),
@@ -404,7 +406,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (error) {
       debugPrint('Google Sign-In Error: $error');
-      if (mounted) {
+      if (mounted && ConnectivityStatus.of(context)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('login.conn_error'.tr(context)),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'widgets/connectivity_wrapper.dart';
 
 import 'widgets/custom_bottom_nav.dart';
 import 'widgets/custom_app_bar.dart';
@@ -130,9 +131,11 @@ class _DashboardPageState extends State<DashboardPage> {
       debugPrint('Error fetching dashboard data: $e');
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('dashboard.fetch_error'.tr(context))),
-        );
+        if (ConnectivityStatus.of(context)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('dashboard.fetch_error'.tr(context))),
+          );
+        }
       }
     }
   }
@@ -181,151 +184,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Future<void> _clockIn() async {
-    final shiftIn = _dashboardData['stats']?['shift_in'];
-    final shiftOut = _dashboardData['stats']?['shift_out'];
-
-    if (shiftIn == null || shiftOut == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('dashboard.shift_not_found'.tr(context))),
-      );
-      return;
-    }
-
-    final now = DateTime.now();
-    final todayStr =
-        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-    final shiftOutDt = DateTime.parse("$todayStr $shiftOut");
-
-    // Option B: Block if after shift out time
-    if (now.isAfter(shiftOutDt)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('dashboard.shift_ended_msg'.tr(context)),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-    try {
-      final response = await http.post(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/clock_in'),
-        body: {
-          'user_id': widget.userData['id']?.toString() ?? '',
-          'company_id':
-              (widget.userData['company_id'] ??
-                      _dashboardData['user']?['company_id'])
-                  ?.toString() ??
-              '',
-        },
-      );
-      final data = json.decode(response.body);
-      if (data['status'] == true) {
-        _fetchDashboardData();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message']),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        throw data['message'];
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'dashboard.clock_in_failed'.tr(
-              context,
-              args: {'error': e.toString()},
-            ),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _clockOut() async {
-    final activeAtt = _dashboardData['attendance'];
-    if (activeAtt == null) return;
-
-    final shiftOut = _dashboardData['stats']?['shift_out'];
-    if (shiftOut != null) {
-      final now = DateTime.now();
-      final todayStr =
-          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-      final shiftOutDt = DateTime.parse("$todayStr $shiftOut");
-
-      // Show warning for early clock out
-      if (now.isBefore(shiftOutDt)) {
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('dashboard.early_out_title'.tr(context)),
-            content: Text('dashboard.early_out_content'.tr(context)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text('dashboard.cancel'.tr(context)),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text(
-                  'dashboard.continue'.tr(context),
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        );
-        if (confirmed != true) return;
-      }
-    }
-
-    setState(() => _isLoading = true);
-    try {
-      final response = await http.post(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/clock_out'),
-        body: {
-          'user_id': widget.userData['id']?.toString() ?? '',
-          'attendance_id': activeAtt?['id']?.toString() ?? '',
-        },
-      );
-      final data = json.decode(response.body);
-      if (data['status'] == true) {
-        _fetchDashboardData();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message']),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        throw data['message'];
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'dashboard.clock_out_failed'.tr(
-              context,
-              args: {'error': e.toString()},
-            ),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
   Future<void> _clockBreak() async {
     final activeAtt = _dashboardData['attendance'];
     if (activeAtt == null) return;
@@ -341,7 +199,12 @@ class _DashboardPageState extends State<DashboardPage> {
         _fetchDashboardData();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(data['message']),
+            content: Text(
+              'main.success_with_msg'.tr(
+                context,
+                args: {'message': data['message']?.toString() ?? ''},
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -349,32 +212,53 @@ class _DashboardPageState extends State<DashboardPage> {
         throw data['message'];
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        if (ConnectivityStatus.of(context)) {
+          String errorMessage = e.toString();
+          if (errorMessage.contains('SocketException') ||
+              errorMessage.contains('ClientException') ||
+              errorMessage.contains('HandshakeException')) {
+            errorMessage = 'login.conn_error'.tr(context);
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'main.error_with_msg'.tr(
+                  context,
+                  args: {'message': errorMessage},
+                ),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
+
   Widget _buildHomeContent() {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     final attendance = _dashboardData['attendance'];
-    final bool hasClockIn = attendance != null;
-    final bool hasClockOut =
-        attendance != null &&
+    final bool hasClockIn = attendance != null &&
+        attendance['clock_in'] != null &&
+        attendance['clock_in'].toString().isNotEmpty &&
+        attendance['clock_in'].toString() != '-';
+    final bool hasClockOut = attendance != null &&
         attendance['clock_out'] != null &&
         attendance['clock_out'].toString().isNotEmpty &&
         attendance['clock_out'].toString() != '-';
 
-    final bool hasBreakIn =
-        attendance != null &&
+    final bool hasBreakIn = attendance != null &&
         attendance['break_in'] != null &&
+        attendance['break_in'].toString().isNotEmpty &&
         attendance['break_in'].toString() != '-';
-    final bool hasBreakOut =
-        attendance != null &&
+    final bool hasBreakOut = attendance != null &&
         attendance['break_out'] != null &&
+        attendance['break_out'].toString().isNotEmpty &&
         attendance['break_out'].toString() != '-';
 
     String breakLabel = 'dashboard.break_time_clock'.tr(context);
@@ -386,12 +270,6 @@ class _DashboardPageState extends State<DashboardPage> {
       breakLabel = 'dashboard.start_break'.tr(context);
     }
 
-    final String buttonMasukLabel = hasClockIn
-        ? 'dashboard.already_clock_in'.tr(context)
-        : 'dashboard.clock_in'.tr(context).toUpperCase();
-    final String buttonPulangLabel = hasClockOut
-        ? 'dashboard.already_clock_out'.tr(context)
-        : 'dashboard.clock_out'.tr(context).toUpperCase();
 
     return RefreshIndicator(
       onRefresh: _fetchDashboardData,
@@ -555,8 +433,28 @@ class _DashboardPageState extends State<DashboardPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTimeDisplay(
+                          'dashboard.clock_in'.tr(context).toUpperCase(),
+                          hasClockIn ? attendance['clock_in'] : '--:--',
+                          const Color(0xFF2ECC71),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTimeDisplay(
+                          'dashboard.clock_out'.tr(context).toUpperCase(),
+                          hasClockOut ? attendance['clock_out'] : '--:--',
+                          const Color(0xFFE74C3C),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   if (hasClockIn) ...[
-                    const SizedBox(height: 8),
                     Text(
                       hasClockOut
                           ? 'dashboard.clock_in_out_details'.tr(
@@ -579,63 +477,13 @@ class _DashboardPageState extends State<DashboardPage> {
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: (hasClockIn) ? null : _clockIn,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2ECC71),
-                            disabledBackgroundColor: Colors.grey.shade200,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            minimumSize: const Size(0, 40),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              buttonMasukLabel,
-                              style: TextStyle(
-                                color: hasClockIn ? Colors.grey : Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: (!hasClockIn || hasClockOut)
-                              ? null
-                              : _clockOut,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE74C3C),
-                            disabledBackgroundColor: Colors.grey.shade200,
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            minimumSize: const Size(0, 40),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              buttonPulangLabel,
-                              style: TextStyle(
-                                color: (!hasClockIn || hasClockOut)
-                                    ? Colors.grey
-                                    : Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 12),
+                  if (hasBreakIn || hasBreakOut)
+                    Text(
+                      'Rest: ${attendance['break_out']}${hasBreakIn ? ' - ${attendance['break_in']}' : ''}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -645,21 +493,18 @@ class _DashboardPageState extends State<DashboardPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7E57C2),
                         disabledBackgroundColor: Colors.grey.shade200,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        minimumSize: const Size(0, 40),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          breakLabel,
-                          style: TextStyle(
-                            color: (!hasClockIn || hasClockOut || hasBreakIn)
-                                ? Colors.grey
-                                : Colors.white,
-                          ),
+                      child: Text(
+                        breakLabel,
+                        style: TextStyle(
+                          color: (!hasClockIn || hasClockOut || hasBreakIn)
+                              ? Colors.grey
+                              : Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -824,6 +669,35 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
       ],
+    );
+  }
+
+  Widget _buildTimeDisplay(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 }

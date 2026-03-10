@@ -116,7 +116,12 @@ class _RegisterPageState extends State<RegisterPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(data['message']),
+            content: Text(
+              'main.success_with_msg'.tr(
+                context,
+                args: {'message': data['message']?.toString() ?? ''},
+              ),
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -149,13 +154,14 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('login.conn_error'.tr(context)),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted && ConnectivityStatus.of(context)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('login.conn_error'.tr(context)),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

@@ -105,7 +105,10 @@ class _SettingsPageState extends State<SettingsPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Gagal: ${data['message'] ?? 'Error tidak diketahui'}',
+                  'main.error_with_msg'.tr(
+                    context,
+                    args: {'message': data['message'] ?? 'Error'},
+                  ),
                 ),
                 backgroundColor: Colors.red,
               ),
@@ -117,7 +120,7 @@ class _SettingsPageState extends State<SettingsPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Koneksi Error: $e'),
+              content: Text('login.conn_error'.tr(context)),
               backgroundColor: Colors.red,
             ),
           );
@@ -180,7 +183,10 @@ class _SettingsPageState extends State<SettingsPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Gagal Hapus: ${data['message'] ?? 'Error tidak diketahui'}',
+                  'main.error_with_msg'.tr(
+                    context,
+                    args: {'message': data['message'] ?? 'Error'},
+                  ),
                 ),
                 backgroundColor: Colors.red,
               ),
@@ -192,7 +198,7 @@ class _SettingsPageState extends State<SettingsPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Koneksi Error: $e'),
+              content: Text('login.conn_error'.tr(context)),
               backgroundColor: Colors.red,
             ),
           );
@@ -277,7 +283,12 @@ class _SettingsPageState extends State<SettingsPage> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Gagal: ${data['message']}'),
+                content: Text(
+                  'main.error_with_msg'.tr(
+                    context,
+                    args: {'message': data['message'] ?? 'Error'},
+                  ),
+                ),
                 backgroundColor: Colors.red,
               ),
             );

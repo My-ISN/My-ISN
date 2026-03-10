@@ -52,9 +52,16 @@ class _ProfilePageState extends State<ProfilePage> {
         debugPrint('PROFILE API ERROR: ${data['message']}');
         if (mounted) {
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: ${data['message']}')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'main.error_with_msg'.tr(
+                  context,
+                  args: {'message': data['message'].toString()},
+                ),
+              ),
+            ),
+          );
         }
       }
     } catch (e) {

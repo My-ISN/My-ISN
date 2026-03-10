@@ -15,6 +15,7 @@
     "xin_settings": "Pengaturan",
     "xin_logout": "Keluar",
     "error_with_msg": "Kesalahan: {message}",
+    "success_with_msg": "Berhasil: {message}",
     "update_available": "Pembaruan Tersedia",
     "new_version": "Versi Baru",
     "update_desc": "Versi baru aplikasi Foxgeen telah tersedia. Silakan perbarui untuk mendapatkan fitur terbaru dan stabilitas yang lebih baik.",
@@ -151,7 +152,8 @@
       "4": "Kam",
       "5": "Jum",
       "6": "Sab"
-    }
+    },
+    "error_with_msg": "Kesalahan: {message}"
   },
   "announcement": {
     "title": "Pengumuman",
