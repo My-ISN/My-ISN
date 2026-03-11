@@ -7,7 +7,7 @@
     "settings": "Settings",
     "logout": "Logout",
     "xin_notification": "Notifications",
-    "app_name": "MyISN",
+    "app_name": "My ISN",
     "xin_attendance": "Attendance",
     "xin_dashboard": "Dashboard",
     "xin_payroll": "Payroll",
@@ -18,9 +18,13 @@
     "success_with_msg": "Success: {message}",
     "update_available": "Update Available",
     "new_version": "New Version",
-    "update_desc": "A new version of the MyISN app is available. Please update to get the latest features and better stability.",
+    "update_desc": "A new version of the My ISN app is available. Please update for latest features and better stability.",
     "later": "Later",
-    "update_now": "Update Now"
+    "update_now": "Update Now",
+    "active": "Active",
+    "inactive": "Inactive",
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "dashboard": {
     "welcome": "Welcome,",
@@ -51,15 +55,19 @@
     "already_break": "BREAK COMPLETED",
     "overtime_request": "Overtime Request",
     "travel_request": "Travel Request",
-    "payroll_report": "Monthly Payroll Report",
+    "continue": "Yes, Continue",
+    "payroll_report": "Payroll Report",
     "total": "Total",
     "this_month": "This Month",
-    "early_out": "Early Clock Out",
-    "early_out_title": "Early Clock Out?",
-    "early_out_content": "You are trying to clock out before the shift ends. Continue?",
-    "cancel": "Cancel",
-    "continue": "Yes, Continue"
+    "quick_menu": "Quick Menu",
+    "rent_plan": "Rent Plan",
+    "todo_list": "Todo List",
+    "employees": "Employees",
+    "quick_menu_rent_plan": "Rent\nPlan",
+    "quick_menu_todo_list": "Todo\nList",
+    "quick_menu_employees": "Employees"
   },
+
   "login": {
     "welcome_back": "Welcome back, Please login into an account",
     "username_email": "Username or Email",
@@ -350,5 +358,74 @@
     "details": "Payroll Details",
     "earnings": "Earnings",
     "total_earnings": "Total Earnings"
+  },
+  "employees": {
+    "title": "Employees",
+    "search_hint": "Search name, role, or department...",
+    "show": "Show",
+    "total": "{count} Total",
+    "no_employees": "No employees found",
+    "add_employee": "Add",
+    "page_x_of_y": "Page {current} of {total}",
+    "detail_title": "Employee Detail",
+    "edit_title": "Edit Employee",
+    "tabs": {
+      "profile": "Profile",
+      "contract": "Contract",
+      "employment": "Employment",
+      "personal": "Personal",
+      "history": "History",
+      "documents": "Documents"
+    },
+    "work_log": "Work Log",
+    "worklog_target": "Work Log Target",
+    "status_target_worklog": "Status Target Worklog",
+    "payslip_type": "Payslip Type",
+    "start_contract": "Start of Contract",
+    "leave_categories": "Leave Categories",
+    "all": "All",
+    "none": "None",
+    "per_month": "Per Month",
+    "status_work_label": "Work Status",
+    "overview": {
+      "contact_info": "Contact Information",
+      "profile_data_not_available": "Profile data not available"
+    },
+    "contract_data": {
+      "title": "Contract Data",
+      "not_available": "Contract data not available"
+    },
+    "salary_shift": {
+      "title": "Salary & Shift"
+    },
+    "period_leave": {
+      "title": "Period & Leave"
+    },
+    "employment_detail": {
+      "title": "Employment Detail",
+      "not_available": "Employment data not available"
+    },
+    "role_desc": "Role Description",
+    "personal_info": "Personal Information",
+    "personal_info_not_available": "Personal data not available",
+    "bank_info": "Bank Information",
+    "work_exp": "Work Experience",
+    "education": "Education",
+    "emp_docs": "Employee Documents",
+    "delete_title": "Delete Employee",
+    "delete_confirm": "Are you sure you want to delete this employee?",
+    "delete_success": "Employee deleted successfully",
+    "delete_error": "Failed to delete employee",
+    "delete_conn_error": "Failed to delete employee: Connection problem",
+    "save": "SAVE",
+    "save_success": "Data saved successfully",
+    "edit_upcoming": "Edit feature for this section will be coming soon",
+    "try_again": "Try Again",
+    "fetch_error": "Failed to Load Data",
+    "status_work": {
+      "contract": "Employee Contract",
+      "probation": "Probation",
+      "trainee": "Trainee"
+    }
   }
 }

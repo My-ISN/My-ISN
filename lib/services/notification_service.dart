@@ -57,7 +57,7 @@ class NotificationService {
     // 4. Create a High Importance Channel for Android
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'foxgeen_push_channel', // id
-      'MyISN Push Notifications', // title
+      'My ISN Push Notifications', // title
       description:
           'Digunakan untuk notifikasi pengumuman penting.', // description
       importance: Importance.max,

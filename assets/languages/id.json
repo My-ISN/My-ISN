@@ -7,7 +7,7 @@
     "settings": "Pengaturan",
     "logout": "Keluar",
     "xin_notification": "Notifikasi",
-    "app_name": "MyISN",
+    "app_name": "My ISN",
     "xin_attendance": "Absensi",
     "xin_dashboard": "Beranda",
     "xin_payroll": "Payroll",
@@ -18,9 +18,13 @@
     "success_with_msg": "Berhasil: {message}",
     "update_available": "Pembaruan Tersedia",
     "new_version": "Versi Baru",
-    "update_desc": "Versi baru aplikasi MyISN telah tersedia. Silakan perbarui untuk mendapatkan fitur terbaru dan stabilitas yang lebih baik.",
+    "update_desc": "Versi baru aplikasi My ISN telah tersedia. Silakan perbarui untuk mendapatkan fitur terbaru dan stabilitas yang lebih baik.",
     "later": "Nanti",
-    "update_now": "Perbarui Sekarang"
+    "update_now": "Perbarui Sekarang",
+    "active": "Aktif",
+    "inactive": "Tidak Aktif",
+    "cancel": "Batal",
+    "save": "Simpan"
   },
   "dashboard": {
     "welcome": "Selamat Datang,",
@@ -51,15 +55,19 @@
     "already_break": "ISTIRAHAT SELESAI",
     "overtime_request": "Permintaan Lembur",
     "travel_request": "Permintaan Perjalanan",
-    "payroll_report": "Laporan Penggajian Bulanan",
+    "continue": "Ya, Lanjut",
+    "payroll_report": "Laporan Gaji",
     "total": "Total",
     "this_month": "Bulan Ini",
-    "early_out": "Pulang Awal",
-    "early_out_title": "Clock Out Awal?",
-    "early_out_content": "Anda mencoba clock out sebelum waktu shift berakhir. Tetap lanjut?",
-    "cancel": "Batal",
-    "continue": "Ya, Lanjut"
+    "quick_menu": "Menu Cepat",
+    "rent_plan": "Rencana Sewa",
+    "todo_list": "Daftar Tugas",
+    "employees": "Karyawan",
+    "quick_menu_rent_plan": "Rencana\nSewa",
+    "quick_menu_todo_list": "Daftar\nTugas",
+    "quick_menu_employees": "Karyawan"
   },
+
   "login": {
     "welcome_back": "Selamat datang kembali, Silakan masuk ke akun Anda",
     "username_email": "Username atau Email",
@@ -350,5 +358,74 @@
     "details": "Detail Payroll",
     "earnings": "Penghasilan",
     "total_earnings": "Total Penghasilan"
+  },
+  "employees": {
+    "title": "Karyawan",
+    "search_hint": "Cari nama, jabatan, atau departemen...",
+    "show": "Tampilkan",
+    "total": "{count} Total",
+    "no_employees": "Tidak ada karyawan ditemukan",
+    "add_employee": "Tambah",
+    "page_x_of_y": "Halaman {current} dari {total}",
+    "detail_title": "Detail Karyawan",
+    "edit_title": "Edit Karyawan",
+    "tabs": {
+      "profile": "Profil",
+      "contract": "Kontrak",
+      "employment": "Pekerjaan",
+      "personal": "Pribadi",
+      "history": "Riwayat",
+      "documents": "Dokumen"
+    },
+    "work_log": "Work Log",
+    "worklog_target": "Target Work Log",
+    "status_target_worklog": "Status Target Worklog",
+    "payslip_type": "Tipe Slip Gaji",
+    "start_contract": "Awal Kontrak",
+    "leave_categories": "Kategori Cuti",
+    "all": "Semua",
+    "none": "Tidak Ada",
+    "per_month": "Per Bulan",
+    "status_work_label": "Status Kerja",
+    "overview": {
+      "contact_info": "Informasi Kontak",
+      "profile_data_not_available": "Data profil tidak tersedia"
+    },
+    "contract_data": {
+      "title": "Data Kontrak",
+      "not_available": "Data kontrak tidak tersedia"
+    },
+    "salary_shift": {
+      "title": "Gaji & Shift"
+    },
+    "period_leave": {
+      "title": "Periode & Cuti"
+    },
+    "employment_detail": {
+      "title": "Detail Pekerjaan",
+      "not_available": "Data pekerjaan tidak tersedia"
+    },
+    "role_desc": "Deskripsi Peran",
+    "personal_info": "Informasi Pribadi",
+    "personal_info_not_available": "Data pribadi tidak tersedia",
+    "bank_info": "Informasi Bank",
+    "work_exp": "Pengalaman Kerja",
+    "education": "Pendidikan",
+    "emp_docs": "Dokumen Karyawan",
+    "delete_title": "Hapus Karyawan",
+    "delete_confirm": "Apakah Anda yakin ingin menghapus data karyawan ini?",
+    "delete_success": "Karyawan berhasil dihapus",
+    "delete_error": "Gagal menghapus karyawan",
+    "delete_conn_error": "Gagal menghapus karyawan: Koneksi bermasalah",
+    "save": "SIMPAN",
+    "save_success": "Data berhasil disimpan",
+    "edit_upcoming": "Fitur edit untuk bagian ini akan segera hadir",
+    "try_again": "Coba Lagi",
+    "fetch_error": "Gagal Memuat Data",
+    "status_work": {
+      "contract": "Kontrak Karyawan",
+      "probation": "Masa Percobaan",
+      "trainee": "Trainee"
+    }
   }
 }

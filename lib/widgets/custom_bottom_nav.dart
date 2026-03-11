@@ -57,6 +57,8 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
           icon: const Icon(Icons.person_outline),
           label: 'main.xin_profile'.tr(context),
         ),
+
+
       ],
     );
   }

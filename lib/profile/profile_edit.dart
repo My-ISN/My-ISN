@@ -190,8 +190,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         text: basic['gender']?.toString() ?? '1',
       );
       _controllers['nationality'] = TextEditingController(
-        text:
-            basic['nationality']?.toString() ?? 'profile.indonesia'.tr(context),
+        text: basic['nationality']?.toString() ?? '',
       );
       _controllers['address_1'] = TextEditingController(
         text: basic['address_1'] ?? '',

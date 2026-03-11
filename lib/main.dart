@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
-      title: 'MyISN Mobile',
+      title: 'My ISN Mobile',
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       locale: languageProvider.locale,

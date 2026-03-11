@@ -4,7 +4,11 @@ import '../login_page.dart';
 import '../settings_page.dart';
 import '../profile/profile_page.dart';
 import '../attendance_page.dart';
+import '../rent_plan/rent_plan_page.dart';
+import '../todo_list/todo_list_page.dart';
+import '../employees/employees_page.dart';
 import '../localization/app_localizations.dart';
+
 
 class SideDrawer extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -17,6 +21,13 @@ class SideDrawer extends StatelessWidget {
     required this.activePage,
     this.onTabSelected,
   });
+
+  bool _hasPermission(String resource) {
+    if (userData['role_resources'] == 'all') return true;
+    final String resources = userData['role_resources'] ?? '';
+    final List<String> resourceList = resources.split(',');
+    return resourceList.contains(resource);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +85,7 @@ class SideDrawer extends StatelessWidget {
                     if (onTabSelected != null) {
                       onTabSelected!(2);
                     } else if (activePage != 'payroll') {
-                      // Navigate to payroll page if needed (but currently it's a tab)
+                      // Handled within dashboard tabs
                     }
                   },
                 ),
@@ -97,6 +108,54 @@ class SideDrawer extends StatelessWidget {
                     }
                   },
                 ),
+                const Divider(indent: 16, endIndent: 16),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.house_outlined,
+                  title: 'dashboard.rent_plan'.tr(context),
+                  isActive: activePage == 'rent_plan',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RentPlanPage(userData: userData),
+                      ),
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.list_alt_outlined,
+                  title: 'dashboard.todo_list'.tr(context),
+                  isActive: activePage == 'todo_list',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TodoListPage(userData: userData),
+                      ),
+                    );
+                  },
+                ),
+                if (_hasPermission('mobile_employees_enable'))
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.people_outline,
+                    title: 'dashboard.employees'.tr(context),
+                    isActive: activePage == 'employees',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EmployeesPage(userData: userData),
+                        ),
+                      );
+                    },
+                  ),
+
                 _buildMenuItem(
                   context,
                   icon: Icons.settings_outlined,
@@ -133,6 +192,7 @@ class SideDrawer extends StatelessWidget {
         if (onTabSelected != null) {
           onTabSelected!(3);
         } else if (activePage != 'profile') {
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -141,6 +201,7 @@ class SideDrawer extends StatelessWidget {
           );
         }
       },
+
       child: Container(
         padding: const EdgeInsets.only(
           top: 60,

@@ -10,10 +10,16 @@ import 'profile/profile_page.dart';
 import 'attendance_page.dart';
 import 'payroll/payroll_page.dart';
 import 'localization/app_localizations.dart';
+
+
 import 'services/version_check_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'rent_plan/rent_plan_page.dart';
+import 'todo_list/todo_list_page.dart';
+import 'employees/employees_page.dart';
+
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -34,6 +40,18 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     _fetchDashboardData();
     _checkAppUpdate();
+  }
+
+  bool _hasPermission(String resource) {
+    // Prefer data from dashboard refresh if available
+    final userData = _dashboardData['user'] ?? widget.userData;
+    
+    // Admin has all permissions
+    if (userData['role_resources'] == 'all') return true;
+
+    final String resources = userData['role_resources'] ?? '';
+    final List<String> resourceList = resources.split(',');
+    return resourceList.contains(resource);
   }
 
   Future<void> _checkAppUpdate() async {
@@ -228,6 +246,8 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     ];
 
+
+
     return Scaffold(
       appBar: CustomAppBar(
         userData: _dashboardData['user'] ?? widget.userData,
@@ -243,6 +263,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   : (_currentIndex == 2
                         ? 'payroll'
                         : (_currentIndex == 3 ? 'profile' : ''))),
+
+
         onTabSelected: (index) {
           setState(() {
             _currentIndex = index;
@@ -638,9 +660,140 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
+            // Services Menu Section
+            Row(
+              children: [
+                Text(
+                  'dashboard.quick_menu'.tr(context),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Icon(Icons.auto_awesome_rounded, size: 16, color: Colors.grey[400]),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.85,
+              children: [
+                _buildQuickMenuCard(
+                  'dashboard.quick_menu_rent_plan'.tr(context),
+                  Icons.house_rounded,
+                  const Color(0xFF7E57C2),
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RentPlanPage(
+                          userData: _dashboardData['user'] ?? widget.userData,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                _buildQuickMenuCard(
+                  'dashboard.quick_menu_todo_list'.tr(context),
+                  Icons.assignment_rounded,
+                  const Color(0xFF5C6BC0),
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TodoListPage(
+                          userData: _dashboardData['user'] ?? widget.userData,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                if (_hasPermission('mobile_employees_enable'))
+                  _buildQuickMenuCard(
+                    'dashboard.quick_menu_employees'.tr(context),
+                    Icons.people_alt_rounded,
+                    const Color(0xFF2ECC71),
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EmployeesPage(
+                            userData: _dashboardData['user'] ?? widget.userData,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 32),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickMenuCard(
+    String title,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white24)
+            : Border.all(color: Colors.grey.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

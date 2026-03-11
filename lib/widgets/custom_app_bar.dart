@@ -81,18 +81,22 @@ class NotificationManager {
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Map<String, dynamic> userData;
   final bool showBackButton;
+  final String? title;
+  final PreferredSizeWidget? bottom;
 
   const CustomAppBar({
     super.key,
     required this.userData,
     this.showBackButton = false,
+    this.title,
+    this.bottom,
   });
 
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0.0));
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
@@ -162,12 +166,13 @@ class _CustomAppBarState extends State<CustomAppBar> {
       elevation: 0,
       automaticallyImplyLeading: widget.showBackButton,
       title: Text(
-        'MyISN',
+        widget.title ?? 'My ISN',
         style: TextStyle(
           color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.bold,
         ),
       ),
+      bottom: widget.bottom,
       actions: [
         ValueListenableBuilder<int>(
           valueListenable: _notifManager.unreadCount,
