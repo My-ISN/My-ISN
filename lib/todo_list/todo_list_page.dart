@@ -1,88 +1,374 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 
-
-class TodoListPage extends StatelessWidget {
+class TodoListPage extends StatefulWidget {
   final Map<String, dynamic> userData;
-  final Color _primaryColor = const Color(0xFF7E57C2);
 
   const TodoListPage({super.key, required this.userData});
+
+  @override
+  State<TodoListPage> createState() => _TodoListPageState();
+}
+
+class _TodoListPageState extends State<TodoListPage> {
+  final Color _primaryColor = const Color(0xFF7E57C2);
+  bool _isLoading = true;
+  List<dynamic> _todos = [];
+  
+  // Pagination
+  int _selectedLimit = 10;
+  int _currentPage = 1;
+  int _totalCount = 0;
+  final List<int> _limitOptions = [10, 25, 50, 100];
+
+  // Stats
+  int _completedCount = 0;
+  int _pendingCount = 0;
+  
+  // Throttling
+  final Map<String, DateTime> _lastToggleTimes = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTodos();
+  }
+
+  bool _hasPermission(String resource) {
+    if (widget.userData['role_resources'] == 'all') return true;
+    final String resources = widget.userData['role_resources'] ?? '';
+    final List<String> resourceList = resources.split(',');
+    return resourceList.contains(resource);
+  }
+
+  Future<void> _fetchTodos({int? page}) async {
+    final int targetPage = page ?? _currentPage;
+    setState(() => _isLoading = true);
+    try {
+      final offset = (targetPage - 1) * _selectedLimit;
+      final response = await http.post(
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_todos'),
+        body: {
+          'user_id': (widget.userData['id'] ?? widget.userData['user_id']).toString(),
+          'limit': _selectedLimit.toString(),
+          'offset': offset.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['status'] == true) {
+          setState(() {
+            _currentPage = targetPage;
+            _todos = result['data'];
+            _totalCount = result['total_count'] ?? 0;
+            _completedCount = result['completed_count'] ?? 0;
+            _pendingCount = result['pending_count'] ?? 0;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching todos: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _toggleTodo(dynamic todo) async {
+    final String todoId = todo['todo_item_id'].toString();
+    final now = DateTime.now();
+
+    // Throttling: Prevent clicks faster than 500ms
+    if (_lastToggleTimes.containsKey(todoId) && 
+        now.difference(_lastToggleTimes[todoId]!) < const Duration(milliseconds: 500)) {
+      return;
+    }
+    _lastToggleTimes[todoId] = now;
+
+    // 1. Optimistic UI Update
+    final int index = _todos.indexOf(todo);
+    if (index == -1) return;
+
+    final bool originalStatus = (todo['is_done'] == '1' || todo['is_done'] == 1);
+    final bool newStatus = !originalStatus;
+
+    setState(() {
+      _todos[index]['is_done'] = newStatus ? 1 : 0;
+      if (newStatus) {
+        _completedCount++;
+        _pendingCount--;
+      } else {
+        _completedCount--;
+        _pendingCount++;
+      }
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/toggle_todo'),
+        body: {'todo_item_id': todo['todo_item_id'].toString()},
+      );
+
+      if (response.statusCode != 200) {
+        // Revert on failure
+        _revertToggle(index, originalStatus);
+      } else {
+        // Optional: Silent refresh to stay in sync with database (e.g. server-side timestamps)
+        // But for performance, we don't necessarily need to call _fetchTodos() immediately 
+        // unless we expect other fields to change.
+      }
+    } catch (e) {
+      debugPrint('Error toggling todo: $e');
+      _revertToggle(index, originalStatus);
+    }
+  }
+
+  void _revertToggle(int index, bool originalStatus) {
+    if (mounted) {
+      setState(() {
+        _todos[index]['is_done'] = originalStatus ? 1 : 0;
+        if (!originalStatus) {
+          _completedCount--;
+          _pendingCount++;
+        } else {
+          _completedCount++;
+          _pendingCount--;
+        }
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal memperbarui status tugas.'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<void> _deleteTodo(dynamic todo) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_todo'),
+        body: {'todo_item_id': todo['todo_item_id'].toString()},
+      );
+
+      if (response.statusCode == 200) {
+        _fetchTodos();
+      }
+    } catch (e) {
+      debugPrint('Error deleting todo: $e');
+    }
+  }
+
+  Future<void> _addTodo(String description) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/add_todo'),
+        body: {
+          'user_id': (widget.userData['id'] ?? widget.userData['user_id']).toString(),
+          'description': description,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _fetchTodos();
+      }
+    } catch (e) {
+      debugPrint('Error adding todo: $e');
+    }
+  }
+
+  void _showAddTodoDialog() {
+    final TextEditingController controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Tambah Tugas Baru'),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: 'Masukkan deskripsi tugas...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: _primaryColor, width: 2),
+            ),
+          ),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal', style: TextStyle(color: Colors.grey[600])),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                _addTodo(controller.text);
+                Navigator.pop(context);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _primaryColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Simpan', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(userData: userData, showBackButton: true),
-      endDrawer: SideDrawer(userData: userData, activePage: 'todo_list'),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: _buildHeaderCard(context),
-            ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tugas Hari Ini',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildTodoItem(
-                    context,
-                    title: 'Review proposal proyek',
-                    time: '09:00 AM',
-                    isCompleted: true,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTodoItem(
-                    context,
-                    title: 'Meeting dengan tim UI/UX',
-                    time: '11:00 AM',
-                    isCompleted: false,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildTodoItem(
-                    context,
-                    title: 'Update dokumentasi API',
-                    time: '02:00 PM',
-                    isCompleted: false,
-                  ),
-                  const SizedBox(height: 32),
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.history, size: 20),
-                      label: const Text('Lihat Semua Riwayat'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: _primaryColor,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 100),
-                ],
+      appBar: CustomAppBar(userData: widget.userData, showBackButton: true),
+      endDrawer: SideDrawer(userData: widget.userData, activePage: 'todo_list'),
+      body: RefreshIndicator(
+        onRefresh: () => _fetchTodos(),
+        color: _primaryColor,
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: _buildHeaderCard(context),
               ),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: _buildPaginationHeader(),
+              ),
+            ),
+            if (_isLoading && _todos.isEmpty)
+              const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator(color: Color(0xFF7E57C2))),
+              )
+            else if (_todos.isEmpty && !_isLoading)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.task_alt, size: 80, color: Colors.grey[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Belum ada tugas.',
+                        style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final todo = _todos[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildTodoItem(context, todo),
+                      );
+                    },
+                    childCount: _todos.length,
+                  ),
+                ),
+              ),
+            if (_totalCount > _selectedLimit)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: _buildPaginationFooter(),
+                ),
+              ),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+      floatingActionButton: _hasPermission('mobile_todo_add')
+      ? FloatingActionButton.extended(
+        onPressed: _showAddTodoDialog,
         backgroundColor: _primaryColor,
-        child: const Icon(Icons.add_task, color: Colors.white),
-      ),
+        icon: const Icon(Icons.add_task, color: Colors.white),
+        label: const Text('Tambah Tugas', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      )
+      : null,
+    );
+  }
+
+  Widget _buildPaginationHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Text('Show', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  value: _selectedLimit,
+                  items: _limitOptions.map((limit) {
+                    return DropdownMenuItem<int>(
+                      value: limit,
+                      child: Text(limit.toString(), style: const TextStyle(fontSize: 13)),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedLimit = value;
+                      });
+                      _fetchTodos(page: 1);
+                    }
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text('entries', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+          ],
+        ),
+        if (_todos.isNotEmpty)
+          Text(
+            'Showing ${((_currentPage - 1) * _selectedLimit) + 1} to ${_currentPage * _selectedLimit > _totalCount ? _totalCount : _currentPage * _selectedLimit} of $_totalCount',
+            style: TextStyle(color: Colors.grey[600], fontSize: 11),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPaginationFooter() {
+    final totalPages = (_totalCount / _selectedLimit).ceil();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: _currentPage > 1
+              ? () => _fetchTodos(page: _currentPage - 1)
+              : null,
+          icon: const Icon(Icons.chevron_left),
+          color: _primaryColor,
+        ),
+        Text('Halaman $_currentPage dari $totalPages', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+        IconButton(
+          onPressed: _currentPage < totalPages
+              ? () => _fetchTodos(page: _currentPage + 1)
+              : null,
+          icon: const Icon(Icons.chevron_right),
+          color: _primaryColor,
+        ),
+      ],
     );
   }
 
@@ -107,41 +393,44 @@ class TodoListPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildMiniInfo(context, 'Total', '24'),
-          _buildMiniInfo(context, 'Selesai', '18'),
-          _buildMiniInfo(context, 'Tertunda', '6'),
+          _buildMiniInfo(context, 'Total', _totalCount.toString(), Colors.blue),
+          _buildMiniInfo(context, 'Selesai', _completedCount.toString(), Colors.green),
+          _buildMiniInfo(context, 'Tertunda', _pendingCount.toString(), Colors.orange),
         ],
       ),
     );
   }
 
-  Widget _buildMiniInfo(BuildContext context, String label, String value) {
+  Widget _buildMiniInfo(BuildContext context, String label, String value, Color color) {
     return Column(
       children: [
         Text(
           value,
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: _primaryColor,
+            color: color,
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600],
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildTodoItem(
-    BuildContext context, {
-    required String title,
-    required String time,
-    required bool isCompleted,
-  }) {
+  Widget _buildTodoItem(BuildContext context, dynamic todo) {
+    final bool isCompleted = (todo['is_done'] == '1' || todo['is_done'] == 1);
+    final String description = todo['description'] ?? '-';
+    final String date = todo['created_at'] ?? '-';
+
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -156,39 +445,129 @@ class TodoListPage extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Icon(
-            isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: isCompleted ? Colors.green : Colors.grey[400],
-            size: 24,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    decoration: isCompleted ? TextDecoration.lineThrough : null,
-                    color: isCompleted ? Colors.grey : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onLongPress: () => _hasPermission('mobile_todo_delete') ? _confirmDelete(todo) : null,
+            onTap: () => _toggleTodo(todo),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => _toggleTodo(todo),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted ? Colors.green : Colors.transparent,
+                        border: Border.all(
+                          color: isCompleted ? Colors.green : Colors.grey[400]!,
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.check,
+                        size: 16,
+                        color: isCompleted ? Colors.white : Colors.transparent,
+                      ),
+                    ),
                   ),
-                ),
-                Text(
-                  time,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                ),
-              ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          description,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            decoration: isCompleted ? TextDecoration.lineThrough : null,
+                            color: isCompleted ? Colors.grey : Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_today, size: 10, color: Colors.grey[500]),
+                            const SizedBox(width: 4),
+                            Text(
+                              date,
+                              style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'delete') _confirmDelete(todo);
+                      if (value == 'toggle') _toggleTodo(todo);
+                    },
+                    icon: Icon(Icons.more_vert, size: 20, color: Colors.grey[400]),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'toggle',
+                        child: Row(
+                          children: [
+                            Icon(isCompleted ? Icons.undo : Icons.check_circle, size: 18),
+                            const SizedBox(width: 8),
+                            Text(isCompleted ? 'Batalkan Selesai' : 'Tandai Selesai'),
+                          ],
+                        ),
+                      ),
+                      if (_hasPermission('mobile_todo_delete'))
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                              const SizedBox(width: 8),
+                              Text('Hapus', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          Icon(Icons.more_horiz, size: 20, color: Colors.grey[400]),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(dynamic todo) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Hapus Tugas'),
+        content: const Text('Apakah Anda yakin ingin menghapus tugas ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal', style: TextStyle(color: Colors.grey[600])),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _deleteTodo(todo);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );
   }
 }
-
-

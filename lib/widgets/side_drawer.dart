@@ -109,36 +109,38 @@ class SideDrawer extends StatelessWidget {
                   },
                 ),
                 const Divider(indent: 16, endIndent: 16),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.house_outlined,
-                  title: 'dashboard.rent_plan'.tr(context),
-                  isActive: activePage == 'rent_plan',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RentPlanPage(userData: userData),
-                      ),
-                    );
-                  },
-                ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.list_alt_outlined,
-                  title: 'dashboard.todo_list'.tr(context),
-                  isActive: activePage == 'todo_list',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TodoListPage(userData: userData),
-                      ),
-                    );
-                  },
-                ),
+                if (_hasPermission('mobile_rent_plan_enable'))
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.house_outlined,
+                    title: 'dashboard.rent_plan'.tr(context),
+                    isActive: activePage == 'rent_plan',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RentPlanPage(userData: userData),
+                        ),
+                      );
+                    },
+                  ),
+                if (_hasPermission('mobile_todo_enable'))
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.list_alt_outlined,
+                    title: 'dashboard.todo_list'.tr(context),
+                    isActive: activePage == 'todo_list',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TodoListPage(userData: userData),
+                        ),
+                      );
+                    },
+                  ),
                 if (_hasPermission('mobile_employees_enable'))
                   _buildMenuItem(
                     context,

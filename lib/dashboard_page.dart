@@ -686,36 +686,38 @@ class _DashboardPageState extends State<DashboardPage> {
               crossAxisSpacing: 12,
               childAspectRatio: 0.85,
               children: [
-                _buildQuickMenuCard(
-                  'dashboard.quick_menu_rent_plan'.tr(context),
-                  Icons.house_rounded,
-                  const Color(0xFF7E57C2),
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RentPlanPage(
-                          userData: _dashboardData['user'] ?? widget.userData,
+                if (_hasPermission('mobile_rent_plan_enable'))
+                  _buildQuickMenuCard(
+                    'dashboard.quick_menu_rent_plan'.tr(context),
+                    Icons.house_rounded,
+                    const Color(0xFF7E57C2),
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RentPlanPage(
+                            userData: _dashboardData['user'] ?? widget.userData,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-                _buildQuickMenuCard(
-                  'dashboard.quick_menu_todo_list'.tr(context),
-                  Icons.assignment_rounded,
-                  const Color(0xFF5C6BC0),
-                  () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TodoListPage(
-                          userData: _dashboardData['user'] ?? widget.userData,
+                      );
+                    },
+                  ),
+                if (_hasPermission('mobile_todo_enable'))
+                  _buildQuickMenuCard(
+                    'dashboard.quick_menu_todo_list'.tr(context),
+                    Icons.assignment_rounded,
+                    const Color(0xFF5C6BC0),
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TodoListPage(
+                            userData: _dashboardData['user'] ?? widget.userData,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
                 if (_hasPermission('mobile_employees_enable'))
                   _buildQuickMenuCard(
                     'dashboard.quick_menu_employees'.tr(context),
