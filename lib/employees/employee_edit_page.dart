@@ -331,7 +331,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         ),
       ];
     }
-    return [const Text('No fields available')];
+    return [Text('employees.form.no_fields'.tr(context))];
   }
 
   Widget _buildTextField({
@@ -464,7 +464,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         ),
         const SizedBox(height: 8),
         if (items.isEmpty)
-          const Text('No data found', style: TextStyle(color: Colors.grey))
+          Text('attendance.no_data'.tr(context), style: const TextStyle(color: Colors.grey))
         else
           ListView.separated(
             shrinkWrap: true,
@@ -538,10 +538,10 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: companyController, decoration: const InputDecoration(labelText: 'Company')),
-              TextField(controller: postController, decoration: const InputDecoration(labelText: 'Post')),
-              TextField(controller: fromController, decoration: const InputDecoration(labelText: 'From Year')),
-              TextField(controller: toController, decoration: const InputDecoration(labelText: 'To Year')),
+              TextField(controller: companyController, decoration: InputDecoration(labelText: 'employees.form.company'.tr(context))),
+              TextField(controller: postController, decoration: InputDecoration(labelText: 'employees.form.post'.tr(context))),
+              TextField(controller: fromController, decoration: InputDecoration(labelText: 'employees.form.from_year'.tr(context))),
+              TextField(controller: toController, decoration: InputDecoration(labelText: 'employees.form.to_year'.tr(context))),
             ],
           ),
         ),
@@ -577,10 +577,10 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: schoolController, decoration: const InputDecoration(labelText: 'School/Uni')),
-              TextField(controller: levelController, decoration: const InputDecoration(labelText: 'Level')),
-              TextField(controller: fromController, decoration: const InputDecoration(labelText: 'From Year')),
-              TextField(controller: toController, decoration: const InputDecoration(labelText: 'To Year')),
+              TextField(controller: schoolController, decoration: InputDecoration(labelText: 'employees.form.school_uni'.tr(context))),
+              TextField(controller: levelController, decoration: InputDecoration(labelText: 'employees.form.education_level'.tr(context))),
+              TextField(controller: fromController, decoration: InputDecoration(labelText: 'employees.form.from_year'.tr(context))),
+              TextField(controller: toController, decoration: InputDecoration(labelText: 'employees.form.to_year'.tr(context))),
             ],
           ),
         ),
@@ -615,8 +615,8 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: titleController, decoration: const InputDecoration(labelText: 'Document Name')),
-                TextField(controller: typeController, decoration: const InputDecoration(labelText: 'Document Type (e.g. Identity, Certificate)')),
+                TextField(controller: titleController, decoration: InputDecoration(labelText: 'employees.form.doc_name'.tr(context))),
+                TextField(controller: typeController, decoration: InputDecoration(labelText: 'employees.form.doc_type'.tr(context))),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () async {
@@ -631,7 +631,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
                     }
                   },
                   icon: const Icon(Icons.upload_file),
-                  label: Text(selectedFile != null ? selectedFile!.name : 'Select File'),
+                  label: Text(selectedFile != null ? selectedFile!.name : 'employees.form.select_file'.tr(context)),
                 ),
               ],
             ),
@@ -641,7 +641,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
             TextButton(
               onPressed: () {
                 if (titleController.text.isEmpty || typeController.text.isEmpty || selectedFile == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields and select a file')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('employees.form.fill_all_fields'.tr(context))));
                   return;
                 }
                 _uploadDocument(titleController.text, typeController.text, selectedFile!);

@@ -5,6 +5,7 @@ import 'dart:async';
 import '../announcement_page.dart';
 import 'connectivity_wrapper.dart';
 import 'top_notification.dart';
+import '../localization/app_localizations.dart';
 
 // Global Manager for Notification State
 class NotificationManager {
@@ -47,7 +48,7 @@ class NotificationManager {
             title: latestTitle,
             message: (latestSummary != null && latestSummary.isNotEmpty)
                 ? latestSummary
-                : 'Ketuk untuk melihat detail pengumuman baru.',
+                : 'announcement.tap_to_view'.tr(context),
             onTap: () {
               if (userData != null) {
                 Navigator.push(

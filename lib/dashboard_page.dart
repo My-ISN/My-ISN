@@ -117,7 +117,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                info.releaseNotes ?? 'Peningkatan stabilitas dan performa.',
+                info.releaseNotes ?? 'announcement.no_description_available'.tr(context),
                 style: const TextStyle(fontSize: 14),
               ),
             ),
@@ -167,9 +167,9 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               if (updateInfo.releaseNotes != null) ...[
                 const SizedBox(height: 10),
-                const Text(
-                  'What\'s new:',
-                  style: TextStyle(fontWeight: FontWeight.w500),
+                Text(
+                  'announcement.whats_new'.tr(context),
+                  style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 Text(updateInfo.releaseNotes!),
               ],

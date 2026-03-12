@@ -29,6 +29,8 @@
     "back": "Kembali",
     "required": "Wajib diisi",
     "total": "Total",
+    "items": "item",
+    "cancel": "Batal",
     "male": "Laki-laki",
     "female": "Perempuan",
     "active": "Aktif",
@@ -175,12 +177,15 @@
       "5": "Jum",
       "6": "Sab"
     },
-    "error_with_msg": "Kesalahan: {message}"
+    "error_with_msg": "Kesalahan: {message}",
+    "server_error_status": "Kesalahan Server ({status})",
+    "json_parse_error": "Kesalahan pembacaan data (JSON)"
   },
   "announcement": {
     "title": "Pengumuman",
     "fetch_error": "Gagal memuat pengumuman. Periksa koneksi internet Anda.",
     "no_description": "Tidak ada deskripsi tambahan.",
+    "tap_to_view": "Ketuk untuk melihat detail pengumuman baru.",
     "mark_all": "Tandai semua?",
     "mark_all_tooltip": "Lihat semua",
     "clear_seen_tooltip": "Hapus yang sudah dibaca",
@@ -190,7 +195,9 @@
     "delete_seen": "Hapus yang sudah dibaca?",
     "delete_seen_desc": "Ini akan menghapus semua pengumuman yang sudah Anda baca dari daftar.",
     "delete": "Hapus",
-    "no_announcements": "Tidak ada pengumuman baru"
+    "no_announcements": "Tidak ada pengumuman baru",
+    "whats_new": "Apa saja yang baru:",
+    "no_description_available": "Tidak ada deskripsi tersedia"
   },
   "profile": {
     "conn_error": "Gagal memuat data. Periksa koneksi internet Anda.",
@@ -436,7 +443,38 @@
     "status_work": {
       "contract": "Kontrak Karyawan",
       "probation": "Masa Percobaan",
-      "trainee": "Trainee"
+      "trainee": "Trainee",
+      "permanent": "Tetap",
+      "freelance": "Pekerja Lepas"
+    },
+    "tabs": {
+      "profile": "Profil",
+      "contract": "Kontrak",
+      "employment": "Pekerjaan",
+      "personal": "Pribadi",
+      "history": "Riwayat",
+      "documents": "Dokumen"
+    },
+    "edit_sections": {
+      "profil": "profil",
+      "kontrak": "kontrak",
+      "pekerjaan": "pekerjaan",
+      "pribadi": "pribadi",
+      "riwayat": "riwayat",
+      "dokumen": "dokumen"
+    },
+    "form": {
+      "company": "Perusahaan",
+      "post": "Jabatan/Posisi",
+      "from_year": "Tahun Mulai",
+      "to_year": "Tahun Selesai",
+      "school_uni": "Sekolah/Universitas",
+      "education_level": "Jenjang Pendidikan",
+      "doc_name": "Nama Dokumen",
+      "doc_type": "Tipe Dokumen (contoh: KTP, Sertifikat)",
+      "select_file": "Pilih File",
+      "fill_all_fields": "Harap isi semua bidang dan pilih file",
+      "no_fields": "Tidak ada bidang tersedia"
     },
     "default_role": "Karyawan",
     "default_dept": "Umum"
@@ -449,6 +487,8 @@
     "completed_items": "Item Selesai",
     "items": "Item",
     "no_logs": "Belum ada Work Log",
+    "showing_x_of_y": "Menampilkan {start} sampai {end} dari {total}",
+    "page_x_of_y": "Halaman {current} dari {total}",
     "create_title": "Buat Work Log",
     "select_date": "Pilih Tanggal",
     "add_item": "Tambah Item",
@@ -468,6 +508,7 @@
     "delete_confirm_desc": "Data yang dihapus tidak dapat dikembalikan.",
     "delete_success": "Work Log berhasil dihapus",
     "fetch_details_failed": "Gagal memuat detail.",
+    "save_failed": "Gagal menyimpan work log",
     "conn_error": "Kesalahan koneksi ke server"
   },
   "rent_plan": {
@@ -502,6 +543,8 @@
     "fetch_error": "Gagal memuat tugas",
     "status_update_failed": "Gagal memperbarui status tugas.",
     "no_tasks": "Hore! Tidak ada tugas saat ini.",
-    "search_hint": "Cari tugas..."
+    "search_hint": "Cari tugas...",
+    "showing_x_of_y": "Menampilkan {start} sampai {end} dari {total}",
+    "page_x_of_y": "Halaman {current} dari {total}"
   }
 }

@@ -58,7 +58,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
       if (response.statusCode != 200) {
         if (mounted) {
           setState(() {
-            _errorMessage = 'main.error_with_msg'.tr(context, args: {'message': 'Server Error (${response.statusCode})'});
+            _errorMessage = 'main.error_with_msg'.tr(context, args: {'message': 'main.server_error_status'.tr(context, args: {'status': response.statusCode.toString()})});
             _isLoading = false;
           });
         }
@@ -85,7 +85,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
       } catch (e) {
         if (mounted) {
           setState(() {
-            _errorMessage = 'JSON Error: ${e.toString()}\nResponse: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}';
+            _errorMessage = '${'main.json_parse_error'.tr(context)}: ${e.toString()}';
             _isLoading = false;
           });
         }

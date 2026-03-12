@@ -200,7 +200,7 @@ class _TodoListPageState extends State<TodoListPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: TextStyle(color: Colors.grey[600])),
+            child: Text('main.cancel'.tr(context), style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton(
             onPressed: () {
@@ -303,53 +303,73 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Widget _buildPaginationHeader() {
-    final totalPages = (_totalCount / _selectedLimit).ceil();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            Text('main.show'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<int>(
-                  value: _selectedLimit,
-                  items: _limitOptions.map((limit) {
-                    return DropdownMenuItem<int>(
-                      value: limit,
-                      child: Text(limit.toString(), style: const TextStyle(fontSize: 13)),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _selectedLimit = value;
-                      });
-                      _fetchTodos(page: 1);
-                    }
-                  },
-                ),
-              ),
+            Text(
+              'main.show'.tr(context),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
             ),
             const SizedBox(width: 8),
-            Text('main.entries'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+            _buildPremiumDropdown(),
           ],
         ),
         if (_todos.isNotEmpty)
-          Text(
-            'todo_list.showing_x_of_y'.tr(context, args: {
-              'current': _currentPage.toString(),
-              'total': totalPages.toString(),
-            }),
-            style: TextStyle(color: Colors.grey[600], fontSize: 11),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              'todo_list.showing_x_of_y'.tr(context, args: {
+                'start': (((_currentPage - 1) * _selectedLimit) + 1).toString(),
+                'end': (_currentPage * _selectedLimit > _totalCount ? _totalCount : _currentPage * _selectedLimit).toString(),
+                'total': _totalCount.toString(),
+              }),
+              style: TextStyle(
+                color: _primaryColor,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
       ],
+    );
+  }
+
+  Widget _buildPremiumDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<int>(
+          value: _selectedLimit,
+          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _primaryColor),
+          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+          onChanged: (int? newValue) {
+            if (newValue != null) {
+              setState(() {
+                _selectedLimit = newValue;
+                _currentPage = 1;
+              });
+              _fetchTodos();
+            }
+          },
+          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
+            return DropdownMenuItem<int>(
+              value: value,
+              child: Text(value.toString()),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
@@ -358,25 +378,62 @@ class _TodoListPageState extends State<TodoListPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(
-          onPressed: _currentPage > 1
-              ? () => _fetchTodos(page: _currentPage - 1)
-              : null,
-          icon: const Icon(Icons.chevron_left),
-          color: _primaryColor,
+        _buildPageButton(
+          icon: Icons.chevron_left_rounded,
+          onPressed: _currentPage > 1 ? () {
+            _fetchTodos(page: _currentPage - 1);
+          } : null,
         ),
-        Text('todo_list.showing_x_of_y'.tr(context, args: {
-          'current': _currentPage.toString(),
-          'total': totalPages.toString(),
-        }), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-        IconButton(
-          onPressed: _currentPage < totalPages
-              ? () => _fetchTodos(page: _currentPage + 1)
-              : null,
-          icon: const Icon(Icons.chevron_right),
-          color: _primaryColor,
+        const SizedBox(width: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: _primaryColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: _primaryColor.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            'todo_list.page_x_of_y'.tr(context, args: {
+              'current': _currentPage.toString(),
+              'total': totalPages.toString(),
+            }),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+        ),
+        const SizedBox(width: 16),
+        _buildPageButton(
+          icon: Icons.chevron_right_rounded,
+          onPressed: _currentPage < totalPages ? () {
+            _fetchTodos(page: _currentPage + 1);
+          } : null,
         ),
       ],
+    );
+  }
+
+  Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
+    return Material(
+      color: onPressed == null ? Colors.grey[200] : Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          ),
+          child: Icon(icon, color: onPressed == null ? Colors.grey[400] : _primaryColor, size: 24),
+        ),
+      ),
     );
   }
 
@@ -561,7 +618,7 @@ class _TodoListPageState extends State<TodoListPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: TextStyle(color: Colors.grey[600])),
+            child: Text('main.cancel'.tr(context), style: TextStyle(color: Colors.grey[600])),
           ),
           ElevatedButton(
             onPressed: () {

@@ -74,17 +74,17 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
       final result = json.decode(response.body);
       if (response.statusCode == 200 && result['status'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message']), backgroundColor: Colors.green),
+          SnackBar(content: Text(result['message'] ?? 'work_log.save_success'.tr(context)), backgroundColor: Colors.green),
         );
         Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Gagal menyimpan'), backgroundColor: Colors.red),
+          SnackBar(content: Text(result['message'] ?? 'work_log.save_failed'.tr(context)), backgroundColor: Colors.red),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kesalahan koneksi ke server'), backgroundColor: Colors.red),
+        SnackBar(content: Text('work_log.conn_error'.tr(context)), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _isSaving = false);

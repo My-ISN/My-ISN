@@ -29,6 +29,8 @@
     "back": "Back",
     "required": "Required",
     "total": "Total",
+    "items": "items",
+    "cancel": "Cancel",
     "male": "Male",
     "female": "Female",
     "active": "Active",
@@ -175,12 +177,15 @@
       "5": "Fri",
       "6": "Sat"
     },
-    "error_with_msg": "Error: {message}"
+    "error_with_msg": "Error: {message}",
+    "server_error_status": "Server Error ({status})",
+    "json_parse_error": "Data parsing error (JSON)"
   },
   "announcement": {
     "title": "Announcement",
     "fetch_error": "Failed to load announcements. Check your internet connection.",
     "no_description": "No additional description.",
+    "tap_to_view": "Tap to view details of the new announcement.",
     "mark_all": "Mark all?",
     "mark_all_tooltip": "Mark all as read",
     "clear_seen_tooltip": "Clear read announcements",
@@ -190,7 +195,9 @@
     "delete_seen": "Delete read?",
     "delete_seen_desc": "This will delete all announcements you have already read from the list.",
     "delete": "Delete",
-    "no_announcements": "No new announcements"
+    "no_announcements": "No new announcements",
+    "whats_new": "What's new:",
+    "no_description_available": "No description available"
   },
   "profile": {
     "conn_error": "Failed to load data. Check your internet connection.",
@@ -436,7 +443,38 @@
     "status_work": {
       "contract": "Employee Contract",
       "probation": "Probation",
-      "trainee": "Trainee"
+      "trainee": "Trainee",
+      "permanent": "Permanent",
+      "freelance": "Freelance"
+    },
+    "tabs": {
+      "profile": "Profile",
+      "contract": "Contract",
+      "employment": "Employment",
+      "personal": "Personal",
+      "history": "History",
+      "documents": "Documents"
+    },
+    "edit_sections": {
+      "profil": "profile",
+      "kontrak": "contract",
+      "pekerjaan": "employment",
+      "pribadi": "personal",
+      "riwayat": "history",
+      "dokumen": "documents"
+    },
+    "form": {
+      "company": "Company",
+      "post": "Post/Position",
+      "from_year": "From Year",
+      "to_year": "To Year",
+      "school_uni": "School/University",
+      "education_level": "Education Level",
+      "doc_name": "Document Name",
+      "doc_type": "Document Type (e.g. Identity, Certificate)",
+      "select_file": "Select File",
+      "fill_all_fields": "Please fill all fields and select a file",
+      "no_fields": "No fields available"
     },
     "default_role": "Employee",
     "default_dept": "General"
@@ -449,6 +487,8 @@
     "completed_items": "Completed Items",
     "items": "Items",
     "no_logs": "No Work Logs yet",
+    "showing_x_of_y": "Showing {start} to {end} of {total}",
+    "page_x_of_y": "Page {current} of {total}",
     "create_title": "Create Work Log",
     "select_date": "Select Date",
     "add_item": "Add Item",
@@ -502,6 +542,8 @@
     "fetch_error": "Failed to load tasks",
     "status_update_failed": "Failed to update task status.",
     "no_tasks": "Hooray! No tasks for now.",
-    "search_hint": "Search tasks..."
+    "search_hint": "Search tasks...",
+    "showing_x_of_y": "Showing {start} to {end} of {total}",
+    "page_x_of_y": "Page {current} of {total}"
   }
 }
