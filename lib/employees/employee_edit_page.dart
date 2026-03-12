@@ -201,7 +201,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         _buildTextField(label: 'profile.email'.tr(context), key: 'email', keyboardType: TextInputType.emailAddress),
         _buildTextField(label: 'profile.phone'.tr(context), key: 'contact_number', keyboardType: TextInputType.phone),
         _buildTextField(label: 'profile.address'.tr(context), key: 'address_1'),
-        _buildTextField(label: 'profile.city_state'.tr(context).split('/')[0], key: 'city'),
+        _buildTextField(label: 'profile.city_regency'.tr(context), key: 'city'),
         _buildTextField(label: 'profile.state_province'.tr(context), key: 'state'),
         _buildTextField(label: 'profile.zip_code'.tr(context), key: 'zipcode'),
         _buildTextField(label: 'profile.nationality'.tr(context), key: 'nationality'),
@@ -255,9 +255,11 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           label: 'employees.status_work_label'.tr(context), 
           key: 'status_work', 
           items: {
-            '1': 'employees.status_work.contract'.tr(context),
-            '2': 'employees.status_work.probation'.tr(context),
-            '3': 'employees.status_work.trainee'.tr(context),
+            '1': 'employees.status_work_list.contract'.tr(context),
+            '2': 'employees.status_work_list.probation'.tr(context),
+            '3': 'employees.status_work_list.trainee'.tr(context),
+            '4': 'employees.status_work_list.permanent'.tr(context),
+            '5': 'employees.status_work_list.freelance'.tr(context),
           }
         ),
       ];
@@ -267,7 +269,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         _buildDropdown(
           label: 'profile.gender'.tr(context), 
           key: 'gender', 
-          items: {'1': 'profile.male'.tr(context), '2': 'profile.female'.tr(context)}
+          items: {'1': 'main.male'.tr(context), '2': 'main.female'.tr(context)}
         ),
         _buildDropdown(
           label: 'profile.marital_status'.tr(context), 
@@ -297,8 +299,8 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         _buildTextField(label: 'profile.bank_name'.tr(context), key: 'bank_name'),
         _buildTextField(label: 'profile.account_title'.tr(context), key: 'account_title'),
         _buildTextField(label: 'profile.account_number'.tr(context), key: 'account_number'),
-        _buildTextField(label: 'SWIFT/IBAN', key: 'swift_code'),
-        _buildTextField(label: 'Bank Branch', key: 'bank_branch'),
+        _buildTextField(label: 'profile.swift_code'.tr(context), key: 'swift_code'),
+        _buildTextField(label: 'profile.bank_branch'.tr(context), key: 'bank_branch'),
       ];
     } else if (widget.section == 'riwayat') {
       return [

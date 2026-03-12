@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
             'identifier': identifier,
             'password': password,
             'biometric_token': biometricToken,
-            'device_info': 'Android Device',
+            'device_info': 'login.android_device'.tr(context),
           },
         );
 

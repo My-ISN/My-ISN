@@ -58,7 +58,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
       if (response.statusCode != 200) {
         if (mounted) {
           setState(() {
-            _errorMessage = 'Server Error (${response.statusCode}): ${response.body.substring(0, response.body.length > 100 ? 100 : response.body.length)}';
+            _errorMessage = 'main.error_with_msg'.tr(context, args: {'message': 'Server Error (${response.statusCode})'});
             _isLoading = false;
           });
         }
@@ -77,7 +77,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
         } else {
           if (mounted) {
             setState(() {
-              _errorMessage = data['message'] ?? 'Gagal mengambil data';
+              _errorMessage = data['message'] ?? 'employees.fetch_error'.tr(context);
               _isLoading = false;
             });
           }
@@ -94,7 +94,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
       debugPrint('Error fetching employee detail: $e');
       if (mounted) {
         setState(() {
-          _errorMessage = 'Koneksi Error: $e';
+          _errorMessage = 'profile.conn_error'.tr(context);
           _isLoading = false;
         });
       }

@@ -495,7 +495,7 @@ class _RegisterPageState extends State<RegisterPage> {
             'identifier': identifier,
             'password': password,
             'biometric_token': biometricToken,
-            'device_info': 'Android Device (After Registration)',
+            'device_info': 'login.android_device_reg'.tr(context),
           },
         );
 

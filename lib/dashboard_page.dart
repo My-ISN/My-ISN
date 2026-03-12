@@ -19,6 +19,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'rent_plan/rent_plan_page.dart';
 import 'todo_list/todo_list_page.dart';
 import 'employees/employees_page.dart';
+import 'work_log/work_log_page.dart';
 
 
 class DashboardPage extends StatefulWidget {
@@ -50,7 +51,7 @@ class _DashboardPageState extends State<DashboardPage> {
     if (userData['role_resources'] == 'all') return true;
 
     final String resources = userData['role_resources'] ?? '';
-    final List<String> resourceList = resources.split(',');
+    final List<String> resourceList = resources.split(',').map((e) => e.trim()).toList();
     return resourceList.contains(resource);
   }
 
@@ -96,7 +97,7 @@ class _DashboardPageState extends State<DashboardPage> {
             const Icon(Icons.celebration, color: Color(0xFF7E57C2)),
             const SizedBox(width: 10),
             Expanded(
-              child: Text('What\'s New in ${info.version.split('+')[0]}'),
+              child: Text('dashboard.whats_new'.tr(context, args: {'version': info.version.split('+')[0]})),
             ),
           ],
         ),
@@ -104,9 +105,9 @@ class _DashboardPageState extends State<DashboardPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Terima kasih telah memperbarui aplikasi! Berikut adalah perubahan terbaru:',
-              style: TextStyle(fontSize: 13, color: Colors.grey),
+            Text(
+              'dashboard.update_thanks'.tr(context),
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
             ),
             const SizedBox(height: 15),
             Container(
@@ -129,7 +130,7 @@ class _DashboardPageState extends State<DashboardPage> {
               backgroundColor: const Color(0xFF7E57C2),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
-            child: const Text('Mantap!', style: TextStyle(color: Colors.white)),
+            child: Text('dashboard.cool'.tr(context), style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -734,6 +735,23 @@ class _DashboardPageState extends State<DashboardPage> {
                       );
                     },
                   ),
+                if (_hasPermission('mobile_worklog_enable'))
+                  _buildQuickMenuCard(
+                    'dashboard.quick_menu_work_log'.tr(context),
+                    Icons.assignment_turned_in_rounded,
+                    const Color(0xFF7E57C2),
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WorkLogPage(
+                            userData: _dashboardData['user'] ?? widget.userData,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
               ],
             ),
             const SizedBox(height: 32),

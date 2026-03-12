@@ -207,70 +207,76 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
   List<Widget> _buildFormFields() {
     return [
       _buildProfilePicturePicker(),
-      _buildSectionTitle('Profile'),
-      _buildTextField(label: 'First Name', key: 'first_name', textCapitalization: TextCapitalization.words, requiredField: true),
-      _buildTextField(label: 'Last Name', key: 'last_name', textCapitalization: TextCapitalization.words),
-      _buildTextField(label: 'Employee ID', key: 'employee_id', readOnly: true),
-      _buildTextField(label: 'Contact Number', key: 'contact_number', keyboardType: TextInputType.phone),
+      _buildSectionTitle('employees.sections.profile'.tr(context)),
+      _buildTextField(label: 'employees.first_name'.tr(context), key: 'first_name', textCapitalization: TextCapitalization.words, requiredField: true),
+      _buildTextField(label: 'employees.last_name'.tr(context), key: 'last_name', textCapitalization: TextCapitalization.words),
+      _buildTextField(label: 'employees.employee_id'.tr(context), key: 'employee_id', readOnly: true),
+      _buildTextField(label: 'employees.contact_number'.tr(context), key: 'contact_number', keyboardType: TextInputType.phone),
       _buildDropdown(
-        label: 'Gender', 
+        label: 'employees.gender'.tr(context), 
         key: 'gender', 
-        items: {'1': 'Male', '2': 'Female'}
+        items: {'1': 'main.male'.tr(context), '2': 'main.female'.tr(context)}
       ),
       
-      _buildSectionTitle('Account'),
-      _buildTextField(label: 'Email', key: 'email', keyboardType: TextInputType.emailAddress, requiredField: true),
-      _buildTextField(label: 'Username', key: 'username', requiredField: true),
-      _buildTextField(label: 'Password', key: 'password', requiredField: true),
+      _buildSectionTitle('employees.sections.account'.tr(context)),
+      _buildTextField(label: 'employees.email'.tr(context), key: 'email', keyboardType: TextInputType.emailAddress, requiredField: true),
+      _buildTextField(label: 'employees.username'.tr(context), key: 'username', requiredField: true),
+      _buildTextField(label: 'employees.password'.tr(context), key: 'password', requiredField: true),
 
-      _buildSectionTitle('Work Details'),
+      _buildSectionTitle('employees.sections.work_details'.tr(context)),
       _buildDropdown(
-        label: 'Status Work', 
+        label: 'employees.status_work'.tr(context), 
         key: 'status_work', 
-        items: {'1': 'Contract', '2': 'Probation', '3': 'Trainee', '4': 'Permanent', '5': 'Freelance'}
+        items: {
+          '1': 'employees.status_work_list.contract'.tr(context), 
+          '2': 'employees.status_work_list.probation'.tr(context), 
+          '3': 'employees.status_work_list.trainee'.tr(context), 
+          '4': 'employees.status_work_list.permanent'.tr(context), 
+          '5': 'employees.status_work_list.freelance'.tr(context)
+        }
       ),
       _buildApiDropdown(
-        label: 'Office Shift', 
+        label: 'employees.office_shift'.tr(context), 
         key: 'office_shift_id', 
         items: _shifts, 
         idKey: 'office_shift_id', 
         nameKey: 'shift_name'
       ),
       _buildApiDropdown(
-        label: 'Role', 
+        label: 'employees.role'.tr(context), 
         key: 'role', 
         items: _roles, 
         idKey: 'role_id', 
         nameKey: 'role_name'
       ),
       _buildApiDropdown(
-        label: 'Department', 
+        label: 'employees.department'.tr(context), 
         key: 'department_id', 
         items: _departments, 
         idKey: 'department_id', 
         nameKey: 'department_name'
       ),
       _buildApiDropdown(
-        label: 'Designation', 
+        label: 'employees.designation'.tr(context), 
         key: 'designation_id', 
         items: _designations, 
         idKey: 'designation_id', 
         nameKey: 'designation_name'
       ),
       
-      _buildSectionTitle('Salary & Worklog'),
-      _buildTextField(label: 'Basic Salary', key: 'basic_salary', keyboardType: TextInputType.number),
-      _buildTextField(label: 'Hourly Rate', key: 'hourly_rate', keyboardType: TextInputType.number),
+      _buildSectionTitle('employees.sections.salary_worklog'.tr(context)),
+      _buildTextField(label: 'employees.basic_salary'.tr(context), key: 'basic_salary', keyboardType: TextInputType.number),
+      _buildTextField(label: 'employees.hourly_rate'.tr(context), key: 'hourly_rate', keyboardType: TextInputType.number),
       _buildDropdown(
-        label: 'Payslip Type', 
+        label: 'employees.payslip_type'.tr(context), 
         key: 'salay_type', 
-        items: {'1': 'Per Month', '0': 'None'}
+        items: {'1': 'employees.per_month'.tr(context), '0': 'employees.none'.tr(context)}
       ),
-      _buildTextField(label: 'Work Log (Hours)', key: 'worklog', keyboardType: TextInputType.number),
+      _buildTextField(label: 'employees.work_log_hours'.tr(context), key: 'worklog', keyboardType: TextInputType.number),
       _buildDropdown(
-        label: 'Status Target Worklog', 
+        label: 'employees.status_target_worklog'.tr(context), 
         key: 'worklog_active', 
-        items: {'1': 'Active', '0': 'Inactive'}
+        items: {'1': 'main.active'.tr(context), '0': 'main.inactive'.tr(context)}
       ),
       const SizedBox(height: 50),
     ];

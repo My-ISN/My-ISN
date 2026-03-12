@@ -40,7 +40,7 @@ class RentPlanPage extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildStatusCard(
                     context,
-                    title: 'Rencana Aktif',
+                    title: 'rent_plan.active_plan'.tr(context),
                     value: '12',
                     icon: Icons.assignment_turned_in_outlined,
                     color: Colors.blue,
@@ -48,7 +48,7 @@ class RentPlanPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildStatusCard(
                     context,
-                    title: 'Menunggu Persetujuan',
+                    title: 'rent_plan.pending_plan'.tr(context),
                     value: '3',
                     icon: Icons.pending_actions,
                     color: Colors.orange,
@@ -56,7 +56,7 @@ class RentPlanPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildStatusCard(
                     context,
-                    title: 'Rencana Selesai',
+                    title: 'rent_plan.completed_plan'.tr(context),
                     value: '45',
                     icon: Icons.check_circle_outline,
                     color: Colors.green,
@@ -72,7 +72,7 @@ class RentPlanPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Belum Ada Data Detail',
+                          'rent_plan.no_detail_data'.tr(context),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -81,7 +81,7 @@ class RentPlanPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Daftar penyewaan Anda akan muncul di sini.',
+                          'rent_plan.list_will_appear'.tr(context),
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.grey.shade400),
                         ),
@@ -147,7 +147,7 @@ class RentPlanPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Kelola rencana penyewaan Anda',
+                      'rent_plan.manage_plans'.tr(context),
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 13,

@@ -410,7 +410,7 @@ class _AttendancePageState extends State<AttendancePage> {
                 'attendance.details'.tr(context),
                 record?['status'] == 'Present'
                     ? 'attendance.present'.tr(context)
-                    : (record?['status'] ?? 'attendance.no_data'.tr(context)),
+                    : (record?['status'] == 'Late' ? 'attendance.late'.tr(context) : (record?['status'] ?? 'attendance.no_data'.tr(context))),
               ),
             ),
             const SizedBox(height: 16),

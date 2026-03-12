@@ -257,7 +257,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 widget.userData['username'] ?? widget.userData['email'],
             'password': password,
             'biometric_token': biometricToken,
-            'device_info': 'Android Device (Settings Update)',
+            'device_info': 'settings.device_info'.tr(context),
           },
         );
 
@@ -738,7 +738,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: 'settings.help_support'.tr(context),
                         onTap: () => _launchWhatsApp(
                           '0895384314416',
-                          'Halo admin My ISN, saya butuh bantuan terkait akun saya...',
+                          'settings.whatsapp_help_msg'.tr(context),
                         ),
                       ),
                       const Divider(height: 1, indent: 70),

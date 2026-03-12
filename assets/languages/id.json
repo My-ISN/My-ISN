@@ -21,10 +21,18 @@
     "update_desc": "Versi baru aplikasi My ISN telah tersedia. Silakan perbarui untuk mendapatkan fitur terbaru dan stabilitas yang lebih baik.",
     "later": "Nanti",
     "update_now": "Perbarui Sekarang",
-    "active": "Aktif",
-    "inactive": "Tidak Aktif",
     "cancel": "Batal",
-    "save": "Simpan"
+    "save": "Simpan",
+    "show": "Tampilkan",
+    "entries": "entri",
+    "delete": "Hapus",
+    "back": "Kembali",
+    "required": "Wajib diisi",
+    "total": "Total",
+    "male": "Laki-laki",
+    "female": "Perempuan",
+    "active": "Aktif",
+    "inactive": "Tidak Aktif"
   },
   "dashboard": {
     "welcome": "Selamat Datang,",
@@ -65,7 +73,11 @@
     "employees": "Karyawan",
     "quick_menu_rent_plan": "Rencana\nSewa",
     "quick_menu_todo_list": "Daftar\nTugas",
-    "quick_menu_employees": "Karyawan"
+    "quick_menu_employees": "Karyawan",
+    "quick_menu_work_log": "Work\nLog",
+    "whats_new": "Apa yang Baru di {version}",
+    "update_thanks": "Terima kasih telah memperbarui aplikasi! Berikut adalah perubahan terbaru:",
+    "cool": "Mantap!"
   },
 
   "login": {
@@ -97,7 +109,9 @@
     "scan_fingerprint_login": "Scan sidik jari untuk masuk",
     "welcome_back_name": "Selamat datang kembali, {name}",
     "google_success": "Login Google Berhasil: {name}",
-    "google_failed": "Login Google Gagal"
+    "google_failed": "Login Google Gagal",
+    "android_device": "Perangkat Android",
+    "android_device_reg": "Perangkat Android (Setelah Pendaftaran)"
   },
   "register": {
     "title": "Daftar Akun Baru",
@@ -289,7 +303,9 @@
     "confirm": "Konfirmasi",
     "reg_success": "Fingerprint berhasil didaftarkan!",
     "link_error": "Tidak dapat membuka link: {error}",
-    "wa_error": "Tidak dapat membuka WhatsApp: {error}"
+    "wa_error": "Tidak dapat membuka WhatsApp: {error}",
+    "device_info": "Perangkat Android (Pembaruan Pengaturan)",
+    "whatsapp_help_msg": "Halo admin My ISN, saya butuh bantuan terkait akun saya..."
   },
   "diagnosis": {
     "title": "Diagnosis Sistem",
@@ -365,22 +381,17 @@
     "show": "Tampilkan",
     "total": "{count} Total",
     "no_employees": "Tidak ada karyawan ditemukan",
-    "add_employee": "Tambah",
+    "add_employee": "Tambah Karyawan",
     "page_x_of_y": "Halaman {current} dari {total}",
-    "detail_title": "Detail Karyawan",
-    "edit_title": "Edit Karyawan",
-    "tabs": {
-      "profile": "Profil",
-      "contract": "Kontrak",
-      "employment": "Pekerjaan",
-      "personal": "Pribadi",
-      "history": "Riwayat",
-      "documents": "Dokumen"
-    },
-    "work_log": "Work Log",
-    "worklog_target": "Target Work Log",
-    "status_target_worklog": "Status Target Worklog",
-    "payslip_type": "Tipe Slip Gaji",
+    "showing_x_of_y": "Menampilkan {current} dari {total} entri",
+    "first_name": "Nama Depan",
+    "last_name": "Nama Belakang",
+    "employee_id": "ID Karyawan",
+    "contact_number": "Nomor Kontak",
+    "gender": "Jenis Kelamin",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
     "start_contract": "Awal Kontrak",
     "leave_categories": "Kategori Cuti",
     "all": "Semua",
@@ -426,6 +437,71 @@
       "contract": "Kontrak Karyawan",
       "probation": "Masa Percobaan",
       "trainee": "Trainee"
-    }
+    },
+    "default_role": "Karyawan",
+    "default_dept": "Umum"
+  },
+  "work_log": {
+    "title": "Work Log",
+    "add_log": "Tambah Log",
+    "my_summary": "Ringkasan Saya",
+    "monthly_target": "Target Bulanan",
+    "completed_items": "Item Selesai",
+    "items": "Item",
+    "no_logs": "Belum ada Work Log",
+    "create_title": "Buat Work Log",
+    "select_date": "Pilih Tanggal",
+    "add_item": "Tambah Item",
+    "item_hint": "Apa yang Anda kerjakan?",
+    "save_log": "Simpan Log",
+    "fill_required": "Harap isi tanggal dan minimal satu item",
+    "from_job_desk": "Dari Job Desk",
+    "select_job": "Pilih dari Deskripsi Pekerjaan",
+    "search_job": "Cari pekerjaan...",
+    "showing_x_of_y": "Menampilkan {current} dari {total}",
+    "save_success": "Work log berhasil disimpan",
+    "confirm_save": "Simpan Work Log ini?",
+    "log_details": "Detail Work Log",
+    "date": "Tanggal",
+    "number": "Nomor Log",
+    "delete_confirm_title": "Hapus Work Log?",
+    "delete_confirm_desc": "Data yang dihapus tidak dapat dikembalikan.",
+    "delete_success": "Work Log berhasil dihapus",
+    "fetch_details_failed": "Gagal memuat detail.",
+    "conn_error": "Kesalahan koneksi ke server"
+  },
+  "rent_plan": {
+    "active_plan": "Rencana Aktif",
+    "pending_plan": "Menunggu Persetujuan",
+    "completed_plan": "Rencana Selesai",
+    "manage_plans": "Kelola rencana penyewaan Anda",
+    "no_detail_data": "Belum Ada Data Detail",
+    "list_will_appear": "Daftar penyewaan Anda akan muncul di sini."
+  },
+  "todo_list": {
+    "title": "Daftar Tugas",
+    "add_task": "Tambah Tugas",
+    "edit_task": "Ubah Tugas",
+    "delete_task": "Hapus Tugas",
+    "new_task_title": "Tambah Tugas Baru",
+    "task_name": "Nama Tugas",
+    "task_desc": "Deskripsi Tugas",
+    "status": "Status",
+    "due_date": "Batas Waktu",
+    "priority": "Prioritas",
+    "low": "Rendah",
+    "medium": "Sedang",
+    "high": "Tinggi",
+    "completed": "Selesai",
+    "pending": "Menunggu",
+    "save_success": "Tugas berhasil disimpan",
+    "update_success": "Tugas berhasil diperbarui",
+    "delete_success": "Tugas berhasil dihapus",
+    "delete_confirm_title": "Hapus Tugas?",
+    "delete_confirm_desc": "Apakah Anda yakin ingin menghapus tugas ini?",
+    "fetch_error": "Gagal memuat tugas",
+    "status_update_failed": "Gagal memperbarui status tugas.",
+    "no_tasks": "Hore! Tidak ada tugas saat ini.",
+    "search_hint": "Cari tugas..."
   }
 }

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
+import '../localization/app_localizations.dart';
 
 class TodoListPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -139,7 +140,7 @@ class _TodoListPageState extends State<TodoListPage> {
         }
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal memperbarui status tugas.'), backgroundColor: Colors.red),
+        SnackBar(content: Text('todo_list.status_update_failed'.tr(context)), backgroundColor: Colors.red),
       );
     }
   }
@@ -183,11 +184,11 @@ class _TodoListPageState extends State<TodoListPage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Tambah Tugas Baru'),
+        title: Text('todo_list.new_task_title'.tr(context)),
         content: TextField(
           controller: controller,
           decoration: InputDecoration(
-            hintText: 'Masukkan deskripsi tugas...',
+            hintText: 'todo_list.task_desc'.tr(context),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -212,7 +213,7 @@ class _TodoListPageState extends State<TodoListPage> {
               backgroundColor: _primaryColor,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Simpan', style: TextStyle(color: Colors.white)),
+            child: Text('main.save'.tr(context), style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -256,7 +257,7 @@ class _TodoListPageState extends State<TodoListPage> {
                       Icon(Icons.task_alt, size: 80, color: Colors.grey[300]),
                       const SizedBox(height: 16),
                       Text(
-                        'Belum ada tugas.',
+                        'todo_list.no_tasks'.tr(context),
                         style: TextStyle(color: Colors.grey[500], fontSize: 16),
                       ),
                     ],
@@ -295,19 +296,20 @@ class _TodoListPageState extends State<TodoListPage> {
         onPressed: _showAddTodoDialog,
         backgroundColor: _primaryColor,
         icon: const Icon(Icons.add_task, color: Colors.white),
-        label: const Text('Tambah Tugas', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: Text('todo_list.add_task'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       )
       : null,
     );
   }
 
   Widget _buildPaginationHeader() {
+    final totalPages = (_totalCount / _selectedLimit).ceil();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            Text('Show', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+            Text('main.show'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 13)),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -336,12 +338,15 @@ class _TodoListPageState extends State<TodoListPage> {
               ),
             ),
             const SizedBox(width: 8),
-            Text('entries', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+            Text('main.entries'.tr(context), style: TextStyle(color: Colors.grey[600], fontSize: 13)),
           ],
         ),
         if (_todos.isNotEmpty)
           Text(
-            'Showing ${((_currentPage - 1) * _selectedLimit) + 1} to ${_currentPage * _selectedLimit > _totalCount ? _totalCount : _currentPage * _selectedLimit} of $_totalCount',
+            'todo_list.showing_x_of_y'.tr(context, args: {
+              'current': _currentPage.toString(),
+              'total': totalPages.toString(),
+            }),
             style: TextStyle(color: Colors.grey[600], fontSize: 11),
           ),
       ],
@@ -360,7 +365,10 @@ class _TodoListPageState extends State<TodoListPage> {
           icon: const Icon(Icons.chevron_left),
           color: _primaryColor,
         ),
-        Text('Halaman $_currentPage dari $totalPages', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+        Text('todo_list.showing_x_of_y'.tr(context, args: {
+          'current': _currentPage.toString(),
+          'total': totalPages.toString(),
+        }), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
         IconButton(
           onPressed: _currentPage < totalPages
               ? () => _fetchTodos(page: _currentPage + 1)
@@ -393,9 +401,9 @@ class _TodoListPageState extends State<TodoListPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildMiniInfo(context, 'Total', _totalCount.toString(), Colors.blue),
-          _buildMiniInfo(context, 'Selesai', _completedCount.toString(), Colors.green),
-          _buildMiniInfo(context, 'Tertunda', _pendingCount.toString(), Colors.orange),
+          _buildMiniInfo(context, 'main.total'.tr(context), _totalCount.toString(), Colors.blue),
+          _buildMiniInfo(context, 'todo_list.completed'.tr(context), _completedCount.toString(), Colors.green),
+          _buildMiniInfo(context, 'todo_list.pending'.tr(context), _pendingCount.toString(), Colors.orange),
         ],
       ),
     );
@@ -517,18 +525,18 @@ class _TodoListPageState extends State<TodoListPage> {
                           children: [
                             Icon(isCompleted ? Icons.undo : Icons.check_circle, size: 18),
                             const SizedBox(width: 8),
-                            Text(isCompleted ? 'Batalkan Selesai' : 'Tandai Selesai'),
+                            Text(isCompleted ? 'todo_list.pending'.tr(context) : 'todo_list.completed'.tr(context)),
                           ],
                         ),
                       ),
                       if (_hasPermission('mobile_todo_delete'))
-                        const PopupMenuItem(
+                         PopupMenuItem(
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                              const Icon(Icons.delete_outline, size: 18, color: Colors.red),
                               const SizedBox(width: 8),
-                              Text('Hapus', style: TextStyle(color: Colors.red)),
+                              Text('main.delete'.tr(context), style: const TextStyle(color: Colors.red)),
                             ],
                           ),
                         ),
@@ -548,8 +556,8 @@ class _TodoListPageState extends State<TodoListPage> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Hapus Tugas'),
-        content: const Text('Apakah Anda yakin ingin menghapus tugas ini?'),
+        title: Text('todo_list.delete_confirm_title'.tr(context)),
+        content: Text('todo_list.delete_confirm_desc'.tr(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -564,7 +572,7 @@ class _TodoListPageState extends State<TodoListPage> {
               backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+            child: Text('main.delete'.tr(context), style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

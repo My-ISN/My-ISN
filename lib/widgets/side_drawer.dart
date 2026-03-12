@@ -7,6 +7,7 @@ import '../attendance_page.dart';
 import '../rent_plan/rent_plan_page.dart';
 import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
+import '../work_log/work_log_page.dart';
 import '../localization/app_localizations.dart';
 
 
@@ -25,7 +26,7 @@ class SideDrawer extends StatelessWidget {
   bool _hasPermission(String resource) {
     if (userData['role_resources'] == 'all') return true;
     final String resources = userData['role_resources'] ?? '';
-    final List<String> resourceList = resources.split(',');
+    final List<String> resourceList = resources.split(',').map((e) => e.trim()).toList();
     return resourceList.contains(resource);
   }
 
@@ -157,6 +158,23 @@ class SideDrawer extends StatelessWidget {
                       );
                     },
                   ),
+                if (_hasPermission('mobile_worklog_enable'))
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.assignment_outlined,
+                    title: 'work_log.title'.tr(context),
+                    isActive: activePage == 'work_log',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WorkLogPage(userData: userData),
+                        ),
+                      );
+                    },
+                  ),
+
 
                 _buildMenuItem(
                   context,

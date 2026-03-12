@@ -21,10 +21,18 @@
     "update_desc": "A new version of the My ISN app is available. Please update for latest features and better stability.",
     "later": "Later",
     "update_now": "Update Now",
-    "active": "Active",
-    "inactive": "Inactive",
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "show": "Show",
+    "entries": "entries",
+    "delete": "Delete",
+    "back": "Back",
+    "required": "Required",
+    "total": "Total",
+    "male": "Male",
+    "female": "Female",
+    "active": "Active",
+    "inactive": "Inactive"
   },
   "dashboard": {
     "welcome": "Welcome,",
@@ -65,7 +73,11 @@
     "employees": "Employees",
     "quick_menu_rent_plan": "Rent\nPlan",
     "quick_menu_todo_list": "Todo\nList",
-    "quick_menu_employees": "Employees"
+    "quick_menu_employees": "Employees",
+    "quick_menu_work_log": "Work\nLog",
+    "whats_new": "What's New in {version}",
+    "update_thanks": "Thank you for updating the app! Here are the latest changes:",
+    "cool": "Cool!"
   },
 
   "login": {
@@ -97,7 +109,9 @@
     "scan_fingerprint_login": "Scan fingerprint to enter",
     "welcome_back_name": "Welcome back, {name}",
     "google_success": "Google Login Success: {name}",
-    "google_failed": "Google Login Failed"
+    "google_failed": "Google Login Failed",
+    "android_device": "Android Device",
+    "android_device_reg": "Android Device (After Registration)"
   },
   "register": {
     "title": "Register New Account",
@@ -289,7 +303,9 @@
     "confirm": "Confirm",
     "reg_success": "Fingerprint registered successfully!",
     "link_error": "Could not open link: {error}",
-    "wa_error": "Could not open WhatsApp: {error}"
+    "wa_error": "Could not open WhatsApp: {error}",
+    "device_info": "Android Device (Settings Update)",
+    "whatsapp_help_msg": "Hello admin My ISN, I need help with my account..."
   },
   "diagnosis": {
     "title": "System Diagnosis",
@@ -365,22 +381,17 @@
     "show": "Show",
     "total": "{count} Total",
     "no_employees": "No employees found",
-    "add_employee": "Add",
+    "add_employee": "Add Employee",
     "page_x_of_y": "Page {current} of {total}",
-    "detail_title": "Employee Detail",
-    "edit_title": "Edit Employee",
-    "tabs": {
-      "profile": "Profile",
-      "contract": "Contract",
-      "employment": "Employment",
-      "personal": "Personal",
-      "history": "History",
-      "documents": "Documents"
-    },
-    "work_log": "Work Log",
-    "worklog_target": "Work Log Target",
-    "status_target_worklog": "Status Target Worklog",
-    "payslip_type": "Payslip Type",
+    "showing_x_of_y": "Showing {current} to {total} of {count}",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "employee_id": "Employee ID",
+    "contact_number": "Contact Number",
+    "gender": "Gender",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
     "start_contract": "Start of Contract",
     "leave_categories": "Leave Categories",
     "all": "All",
@@ -426,6 +437,71 @@
       "contract": "Employee Contract",
       "probation": "Probation",
       "trainee": "Trainee"
-    }
+    },
+    "default_role": "Employee",
+    "default_dept": "General"
+  },
+  "work_log": {
+    "title": "Work Log",
+    "add_log": "Add Log",
+    "my_summary": "My Summary",
+    "monthly_target": "Monthly Target",
+    "completed_items": "Completed Items",
+    "items": "Items",
+    "no_logs": "No Work Logs yet",
+    "create_title": "Create Work Log",
+    "select_date": "Select Date",
+    "add_item": "Add Item",
+    "item_hint": "What did you work on?",
+    "save_log": "Save Log",
+    "fill_required": "Please fill date and at least one item",
+    "from_job_desk": "From Job Desk",
+    "select_job": "Select from Job Description",
+    "search_job": "Search job...",
+    "showing_x_of_y": "Showing {current} of {total}",
+    "save_success": "Work log saved successfully",
+    "confirm_save": "Save this Work Log?",
+    "log_details": "Work Log Details",
+    "date": "Date",
+    "number": "Log Number",
+    "delete_confirm_title": "Delete Work Log?",
+    "delete_confirm_desc": "Deleted data cannot be recovered.",
+    "delete_success": "Work Log deleted successfully",
+    "fetch_details_failed": "Failed to load details.",
+    "conn_error": "Server connection error"
+  },
+  "rent_plan": {
+    "active_plan": "Active Plan",
+    "pending_plan": "Pending Approval",
+    "completed_plan": "Completed Plan",
+    "manage_plans": "Manage your rental plans",
+    "no_detail_data": "No Detailed Data",
+    "list_will_appear": "Your rental list will appear here."
+  },
+  "todo_list": {
+    "title": "Todo List",
+    "add_task": "Add Task",
+    "edit_task": "Edit Task",
+    "delete_task": "Delete Task",
+    "new_task_title": "Add New Task",
+    "task_name": "Task Name",
+    "task_desc": "Task Description",
+    "status": "Status",
+    "due_date": "Due Date",
+    "priority": "Priority",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "completed": "Completed",
+    "pending": "Pending",
+    "save_success": "Task saved successfully",
+    "update_success": "Task updated successfully",
+    "delete_success": "Task deleted successfully",
+    "delete_confirm_title": "Delete Task?",
+    "delete_confirm_desc": "Are you sure you want to delete this task?",
+    "fetch_error": "Failed to load tasks",
+    "status_update_failed": "Failed to update task status.",
+    "no_tasks": "Hooray! No tasks for now.",
+    "search_hint": "Search tasks..."
   }
 }

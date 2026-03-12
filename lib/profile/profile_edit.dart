@@ -122,7 +122,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       compressQuality: 70,
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'Edit Foto',
+          toolbarTitle: 'profile.edit_photo'.tr(context),
           toolbarColor: const Color(0xFF7E57C2),
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.square,
@@ -136,9 +136,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           ],
         ),
         IOSUiSettings(
-          title: 'Edit Foto',
-          cancelButtonTitle: 'Batal',
-          doneButtonTitle: 'Selesai',
+          title: 'profile.edit_photo'.tr(context),
+          cancelButtonTitle: 'main.cancel'.tr(context),
+          doneButtonTitle: 'main.save'.tr(context),
           aspectRatioPresets: [
             CropAspectRatioPreset.square,
             CropAspectRatioPreset.original,
