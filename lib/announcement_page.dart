@@ -78,6 +78,11 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             _isLoading = false;
           });
 
+          // Sync unread count globally if list is empty
+          if (_announcements.isEmpty) {
+            NotificationManager().unreadCount.value = 0;
+          }
+          
           // Handle initialAnnouncementId for deep linking
           if (widget.initialAnnouncementId != null) {
             try {
@@ -180,9 +185,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             maxChildSize: 0.9,
             minChildSize: 0.5,
             builder: (context, scrollController) => Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -320,11 +325,13 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
           onPressed: () => Navigator.pop(context, true),
         ),
         title: Text(
@@ -389,9 +396,8 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           ),
           const SizedBox(width: 8),
         ],
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).cardColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -403,12 +409,12 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   Icon(
                     Icons.announcement_outlined,
                     size: 80,
-                    color: Colors.grey[300],
+                    color: isDark ? Colors.grey[800] : Colors.grey[300],
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'announcement.no_announcements'.tr(context),
-                    style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                    style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[500], fontSize: 16),
                   ),
                 ],
               ),
@@ -425,11 +431,11 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -464,7 +470,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                                   color: Colors.red,
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.white,
+                                    color: Theme.of(context).cardColor,
                                     width: 2,
                                   ),
                                 ),
@@ -479,6 +485,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                               ? FontWeight.bold
                               : FontWeight.normal,
                           fontSize: 16,
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
                       subtitle: Column(
@@ -490,7 +497,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: isDark ? Colors.grey[400] : Colors.grey[600],
                               fontSize: 13,
                             ),
                           ),
@@ -498,7 +505,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                           Text(
                             item['created_at'] ?? '',
                             style: TextStyle(
-                              color: Colors.grey[400],
+                              color: isDark ? Colors.grey[500] : Colors.grey[400],
                               fontSize: 11,
                             ),
                           ),

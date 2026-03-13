@@ -30,7 +30,6 @@
     "required": "Wajib diisi",
     "total": "Total",
     "items": "item",
-    "cancel": "Batal",
     "male": "Laki-laki",
     "female": "Perempuan",
     "active": "Aktif",
@@ -384,6 +383,7 @@
   },
   "employees": {
     "title": "Karyawan",
+    "detail_title": "Detail Karyawan",
     "search_hint": "Cari nama, jabatan, atau departemen...",
     "show": "Tampilkan",
     "total": "{count} Total",
@@ -487,7 +487,6 @@
     "completed_items": "Item Selesai",
     "items": "Item",
     "no_logs": "Belum ada Work Log",
-    "showing_x_of_y": "Menampilkan {start} sampai {end} dari {total}",
     "page_x_of_y": "Halaman {current} dari {total}",
     "create_title": "Buat Work Log",
     "select_date": "Pilih Tanggal",
@@ -499,6 +498,7 @@
     "select_job": "Pilih dari Deskripsi Pekerjaan",
     "search_job": "Cari pekerjaan...",
     "showing_x_of_y": "Menampilkan {current} dari {total}",
+    "total": "{count} Total",
     "save_success": "Work log berhasil disimpan",
     "confirm_save": "Simpan Work Log ini?",
     "log_details": "Detail Work Log",
@@ -545,6 +545,7 @@
     "no_tasks": "Hore! Tidak ada tugas saat ini.",
     "search_hint": "Cari tugas...",
     "showing_x_of_y": "Menampilkan {start} sampai {end} dari {total}",
+    "total": "{count} Total",
     "page_x_of_y": "Halaman {current} dari {total}"
   }
 }

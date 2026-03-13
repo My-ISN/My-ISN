@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import '../announcement_page.dart';
+import '../todo_list/todo_list_page.dart';
 import 'connectivity_wrapper.dart';
 import 'top_notification.dart';
 import '../localization/app_localizations.dart';
@@ -14,7 +15,9 @@ class NotificationManager {
   NotificationManager._internal();
 
   final ValueNotifier<int> unreadCount = ValueNotifier<int>(0);
+  final ValueNotifier<int> unreadTodoCount = ValueNotifier<int>(0);
   int _lastKnownId = -1;
+  int _lastKnownTodoId = -1;
 
   void updateCount(
     int count, {
@@ -23,45 +26,31 @@ class NotificationManager {
     String? latestSummary,
     BuildContext? context,
     Map<String, dynamic>? userData,
+    int? todoCount,
+    int? latestTodoId,
+    String? latestTodoDesc,
   }) {
-    // Avoid showing notification on first load (initial state)
+    // Announcements logic
     if (_lastKnownId == -1) {
       _lastKnownId = latestId ?? 0;
       unreadCount.value = count;
-      return;
-    }
-
-    // Trigger notification banner if a NEW ID is detected
-    if (latestId != null &&
+    } else if (latestId != null &&
         latestId > _lastKnownId &&
         context != null &&
         context.mounted &&
         latestTitle != null &&
         latestTitle.isNotEmpty) {
       _lastKnownId = latestId;
-
-      // Small delay to ensure Overlay/Context is stable
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (context.mounted) {
-          TopNotification.show(
+      _showBanner(context, latestTitle, latestSummary ?? 'announcement.tap_to_view'.tr(context), () {
+        if (userData != null) {
+          Navigator.push(
             context,
-            title: latestTitle,
-            message: (latestSummary != null && latestSummary.isNotEmpty)
-                ? latestSummary
-                : 'announcement.tap_to_view'.tr(context),
-            onTap: () {
-              if (userData != null) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AnnouncementPage(
-                      userData: userData,
-                      initialAnnouncementId: latestId,
-                    ),
-                  ),
-                );
-              }
-            },
+            MaterialPageRoute(
+              builder: (context) => AnnouncementPage(
+                userData: userData,
+                initialAnnouncementId: latestId,
+              ),
+            ),
           );
         }
       });
@@ -70,12 +59,56 @@ class NotificationManager {
     if (unreadCount.value != count) {
       unreadCount.value = count;
     }
+
+    // Todos logic
+    if (_lastKnownTodoId == -1) {
+      _lastKnownTodoId = latestTodoId ?? 0;
+      unreadTodoCount.value = todoCount ?? 0;
+    } else if (latestTodoId != null &&
+        latestTodoId > _lastKnownTodoId &&
+        context != null &&
+        context.mounted &&
+        latestTodoDesc != null &&
+        latestTodoDesc.isNotEmpty) {
+      _lastKnownTodoId = latestTodoId;
+      _showBanner(context, 'Tugas To-Do Baru', latestTodoDesc, () {
+        if (userData != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TodoListPage(userData: userData),
+            ),
+          );
+        }
+      });
+    }
+
+    if (todoCount != null && unreadTodoCount.value != todoCount) {
+      unreadTodoCount.value = todoCount;
+    }
+  }
+
+  void _showBanner(BuildContext context, String title, String message, VoidCallback onTap) {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (context.mounted) {
+        TopNotification.show(
+          context,
+          title: title,
+          message: message,
+          onTap: onTap,
+        );
+      }
+    });
   }
 
   void decrement() {
     if (unreadCount.value > 0) {
       unreadCount.value--;
     }
+  }
+
+  void clearTodoBadge() {
+    unreadTodoCount.value = 0;
   }
 }
 
@@ -138,23 +171,37 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
     if (userId == null) return;
 
-    final url = Uri.parse(
+    // 1. Fetch Announcement Count
+    final annUrl = Uri.parse(
       'https://foxgeen.com/HRIS/mobileapi/get_unread_announcements_count?user_id=$userId&department_id=$deptId&designation_id=$desigId',
     );
+
+    // 2. Fetch Todo Count
+    final todoUrl = Uri.parse(
+      'https://foxgeen.com/HRIS/mobileapi/get_unread_todos_count?user_id=$userId',
+    );
+
     try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == true) {
-          _notifManager.updateCount(
-            data['unread_count'] ?? 0,
-            latestId: data['latest_announcement_id'],
-            latestTitle: data['latest_title'],
-            latestSummary: data['latest_summary'],
-            context: context,
-            userData: widget.userData,
-          );
-        }
+      final responses = await Future.wait([
+        http.get(annUrl),
+        http.get(todoUrl),
+      ]);
+
+      if (responses[0].statusCode == 200 && responses[1].statusCode == 200) {
+        final annData = json.decode(responses[0].body);
+        final todoData = json.decode(responses[1].body);
+
+        _notifManager.updateCount(
+          annData['unread_count'] ?? 0,
+          latestId: annData['latest_announcement_id'],
+          latestTitle: annData['latest_title'],
+          latestSummary: annData['latest_summary'],
+          context: context,
+          userData: widget.userData,
+          todoCount: todoData['unread_count'] ?? 0,
+          latestTodoId: todoData['latest_todo_id'],
+          latestTodoDesc: todoData['latest_description'],
+        );
       }
     } catch (e) {
       // Silent error

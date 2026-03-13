@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 
 class TodoListPage extends StatefulWidget {
-  final Map<String, dynamic> userData;
+  final Map<String, dynamic>? userData;
+  final int? initialTodoId;
 
-  const TodoListPage({super.key, required this.userData});
+  const TodoListPage({super.key, this.userData, this.initialTodoId});
 
   @override
   State<TodoListPage> createState() => _TodoListPageState();
@@ -18,7 +20,7 @@ class _TodoListPageState extends State<TodoListPage> {
   final Color _primaryColor = const Color(0xFF7E57C2);
   bool _isLoading = true;
   List<dynamic> _todos = [];
-  
+
   // Pagination
   int _selectedLimit = 10;
   int _currentPage = 1;
@@ -28,24 +30,63 @@ class _TodoListPageState extends State<TodoListPage> {
   // Stats
   int _completedCount = 0;
   int _pendingCount = 0;
-  
+
   // Throttling
   final Map<String, DateTime> _lastToggleTimes = {};
+  Map<String, dynamic>? _currentUserData;
 
   @override
   void initState() {
     super.initState();
-    _fetchTodos();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    if (widget.userData != null) {
+      _currentUserData = widget.userData;
+      _fetchTodos();
+      _markAsSeen();
+    } else {
+      const storage = FlutterSecureStorage();
+      final userDataStr = await storage.read(key: 'user_data');
+      if (userDataStr != null) {
+        if (mounted) {
+          setState(() {
+            _currentUserData = json.decode(userDataStr);
+          });
+          _fetchTodos();
+          _markAsSeen();
+        }
+      } else {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _markAsSeen() async {
+    if (_currentUserData == null) return;
+    final userId = _currentUserData!['id'] ?? _currentUserData!['user_id'];
+    try {
+      await http.post(
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/mark_todo_seen'),
+        body: {'user_id': userId.toString()},
+      );
+      NotificationManager().clearTodoBadge();
+    } catch (e) {
+      // Silent error
+    }
   }
 
   bool _hasPermission(String resource) {
-    if (widget.userData['role_resources'] == 'all') return true;
-    final String resources = widget.userData['role_resources'] ?? '';
+    if (_currentUserData == null) return false;
+    if (_currentUserData!['role_resources'] == 'all') return true;
+    final String resources = _currentUserData!['role_resources'] ?? '';
     final List<String> resourceList = resources.split(',');
     return resourceList.contains(resource);
   }
 
   Future<void> _fetchTodos({int? page}) async {
+    if (_currentUserData == null) return;
     final int targetPage = page ?? _currentPage;
     setState(() => _isLoading = true);
     try {
@@ -53,7 +94,7 @@ class _TodoListPageState extends State<TodoListPage> {
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_todos'),
         body: {
-          'user_id': (widget.userData['id'] ?? widget.userData['user_id']).toString(),
+          'user_id': (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString(),
           'limit': _selectedLimit.toString(),
           'offset': offset.toString(),
         },
@@ -69,12 +110,36 @@ class _TodoListPageState extends State<TodoListPage> {
             _completedCount = result['completed_count'] ?? 0;
             _pendingCount = result['pending_count'] ?? 0;
           });
+
+          // Handle deep linking for highlighting specific Todo
+          if (widget.initialTodoId != null) {
+            _highlightInitialTodo();
+          }
         }
       }
     } catch (e) {
       debugPrint('Error fetching todos: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _highlightInitialTodo() {
+    // Current pagination only shows first N todos. 
+    // If we want to find the specific todo, we might need a separate API or different approach.
+    // For now, if it exists in the current page, we can show a snackbar or scroll to it.
+    final todo = _todos.firstWhere(
+      (t) => t['todo_item_id'].toString() == widget.initialTodoId.toString(),
+      orElse: () => null,
+    );
+
+    if (todo != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Tugas yang Anda cari: "${todo['description']}"'),
+          backgroundColor: _primaryColor,
+        ),
+      );
     }
   }
 
@@ -165,7 +230,7 @@ class _TodoListPageState extends State<TodoListPage> {
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/add_todo'),
         body: {
-          'user_id': (widget.userData['id'] ?? widget.userData['user_id']).toString(),
+          'user_id': (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString(),
           'description': description,
         },
       );
@@ -224,8 +289,8 @@ class _TodoListPageState extends State<TodoListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(userData: widget.userData, showBackButton: true),
-      endDrawer: SideDrawer(userData: widget.userData, activePage: 'todo_list'),
+      appBar: CustomAppBar(userData: _currentUserData ?? {}, showBackButton: true),
+      endDrawer: SideDrawer(userData: _currentUserData ?? {}, activePage: 'todo_list'),
       body: RefreshIndicator(
         onRefresh: () => _fetchTodos(),
         color: _primaryColor,
@@ -324,10 +389,8 @@ class _TodoListPageState extends State<TodoListPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              'todo_list.showing_x_of_y'.tr(context, args: {
-                'start': (((_currentPage - 1) * _selectedLimit) + 1).toString(),
-                'end': (_currentPage * _selectedLimit > _totalCount ? _totalCount : _currentPage * _selectedLimit).toString(),
-                'total': _totalCount.toString(),
+              'todo_list.total'.tr(context, args: {
+                'count': _totalCount.toString(),
               }),
               style: TextStyle(
                 color: _primaryColor,

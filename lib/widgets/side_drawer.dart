@@ -9,6 +9,7 @@ import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
 import '../work_log/work_log_page.dart';
 import '../localization/app_localizations.dart';
+import 'custom_app_bar.dart'; // For NotificationManager
 
 
 class SideDrawer extends StatelessWidget {
@@ -127,18 +128,24 @@ class SideDrawer extends StatelessWidget {
                     },
                   ),
                 if (_hasPermission('mobile_todo_enable'))
-                  _buildMenuItem(
-                    context,
-                    icon: Icons.list_alt_outlined,
-                    title: 'dashboard.todo_list'.tr(context),
-                    isActive: activePage == 'todo_list',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
+                  ValueListenableBuilder<int>(
+                    valueListenable: NotificationManager().unreadTodoCount,
+                    builder: (context, count, child) {
+                      return _buildMenuItem(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => TodoListPage(userData: userData),
-                        ),
+                        icon: Icons.list_alt_outlined,
+                        title: 'dashboard.todo_list'.tr(context),
+                        isActive: activePage == 'todo_list',
+                        badgeCount: count,
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TodoListPage(userData: userData),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
@@ -289,6 +296,7 @@ class SideDrawer extends StatelessWidget {
     required IconData icon,
     required String title,
     required bool isActive,
+    int? badgeCount,
     required VoidCallback onTap,
   }) {
     return Padding(
@@ -314,16 +322,34 @@ class SideDrawer extends StatelessWidget {
                 size: 24,
               ),
               const SizedBox(width: 16),
-              Text(
-                title,
-                style: TextStyle(
-                  color: isActive
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurface,
-                  fontSize: 16,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: isActive
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurface,
+                    fontSize: 16,
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  ),
                 ),
               ),
+              if (badgeCount != null && badgeCount > 0)
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    badgeCount > 9 ? '9+' : '$badgeCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

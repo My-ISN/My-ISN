@@ -239,10 +239,8 @@ class _WorkLogPageState extends State<WorkLogPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              'work_log.showing_x_of_y'.tr(context, args: {
-                'start': (((_currentPage - 1) * _selectedLimit) + 1).toString(),
-                'end': (_currentPage * _selectedLimit > _totalCount ? _totalCount : _currentPage * _selectedLimit).toString(),
-                'total': _totalCount.toString(),
+              'work_log.total'.tr(context, args: {
+                'count': _totalCount.toString(),
               }),
               style: TextStyle(
                 color: _primaryColor,

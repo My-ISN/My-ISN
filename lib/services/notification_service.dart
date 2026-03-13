@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../announcement_page.dart';
+import '../todo_list/todo_list_page.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -106,6 +107,12 @@ class NotificationService {
       navigatorKey?.currentState?.push(
         MaterialPageRoute(
           builder: (context) => AnnouncementPage(initialAnnouncementId: id),
+        ),
+      );
+    } else if (data['type'] == 'todo' || data.containsKey('todo_id')) {
+      navigatorKey?.currentState?.push(
+        MaterialPageRoute(
+          builder: (context) => const TodoListPage(),
         ),
       );
     }
