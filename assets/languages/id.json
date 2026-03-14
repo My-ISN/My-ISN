@@ -379,7 +379,19 @@
     "year": "Tahun",
     "details": "Detail Payroll",
     "earnings": "Penghasilan",
-    "total_earnings": "Total Penghasilan"
+    "total_earnings": "Total Penghasilan",
+    "make_payment": "Proses Pembayaran",
+    "select_staff": "Pilih Karyawan",
+    "select_month": "Pilih Bulan",
+    "preview_salary": "Pratinjau Gaji",
+    "source_account": "Akun Sumber",
+    "pay_now": "Bayar Sekarang",
+    "payment_success": "Pembayaran berhasil diproses via Flip",
+    "payment_success_desc": "Gaji telah berhasil diproses. Anda akan diarahkan ke tab riwayat untuk melihat detailnya.",
+    "confirm_payment": "Konfirmasi Pembayaran",
+    "confirm_payment_desc": "Apakah Anda yakin ingin memproses pembayaran gaji untuk {name}?",
+    "comments": "Komentar/Catatan",
+    "no_preview": "Pilih karyawan dan bulan untuk melihat pratinjau gaji"
   },
   "employees": {
     "title": "Karyawan",

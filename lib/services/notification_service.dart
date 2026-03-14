@@ -31,6 +31,9 @@ class NotificationService {
     // 1. Request permissions (especially for Android 13+)
     await _fcm.requestPermission(alert: true, badge: true, sound: true);
 
+    // 1b. Subscribe to App Updates topic
+    await _fcm.subscribeToTopic('app_updates');
+
     // 2. Set background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

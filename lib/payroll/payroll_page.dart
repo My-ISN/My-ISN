@@ -14,19 +14,256 @@ class PayrollPage extends StatefulWidget {
 class _PayrollPageState extends State<PayrollPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _hasPermission(String resource) => _hasPermissionIn(widget.userData, resource);
+  bool get _canMakePayment => _hasPermission('mobile_payroll_add');
+
+  bool _hasPermissionIn(Map<String, dynamic> data, String resource) {
+    if (data['role_resources'] == 'all') return true;
+    final String resources = data['role_resources'] ?? '';
+    final List<String> resourceList =
+        resources.split(',').map((e) => e.trim()).toList();
+    return resourceList.contains(resource);
+  }
+  Map<String, dynamic>? _payrollStats;
   bool _isLoading = true;
   List<dynamic> _history = [];
-  Map<String, dynamic>? _payrollStats;
+  List<dynamic> _staffList = [];
+  String? _selectedStaffId;
+  DateTime _selectedMonth = DateTime.now();
+  List<dynamic> _accounts = [];
+  String? _selectedAccountId;
+  Map<String, dynamic>? _previewData;
+  bool _isActionLoading = false;
+  bool _isStaffLoading = true;
+  String? _staffErrorMessage;
+  final TextEditingController _commentController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    final int tabCount = _canMakePayment ? 2 : 1;
+    _tabController = TabController(length: tabCount, vsync: this);
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
     _fetchPayrollHistory();
     _fetchDashboardStats();
+    _fetchStaffList();
+    _fetchAccounts();
+  }
+
+  @override
+  void didUpdateWidget(PayrollPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final bool oldCan = _hasPermissionIn(oldWidget.userData, 'mobile_payroll_add');
+    final bool newCan = _canMakePayment;
+    if (oldCan != newCan) {
+      final int newLength = newCan ? 2 : 1;
+      _tabController.dispose();
+      _tabController = TabController(length: newLength, vsync: this);
+      _tabController.addListener(() {
+        if (mounted) setState(() {});
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  String _formatCurrency(dynamic amount) {
+    if (amount == null) return "0,00";
+    double val = double.tryParse(amount.toString()) ?? 0;
+    String formatted = val.toStringAsFixed(2).replaceAll('.', ',');
+    List<String> parts = formatted.split(',');
+    String integerPart = parts[0];
+    String decimalPart = parts[1];
+    RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    integerPart = integerPart.replaceAllMapped(reg, (Match match) => '${match[1]}.');
+    return "$integerPart,$decimalPart";
+  }
+
+  Future<void> _fetchStaffList() async {
+    setState(() {
+      _isStaffLoading = true;
+      _staffErrorMessage = null;
+    });
+    try {
+      final userId = widget.userData['user_id'] ?? widget.userData['id'];
+      debugPrint('Fetching staff for user: $userId');
+      if (userId == null) {
+        setState(() {
+          _isStaffLoading = false;
+          _staffErrorMessage = "Kesalahan: ID Pengguna tidak ditemukan (Silakan Logout & Login kembali)";
+        });
+        return;
+      }
+      String? responseBody;
+      try {
+        final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_staff_list?user_id=$userId';
+        final response = await http.get(Uri.parse(url));
+        responseBody = response.body;
+        debugPrint('Staff list response body: "$responseBody"');
+        
+        if (responseBody.trim().isEmpty) {
+           throw Exception("Server memberikan respon kosong");
+        }
+
+        final data = json.decode(responseBody);
+        if (data['status'] == true && mounted) {
+          setState(() {
+            _staffList = data['data'];
+            _isStaffLoading = false;
+          });
+        } else {
+          setState(() {
+            _isStaffLoading = false;
+            _staffErrorMessage = data['message'] ?? "Gagal mengambil data staff";
+          });
+        }
+      } catch (e) {
+        debugPrint('Error fetching staff: $e');
+        if (mounted) {
+          String errorMsg = "Kesalahan koneksi: $e";
+          if (e is FormatException && responseBody != null) {
+             final snippet = responseBody.length > 100 ? responseBody.substring(0, 100) : responseBody;
+             errorMsg += "\nRespon Server: $snippet";
+          }
+          setState(() {
+            _isStaffLoading = false;
+            _staffErrorMessage = errorMsg;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Global error fetching staff: $e');
+    }
+  }
+
+  Future<void> _fetchAccounts() async {
+    try {
+      final userId = widget.userData['id'] ?? widget.userData['user_id'];
+      final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_accounts?user_id=$userId';
+      final response = await http.get(Uri.parse(url));
+      final data = json.decode(response.body);
+      if (data['status'] == true && mounted) {
+        setState(() {
+          _accounts = data['data'];
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching accounts: $e');
+    }
+  }
+
+  Future<void> _fetchPreview() async {
+    if (_selectedStaffId == null) return;
+    setState(() => _isActionLoading = true);
+    try {
+      final monthStr = "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
+      final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_preview?staff_id=$_selectedStaffId&salary_month=$monthStr';
+      final response = await http.get(Uri.parse(url));
+      final data = json.decode(response.body);
+      if (data['status'] == true && mounted) {
+        setState(() {
+          _previewData = data;
+        });
+      } else {
+        debugPrint('Preview failed: ${data['message']}');
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(content: Text(data['message'] ?? 'Gagal memuat preview gaji'), backgroundColor: Colors.red),
+           );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching preview: $e');
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('Kesalahan koneksi saat memuat preview'), backgroundColor: Colors.orange),
+         );
+      }
+    } finally {
+      setState(() => _isActionLoading = false);
+    }
+  }
+
+  Future<void> _executePayment() async {
+    if (_selectedStaffId == null || _selectedAccountId == null) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('payroll.confirm_payment'.tr(context)),
+        content: Text('payroll.confirm_payment_desc'.tr(context).replaceFirst('{name}', _staffList.firstWhere((s) => s['user_id'] == _selectedStaffId)['full_name'])),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('main.cancel'.tr(context))),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('main.save'.tr(context))),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _isActionLoading = true);
+    try {
+      final userId = widget.userData['id'] ?? widget.userData['user_id'];
+      final monthStr = "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
+      
+      final url = 'https://foxgeen.com/HRIS/mobileapi/execute_payroll_payment';
+      final response = await http.post(Uri.parse(url), body: {
+        'user_id': userId.toString(),
+        'staff_id': _selectedStaffId,
+        'salary_month': monthStr,
+        'account_id': _selectedAccountId,
+        'comments': _commentController.text,
+      });
+      
+      final data = json.decode(response.body);
+      if (data['status'] == true && mounted) {
+        // Show success dialog for better feedback
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text('payroll.payment_success'.tr(context)),
+                ),
+              ],
+            ),
+            content: Text('payroll.payment_success_desc'.tr(context)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+
+        setState(() {
+          _selectedStaffId = null;
+          _previewData = null;
+          _commentController.clear();
+          _tabController.animateTo(1); // Switch to History tab
+        });
+        _fetchPayrollHistory();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? 'Error'), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error executing payment: $e');
+    } finally {
+      setState(() => _isActionLoading = false);
+    }
   }
 
   Future<void> _fetchDashboardStats() async {
@@ -53,6 +290,7 @@ class _PayrollPageState extends State<PayrollPage>
       final url =
           'https://foxgeen.com/HRIS/mobileapi/get_payroll_history?user_id=$userId';
       final response = await http.get(Uri.parse(url));
+      debugPrint('Payroll history response: "${response.body}"');
       final data = json.decode(response.body);
 
       if (data['status'] == true) {
@@ -68,7 +306,12 @@ class _PayrollPageState extends State<PayrollPage>
   }
 
   Future<void> _onRefresh() async {
-    await Future.wait([_fetchPayrollHistory(), _fetchDashboardStats()]);
+    await Future.wait([
+      _fetchPayrollHistory(),
+      _fetchDashboardStats(),
+      _fetchStaffList(),
+      _fetchAccounts(),
+    ]);
   }
 
   @override
@@ -85,13 +328,15 @@ class _PayrollPageState extends State<PayrollPage>
         child: Column(
           children: [
             _buildMonthlyReportBox(),
-            _buildTabSwitcher(),
+            if (_canMakePayment) _buildTabSwitcher(),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                physics:
-                    const NeverScrollableScrollPhysics(), // Prevent swiping if desired for cleaner toggle feel
-                children: [_buildHistoryTab(), _buildLatestPayslipTab()],
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  if (_tabController.length == 2) _buildMakePaymentTab(),
+                  _buildHistoryTab()
+                ],
               ),
             ),
           ],
@@ -150,6 +395,7 @@ class _PayrollPageState extends State<PayrollPage>
               children: [
                 Expanded(
                   child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () {
                       setState(() {
                         _tabController.animateTo(0);
@@ -159,7 +405,7 @@ class _PayrollPageState extends State<PayrollPage>
                       color: Colors.transparent,
                       alignment: Alignment.center,
                       child: Text(
-                        'payroll.history'.tr(context),
+                        'payroll.make_payment'.tr(context),
                         style: TextStyle(
                           color: _tabController.index == 0
                               ? Colors.white
@@ -172,6 +418,7 @@ class _PayrollPageState extends State<PayrollPage>
                 ),
                 Expanded(
                   child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () {
                       setState(() {
                         _tabController.animateTo(1);
@@ -181,7 +428,7 @@ class _PayrollPageState extends State<PayrollPage>
                       color: Colors.transparent,
                       alignment: Alignment.center,
                       child: Text(
-                        'payroll.payslip'.tr(context),
+                        'payroll.history'.tr(context),
                         style: TextStyle(
                           color: _tabController.index == 1
                               ? Colors.white
@@ -231,12 +478,12 @@ class _PayrollPageState extends State<PayrollPage>
             Row(
               children: [
                 _buildReportStat(
-                  'IDR ${_payrollStats?['total'] ?? 0}',
+                  'IDR ${_formatCurrency(_payrollStats?['total'])}',
                   'dashboard.total'.tr(context),
                 ),
                 const SizedBox(width: 32),
                 _buildReportStat(
-                  'IDR ${_payrollStats?['this_month'] ?? 0}',
+                  'IDR ${_formatCurrency(_payrollStats?['this_month'])}',
                   'dashboard.this_month'.tr(context),
                 ),
               ],
@@ -333,7 +580,7 @@ class _PayrollPageState extends State<PayrollPage>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'IDR ${item['net_salary']}',
+                              'IDR ${_formatCurrency(item['net_salary'])}',
                               style: TextStyle(
                                 color: Colors.green[600],
                                 fontWeight: FontWeight.w600,
@@ -355,20 +602,258 @@ class _PayrollPageState extends State<PayrollPage>
     );
   }
 
-  Widget _buildLatestPayslipTab() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-    if (_history.isEmpty) {
-      return _buildEmptyState(
-        icon: Icons.receipt_long_rounded,
-        message: 'payroll.no_history'.tr(context),
-      );
-    }
+  Widget _buildMakePaymentTab() {
     return RefreshIndicator(
       onRefresh: _onRefresh,
       color: const Color(0xFF7E57C2),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        child: _buildPayslipView(_history.first['payslip_id']),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSelectionCard(),
+            const SizedBox(height: 20),
+            if (_previewData != null) ...[
+              _buildSalaryPreviewCard(),
+              const SizedBox(height: 20),
+              _buildAccountSelectionCard(),
+              const SizedBox(height: 20),
+              _buildActionCard(),
+            ] else if (_selectedStaffId != null && !_isActionLoading)
+              const Center(child: Text("Preview not loaded"))
+            else if (_isActionLoading)
+              const Center(child: CircularProgressIndicator())
+            else
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(
+                    'payroll.no_preview'.tr(context),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectionCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('payroll.select_staff'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          if (_isStaffLoading)
+            const Center(child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ))
+          else if (_staffErrorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(_staffErrorMessage!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+            )
+          else if (_staffList.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
+              child: Text("Tidak ada staff ditemukan", style: TextStyle(color: Colors.orange, fontSize: 12)),
+            ),
+          DropdownButtonFormField<String>(
+            isExpanded: true,
+            value: _selectedStaffId,
+            hint: Text(_isStaffLoading ? 'Memuat karyawan...' : 'Pilih Karyawan'),
+            items: _staffList.map((s) => DropdownMenuItem(
+              value: s['user_id'].toString(),
+              child: Text(s['full_name']),
+            )).toList(),
+            onChanged: (val) {
+              setState(() {
+                _selectedStaffId = val;
+                _previewData = null;
+              });
+              _fetchPreview();
+            },
+            decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+          ),
+          const SizedBox(height: 20),
+          Text('payroll.select_month'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _selectedMonth,
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2100),
+                initialDatePickerMode: DatePickerMode.year,
+              );
+              if (picked != null) {
+                setState(() {
+                  _selectedMonth = picked;
+                  _previewData = null;
+                });
+                _fetchPreview();
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(4)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}"),
+                  const Icon(Icons.calendar_today, size: 18),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSalaryPreviewCard() {
+    final breakdown = _previewData!['breakdown'];
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('payroll.preview_salary'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const Divider(height: 32),
+          _buildAmountRow('payroll.basic_salary'.tr(context), breakdown['basic_salary']),
+          ..._buildDynamicPreviewRows(breakdown['allowances'], false),
+          ..._buildDynamicPreviewRows(breakdown['commissions'], false),
+          ..._buildDynamicPreviewRows(breakdown['other_payments'], false),
+          const Divider(height: 32),
+          ..._buildDynamicPreviewRows(breakdown['statutory_deductions'], true),
+          ..._buildDynamicPreviewRows(breakdown['optional_deductions'], true),
+          if ((breakdown['advance_salary_deduct'] ?? 0) > 0)
+            _buildAmountRow('Advance Salary', breakdown['advance_salary_deduct'], isNegative: true),
+          if ((breakdown['loan_deduct'] ?? 0) > 0)
+            _buildAmountRow('Loan', breakdown['loan_deduct'], isNegative: true),
+          const Divider(height: 32),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: const Color(0xFF7E57C2).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('payroll.net_salary'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text('IDR ${_formatCurrency(breakdown['net_salary'])}', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF7E57C2))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildDynamicPreviewRows(List<dynamic> items, bool isNegative) {
+    return items.map((i) => _buildAmountRow(i['title'], i['amount'], isNegative: isNegative)).toList();
+  }
+
+  Widget _buildAccountSelectionCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('payroll.source_account'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            isExpanded: true,
+            value: _selectedAccountId,
+            hint: Text('Pilih Akun Sumber', style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+            items: _accounts.map((a) {
+              return DropdownMenuItem(
+                value: a['account_id'].toString(),
+                child: Text(
+                  "${a['account_name']} (IDR ${_formatCurrency(a['account_balance'])})",
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              );
+            }).toList(),
+            onChanged: (val) => setState(() => _selectedAccountId = val),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: const Color(0xFF7E57C2).withOpacity(0.5)),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+      ),
+      child: Column(
+        children: [
+          TextField(
+            controller: _commentController,
+            decoration: InputDecoration(
+              labelText: 'payroll.comments'.tr(context),
+              border: const OutlineInputBorder(),
+            ),
+            maxLines: 2,
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: _isActionLoading ? null : _executePayment,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF7E57C2),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: _isActionLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Text('payroll.pay_now'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -492,22 +977,48 @@ class _PayrollPageState extends State<PayrollPage>
                     ],
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'payroll.net_salary'.tr(context),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.account_balance_wallet_rounded,
                           color: Colors.white,
+                          size: 28,
                         ),
                       ),
-                      Text(
-                        'IDR ${payslip['net_salary']}',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'payroll.net_salary'.tr(context),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withOpacity(0.9),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'IDR ${_formatCurrency(payslip['net_salary'])}',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -601,7 +1112,7 @@ class _PayrollPageState extends State<PayrollPage>
             ),
           ),
           Text(
-            '${isNegative ? '-' : '+'} IDR $value',
+            '${isNegative ? '-' : '+'} IDR ${_formatCurrency(value)}',
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 14,

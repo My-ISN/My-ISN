@@ -77,20 +77,21 @@ class SideDrawer extends StatelessWidget {
                     }
                   },
                 ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.payments_outlined,
-                  title: 'main.xin_payroll'.tr(context),
-                  isActive: activePage == 'payroll',
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (onTabSelected != null) {
-                      onTabSelected!(2);
-                    } else if (activePage != 'payroll') {
-                      // Handled within dashboard tabs
-                    }
-                  },
-                ),
+                if (_hasPermission('mobile_payroll_enable'))
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.payments_outlined,
+                    title: 'main.xin_payroll'.tr(context),
+                    isActive: activePage == 'payroll',
+                    onTap: () {
+                      Navigator.pop(context);
+                      if (onTabSelected != null) {
+                        onTabSelected!(2);
+                      } else if (activePage != 'payroll') {
+                        // Handled within dashboard tabs
+                      }
+                    },
+                  ),
                 _buildMenuItem(
                   context,
                   icon: Icons.person_outline,
