@@ -289,7 +289,7 @@ class _TodoListPageState extends State<TodoListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(userData: _currentUserData ?? {}, showBackButton: true),
+      appBar: CustomAppBar(userData: _currentUserData ?? {}, showBackButton: false),
       endDrawer: SideDrawer(userData: _currentUserData ?? {}, activePage: 'todo_list'),
       body: RefreshIndicator(
         onRefresh: () => _fetchTodos(),

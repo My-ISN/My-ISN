@@ -109,7 +109,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(userData: widget.userData, showBackButton: true),
+      appBar: CustomAppBar(userData: widget.userData, showBackButton: false),
       endDrawer: SideDrawer(userData: widget.userData, activePage: 'work_log'),
       body: RefreshIndicator(
         onRefresh: () async {
