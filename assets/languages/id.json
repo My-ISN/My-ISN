@@ -512,6 +512,7 @@
     "no_logs": "Belum ada Work Log",
     "page_x_of_y": "Halaman {current} dari {total}",
     "create_title": "Buat Work Log",
+    "edit_title": "Edit Work Log",
     "select_date": "Pilih Tanggal",
     "add_item": "Tambah Item",
     "item_hint": "Apa yang Anda kerjakan?",

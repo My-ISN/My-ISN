@@ -641,6 +641,23 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
     }
   }
 
+  Future<void> _editLog() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateWorkLogPage(
+          userData: widget.userData,
+          estimateId: widget.logId,
+          initialData: _details,
+        ),
+      ),
+    );
+
+    if (result == true && mounted) {
+      Navigator.pop(context, true); 
+    }
+  }
+
   bool _hasPermission(String resource) {
     if (widget.userData['role_resources'] == 'all') return true;
     final String resources = widget.userData['role_resources'] ?? '';
@@ -689,6 +706,11 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
               ),
               Row(
                 children: [
+                  if (_hasPermission('mobile_worklog_edit') || _hasPermission('mobile_worklog_add'))
+                    IconButton(
+                      onPressed: _editLog,
+                      icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                    ),
                    if (_hasPermission('mobile_worklog_delete'))
                     IconButton(
                       onPressed: _deleteLog,

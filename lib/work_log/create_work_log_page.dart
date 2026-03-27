@@ -6,8 +6,15 @@ import '../localization/app_localizations.dart';
 
 class CreateWorkLogPage extends StatefulWidget {
   final Map<String, dynamic> userData;
+  final String? estimateId;
+  final Map<String, dynamic>? initialData;
 
-  const CreateWorkLogPage({super.key, required this.userData});
+  const CreateWorkLogPage({
+    super.key, 
+    required this.userData,
+    this.estimateId,
+    this.initialData,
+  });
 
   @override
   State<CreateWorkLogPage> createState() => _CreateWorkLogPageState();
@@ -25,6 +32,25 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
   void initState() {
     super.initState();
     _fetchJobDesks();
+    if (widget.initialData != null) {
+      final estimate = widget.initialData!['estimate'];
+      final items = widget.initialData!['items'] as List?;
+      
+      if (estimate != null && estimate['estimate_date'] != null) {
+        try {
+          _selectedDate = DateTime.parse(estimate['estimate_date']);
+        } catch (e) {
+          debugPrint('Error parsing date: $e');
+        }
+      }
+      
+      if (items != null && items.isNotEmpty) {
+        _itemControllers.clear();
+        for (var item in items) {
+          _itemControllers.add(TextEditingController(text: item['item_name'] ?? ''));
+        }
+      }
+    }
   }
 
   Future<void> _fetchJobDesks() async {
@@ -62,13 +88,19 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
 
     setState(() => _isSaving = true);
     try {
+      final Map<String, String> body = {
+        'user_id': (widget.userData['id'] ?? widget.userData['user_id']).toString(),
+        'date': _selectedDate.toIso8601String().split('T')[0],
+        'items': json.encode(items),
+      };
+
+      if (widget.estimateId != null) {
+        body['estimate_id'] = widget.estimateId!;
+      }
+
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/save_worklog'),
-        body: {
-          'user_id': (widget.userData['id'] ?? widget.userData['user_id']).toString(),
-          'date': _selectedDate.toIso8601String().split('T')[0],
-          'items': json.encode(items),
-        },
+        body: body,
       );
 
       final result = json.decode(response.body);
@@ -150,7 +182,9 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'work_log.create_title'.tr(context),
+              widget.estimateId == null 
+                ? 'work_log.create_title'.tr(context)
+                : 'work_log.edit_title'.tr(context),
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
 
