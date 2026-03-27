@@ -31,6 +31,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
   int _currentPage = 1;
   int _totalCount = 0;
   final List<int> _limitOptions = [10, 25, 50, 100];
+  bool _isStatsExpanded = true;
 
   @override
   void initState() {
@@ -350,7 +351,6 @@ class _WorkLogPageState extends State<WorkLogPage> {
     if (progress > 1.0) progress = 1.0;
 
     return Container(
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
@@ -365,69 +365,92 @@ class _WorkLogPageState extends State<WorkLogPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          InkWell(
+            onTap: () => setState(() => _isStatsExpanded = !_isStatsExpanded),
+            borderRadius: BorderRadius.circular(24),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'work_log.my_summary'.tr(context),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'work_log.my_summary'.tr(context),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                      ),
+                      const SizedBox(height: 4),
+                      if (_monthName.isNotEmpty)
+                        Text(
+                          '$_monthName ${DateTime.now().year}',
+                          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  if (_monthName.isNotEmpty)
-                    Text(
-                      '$_monthName ${DateTime.now().year}',
-                      style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: _primaryColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _isStatsExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                          color: _primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _primaryColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.auto_graph_rounded, color: _primaryColor),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildStatRow('work_log.monthly_target'.tr(context), _targetItems.toString(), Colors.blue),
-                    const SizedBox(height: 16),
-                    _buildStatRow('work_log.completed_items'.tr(context), _completedItems.toString(), Colors.green),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 20),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: 85,
-                    height: 85,
-                    child: CircularProgressIndicator(
-                      value: progress,
-                      strokeWidth: 10,
-                      backgroundColor: Colors.grey[100],
-                      valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
-                      strokeCap: StrokeCap.round,
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: _isStatsExpanded
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildStatRow('work_log.monthly_target'.tr(context), _targetItems.toString(), Colors.blue),
+                              const SizedBox(height: 16),
+                              _buildStatRow('work_log.completed_items'.tr(context), _completedItems.toString(), Colors.green),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: 85,
+                              height: 85,
+                              child: CircularProgressIndicator(
+                                value: progress,
+                                strokeWidth: 10,
+                                backgroundColor: Colors.grey[100],
+                                valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                                strokeCap: StrokeCap.round,
+                              ),
+                            ),
+                            Text(
+                              '${(progress * 100).toInt()}%',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                  Text(
-                    '${(progress * 100).toInt()}%',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                ],
-              ),
-            ],
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),
@@ -641,17 +664,22 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
     final estimate = _details!['estimate'];
     final items = _details!['items'] as List;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 20,
-        right: 20,
-        top: 20,
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 20,
+          right: 20,
+          top: 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -695,8 +723,9 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
           const SizedBox(height: 30),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
 
   Widget _buildInfoRow(String label, String value) {

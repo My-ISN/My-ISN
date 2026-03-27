@@ -237,15 +237,22 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasPayroll = _hasPermission('mobile_payroll_enable');
     final List<Widget> pages = [
       _buildHomeContent(),
       AttendancePage(userData: _dashboardData['user'] ?? widget.userData),
-      PayrollPage(userData: _dashboardData['user'] ?? widget.userData),
+      if (hasPayroll)
+        PayrollPage(userData: _dashboardData['user'] ?? widget.userData),
       ProfilePage(
         userData: _dashboardData['user'] ?? widget.userData,
         isTab: true,
       ),
     ];
+
+    // Ensure _currentIndex is within bounds if pages list changed
+    if (_currentIndex >= pages.length) {
+      _currentIndex = pages.length - 1;
+    }
 
 
 
@@ -260,20 +267,23 @@ class _DashboardPageState extends State<DashboardPage> {
         activePage: _currentIndex == 0
             ? 'dashboard'
             : (_currentIndex == 1
-                  ? 'attendance'
-                  : (_currentIndex == 2
-                        ? 'payroll'
-                        : (_currentIndex == 3 ? 'profile' : ''))),
-
-
+                ? 'attendance'
+                : (hasPayroll && _currentIndex == 2
+                    ? 'payroll'
+                    : (_currentIndex == (hasPayroll ? 3 : 2) ? 'profile' : ''))),
         onTabSelected: (index) {
+          int targetIndex = index;
+          if (!hasPayroll && index > 2) {
+            targetIndex = index - 1;
+          }
           setState(() {
-            _currentIndex = index;
+            _currentIndex = targetIndex;
           });
         },
       ),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
+        userData: _dashboardData['user'] ?? widget.userData,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
@@ -477,9 +487,9 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                           ),
                           child: Text(
-                            _dashboardData['user']?['role_name'] ??
+                            (_dashboardData['user']?['role_name'] ??
                                 widget.userData['role_name'] ??
-                                'Staff',
+                                'Staff').toString().roleTr(context),
                             style: const TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,

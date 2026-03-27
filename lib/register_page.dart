@@ -177,70 +177,107 @@ class _RegisterPageState extends State<RegisterPage> {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF4A4A4A), size: 20),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
             'register.title'.tr(context),
             style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
+              color: Color(0xFF4A4A4A),
+              fontWeight: FontWeight.w900,
+              fontSize: 22,
+              letterSpacing: -0.5,
             ),
           ),
+          centerTitle: true,
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'register.subtitle'.tr(context),
-                style: const TextStyle(color: Colors.grey, fontSize: 15),
-              ),
-              const SizedBox(height: 32),
+          physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        'register.subtitle'.tr(context),
+                        style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
 
-              // Profile Photo Picker (Merged)
+              // Profile Photo Picker (Premium Design)
               Center(
                 child: Column(
                   children: [
                     GestureDetector(
                       onTap: _pickImage,
-                      child: Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFF7E57C2).withOpacity(0.2),
-                                width: 4,
-                              ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 55,
-                              backgroundColor: const Color(0xFFF3F6FF),
-                              backgroundImage: _image != null
-                                  ? FileImage(_image!)
-                                  : null,
-                              child: _image == null
-                                  ? const Icon(
-                                      Icons.camera_alt_outlined,
-                                      size: 40,
-                                      color: Colors.grey,
-                                    )
-                                  : null,
-                            ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF7E57C2).withOpacity(0.2),
+                              const Color(0xFF7E57C2).withOpacity(0.05),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
+                        ),
+                      ),
+                      Container(
+                        width: 86,
+                        height: 86,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundColor: const Color(0xFFF8F9FE),
+                          backgroundImage: _image != null
+                              ? FileImage(_image!)
+                              : null,
+                          child: _image == null
+                              ? Icon(
+                                  Icons.person_outline_rounded,
+                                  size: 40,
+                                  color: Colors.grey.shade400,
+                                )
+                              : null,
+                        ),
+                      ),
                           Positioned(
-                            bottom: 0,
-                            right: 0,
+                            bottom: 4,
+                            right: 4,
                             child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF7E57C2),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF7E57C2),
                                 shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF7E57C2).withOpacity(0.3),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
                               child: const Icon(
-                                Icons.edit,
+                                Icons.camera_alt_rounded,
                                 color: Colors.white,
                                 size: 18,
                               ),
@@ -249,192 +286,193 @@ class _RegisterPageState extends State<RegisterPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
                       'register.set_profile_photo'.tr(context),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextField(
+                    child: _buildPremiumField(
                       controller: _firstNameController,
                       label: 'register.first_name'.tr(context),
                       hint: 'register.first_name'.tr(context),
-                      icon: Icons.person_outline,
+                      icon: Icons.person_outline_rounded,
                       autoCapitalize: true,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTextField(
+                    child: _buildPremiumField(
                       controller: _lastNameController,
                       label: 'register.last_name'.tr(context),
                       hint: 'register.last_name'.tr(context),
-                      icon: Icons.person_outline,
+                      icon: Icons.person_outline_rounded,
                       autoCapitalize: true,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _usernameController,
-                      label: 'register.username'.tr(context),
-                      hint: 'register.username'.tr(context),
-                      icon: Icons.alternate_email,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _emailController,
-                      label: 'register.email'.tr(context),
-                      hint: 'register.email'.tr(context),
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              _buildPremiumField(
+                controller: _usernameController,
+                label: 'register.username'.tr(context),
+                hint: 'register.username'.tr(context),
+                icon: Icons.alternate_email_rounded,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              _buildPremiumField(
+                controller: _emailController,
+                label: 'register.email'.tr(context),
+                hint: 'register.email'.tr(context),
+                icon: Icons.email_outlined,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: _buildTextField(
+                    child: _buildPremiumField(
                       controller: _passwordController,
                       label: 'register.password'.tr(context),
-                      hint: 'register.password'.tr(context),
-                      icon: Icons.lock_outline,
+                      hint: '••••••••',
+                      icon: Icons.lock_outline_rounded,
                       isPassword: true,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildTextField(
+                    child: _buildPremiumField(
                       controller: _contactController,
                       label: 'register.contact'.tr(context),
-                      hint: 'register.contact'.tr(context),
-                      icon: Icons.phone_outlined,
+                      hint: '0812...',
+                      icon: Icons.phone_android_rounded,
                       keyboardType: TextInputType.phone,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'register.gender'.tr(context),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3F6FF),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: _selectedGender,
-                        isExpanded: true,
-                        icon: const Icon(Icons.keyboard_arrow_down),
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 16,
-                        ),
-                        items: ['Male', 'Female'].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value == 'Male'
-                                  ? 'register.male'.tr(context)
-                                  : 'register.female'.tr(context),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            _selectedGender = newValue!;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              
+              Text(
+                'register.gender'.tr(context),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF4A4A4A),
+                ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F9FE),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.01),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedGender,
+                    isExpanded: true,
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF7E57C2)),
+                    style: const TextStyle(
+                      color: Color(0xFF4A4A4A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    items: ['Male', 'Female'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value == 'Male'
+                              ? 'register.male'.tr(context)
+                              : 'register.female'.tr(context),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedGender = newValue!;
+                      });
+                    },
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
+                height: 56,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7E57C2),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    elevation: 0,
+                    elevation: 4,
+                    shadowColor: const Color(0xFF7E57C2).withOpacity(0.3),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   child: _isLoading
                       ? const SizedBox(
-                          height: 20,
-                          width: 20,
+                          height: 24,
+                          width: 24,
                           child: CircularProgressIndicator(
                             color: Colors.white,
-                            strokeWidth: 2,
+                            strokeWidth: 2.5,
                           ),
                         )
                       : Text(
                           'register.create_account'.tr(context),
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
                           ),
                         ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       'register.have_account'.tr(context),
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500),
                     ),
+                    const SizedBox(width: 4),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Text(
                         'register.login'.tr(context),
                         style: const TextStyle(
                           color: Color(0xFF7E57C2),
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -535,7 +573,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Widget _buildTextField({
+  Widget _buildPremiumField({
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -549,39 +587,72 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 14, 
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF4A4A4A),
+          ),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          obscureText: isPassword,
-          keyboardType: keyboardType,
-          onChanged: autoCapitalize
-              ? (value) {
-                  final uppercase = value.toUpperCase();
-                  if (controller.text != uppercase) {
-                    controller.value = controller.value.copyWith(
-                      text: uppercase,
-                      selection: TextSelection.collapsed(
-                        offset: uppercase.length,
-                      ),
-                    );
-                  }
-                }
-              : null,
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20),
-            hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
-            filled: true,
-            fillColor: const Color(0xFFF3F6FF),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
+        Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FE),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.01),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            obscureText: isPassword,
+            keyboardType: keyboardType,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF4A4A4A),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 16,
+            onChanged: autoCapitalize
+                ? (value) {
+                    final uppercase = value.toUpperCase();
+                    if (controller.text != uppercase) {
+                      controller.value = controller.value.copyWith(
+                        text: uppercase,
+                        selection: TextSelection.collapsed(
+                          offset: uppercase.length,
+                        ),
+                      );
+                    }
+                  }
+                : null,
+            decoration: InputDecoration(
+              prefixIcon: Icon(icon, color: const Color(0xFF7E57C2), size: 20),
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w500,
+              ),
+              filled: true,
+              fillColor: Colors.transparent,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 18,
+                horizontal: 20,
+              ),
             ),
           ),
         ),

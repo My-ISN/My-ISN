@@ -33,7 +33,8 @@
     "male": "Male",
     "female": "Female",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "role_client": "Client"
   },
   "dashboard": {
     "welcome": "Welcome,",
@@ -87,6 +88,7 @@
     "password": "Password",
     "remember_me": "Remember Me",
     "forgot_password": "Forgot password?",
+    "dont_have_account": "Don't have an account?",
     "register": "Register",
     "login": "Login",
     "login_fingerprint": "Or login with fingerprint",
@@ -379,7 +381,25 @@
     "year": "Year",
     "details": "Payroll Details",
     "earnings": "Earnings",
-    "total_earnings": "Total Earnings"
+    "total_earnings": "Total Earnings",
+    "make_payment": "Process Payment",
+    "select_staff": "Select Employee",
+    "select_month": "Select Month",
+    "preview_salary": "Preview Salary",
+    "source_account": "Source Account",
+    "pay_now": "Pay Now",
+    "payment_success": "Payment processed successfully via Flip",
+    "payment_success_desc": "Salary has been successfully processed. You will be redirected to the history tab to see details.",
+    "confirm_payment": "Confirm Payment",
+    "confirm_payment_desc": "Are you sure you want to process salary payment for {name}?",
+    "comments": "Comments/Notes",
+    "no_preview": "Select employee and month to see salary preview",
+    "no_staff_found": "No staff found",
+    "loading_staff": "Loading employees...",
+    "select_source_account": "Select Source Account",
+    "preview_not_loaded": "Preview not loaded",
+    "advance_salary": "Advance Salary",
+    "loan": "Loan"
   },
   "employees": {
     "title": "Employees",
@@ -405,6 +425,9 @@
     "none": "None",
     "per_month": "Per Month",
     "status_work_label": "Work Status",
+    "work_log": "Work Log",
+    "status_target_worklog": "Status Target Work Log",
+    "payslip_type": "Payslip Type",
     "overview": {
       "contact_info": "Contact Information",
       "profile_data_not_available": "Profile data not available"
@@ -508,6 +531,7 @@
     "delete_confirm_desc": "Deleted data cannot be recovered.",
     "delete_success": "Work Log deleted successfully",
     "fetch_details_failed": "Failed to load details.",
+    "save_failed": "Failed to save work log",
     "conn_error": "Server connection error"
   },
   "rent_plan": {

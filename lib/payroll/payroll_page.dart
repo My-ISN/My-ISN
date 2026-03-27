@@ -621,7 +621,7 @@ class _PayrollPageState extends State<PayrollPage>
               const SizedBox(height: 20),
               _buildActionCard(),
             ] else if (_selectedStaffId != null && !_isActionLoading)
-              const Center(child: Text("Preview not loaded"))
+              Center(child: Text('payroll.preview_not_loaded'.tr(context)))
             else if (_isActionLoading)
               const Center(child: CircularProgressIndicator())
             else
@@ -665,14 +665,14 @@ class _PayrollPageState extends State<PayrollPage>
               child: Text(_staffErrorMessage!, style: const TextStyle(color: Colors.red, fontSize: 12)),
             )
           else if (_staffList.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8.0),
-              child: Text("Tidak ada staff ditemukan", style: TextStyle(color: Colors.orange, fontSize: 12)),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text('payroll.no_staff_found'.tr(context), style: const TextStyle(color: Colors.orange, fontSize: 12)),
             ),
           DropdownButtonFormField<String>(
             isExpanded: true,
             value: _selectedStaffId,
-            hint: Text(_isStaffLoading ? 'Memuat karyawan...' : 'Pilih Karyawan'),
+            hint: Text(_isStaffLoading ? 'payroll.loading_staff'.tr(context) : 'payroll.select_staff'.tr(context)),
             items: _staffList.map((s) => DropdownMenuItem(
               value: s['user_id'].toString(),
               child: Text(s['full_name']),
@@ -745,9 +745,9 @@ class _PayrollPageState extends State<PayrollPage>
           ..._buildDynamicPreviewRows(breakdown['statutory_deductions'], true),
           ..._buildDynamicPreviewRows(breakdown['optional_deductions'], true),
           if ((breakdown['advance_salary_deduct'] ?? 0) > 0)
-            _buildAmountRow('Advance Salary', breakdown['advance_salary_deduct'], isNegative: true),
+            _buildAmountRow('payroll.advance_salary'.tr(context), breakdown['advance_salary_deduct'], isNegative: true),
           if ((breakdown['loan_deduct'] ?? 0) > 0)
-            _buildAmountRow('Loan', breakdown['loan_deduct'], isNegative: true),
+            _buildAmountRow('payroll.loan'.tr(context), breakdown['loan_deduct'], isNegative: true),
           const Divider(height: 32),
           Container(
             padding: const EdgeInsets.all(16),
@@ -785,7 +785,7 @@ class _PayrollPageState extends State<PayrollPage>
           DropdownButtonFormField<String>(
             isExpanded: true,
             value: _selectedAccountId,
-            hint: Text('Pilih Akun Sumber', style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+            hint: Text('payroll.select_source_account'.tr(context), style: TextStyle(color: Colors.grey[400], fontSize: 14)),
             items: _accounts.map((a) {
               return DropdownMenuItem(
                 value: a['account_id'].toString(),

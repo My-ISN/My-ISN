@@ -71,3 +71,12 @@ extension TranslateExtension on String {
     return AppLocalizations.of(context)?.translate(this, args: args) ?? this;
   }
 }
+
+extension RoleTranslateExtension on String {
+  String roleTr(BuildContext context) {
+    if (toLowerCase() == 'client role manage user') {
+      return 'main.role_client'.tr(context);
+    }
+    return this;
+  }
+}

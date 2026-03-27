@@ -5,11 +5,13 @@ import '../localization/app_localizations.dart';
 class CustomBottomNav extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final Map<String, dynamic> userData;
 
   const CustomBottomNav({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.userData,
   });
 
   @override
@@ -33,33 +35,44 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
     super.dispose();
   }
 
+  bool _hasPermission(String resource) {
+    if (widget.userData['role_resources'] == 'all') return true;
+    final String resources = widget.userData['role_resources'] ?? '';
+    final List<String> resourceList =
+        resources.split(',').map((e) => e.trim()).toList();
+    return resourceList.contains(resource);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+
+    final List<BottomNavigationBarItem> items = [
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.home),
+        label: 'main.xin_dashboard'.tr(context),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.calendar_month),
+        label: 'main.xin_attendance'.tr(context),
+      ),
+      if (hasPayroll)
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.payments_outlined),
+          label: 'main.xin_payroll'.tr(context),
+        ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.person_outline),
+        label: 'main.xin_profile'.tr(context),
+      ),
+    ];
+
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Theme.of(context).colorScheme.primary,
       currentIndex: widget.currentIndex,
       onTap: widget.onTap,
-      items: [
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.home),
-          label: 'main.xin_dashboard'.tr(context),
-        ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.calendar_month),
-          label: 'main.xin_attendance'.tr(context),
-        ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.payments_outlined),
-          label: 'main.xin_payroll'.tr(context),
-        ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.person_outline),
-          label: 'main.xin_profile'.tr(context),
-        ),
-
-
-      ],
+      items: items,
     );
   }
 }

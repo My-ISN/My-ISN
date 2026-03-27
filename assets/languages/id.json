@@ -33,7 +33,8 @@
     "male": "Laki-laki",
     "female": "Perempuan",
     "active": "Aktif",
-    "inactive": "Tidak Aktif"
+    "inactive": "Tidak Aktif",
+    "role_client": "Client"
   },
   "dashboard": {
     "welcome": "Selamat Datang,",
@@ -87,6 +88,7 @@
     "password": "Kata Sandi",
     "remember_me": "Ingat Saya",
     "forgot_password": "Lupa kata sandi?",
+    "dont_have_account": "Belum punya akun?",
     "register": "Daftar",
     "login": "Masuk",
     "login_fingerprint": "Atau masuk dengan sidik jari",
@@ -391,7 +393,13 @@
     "confirm_payment": "Konfirmasi Pembayaran",
     "confirm_payment_desc": "Apakah Anda yakin ingin memproses pembayaran gaji untuk {name}?",
     "comments": "Komentar/Catatan",
-    "no_preview": "Pilih karyawan dan bulan untuk melihat pratinjau gaji"
+    "no_preview": "Pilih karyawan dan bulan untuk melihat pratinjau gaji",
+    "no_staff_found": "Tidak ada staff ditemukan",
+    "loading_staff": "Memuat karyawan...",
+    "select_source_account": "Pilih Akun Sumber",
+    "preview_not_loaded": "Pratinjau tidak dimuat",
+    "advance_salary": "Gaji Dimuka",
+    "loan": "Pinjaman"
   },
   "employees": {
     "title": "Karyawan",
@@ -417,6 +425,9 @@
     "none": "Tidak Ada",
     "per_month": "Per Bulan",
     "status_work_label": "Status Kerja",
+    "work_log": "Work Log",
+    "status_target_worklog": "Status Target Work Log",
+    "payslip_type": "Tipe Slip Gaji",
     "overview": {
       "contact_info": "Informasi Kontak",
       "profile_data_not_available": "Data profil tidak tersedia"
@@ -432,7 +443,7 @@
       "title": "Periode & Cuti"
     },
     "employment_detail": {
-      "title": "Detail Pekerjaan",
+      "detail_title": "Detail Pekerjaan",
       "not_available": "Data pekerjaan tidak tersedia"
     },
     "role_desc": "Deskripsi Peran",

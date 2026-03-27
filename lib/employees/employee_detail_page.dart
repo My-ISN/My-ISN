@@ -326,7 +326,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
           ),
           const SizedBox(height: 4),
           Text(
-            info['role_name'] ?? '--',
+            (info['role_name'] ?? '--').toString().roleTr(context),
             style: TextStyle(color: Colors.grey[600], fontSize: 14, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 12),

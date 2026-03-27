@@ -31,6 +31,14 @@ class _ProfilePageState extends State<ProfilePage> {
     _fetchProfileDetails();
   }
 
+  bool _hasPermission(String resource) {
+    if (widget.userData['role_resources'] == 'all') return true;
+    final String resources = widget.userData['role_resources'] ?? '';
+    final List<String> resourceList =
+        resources.split(',').map((e) => e.trim()).toList();
+    return resourceList.contains(resource);
+  }
+
   Future<void> _fetchProfileDetails() async {
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
@@ -192,7 +200,8 @@ class _ProfilePageState extends State<ProfilePage> {
         activePage: 'profile',
       ),
       bottomNavigationBar: CustomBottomNav(
-        currentIndex: 3,
+        currentIndex: _hasPermission('mobile_payroll_enable') ? 3 : 2,
+        userData: widget.userData,
         onTap: (index) {
           if (index == 0) {
             Navigator.popUntil(context, (route) => route.isFirst);
@@ -359,7 +368,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 ),
                 child: Text(
-                  basic['role_name'] ?? widget.userData['role_name'] ?? 'Staff',
+                  (basic['role_name'] ?? widget.userData['role_name'] ?? 'Staff').toString().roleTr(context),
                   style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,

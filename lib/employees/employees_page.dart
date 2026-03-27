@@ -296,7 +296,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
           child: _buildEmployeeCard(
             context,
             name: '${employee['first_name']} ${employee['last_name'] ?? ''}',
-            role: employee['designation_name'] ?? employee['role_name'] ?? 'employees.default_role'.tr(context),
+            role: (employee['designation_name'] ?? employee['role_name'] ?? 'employees.default_role'.tr(context)).toString().roleTr(context),
             dept: employee['department_name'] ?? 'employees.default_dept'.tr(context),
             photo: employee['profile_photo'],
             email: employee['email'],
