@@ -11,6 +11,7 @@ import 'localization/app_localizations.dart';
 import 'providers/language_provider.dart';
 import 'providers/theme_provider.dart';
 import 'diagnosis/diagnosis_hub_page.dart';
+import 'login_page.dart';
 
 class SettingsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -29,6 +30,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _hasToken = false;
   bool _isLoading = true;
   String _appVersion = "Loading...";
+  String _userType = ''; // fetched from API, same as profile_page
 
   @override
   void initState() {
@@ -52,6 +54,20 @@ class _SettingsPageState extends State<SettingsPage> {
 
     // Initial status from userData (server)
     bool serverEnabled = widget.userData['biometric_enabled'] == 1;
+
+    // Fetch user_type from profile API (same as profile_page.dart)
+    try {
+      final userId = widget.userData['id'] ?? widget.userData['user_id'];
+      final url = 'https://foxgeen.com/HRIS/mobileapi/get_profile_details?user_id=$userId';
+      final response = await http.get(Uri.parse(url));
+      final data = json.decode(response.body);
+      if (data['status'] == true) {
+        final fetchedUserType = (data['data']['basic_info']?['user_type'] ?? '').toString();
+        if (mounted) setState(() => _userType = fetchedUserType);
+      }
+    } catch (e) {
+      debugPrint('Settings: failed to fetch user type: $e');
+    }
 
     setState(() {
       _isFingerprintEnabled = serverEnabled;
@@ -132,24 +148,73 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _deleteFingerprint() async {
-    bool? confirm = await showDialog<bool>(
+    bool? confirm = await showModalBottomSheet<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('settings.delete_confirm_title'.tr(context)),
-        content: Text('settings.delete_confirm_desc'.tr(context)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('settings.cancel'.tr(context)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'settings.delete'.tr(context),
-              style: const TextStyle(color: Colors.red),
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-        ],
+            Text(
+              'settings.delete_confirm_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'settings.delete_confirm_desc'.tr(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'settings.cancel'.tr(context),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('settings.delete'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
 
@@ -210,21 +275,71 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<bool?> _showRegisterDialog() {
-    return showDialog<bool>(
+    return showModalBottomSheet<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('settings.register_title'.tr(context)),
-        content: Text('settings.register_desc'.tr(context)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('settings.cancel'.tr(context)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('settings.continue_label'.tr(context)),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Text(
+              'settings.register_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'settings.register_desc'.tr(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'settings.cancel'.tr(context),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('settings.continue_label'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
@@ -304,28 +419,87 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<String?> _promptForPassword() async {
     final passwordController = TextEditingController();
-    return showDialog<String>(
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    
+    return showModalBottomSheet<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('settings.confirm_password'.tr(context)),
-        content: TextField(
-          controller: passwordController,
-          obscureText: true,
-          decoration: InputDecoration(
-            hintText: 'settings.enter_password'.tr(context),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'settings.confirm_password'.tr(context).toUpperCase(),
+                style: TextStyle(
+                  color: primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                autofocus: true,
+                focusNode: FocusNode()..requestFocus(),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                decoration: InputDecoration(
+                  hintText: 'settings.enter_password'.tr(context),
+                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                onSubmitted: (value) => Navigator.pop(context, value.trim()),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                   OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'settings.cancel'.tr(context),
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: () =>
+                        Navigator.pop(context, passwordController.text.trim()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'settings.confirm'.tr(context),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('settings.cancel'.tr(context)),
-          ),
-          TextButton(
-            onPressed: () =>
-                Navigator.pop(context, passwordController.text.trim()),
-            child: Text('settings.confirm'.tr(context)),
-          ),
-        ],
       ),
     );
   }
@@ -337,17 +511,43 @@ class _SettingsPageState extends State<SettingsPage> {
     );
     String currentLang = languageProvider.locale.languageCode;
 
-    await showDialog(
+    await showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('settings.select_language'.tr(context)),
-        content: Column(
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'settings.select_language'.tr(context),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 16),
             RadioListTile<String>(
               title: const Text('Bahasa Indonesia'),
               value: 'id',
               groupValue: currentLang,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (value) {
                 if (value != null) {
                   languageProvider.setLanguage(value);
@@ -359,6 +559,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: const Text('English'),
               value: 'en',
               groupValue: currentLang,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (value) {
                 if (value != null) {
                   languageProvider.setLanguage(value);
@@ -366,6 +567,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 }
               },
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -376,17 +578,43 @@ class _SettingsPageState extends State<SettingsPage> {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     ThemeMode currentMode = themeProvider.themeMode;
 
-    await showDialog(
+    await showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('settings.theme'.tr(context)),
-        content: Column(
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'settings.theme'.tr(context),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 16),
             RadioListTile<ThemeMode>(
               title: Text('settings.theme_system'.tr(context)),
               value: ThemeMode.system,
               groupValue: currentMode,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (value) {
                 if (value != null) {
                   themeProvider.setThemeMode(value);
@@ -398,6 +626,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text('settings.theme_light'.tr(context)),
               value: ThemeMode.light,
               groupValue: currentMode,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (value) {
                 if (value != null) {
                   themeProvider.setThemeMode(value);
@@ -409,6 +638,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text('settings.theme_dark'.tr(context)),
               value: ThemeMode.dark,
               groupValue: currentMode,
+              activeColor: Theme.of(context).colorScheme.primary,
               onChanged: (value) {
                 if (value != null) {
                   themeProvider.setThemeMode(value);
@@ -416,6 +646,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 }
               },
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -806,6 +1037,51 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 32),
+
+                // ── Zona Berbahaya (Hanya untuk Customer) ──
+                if (_userType == 'customer') ...[  
+                  Text(
+                    'delete_account.section_title'.tr(context),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.delete_forever_outlined, color: Colors.red),
+                      ),
+                      title: Text(
+                        'delete_account.btn_label'.tr(context),
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text('delete_account.btn_desc'.tr(context)),
+                      trailing: const Icon(Icons.chevron_right, color: Colors.red),
+                      onTap: _showDeleteAccountSheet,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
               ],
             ),
     );
@@ -889,6 +1165,287 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         );
       }
+    }
+  }
+
+  void _showDeleteAccountSheet() {
+    final ScrollController scrollController = ScrollController();
+    bool hasScrolledToBottom = false;
+    bool hasAgreed = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          scrollController.addListener(() {
+            if (scrollController.position.atEdge &&
+                scrollController.position.pixels != 0 &&
+                !hasScrolledToBottom) {
+              setSheetState(() => hasScrolledToBottom = true);
+            }
+          });
+
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.85,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                // Handle
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // Header
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          'delete_account.sheet_title'.tr(context),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Scroll hint
+                if (!hasScrolledToBottom)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.arrow_downward, size: 14, color: Colors.orange),
+                        const SizedBox(width: 6),
+                        Text(
+                          'delete_account.scroll_hint'.tr(context),
+                          style: const TextStyle(color: Colors.orange, fontSize: 12, fontStyle: FontStyle.italic),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Warning text (scrollable)
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                    child: Text(
+                      'delete_account.warning_body'.tr(context),
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                      ),
+                    ),
+                  ),
+                ),
+                // Checkbox + Button (bottom fixed)
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.15))),
+                  ),
+                  child: Column(
+                    children: [
+                      InkWell(
+                        onTap: hasScrolledToBottom
+                            ? () => setSheetState(() => hasAgreed = !hasAgreed)
+                            : null,
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: hasAgreed,
+                              onChanged: hasScrolledToBottom
+                                  ? (v) => setSheetState(() => hasAgreed = v ?? false)
+                                  : null,
+                              activeColor: Colors.red,
+                            ),
+                            Expanded(
+                              child: Text(
+                                'delete_account.agree_checkbox'.tr(context),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: hasScrolledToBottom
+                                      ? Theme.of(context).colorScheme.onSurface
+                                      : Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: hasAgreed && hasScrolledToBottom
+                              ? () async {
+                                  Navigator.pop(context);
+                                  final confirm = await showModalBottomSheet<bool>(
+                                    context: context,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (ctx) => Container(
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).scaffoldBackgroundColor,
+                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                                      ),
+                                      padding: const EdgeInsets.all(24),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 40,
+                                            height: 4,
+                                            margin: const EdgeInsets.only(bottom: 24),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.withOpacity(0.3),
+                                              borderRadius: BorderRadius.circular(2),
+                                            ),
+                                          ),
+                                          Text(
+                                            'delete_account.confirm_title'.tr(context),
+                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            'delete_account.confirm_desc'.tr(context),
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                                          ),
+                                          const SizedBox(height: 32),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: OutlinedButton(
+                                                  onPressed: () => Navigator.pop(ctx, false),
+                                                  style: OutlinedButton.styleFrom(
+                                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                                    side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                  ),
+                                                  child: Text(
+                                                    'settings.cancel'.tr(context),
+                                                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                child: ElevatedButton(
+                                                  onPressed: () => Navigator.pop(ctx, true),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: Colors.red,
+                                                    foregroundColor: Colors.white,
+                                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                    elevation: 0,
+                                                  ),
+                                                  child: Text(
+                                                    'delete_account.confirm_btn'.tr(context),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 16),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                  if (confirm == true) _deleteAccount();
+                                }
+                              : null,
+                          icon: const Icon(Icons.delete_forever),
+                          label: Text('delete_account.btn_label'.tr(context)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: hasAgreed && hasScrolledToBottom ? Colors.red : Colors.grey[300],
+                            foregroundColor: hasAgreed && hasScrolledToBottom ? Colors.white : Colors.grey,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount() async {
+    setState(() => _isLoading = true);
+    try {
+      final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
+      final response = await http.post(
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_account'),
+        body: {'user_id': userId},
+      );
+
+      final data = json.decode(response.body);
+      if (data['status'] == true) {
+        // Clear all local storage
+        await storage.deleteAll();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('delete_account.success'.tr(context)),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Navigate back to login
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+            (route) => false,
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'delete_account.error'.tr(context)),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting account: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('delete_account.error'.tr(context)),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 }

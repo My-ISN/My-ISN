@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../services/rent_plan_service.dart';
-import '../localization/app_localizations.dart';
+import '../../services/rent_plan_service.dart';
+import '../../localization/app_localizations.dart';
 import 'rent_plan_detail_page.dart';
 import 'package:intl/intl.dart';
-import '../widgets/custom_app_bar.dart';
-import '../widgets/side_drawer.dart';
+import '../../widgets/custom_app_bar.dart';
+import '../../widgets/side_drawer.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
-  const RentPlanPage({super.key, required this.userData});
+  final bool isTab;
+  const RentPlanPage({super.key, required this.userData, this.isTab = false});
 
   @override
   State<RentPlanPage> createState() => _RentPlanPageState();
@@ -30,9 +31,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
 
   final List<Map<String, String>> _tabs = [
     {'key': 'all', 'label': 'Semua'},
-    {'key': 'new', 'label': 'Baru'},
-    {'key': 'pending', 'label': 'Pending'},
-    {'key': 'masalah', 'label': 'Masalah'},
+    {'key': 'active', 'label': 'Aktif'},
     {'key': 'completed', 'label': 'Selesai'},
   ];
 
@@ -46,7 +45,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
       if (!_tabController.indexIsChanging) {
         setState(() {
           _currentStatus = _tabs[_tabController.index]['key']!;
-          _currentPage = 1; // Reset to first page on tab change
+          _currentPage = 1;
           _fetchRentPlans();
         });
       }
@@ -83,17 +82,9 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(
-        userData: widget.userData,
-        showBackButton: false,
-      ),
-      endDrawer: SideDrawer(userData: widget.userData, activePage: 'rent_plan'),
-      body: Column(
+    Widget content = Column(
         children: [
           _buildHeaderStats(),
-          _buildPremiumSearchBar(),
           _buildTabBar(),
           Expanded(
             child: _isLoading 
@@ -135,7 +126,20 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                 ),
           ),
         ],
+      );
+
+    if (widget.isTab) {
+      return content;
+    }
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: CustomAppBar(
+        userData: widget.userData,
+        showBackButton: false,
       ),
+      endDrawer: SideDrawer(userData: widget.userData, activePage: 'rent_plan'),
+      body: content,
     );
   }
 
@@ -147,9 +151,8 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          _buildStatCard('Total Masuk', _stats['total_masuk']?.toString() ?? '0', Colors.blue),
-          _buildStatCard('Aktiv (New)', _stats['new']?.toString() ?? '0', Colors.green),
-          _buildStatCard('Masalah', _stats['masalah']?.toString() ?? '0', Colors.red),
+          _buildStatCard('Total Rental', _totalCount.toString(), Colors.blue),
+          _buildStatCard('Aktif', _stats['confirmed']?.toString() ?? _stats['active']?.toString() ?? '0', Colors.green),
           _buildStatCard('Selesai', _stats['completed']?.toString() ?? '0', Colors.grey),
         ],
       ),
@@ -185,57 +188,6 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildPremiumSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: TextField(
-          controller: _searchController,
-          onSubmitted: (value) {
-            setState(() => _currentPage = 1);
-            _fetchRentPlans();
-          },
-          onChanged: (value) {
-            setState(() {}); // For suffix icon
-          },
-          decoration: InputDecoration(
-            hintText: 'Cari Invoice atau Nama...',
-            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-            prefixIcon: Icon(Icons.search_rounded, color: _primaryColor),
-            suffixIcon: _searchController.text.isNotEmpty 
-              ? IconButton(
-                  icon: const Icon(Icons.cancel_rounded, size: 20, color: Colors.grey),
-                  onPressed: () {
-                    setState(() {
-                      _searchController.clear();
-                      _currentPage = 1;
-                    });
-                    _fetchRentPlans();
-                  },
-                )
-              : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 18),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildTabBar() {
     return Container(
       width: double.infinity,
@@ -259,18 +211,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
     );
   }
 
-// removed _buildRentalList
-
   Widget _buildRentalCard(Map<String, dynamic> rental) {
-    String clientName = '-';
-    if (rental['first_name'] != null) {
-      clientName = '${rental['first_name']} ${rental['last_name'] ?? ''}';
-    } else if (rental['nama_pribadi'] != null && rental['nama_pribadi'] != '') {
-      clientName = rental['nama_pribadi'];
-    } else if (rental['nama_perusahaan'] != null && rental['nama_perusahaan'] != '') {
-      clientName = rental['nama_perusahaan'];
-    }
-
     final String status = rental['status'] ?? 'new';
     final Color statusColor = _getStatusColor(status);
     final String dueDateStr = rental['invoice_due_date'] ?? '';
@@ -337,7 +278,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                         color: _primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      child: Icon(Icons.person_rounded, color: _primaryColor, size: 28),
+                      child: Icon(Icons.laptop_rounded, color: _primaryColor, size: 28),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -345,14 +286,14 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            clientName,
+                            rental['nama_laptop'] ?? rental['laptop_name'] ?? 'Laptop Rental',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Sewa: ${rental['jenis_sewa'] ?? 'Pribadi'} • ${rental['total_laptop'] ?? 0} Unit',
+                            '${rental['total_laptop'] ?? 0} Unit • ${rental['lama_sewa'] ?? 0} Hari',
                             style: TextStyle(color: Colors.grey[500], fontSize: 13),
                           ),
                         ],
@@ -402,6 +343,9 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
   }
 
   Widget _buildStatusPill(String status, Color color) {
+    String label = status;
+    if (status.toLowerCase() == 'confirmed') label = 'Aktif';
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -409,7 +353,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        status.toUpperCase(),
+        label.toUpperCase(),
         style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
       ),
     );
@@ -419,8 +363,10 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
     switch (status.toLowerCase()) {
       case 'new': return Colors.green;
       case 'pending': return Colors.orange;
+      case 'confirmed':
+      case 'active': return Colors.blue;
       case 'masalah': return Colors.red;
-      case 'completed': return Colors.blue;
+      case 'completed': return Colors.grey;
       default: return Colors.grey;
     }
   }
@@ -429,15 +375,9 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            const Text(
-              'Tampilkan',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
-            ),
-            const SizedBox(width: 8),
-            _buildPremiumDropdown(),
-          ],
+        const Text(
+          'Daftar Rental Saya',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.grey),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -455,39 +395,6 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPremiumDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _primaryColor),
-          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                _currentPage = 1;
-              });
-              _fetchRentPlans();
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 
@@ -520,7 +427,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
             ],
           ),
           child: Text(
-            'Page $_currentPage of $totalPages',
+            'Halaman $_currentPage dari $totalPages',
             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
           ),
         ),
@@ -566,7 +473,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
           Icon(Icons.inbox_rounded, size: 80, color: Colors.grey[200]),
           const SizedBox(height: 16),
           Text(
-            'Tidak ada data rental',
+            'Anda belum memiliki data rental',
             style: TextStyle(color: Colors.grey[400], fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ],

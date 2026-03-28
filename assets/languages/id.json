@@ -14,6 +14,8 @@
     "xin_profile": "Profil",
     "xin_settings": "Pengaturan",
     "xin_logout": "Keluar",
+    "xin_rent_plan": "Rent Plan",
+    "xin_invoice": "Invoice",
     "error_with_msg": "Kesalahan: {message}",
     "success_with_msg": "Berhasil: {message}",
     "update_available": "Pembaruan Tersedia",
@@ -48,6 +50,7 @@
     "late": "Terlambat",
     "present": "Hadir",
     "other": "Lainnya",
+    "under_development": "Fitur ini masih dalam tahap pengembangan. Nantikan segera!",
     "holiday": "Hari Libur",
     "weekend": "Akhir Pekan",
     "fetch_error": "Gagal memuat dashboard. Periksa koneksi internet Anda.",
@@ -79,7 +82,28 @@
     "quick_menu_work_log": "Work\nLog",
     "whats_new": "Apa yang Baru di {version}",
     "update_thanks": "Terima kasih telah memperbarui aplikasi! Berikut adalah perubahan terbaru:",
-    "cool": "Mantap!"
+    "cool": "Mantap!",
+    "rental_active": "Rental Aktif",
+    "total_paid": "Total Lunas",
+    "total_unpaid": "Belum Lunas",
+    "total_invoice": "Total Invoice",
+    "rental_history": "Riwayat Rental",
+    "no_rental_history": "Belum ada riwayat rental",
+    "need_help": "Butuh Bantuan?",
+    "contact_via_wa": "Hubungi via WhatsApp",
+    "available_products": "Produk Tersedia",
+    "invoice": "Invoice",
+    "device": "Perangkat",
+    "installment": "Cicilan",
+    "specification": "Spesifikasi",
+    "processor": "Prosesor",
+    "ram": "RAM",
+    "storage": "Penyimpanan",
+    "stock": "Stok Tersedia",
+    "condition": "Kondisi",
+    "notes": "Catatan",
+    "unit": "Unit",
+    "dashboard_help_msg": "Halo admin My ISN, saya butuh bantuan mengenai produk/rental saya..."
   },
 
   "login": {
@@ -571,5 +595,19 @@
     "showing_x_of_y": "Menampilkan {start} sampai {end} dari {total}",
     "total": "{count} Total",
     "page_x_of_y": "Halaman {current} dari {total}"
+  },
+  "delete_account": {
+    "section_title": "Zona Berbahaya",
+    "btn_label": "Hapus Akun",
+    "btn_desc": "Tindakan ini tidak dapat dibatalkan",
+    "sheet_title": "Peringatan Hapus Akun",
+    "warning_body": "Dengan menghapus akun Anda, semua data pribadi Anda termasuk informasi profil, riwayat transaksi, dan data terkait lainnya akan dihapus secara permanen dari sistem kami.\n\nHal-hal yang perlu Anda ketahui:\n\n• Data yang dihapus tidak dapat dipulihkan.\n• Anda tidak akan bisa login menggunakan akun ini lagi.\n• Anda dapat mendaftar ulang menggunakan email yang sama di kemudian hari.\n• Semua sesi login aktif di perangkat lain akan dihentikan.\n\nJika Anda hanya ingin istirahat, pertimbangkan untuk tidak menghapus akun Anda dan cukup logout saja.\n\nPastikan Anda yakin sebelum melanjutkan. Tim kami tidak dapat membantu memulihkan akun yang sudah dihapus.",
+    "scroll_hint": "Scroll ke bawah untuk melanjutkan",
+    "agree_checkbox": "Saya sudah membaca dan memahami konsekuensi penghapusan akun ini",
+    "confirm_title": "Konfirmasi Terakhir",
+    "confirm_desc": "Apakah Anda benar-benar yakin ingin menghapus akun ini secara permanen? Tindakan ini tidak dapat dibatalkan.",
+    "confirm_btn": "Ya, Hapus Akun Saya",
+    "success": "Akun berhasil dihapus",
+    "error": "Gagal menghapus akun. Silakan coba lagi."
   }
 }

@@ -46,8 +46,28 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
   @override
   Widget build(BuildContext context) {
     final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+    final bool isCustomer = widget.userData['user_type'] == 'customer' || 
+                           widget.userData['user_role_id'] == 21 || 
+                           widget.userData['user_role_id'] == '21';
 
-    final List<BottomNavigationBarItem> items = [
+    final List<BottomNavigationBarItem> items = isCustomer ? [
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.home),
+        label: 'main.xin_dashboard'.tr(context),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.house_rounded),
+        label: 'main.xin_rent_plan'.tr(context),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.receipt_long_rounded),
+        label: 'main.xin_invoice'.tr(context),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.person_outline),
+        label: 'main.xin_profile'.tr(context),
+      ),
+    ] : [
       BottomNavigationBarItem(
         icon: const Icon(Icons.home),
         label: 'main.xin_dashboard'.tr(context),

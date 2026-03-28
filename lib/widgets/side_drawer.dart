@@ -4,7 +4,8 @@ import '../login_page.dart';
 import '../settings_page.dart';
 import '../profile/profile_page.dart';
 import '../attendance_page.dart';
-import '../rent_plan/rent_plan_page.dart';
+import '../rent_plan/staff/rent_plan_page.dart' as staff_rp;
+import '../rent_plan/client/rent_plan_page.dart' as client_rp;
 import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
 import '../work_log/work_log_page.dart';
@@ -119,11 +120,16 @@ class SideDrawer extends StatelessWidget {
                     title: 'dashboard.rent_plan'.tr(context),
                     isActive: activePage == 'rent_plan',
                     onTap: () {
+                      final bool isCustomer = userData['user_type'] == 'customer' || 
+                                             userData['user_role_id'] == 21 || 
+                                             userData['user_role_id'] == '21';
                       Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => RentPlanPage(userData: userData),
+                          builder: (context) => isCustomer 
+                            ? client_rp.RentPlanPage(userData: userData)
+                            : staff_rp.RentPlanPage(userData: userData),
                         ),
                       );
                     },

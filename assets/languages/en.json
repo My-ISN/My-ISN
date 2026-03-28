@@ -14,6 +14,8 @@
     "xin_profile": "Profile",
     "xin_settings": "Settings",
     "xin_logout": "Logout",
+    "xin_rent_plan": "Rent Plan",
+    "xin_invoice": "Invoice",
     "error_with_msg": "Error: {message}",
     "success_with_msg": "Success: {message}",
     "update_available": "Update Available",
@@ -48,6 +50,7 @@
     "late": "Late",
     "present": "Present",
     "other": "Other",
+    "under_development": "This feature is currently under development. Stay tuned!",
     "holiday": "Holiday",
     "weekend": "Weekend",
     "fetch_error": "Failed to load dashboard. Check your internet connection.",
@@ -79,7 +82,28 @@
     "quick_menu_work_log": "Work\nLog",
     "whats_new": "What's New in {version}",
     "update_thanks": "Thank you for updating the app! Here are the latest changes:",
-    "cool": "Cool!"
+    "cool": "Cool!",
+    "rental_active": "Active Rentals",
+    "total_paid": "Total Paid",
+    "total_unpaid": "Unpaid",
+    "total_invoice": "Total Invoice",
+    "rental_history": "Rental History",
+    "no_rental_history": "No rental history yet",
+    "need_help": "Need Help?",
+    "contact_via_wa": "Contact via WhatsApp",
+    "available_products": "Available Products",
+    "invoice": "Invoice",
+    "device": "Device",
+    "installment": "Installment",
+    "specification": "Specification",
+    "processor": "Processor",
+    "ram": "RAM",
+    "storage": "Storage",
+    "stock": "Available Stock",
+    "condition": "Condition",
+    "notes": "Notes",
+    "unit": "Unit",
+    "dashboard_help_msg": "Hello My ISN admin, I need help regarding my products or rental..."
   },
 
   "login": {
@@ -571,5 +595,19 @@
     "showing_x_of_y": "Showing {start} to {end} of {total}",
     "total": "{count} Total",
     "page_x_of_y": "Page {current} of {total}"
+  },
+  "delete_account": {
+    "section_title": "Danger Zone",
+    "btn_label": "Delete Account",
+    "btn_desc": "This action cannot be undone",
+    "sheet_title": "Account Deletion Warning",
+    "warning_body": "By deleting your account, all your personal data including profile information, transaction history, and other related data will be permanently deleted from our system.\n\nThings you need to know:\n\n\u2022 Deleted data cannot be recovered.\n\u2022 You will no longer be able to log in using this account.\n\u2022 You can re-register using the same email address later.\n\u2022 All active login sessions on other devices will be terminated.\n\nIf you just want a break, consider not deleting your account and simply logging out.\n\nMake sure you are certain before proceeding. Our team cannot help recover a deleted account.",
+    "scroll_hint": "Scroll down to continue",
+    "agree_checkbox": "I have read and understand the consequences of deleting this account",
+    "confirm_title": "Final Confirmation",
+    "confirm_desc": "Are you absolutely sure you want to permanently delete this account? This action cannot be undone.",
+    "confirm_btn": "Yes, Delete My Account",
+    "success": "Account deleted successfully",
+    "error": "Failed to delete account. Please try again."
   }
 }

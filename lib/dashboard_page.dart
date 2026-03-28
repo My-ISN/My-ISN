@@ -16,7 +16,8 @@ import 'services/version_check_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'rent_plan/rent_plan_page.dart';
+import 'rent_plan/staff/rent_plan_page.dart' as staff_rp;
+import 'rent_plan/client/rent_plan_page.dart' as client_rp;
 import 'todo_list/todo_list_page.dart';
 import 'employees/employees_page.dart';
 import 'work_log/work_log_page.dart';
@@ -33,6 +34,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   bool _isLoading = true;
   Map<String, dynamic> _dashboardData = {};
+  Map<String, dynamic> _customerDashboardData = {};
   int _currentIndex = 0;
   final storage = const FlutterSecureStorage();
 
@@ -218,7 +220,13 @@ class _DashboardPageState extends State<DashboardPage> {
         if (mounted) {
           setState(() {
             _dashboardData = data['data'];
-            _isLoading = false;
+            // If customer, also fetch customer specific dashboard info
+            final user = _dashboardData['user'] ?? widget.userData;
+            if (user['user_type'] == 'customer' || user['user_role_id'] == 21 || user['user_role_id'] == '21') {
+              _fetchCustomerDashboard();
+            } else {
+              _isLoading = false;
+            }
           });
         }
       }
@@ -235,18 +243,50 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  Future<void> _fetchCustomerDashboard() async {
+    try {
+      final userId = widget.userData['id'] ?? widget.userData['user_id'];
+      final url =
+          'https://foxgeen.com/HRIS/mobileapi/get_customer_dashboard?user_id=$userId';
+
+      final response = await http.get(Uri.parse(url));
+      final data = json.decode(response.body);
+
+      if (data['status'] == true) {
+        if (mounted) {
+          setState(() {
+            _customerDashboardData = data['data'];
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching customer dashboard data: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = _dashboardData['user'] ?? widget.userData;
+    final bool isCustomer = user['user_type'] == 'customer' || 
+                           user['user_role_id'] == 21 || 
+                           user['user_role_id'] == '21';
     final bool hasPayroll = _hasPermission('mobile_payroll_enable');
-    final List<Widget> pages = [
+
+    final List<Widget> pages = isCustomer ? [
       _buildHomeContent(),
-      AttendancePage(userData: _dashboardData['user'] ?? widget.userData),
+      client_rp.RentPlanPage(userData: user, isTab: true),
+      _buildUnderDevelopmentPage('main.xin_invoice'.tr(context)),
+      ProfilePage(userData: user, isTab: true),
+    ] : [
+      _buildHomeContent(),
+      AttendancePage(userData: user),
       if (hasPayroll)
-        PayrollPage(userData: _dashboardData['user'] ?? widget.userData),
-      ProfilePage(
-        userData: _dashboardData['user'] ?? widget.userData,
-        isTab: true,
-      ),
+        PayrollPage(userData: user),
+      ProfilePage(userData: user, isTab: true),
     ];
 
     // Ensure _currentIndex is within bounds if pages list changed
@@ -254,27 +294,37 @@ class _DashboardPageState extends State<DashboardPage> {
       _currentIndex = pages.length - 1;
     }
 
-
+    // Determine activePage for Drawer
+    String activePage = '';
+    if (isCustomer) {
+      switch (_currentIndex) {
+        case 0: activePage = 'dashboard'; break;
+        case 1: activePage = 'rent_plan'; break;
+        case 2: activePage = 'invoice'; break;
+        case 3: activePage = 'profile'; break;
+      }
+    } else {
+      if (_currentIndex == 0) activePage = 'dashboard';
+      else if (_currentIndex == 1) activePage = 'attendance';
+      else if (hasPayroll && _currentIndex == 2) activePage = 'payroll';
+      else if (_currentIndex == (hasPayroll ? 3 : 2)) activePage = 'profile';
+    }
 
     return Scaffold(
       appBar: CustomAppBar(
-        userData: _dashboardData['user'] ?? widget.userData,
+        userData: user,
         showBackButton: false,
       ),
       body: IndexedStack(index: _currentIndex, children: pages),
       endDrawer: SideDrawer(
-        userData: _dashboardData['user'] ?? widget.userData,
-        activePage: _currentIndex == 0
-            ? 'dashboard'
-            : (_currentIndex == 1
-                ? 'attendance'
-                : (hasPayroll && _currentIndex == 2
-                    ? 'payroll'
-                    : (_currentIndex == (hasPayroll ? 3 : 2) ? 'profile' : ''))),
+        userData: user,
+        activePage: activePage,
         onTabSelected: (index) {
           int targetIndex = index;
-          if (!hasPayroll && index > 2) {
-            targetIndex = index - 1;
+          if (!isCustomer) {
+            if (!hasPayroll && index > 2) {
+              targetIndex = index - 1;
+            }
           }
           setState(() {
             _currentIndex = targetIndex;
@@ -283,12 +333,50 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
-        userData: _dashboardData['user'] ?? widget.userData,
+        userData: user,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
+      ),
+    );
+  }
+
+  Widget _buildUnderDevelopmentPage(String title) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7E57C2).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.construction_rounded,
+              size: 64,
+              color: Color(0xFF7E57C2),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'dashboard.under_development'.tr(context),
+            style: TextStyle(
+              color: Colors.grey[500],
+              fontSize: 14,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -350,6 +438,11 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildHomeContent() {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
+
+    final user = _dashboardData['user'] ?? widget.userData;
+    if (user['user_type'] == 'customer' || user['user_role_id'] == 21 || user['user_role_id'] == '21') {
+      return _buildCustomerContent();
+    }
 
     final attendance = _dashboardData['attendance'];
     final bool hasClockIn = attendance != null &&
@@ -703,12 +796,16 @@ class _DashboardPageState extends State<DashboardPage> {
                     Icons.house_rounded,
                     const Color(0xFF7E57C2),
                     () {
+                      final user = _dashboardData['user'] ?? widget.userData;
+                      final bool isCustomer = user['user_type'] == 'customer' || 
+                                             user['user_role_id'] == 21 || 
+                                             user['user_role_id'] == '21';
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => RentPlanPage(
-                            userData: _dashboardData['user'] ?? widget.userData,
-                          ),
+                          builder: (context) => isCustomer 
+                            ? client_rp.RentPlanPage(userData: user)
+                            : staff_rp.RentPlanPage(userData: user),
                         ),
                       );
                     },
@@ -946,5 +1043,377 @@ class _DashboardPageState extends State<DashboardPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildCustomerContent() {
+    final stats = _customerDashboardData['stats'] ?? {};
+    final products = _customerDashboardData['products'] ?? [];
+    final contact = _customerDashboardData['contact'] ?? {};
+
+    return RefreshIndicator(
+      onRefresh: _fetchDashboardData,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Profile Section (reuse existing style)
+            _buildProfileCard(),
+            const SizedBox(height: 24),
+
+            // Customer Stats Grid
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    'dashboard.rental_active'.tr(context),
+                    '${stats['active_rentals'] ?? 0}',
+                    Icons.laptop_mac_rounded,
+                    const Color(0xFF2ECC71),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildStatCard(
+                    'dashboard.total_paid'.tr(context),
+                    'Rp ${_formatPrice(stats['total_paid'] ?? 0)}',
+                    Icons.check_circle_outline_rounded,
+                    const Color(0xFF2ECC71),
+                    isOutline: true,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    'dashboard.total_unpaid'.tr(context),
+                    'Rp ${_formatPrice(stats['total_unpaid'] ?? 0)}',
+                    Icons.error_outline_rounded,
+                    const Color(0xFFE74C3C),
+                    isOutline: true,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildStatCard(
+                    'dashboard.total_invoice'.tr(context),
+                    '${stats['total_invoice'] ?? 0}',
+                    Icons.receipt_long_rounded,
+                    const Color(0xFF7E57C2),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Help Section
+            _buildHelpSection(contact),
+            const SizedBox(height: 16),
+
+            // Products Available
+            _buildProductList(products),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white24)
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() => _currentIndex = (_hasPermission('mobile_payroll_enable') ? 3 : 2));
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                ClipOval(
+                  child: Container(
+                    width: 60, height: 60,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? const Color(0xFFF1F5F9)
+                        : Theme.of(context).scaffoldBackgroundColor,
+                    child: ((_dashboardData['user']?['profile_photo'] ?? widget.userData['profile_photo']) != null && 
+                            (_dashboardData['user']?['profile_photo'] ?? widget.userData['profile_photo']).toString().isNotEmpty)
+                        ? Image.network(
+                            'https://foxgeen.com/HRIS/public/uploads/users/thumb/${_dashboardData['user']?['profile_photo'] ?? widget.userData['profile_photo']}',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 36, color: Colors.white),
+                          )
+                        : const Icon(Icons.person, size: 36, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _dashboardData['user']?['nama'] ?? widget.userData['nama'] ?? 'User',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '@${_dashboardData['user']?['username'] ?? widget.userData['username'] ?? 'username'}',
+                        style: const TextStyle(color: Colors.grey),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                _buildRoleBadge(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.green.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.green.withOpacity(0.2)),
+      ),
+      child: Text(
+        (_dashboardData['user']?['role_name'] ?? widget.userData['role_name'] ?? 'Staff').toString().roleTr(context),
+        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: const Color(0xFF7E57C2)),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+
+  Widget _buildHelpSection(Map contact) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF3F51B5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('BUTUH BANTUAN?', style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(contact['company_name'] ?? 'PT. ISKOM SARANA NUSANTARA', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+          const SizedBox(height: 4),
+          Text(contact['address'] ?? '', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+                            onPressed: () => _launchWhatsApp(
+                '0895384314416',
+                'dashboard.dashboard_help_msg'.tr(context),
+              ),
+              icon: const Icon(Icons.chat, color: Colors.white, size: 18),
+              label: Text('dashboard.contact_via_wa'.tr(context), style: const TextStyle(fontSize: 11, color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF25D366),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductList(List products) {
+    final String laptopBaseUrl = 'https://foxgeen.com/HRIS/uploads/products/';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('dashboard.available_products'.tr(context), Icons.laptop_windows_rounded),
+        const SizedBox(height: 12),
+        ...products.map((p) => InkWell(
+          onTap: () => _showProductSpecs(p),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.withOpacity(0.1)),
+            ),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    '$laptopBaseUrl${p['gambar']}',
+                    width: 40, height: 40, fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 40, height: 40, color: Colors.grey.withOpacity(0.1),
+                      child: const Icon(Icons.laptop, size: 24, color: Colors.grey),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(p['nama_laptop'] ?? 'Laptop', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11), overflow: TextOverflow.ellipsis),
+                      Text('${p['procesor'] ?? 'Core'} - ${p['ram'] ?? '8GB'}', style: TextStyle(color: Colors.grey[500], fontSize: 9)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, size: 20, color: Colors.grey.withOpacity(0.5)),
+              ],
+            ),
+          ),
+        )).toList(),
+      ],
+    );
+  }
+
+  void _showProductSpecs(Map p) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3), borderRadius: BorderRadius.circular(2)),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('dashboard.available_products'.tr(context).toUpperCase(), 
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, letterSpacing: 1.2)),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        'https://foxgeen.com/HRIS/uploads/products/${p['gambar']}',
+                        height: 200, width: double.infinity, fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: 200, width: double.infinity, color: Colors.grey.withOpacity(0.1),
+                          child: const Icon(Icons.laptop, size: 80, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(p['nama_laptop'] ?? 'Laptop', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    if (p['catatan'] != null && p['catatan'].toString().isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(p['catatan'], style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                    ],
+                    const SizedBox(height: 32),
+                    Text('dashboard.specification'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    const SizedBox(height: 16),
+                    _buildSpecItem('dashboard.processor'.tr(context), p['procesor'] ?? '-'),
+                    _buildSpecItem('dashboard.ram'.tr(context), p['ram'] ?? '-'),
+                    _buildSpecItem('dashboard.storage'.tr(context), p['hardisk'] ?? '-'),
+                    _buildSpecItem('dashboard.stock'.tr(context), '${p['stok'] ?? 0} ${'dashboard.unit'.tr(context)}'),
+                    _buildSpecItem('dashboard.condition'.tr(context), (p['kondisi'] ?? '-').toString().toUpperCase()),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpecItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
+
+  String _formatPrice(dynamic price) {
+    if (price == null) return '0';
+    String s = price.toString();
+    RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    return s.replaceAllMapped(reg, (Match m) => '${m[1]}.');
+  }
+
+  Future<void> _launchWhatsApp(String phone, String message) async {
+    // Remove leading 0 and replace with 62
+    String formattedPhone = phone;
+    if (phone.startsWith('0')) {
+      formattedPhone = '62${phone.substring(1)}';
+    }
+
+    final String urlString =
+        "whatsapp://send?phone=$formattedPhone&text=${Uri.encodeComponent(message)}";
+    final Uri url = Uri.parse(urlString);
+
+    try {
+      if (!await launchUrl(url)) {
+        // Fallback to web link if whatsapp app is not installed
+        final String webUrlString =
+            "https://wa.me/$formattedPhone?text=${Uri.encodeComponent(message)}";
+        final Uri webUrl = Uri.parse(webUrlString);
+        if (!await launchUrl(webUrl, mode: LaunchMode.externalApplication)) {
+          throw Exception('Could troubleshoot launch WhatsApp');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error launching WhatsApp: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('settings.wa_error'.tr(context, args: {'error': e.toString()}))),
+        );
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/rent_plan_service.dart';
+import '../../services/rent_plan_service.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:crypto/crypto.dart';
@@ -800,21 +800,6 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                       child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                     );
                   },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 120,
-                      width: double.infinity,
-                      color: Colors.grey[50],
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.broken_image_outlined, color: Colors.red, size: 30),
-                          const SizedBox(height: 6),
-                          Text('Gagal memuat gambar', style: TextStyle(color: Colors.grey[600], fontSize: 11)),
-                        ],
-                      ),
-                    );
-                  },
                 ),
               ),
             ),
@@ -824,15 +809,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     );
   }
 
-  Widget _buildAddressRow(String label, String address) {
+  Widget _buildAddressRow(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+        Text(label, style: TextStyle(fontSize: 9, color: Colors.grey[500], fontWeight: FontWeight.bold, letterSpacing: 0.5)),
         const SizedBox(height: 6),
-        Text(address, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 1.4)),
+        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, height: 1.4)),
       ],
     );
   }
 }
-
