@@ -79,7 +79,7 @@
     "quick_menu_rent_plan": "Rencana\nSewa",
     "quick_menu_todo_list": "Daftar\nTugas",
     "quick_menu_employees": "Karyawan",
-    "quick_menu_work_log": "Work\nLog",
+    "quick_menu_work_log": "Log\nKerja",
     "whats_new": "Apa yang Baru di {version}",
     "update_thanks": "Terima kasih telah memperbarui aplikasi! Berikut adalah perubahan terbaru:",
     "cool": "Mantap!",
@@ -103,7 +103,9 @@
     "condition": "Kondisi",
     "notes": "Catatan",
     "unit": "Unit",
-    "dashboard_help_msg": "Halo admin My ISN, saya butuh bantuan mengenai produk/rental saya..."
+    "dashboard_help_msg": "Halo admin My ISN, saya butuh bantuan mengenai produk/rental saya...",
+    "finance": "Keuangan",
+    "quick_menu_finance": "Keuangan"
   },
 
   "login": {
@@ -449,8 +451,8 @@
     "none": "Tidak Ada",
     "per_month": "Per Bulan",
     "status_work_label": "Status Kerja",
-    "work_log": "Work Log",
-    "status_target_worklog": "Status Target Work Log",
+    "work_log": "Log Kerja",
+    "status_target_worklog": "Status Target Log Kerja",
     "payslip_type": "Tipe Slip Gaji",
     "overview": {
       "contact_info": "Informasi Kontak",
@@ -527,16 +529,16 @@
     "default_dept": "Umum"
   },
   "work_log": {
-    "title": "Work Log",
+    "title": "Log Kerja",
     "add_log": "Tambah Log",
     "my_summary": "Ringkasan Saya",
     "monthly_target": "Target Bulanan",
     "completed_items": "Item Selesai",
     "items": "Item",
-    "no_logs": "Belum ada Work Log",
+    "no_logs": "Belum ada Log Kerja",
     "page_x_of_y": "Halaman {current} dari {total}",
-    "create_title": "Buat Work Log",
-    "edit_title": "Edit Work Log",
+    "create_title": "Buat Log Kerja",
+    "edit_title": "Edit Log Kerja",
     "select_date": "Pilih Tanggal",
     "add_item": "Tambah Item",
     "item_hint": "Apa yang Anda kerjakan?",
@@ -547,16 +549,16 @@
     "search_job": "Cari pekerjaan...",
     "showing_x_of_y": "Menampilkan {current} dari {total}",
     "total": "{count} Total",
-    "save_success": "Work log berhasil disimpan",
-    "confirm_save": "Simpan Work Log ini?",
-    "log_details": "Detail Work Log",
+    "save_success": "Log Kerja berhasil disimpan",
+    "confirm_save": "Simpan Log Kerja ini?",
+    "log_details": "Detail Log Kerja",
     "date": "Tanggal",
     "number": "Nomor Log",
-    "delete_confirm_title": "Hapus Work Log?",
+    "delete_confirm_title": "Hapus Log Kerja?",
     "delete_confirm_desc": "Data yang dihapus tidak dapat dikembalikan.",
-    "delete_success": "Work Log berhasil dihapus",
+    "delete_success": "Log Kerja berhasil dihapus",
     "fetch_details_failed": "Gagal memuat detail.",
-    "save_failed": "Gagal menyimpan work log",
+    "save_failed": "Gagal menyimpan Log Kerja",
     "conn_error": "Kesalahan koneksi ke server"
   },
   "rent_plan": {
@@ -565,7 +567,8 @@
     "completed_plan": "Rencana Selesai",
     "manage_plans": "Kelola rencana penyewaan Anda",
     "no_detail_data": "Belum Ada Data Detail",
-    "list_will_appear": "Daftar penyewaan Anda akan muncul di sini."
+    "list_will_appear": "Daftar penyewaan Anda akan muncul di sini.",
+    "add_rental": "Tambah Rental"
   },
   "todo_list": {
     "title": "Daftar Tugas",

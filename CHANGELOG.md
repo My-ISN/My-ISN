@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.13.0] - 2026-03-28
+
+### Added
+
+- **Modul Hutang Premium**: Desain ulang total dialog "Tambah Hutang" dan "Bayar Cicilan" menggunakan **Premium Bottom Sheet** yang sepenuhnya *theme-aware* (support Dark/Light Mode) dan memiliki estetika *high-fidelity*.
+- **Hapus Hutang**: Fitur penghapusan data hutang permanen lengkap dengan sinkronisasi ke tabel cicilan dan dialog konfirmasi keamanan.
+- **Mandatori Bukti Pembayaran**: Mewajibkan unggahan file bukti transfer untuk setiap transaksi hutang dengan implementasi `MultipartRequest` dan validasi *real-time*.
+- **Modul Tambah Rent Plan**: Implementasi halaman baru untuk registrasi sewa laptop dengan validasi wilayah (Provinsi/Kota/Kecamatan/Desa) dan pilihan jaminan yang dinamis.
+- **Dasbor Customer**: Peningkatan visual pada halaman dashboard untuk tipe user **Customer**, mencakup ringkasan sewa aktif dan status pembayaran.
+- **Modul Finance (WIP)**: Kerangka dasar modul keuangan perusahaan (under development) untuk pemantauan arus kas dan piutang.
+
+### Changed
+
+- **Logika Pembayaran Sebagian**: Sisa pembayaran kini tetap berada pada baris cicilan bulan berjalan (tidak membuat baris baru), sehingga riwayat pembayaran lebih bersih dan akurat.
+- **Sinkronisasi Saldo Otomatis**: Perbaikan algoritma backend agar total "Dibayar" pada ringkasan sewa menjumlahkan seluruh `paid_amount` secara *real-time*.
+- **Penataan Ulang UI (Tab EDIT)**: Reorder section untuk alur kerja yang lebih intuitif: Data Penyewa → Alamat KTP → Domisili → Dokumen Jaminan → Detail Sewa (bawah).
+- **Standarisasi UI Popup**: Seluruh dialog input (Add Rent Plan, Add Debt, Pay Installment, Todo) kini menggunakan format **Premium Bottom Sheet** yang konsisten, responsif, dan elegan.
+- **Visual Feedback Dinamis**: Warna pill tab "HUTANG" kini otomatis berubah merah hanya jika terdapat hutang aktif. Aksen merah pada menu "Belum Ada Hutang" diperkental menggunakan `RedAccent`.
+- **Performance Optimization**: Optimasi query database pada dashboard dan detail rental untuk meminimalkan waktu loading data yang kompleks.
+
+### Fixed
+
+- **Payment Validation**: Validasi input nominal agar tidak dapat melebihi sisa kewajiban cicilan bulan berjalan.
+- **Null-Safety Fix**: Perbaikan error `withOpacity()` pada warna dinamis saat berpindah tema (Dark/Light mode).
+- **History UI Cleanup**: Perbaikan tampilan list riwayat cicilan agar lebih responsif dan informatif.
+
 ## [0.12.2] - 2026-03-28
 
 ### Added

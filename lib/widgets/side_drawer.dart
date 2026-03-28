@@ -9,6 +9,7 @@ import '../rent_plan/client/rent_plan_page.dart' as client_rp;
 import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
 import '../work_log/work_log_page.dart';
+import '../finance/finance_page.dart';
 import '../localization/app_localizations.dart';
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -188,6 +189,21 @@ class SideDrawer extends StatelessWidget {
                       );
                     },
                   ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.payments_rounded,
+                  title: 'dashboard.finance'.tr(context),
+                  isActive: activePage == 'finance',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FinancePage(userData: userData),
+                      ),
+                    );
+                  },
+                ),
 
 
                 _buildMenuItem(

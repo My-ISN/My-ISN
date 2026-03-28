@@ -175,18 +175,20 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
     return Scaffold(
 
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(userData: widget.userData, showBackButton: true),
+      appBar: CustomAppBar(
+        userData: widget.userData, 
+        showBackButton: true,
+        title: widget.estimateId == null 
+          ? 'work_log.create_title'.tr(context)
+          : 'work_log.edit_title'.tr(context),
+        showActions: false,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.estimateId == null 
-                ? 'work_log.create_title'.tr(context)
-                : 'work_log.edit_title'.tr(context),
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
+            const SizedBox(height: 10),
 
             const SizedBox(height: 25),
             

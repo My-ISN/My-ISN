@@ -21,6 +21,7 @@ import 'rent_plan/client/rent_plan_page.dart' as client_rp;
 import 'todo_list/todo_list_page.dart';
 import 'employees/employees_page.dart';
 import 'work_log/work_log_page.dart';
+import 'finance/finance_page.dart';
 
 
 class DashboardPage extends StatefulWidget {
@@ -893,6 +894,21 @@ class _DashboardPageState extends State<DashboardPage> {
                       );
                     },
                   ),
+                _buildQuickMenuCard(
+                  'dashboard.quick_menu_finance'.tr(context),
+                  Icons.payments_rounded,
+                  const Color(0xFFF39C12),
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FinancePage(
+                          userData: _dashboardData['user'] ?? widget.userData,
+                        ),
+                      ),
+                    );
+                  },
+                ),
 
               ],
             ),

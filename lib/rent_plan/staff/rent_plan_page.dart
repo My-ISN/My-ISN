@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../services/rent_plan_service.dart';
-import '../../localization/app_localizations.dart';
 import 'rent_plan_detail_page.dart';
+import 'add_rent_plan_page.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/side_drawer.dart';
+import '../../localization/app_localizations.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -143,6 +144,23 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
       ),
       endDrawer: SideDrawer(userData: widget.userData, activePage: 'rent_plan'),
       body: content,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddRentPlanPage(userData: widget.userData),
+            ),
+          );
+          if (result == true) {
+            _fetchRentPlans();
+          }
+        },
+        backgroundColor: _primaryColor,
+        icon: const Icon(Icons.add_shopping_cart_rounded, color: Colors.white),
+        label: Text('rent_plan.add_rental'.tr(context), 
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
     );
   }
 

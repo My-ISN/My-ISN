@@ -211,7 +211,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
           },
           backgroundColor: _primaryColor,
           elevation: 4,
-          icon: const Icon(Icons.add_rounded, color: Colors.white),
+          icon: const Icon(Icons.edit_note_rounded, color: Colors.white),
           label: Text('work_log.add_log'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         )
       : null,

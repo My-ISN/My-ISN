@@ -103,7 +103,9 @@
     "condition": "Condition",
     "notes": "Notes",
     "unit": "Unit",
-    "dashboard_help_msg": "Hello My ISN admin, I need help regarding my products or rental..."
+    "dashboard_help_msg": "Hello My ISN admin, I need help regarding my products or rental...",
+    "finance": "Finance",
+    "quick_menu_finance": "Finance"
   },
 
   "login": {
@@ -565,7 +567,8 @@
     "completed_plan": "Completed Plan",
     "manage_plans": "Manage your rental plans",
     "no_detail_data": "No Detailed Data",
-    "list_will_appear": "Your rental list will appear here."
+    "list_will_appear": "Your rental list will appear here.",
+    "add_rental": "Add Rental"
   },
   "todo_list": {
     "title": "Todo List",

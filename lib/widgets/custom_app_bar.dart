@@ -117,6 +117,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool showBackButton;
   final String? title;
   final PreferredSizeWidget? bottom;
+  final bool showActions;
 
   const CustomAppBar({
     super.key,
@@ -124,6 +125,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.showBackButton = false,
     this.title,
     this.bottom,
+    this.showActions = true,
   });
 
   @override
@@ -221,7 +223,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
         ),
       ),
       bottom: widget.bottom,
-      actions: [
+      actions: widget.showActions ? [
         ValueListenableBuilder<int>(
           valueListenable: _notifManager.unreadCount,
           builder: (context, count, child) {
@@ -308,7 +310,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
           ),
         ),
         const SizedBox(width: 16),
-      ],
+      ] : [],
     );
   }
 }
