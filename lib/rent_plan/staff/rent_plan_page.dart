@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../services/rent_plan_service.dart';
 import 'rent_plan_detail_page.dart';
@@ -20,22 +21,22 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
   final RentPlanService _rentPlanService = RentPlanService();
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
   
   bool _isLoading = true;
   List<dynamic> _rentals = [];
   Map<String, dynamic> _stats = {};
-  String _currentStatus = 'all';
+  String _currentStatus = 'new';
   int _currentPage = 1;
   int _selectedLimit = 10;
   int _totalCount = 0;
   final List<int> _limitOptions = [10, 25, 50, 100];
 
   final List<Map<String, String>> _tabs = [
-    {'key': 'all', 'label': 'Semua'},
-    {'key': 'new', 'label': 'Baru'},
-    {'key': 'pending', 'label': 'Pending'},
-    {'key': 'masalah', 'label': 'Masalah'},
-    {'key': 'completed', 'label': 'Selesai'},
+    {'key': 'new', 'label': 'rent_plan.filter.new'},
+    {'key': 'pending', 'label': 'rent_plan.filter.pending'},
+    {'key': 'masalah', 'label': 'rent_plan.filter.problem'},
+    {'key': 'completed', 'label': 'rent_plan.filter.completed'},
   ];
 
   Color get _primaryColor => Theme.of(context).colorScheme.primary;
@@ -54,6 +55,14 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
       }
     });
     _fetchRentPlans();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   Future<void> _fetchRentPlans() async {
@@ -77,7 +86,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Gagal mengambil data')),
+          SnackBar(content: Text(response['message'] ?? 'rent_plan.failed_fetch'.tr(context))),
         );
       }
     }
@@ -172,10 +181,10 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          _buildStatCard('Total Masuk', _stats['total_masuk']?.toString() ?? '0', Colors.blue),
-          _buildStatCard('Aktiv (New)', _stats['new']?.toString() ?? '0', Colors.green),
-          _buildStatCard('Masalah', _stats['masalah']?.toString() ?? '0', Colors.red),
-          _buildStatCard('Selesai', _stats['completed']?.toString() ?? '0', Colors.grey),
+          _buildStatCard('rent_plan.stats.new'.tr(context), _stats['new']?.toString() ?? '0', Colors.green),
+          _buildStatCard('rent_plan.stats.pending'.tr(context), _stats['pending']?.toString() ?? '0', Colors.orange),
+          _buildStatCard('rent_plan.stats.problem'.tr(context), _stats['masalah']?.toString() ?? '0', Colors.red),
+          _buildStatCard('rent_plan.stats.completed'.tr(context), _stats['completed']?.toString() ?? '0', Colors.grey),
         ],
       ),
     );
@@ -227,15 +236,18 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
         ),
         child: TextField(
           controller: _searchController,
-          onSubmitted: (value) {
-            setState(() => _currentPage = 1);
-            _fetchRentPlans();
-          },
           onChanged: (value) {
+            if (_debounce?.isActive ?? false) _debounce!.cancel();
+            _debounce = Timer(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                setState(() => _currentPage = 1);
+                _fetchRentPlans();
+              }
+            });
             setState(() {}); // For suffix icon
           },
           decoration: InputDecoration(
-            hintText: 'Cari Invoice atau Nama...',
+            hintText: 'rent_plan.search_hint'.tr(context),
             hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
             prefixIcon: Icon(Icons.search_rounded, color: _primaryColor),
             suffixIcon: _searchController.text.isNotEmpty 
@@ -279,7 +291,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
         indicatorColor: _primaryColor,
         indicatorWeight: 3,
         indicatorSize: TabBarIndicatorSize.label,
-        tabs: _tabs.map((tab) => Tab(text: tab['label'])).toList(),
+        tabs: _tabs.map((tab) => Tab(text: tab['label']!.tr(context))).toList(),
       ),
     );
   }
@@ -375,7 +387,12 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Sewa: ${rental['jenis_sewa'] ?? 'Pribadi'} • ${rental['total_laptop'] ?? 0} Unit',
+                            'rent_plan.rental_type_laptop_count'.tr(context, args: {
+                              'type': (rental['jenis_sewa'] ?? 'pribadi').toString().toLowerCase() == 'perusahaan' 
+                                ? 'rent_plan.company'.tr(context) 
+                                : 'rent_plan.personal'.tr(context),
+                              'count': (rental['total_laptop'] ?? 0).toString()
+                            }),
                             style: TextStyle(color: Colors.grey[500], fontSize: 13),
                           ),
                         ],
@@ -393,7 +410,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Total Biaya', style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
+                        Text('rent_plan.total_cost'.tr(context), style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
                         const SizedBox(height: 4),
                         Text(currencyFormat.format(totalHarga), 
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -402,10 +419,12 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('Sisa Waktu', style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
+                        Text('rent_plan.time_remaining'.tr(context), style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
                         const SizedBox(height: 4),
                         Text(
-                          daysLeft < 0 ? '${daysLeft.abs()} Hari Terlambat' : (daysLeft == 0 ? 'Hari Ini' : '$daysLeft Hari'),
+                          daysLeft < 0 
+                            ? 'rent_plan.days_late'.tr(context, args: {'days': daysLeft.abs().toString()}) 
+                            : (daysLeft == 0 ? 'rent_plan.today'.tr(context) : 'rent_plan.days_left'.tr(context, args: {'days': daysLeft.toString()})),
                           style: TextStyle(
                             fontWeight: FontWeight.bold, 
                             fontSize: 15,
@@ -432,10 +451,21 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        status.toUpperCase(),
+        _getRentalStatusLabel(status),
         style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
       ),
     );
+  }
+
+  String _getRentalStatusLabel(String status) {
+    switch (status.toLowerCase()) {
+      case 'new': return 'rent_plan.status_new'.tr(context);
+      case 'pending': return 'rent_plan.status_pending'.tr(context);
+      case 'confirmed': return 'rent_plan.status_active'.tr(context);
+      case 'masalah': return 'rent_plan.status_problem'.tr(context);
+      case 'completed': return 'rent_plan.status_completed'.tr(context);
+      default: return status.toUpperCase();
+    }
   }
 
   Color _getStatusColor(String status) {
@@ -454,9 +484,9 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
       children: [
         Row(
           children: [
-            const Text(
-              'Tampilkan',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+            Text(
+              'rent_plan.show'.tr(context),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
             ),
             const SizedBox(width: 8),
             _buildPremiumDropdown(),
@@ -469,7 +499,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            '$_totalCount total',
+            'rent_plan.total_count'.tr(context, args: {'count': _totalCount.toString()}),
             style: TextStyle(
               color: _primaryColor,
               fontSize: 12,
@@ -543,7 +573,10 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
             ],
           ),
           child: Text(
-            'Page $_currentPage of $totalPages',
+            'rent_plan.page_x_of_y'.tr(context, args: {
+              'current': _currentPage.toString(),
+              'total': totalPages.toString(),
+            }),
             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
           ),
         ),
@@ -589,7 +622,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
           Icon(Icons.inbox_rounded, size: 80, color: Colors.grey[200]),
           const SizedBox(height: 16),
           Text(
-            'Tidak ada data rental',
+            'rent_plan.empty_data'.tr(context),
             style: TextStyle(color: Colors.grey[400], fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ],

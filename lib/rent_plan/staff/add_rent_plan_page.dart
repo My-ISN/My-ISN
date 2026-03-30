@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../services/rent_plan_service.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../localization/app_localizations.dart';
 
 class AddRentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -115,7 +116,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Gagal memuat data formulir')),
+          SnackBar(content: Text(response['message'] ?? 'rent_plan.error.fetch_failed'.tr(context))),
         );
         Navigator.pop(context);
       }
@@ -228,7 +229,6 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     if (_itemRows[index]['laptop_id'] == null) return;
     int qty = _itemRows[index]['qty'] ?? 1;
     double price = 0;
-
     for (var tier in _pricingTiers) {
       int min = int.tryParse(tier['nama_harga'].toString()) ?? 0;
       int max = int.tryParse(tier['nama_harga2'].toString()) ?? 999999;
@@ -255,7 +255,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     for (var row in _itemRows) {
       double price = (row['price'] is num) ? (row['price'] as num).toDouble() : 0.0;
       int qty = row['qty'] ?? 1;
-      total += (price * qty);
+      total += (price * qty * _lamaSewa);
     }
     return total + _shippingCostAmount;
   }
@@ -263,7 +263,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     if (_jenisSewa == 'pribadi' && _fileKtp == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Upload KTP wajib')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.validation.ktp_required'.tr(context))));
       return;
     }
 
@@ -272,7 +272,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     int jaminanFileCount = _fileJaminan.entries.where((e) => e.key <= minJaminan && e.value != null).length;
 
     if (jaminanCount < minJaminan || jaminanFileCount < minJaminan) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Minimal $minJaminan jaminan wajib dipilih dan diunggah')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.validation.guarantee_min'.tr(context, args: {'min': minJaminan.toString()}))));
       return;
     }
 
@@ -325,14 +325,14 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       setState(() => _isSubmitting = false);
 
       if (res['status'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rent Plan berhasil dibuat')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.success.created'.tr(context))));
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'Gagal menyimpan')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'rent_plan.error.failed_save'.tr(context))));
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.error.generic'.tr(context, args: {'error': e.toString()}))));
     }
   }
 
@@ -346,7 +346,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         userData: widget.userData,
         showBackButton: true,
         showActions: false,
-        title: 'Buat Pesanan Baru',
+        title: 'rent_plan.add_new_order'.tr(context),
       ),
       body: Form(
         key: _formKey,
@@ -356,11 +356,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
             _buildOrderInfoCard(),
             const SizedBox(height: 20),
             _buildSection(
-              title: 'Data Pelanggan',
+              title: 'rent_plan.customer_data'.tr(context),
               icon: Icons.person_add_rounded,
               color: Theme.of(context).colorScheme.primary,
               children: [
-                _buildDropdown('Pelanggan', _selectedCustomerId, _customers.map((c) => DropdownMenuItem(
+                _buildDropdown('rent_plan.customer'.tr(context), _selectedCustomerId, _customers.map((c) => DropdownMenuItem(
                   value: c['user_id'].toString(),
                   child: Text('${c['first_name']} ${c['last_name']}', overflow: TextOverflow.ellipsis),
                 )).toList(), (val) {
@@ -373,37 +373,37 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                       }
                     }
                   });
-                }, hint: 'Pilih Pelanggan'),
+                }, hint: 'rent_plan.select_customer'.tr(context)),
                 const SizedBox(height: 16),
-                _buildTextField('Nomor WhatsApp', controller: _whatsappController, icon: Icons.phone_rounded, keyboardType: TextInputType.phone),
+                _buildTextField('rent_plan.whatsapp'.tr(context), controller: _whatsappController, icon: Icons.phone_rounded, keyboardType: TextInputType.phone),
               ],
             ),
             const SizedBox(height: 20),
             _buildSection(
-              title: 'Alamat KTP',
+              title: 'rent_plan.ktp_address'.tr(context),
               icon: Icons.assignment_ind_rounded,
               color: Colors.indigo[700]!,
               children: [_buildRegionDropdowns(true)],
             ),
             const SizedBox(height: 20),
             _buildSection(
-              title: 'Alamat Domisili',
+              title: 'rent_plan.domicile_address'.tr(context),
               icon: Icons.home_rounded,
               color: Colors.teal[700]!,
               children: [_buildRegionDropdowns(false)],
             ),
             const SizedBox(height: 20),
             _buildSection(
-              title: 'Detail Sewa',
+              title: 'rent_plan.rent_detail'.tr(context),
               icon: Icons.calendar_month_rounded,
               color: Colors.orange[800]!,
               children: [
                 Row(
                   children: [
-                    Expanded(child: _buildDatePicker('Mulai Sewa')),
+                    Expanded(child: _buildDatePicker('rent_plan.rent_start'.tr(context))),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildTextField('Lama Sewa', 
-                      suffix: 'Hari',
+                    Expanded(child: _buildTextField('rent_plan.rent_duration'.tr(context), 
+                      suffix: 'rent_plan.days'.tr(context),
                       initialValue: _lamaSewa.toString(), 
                       keyboardType: TextInputType.number,
                       onChanged: (val) {
@@ -419,36 +419,36 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                 _buildTipePenyewaToggle(),
                 const SizedBox(height: 16),
                 if (_jenisSewa == 'pribadi') ...[
-                  _buildTextField('Nama Lengkap', controller: _namaLengkapController, icon: Icons.badge_rounded),
+                  _buildTextField('rent_plan.full_name'.tr(context), controller: _namaLengkapController, icon: Icons.badge_rounded),
                   const SizedBox(height: 16),
-                  _buildTextField('NIK', controller: _nikController, icon: Icons.credit_card_rounded, keyboardType: TextInputType.number),
+                  _buildTextField('rent_plan.nik'.tr(context), controller: _nikController, icon: Icons.credit_card_rounded, keyboardType: TextInputType.number),
                 ] else ...[
-                  _buildTextField('Nama Perusahaan', controller: _namaPerusahaanController, icon: Icons.business_rounded),
+                  _buildTextField('rent_plan.company_name'.tr(context), controller: _namaPerusahaanController, icon: Icons.business_rounded),
                   const SizedBox(height: 16),
-                  _buildTextField('Nomor NPWP', controller: _npwpController, icon: Icons.description_rounded),
+                  _buildTextField('rent_plan.npwp_number'.tr(context), controller: _npwpController, icon: Icons.description_rounded),
                 ],
               ],
             ),
             const SizedBox(height: 20),
             _buildSection(
-              title: 'Dokumen & Jaminan',
+              title: 'rent_plan.docs_guarantees'.tr(context),
               icon: Icons.verified_user_rounded,
               color: Colors.deepPurple[700]!,
               children: [
                 if (_jenisSewa == 'pribadi') ...[
-                  _buildFileUploadTile('KTP Pelanggan', _fileKtp, () => _pickFile(0), icon: Icons.camera_alt_rounded),
+                  _buildFileUploadTile('rent_plan.upload_ktp'.tr(context), _fileKtp, () => _pickFile(0), icon: Icons.camera_alt_rounded),
                   const Divider(height: 32),
                 ] else ...[
-                  _buildFileUploadTile('Upload NPWP', _fileNpwp, () => _pickFile('npwp'), icon: Icons.upload_file_rounded),
+                  _buildFileUploadTile('rent_plan.upload_npwp'.tr(context), _fileNpwp, () => _pickFile('npwp'), icon: Icons.upload_file_rounded),
                   const SizedBox(height: 12),
-                  _buildFileUploadTile('Upload PO', _filePo, () => _pickFile('po'), icon: Icons.upload_file_rounded),
+                  _buildFileUploadTile('rent_plan.upload_po'.tr(context), _filePo, () => _pickFile('po'), icon: Icons.upload_file_rounded),
                   const SizedBox(height: 12),
-                  _buildFileUploadTile('Upload KTP Pimpinan', _fileKtpPimpinan, () => _pickFile('ktp_pimpinan'), icon: Icons.upload_file_rounded),
+                  _buildFileUploadTile('rent_plan.upload_ktp_leader'.tr(context), _fileKtpPimpinan, () => _pickFile('ktp_pimpinan'), icon: Icons.upload_file_rounded),
                   const SizedBox(height: 12),
-                  _buildFileUploadTile('Domisili Perusahaan', _fileDomisiliPerusahaan, () => _pickFile('domisili'), icon: Icons.upload_file_rounded),
+                  _buildFileUploadTile('rent_plan.company_domicile'.tr(context), _fileDomisiliPerusahaan, () => _pickFile('domisili'), icon: Icons.upload_file_rounded),
                   const Divider(height: 32),
                 ],
-                Text('Jaminan (Wajib ${_jenisSewa == 'pribadi' ? 3 : 2})', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700])),
+                Text('${'rent_plan.guarantee'.tr(context)} (${'rent_plan.required_min'.tr(context, args: {'min': (_jenisSewa == 'pribadi' ? 3 : 2).toString()})})', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700])),
                 const SizedBox(height: 12),
                 for (int i = 1; i <= (_jenisSewa == 'pribadi' ? 3 : 2); i++) ...[
                   _buildJaminanSelector(i),
@@ -458,20 +458,20 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
             ),
             const SizedBox(height: 20),
             _buildSection(
-              title: 'Item Sewa',
+              title: 'rent_plan.rent_item'.tr(context),
               icon: Icons.laptop_mac_rounded,
               color: Colors.blueGrey[700]!,
               children: [_buildItemTable()],
             ),
             const SizedBox(height: 20),
             _buildSection(
-              title: 'Pengiriman & Catatan',
+              title: 'rent_plan.shipping_notes'.tr(context),
               icon: Icons.local_shipping_rounded,
               color: Colors.cyan[800]!,
               children: [
                 _buildShippingDropdown(),
                 const SizedBox(height: 16),
-                _buildTextField('Catatan Tambahan', controller: _notesController, maxLines: 3, icon: Icons.notes_rounded, isRequired: false),
+                _buildTextField('rent_plan.additional_notes'.tr(context), controller: _notesController, maxLines: 3, icon: Icons.notes_rounded, isRequired: false),
               ],
             ),
             const SizedBox(height: 100),
@@ -536,7 +536,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('No. Pesanan', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text('rent_plan.order_number'.tr(context), style: const TextStyle(color: Colors.white70, fontSize: 12)),
               Text(_orderNumber, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           ),
@@ -556,7 +556,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       maxLines: maxLines,
       onChanged: onChanged,
       style: const TextStyle(fontSize: 14),
-      validator: isRequired ? (val) => val == null || val.isEmpty ? 'Wajib diisi' : null : null,
+      validator: isRequired ? (val) => val == null || val.isEmpty ? 'rent_plan.validation.required'.tr(context) : null : null,
       decoration: InputDecoration(
         labelText: isRequired ? '$label *' : label,
         prefixIcon: icon != null ? Icon(icon, size: 18, color: Colors.grey[400]) : null,
@@ -598,7 +598,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       items: uniqueItems.isEmpty ? null : uniqueItems,
       onChanged: isLoading ? null : onChanged,
       isExpanded: true,
-      hint: Text(isLoading ? 'Sedang memuat...' : (hint ?? 'Pilih $label'), 
+      hint: Text(isLoading ? 'rent_plan.loading'.tr(context) : (hint ?? 'rent_plan.select_item'.tr(context, args: {'item': label})), 
           style: TextStyle(fontSize: 13, color: Colors.grey[400]), overflow: TextOverflow.ellipsis),
       decoration: InputDecoration(
         labelText: value == null ? null : label,
@@ -609,41 +609,41 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       icon: Icon(Icons.arrow_drop_down_rounded, color: Theme.of(context).colorScheme.primary),
-      validator: (val) => val == null ? 'Wajib dipilih' : null,
+      validator: (val) => val == null ? 'rent_plan.validation.required'.tr(context) : null,
     );
   }
 
   Widget _buildRegionDropdowns(bool isKtp) {
     return Column(
       children: [
-        _buildDropdown('Provinsi', isKtp ? _selectedProvinceKtp : _selectedProvinceCur, _provinces.map((p) => DropdownMenuItem(
+        _buildDropdown('profile.state_province'.tr(context), isKtp ? _selectedProvinceKtp : _selectedProvinceCur, _provinces.map((p) => DropdownMenuItem(
           value: p['id'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
             if (val != null) {
               setState(() { if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; });
               _loadRegencies(val, isKtp);
             }
-        }, hint: 'Pilih Provinsi'),
+        }, hint: 'rent_plan.select_province'.tr(context)),
         const SizedBox(height: 12),
-        _buildDropdown('Kabupaten', isKtp ? _selectedRegencyKtp : _selectedRegencyCur, (isKtp ? _regenciesKtp : _regenciesCur).map((p) => DropdownMenuItem(
+        _buildDropdown('profile.city_regency'.tr(context), isKtp ? _selectedRegencyKtp : _selectedRegencyCur, (isKtp ? _regenciesKtp : _regenciesCur).map((p) => DropdownMenuItem(
           value: p['id'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
             if (val != null) {
               setState(() { if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; });
               _loadDistricts(val, isKtp);
             }
-        }, hint: 'Pilih Kabupaten', isLoading: isKtp ? _isLoadingRegKtp : _isLoadingRegCur),
+        }, hint: 'rent_plan.select_regency'.tr(context), isLoading: isKtp ? _isLoadingRegKtp : _isLoadingRegCur),
         const SizedBox(height: 12),
-        _buildDropdown('Kecamatan', isKtp ? _selectedDistrictKtp : _selectedDistrictCur, (isKtp ? _districtsKtp : _districtsCur).map((p) => DropdownMenuItem(
+        _buildDropdown('rent_plan.district'.tr(context), isKtp ? _selectedDistrictKtp : _selectedDistrictCur, (isKtp ? _districtsKtp : _districtsCur).map((p) => DropdownMenuItem(
           value: p['id'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
             if (val != null) {
               setState(() { if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; });
               _loadVillages(val, isKtp);
             }
-        }, hint: 'Pilih Kecamatan', isLoading: isKtp ? _isLoadingDistKtp : _isLoadingDistCur),
+        }, hint: 'rent_plan.select_district'.tr(context), isLoading: isKtp ? _isLoadingDistKtp : _isLoadingDistCur),
         const SizedBox(height: 12),
-        _buildDropdown('Desa', isKtp ? _selectedVillageKtp : _selectedVillageCur, (isKtp ? _villagesKtp : _villagesCur).map((p) => DropdownMenuItem(
+        _buildDropdown('rent_plan.village'.tr(context), isKtp ? _selectedVillageKtp : _selectedVillageCur, (isKtp ? _villagesKtp : _villagesCur).map((p) => DropdownMenuItem(
           value: p['id'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
             if (val != null) setState(() { if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; });
-        }, hint: 'Pilih Desa', isLoading: isKtp ? _isLoadingVillKtp : _isLoadingVillCur),
+        }, hint: 'rent_plan.select_village'.tr(context), isLoading: isKtp ? _isLoadingVillKtp : _isLoadingVillCur),
       ],
     );
   }
@@ -687,10 +687,10 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          _buildToggleItem('Pribadi', _jenisSewa == 'pribadi', () => setState(() {
+          _buildToggleItem('rent_plan.personal'.tr(context), _jenisSewa == 'pribadi', () => setState(() {
             _jenisSewa = 'pribadi';
           })),
-          _buildToggleItem('Perusahaan', _jenisSewa == 'perusahaan', () => setState(() {
+          _buildToggleItem('rent_plan.company'.tr(context), _jenisSewa == 'perusahaan', () => setState(() {
             _jenisSewa = 'perusahaan';
             // Clear 3rd jaminan if switching to perusahaan (which only needs 2)
             _selectedJaminanIds[3] = null;
@@ -745,7 +745,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                 children: [
                   Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2),
-                  Text(file == null ? 'Ketuk untuk pilih file' : file.path.split('/').last, style: TextStyle(fontSize: 12, color: file == null ? Colors.grey[500] : Colors.green[700])),
+                  Text(file == null ? 'rent_plan.tap_to_pick'.tr(context) : file.path.split('/').last, style: TextStyle(fontSize: 12, color: file == null ? Colors.grey[500] : Colors.green[700])),
                 ],
               ),
             ),
@@ -775,13 +775,13 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.1))),
       child: Column(
         children: [
-          _buildDropdown('Jaminan $index', _selectedJaminanIds[index], availableOptions.map((j) => DropdownMenuItem(
+          _buildDropdown('${'rent_plan.guarantee'.tr(context)} $index', _selectedJaminanIds[index], availableOptions.map((j) => DropdownMenuItem(
             value: j['constants_id'].toString(), child: Text(j['category_name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
               setState(() { _selectedJaminanIds[index] = val; });
-          }, hint: 'Pilih Jaminan $index'),
+          }, hint: '${'rent_plan.select_guarantee'.tr(context)} $index'),
           if (_selectedJaminanIds[index] != null) ...[
             const SizedBox(height: 12),
-            _buildFileUploadTile('File Jaminan $index', _fileJaminan[index], () => _pickFile(index), icon: Icons.upload_file_rounded),
+            _buildFileUploadTile('${'rent_plan.guarantee_file'.tr(context)} $index', _fileJaminan[index], () => _pickFile(index), icon: Icons.upload_file_rounded),
           ],
         ],
       ),
@@ -806,19 +806,19 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50], borderRadius: BorderRadius.circular(16), border: Border.all(color: isDark ? Colors.white12 : Theme.of(context).dividerColor)),
       child: Column(
         children: [
-          _buildDropdown('Laptop', _itemRows[index]['laptop_id'], _laptops.map((l) => DropdownMenuItem(
+          _buildDropdown('rent_plan.laptop'.tr(context), _itemRows[index]['laptop_id'], _laptops.map((l) => DropdownMenuItem(
             value: l['id'].toString(), child: Text(l['nama_laptop'], overflow: TextOverflow.ellipsis))).toList(), (val) {
               setState(() { _itemRows[index]['laptop_id'] = val; _calculatePriceForRow(index); });
-          }, hint: 'Pilih Laptop'),
+          }, hint: 'rent_plan.select_laptop'.tr(context)),
           const SizedBox(height: 12),
           Row(
             children: [
-              SizedBox(width: 80, child: _buildTextField('Qty', initialValue: _itemRows[index]['qty'].toString(), keyboardType: TextInputType.number, onChanged: (val) {
+              SizedBox(width: 80, child: _buildTextField('rent_plan.qty'.tr(context), initialValue: _itemRows[index]['qty'].toString(), keyboardType: TextInputType.number, onChanged: (val) {
                 setState(() { _itemRows[index]['qty'] = int.tryParse(val) ?? 1; _calculatePriceForRow(index); });
               })),
               const SizedBox(width: 12),
               Expanded(child: _buildTextField(
-                'Harga Unit', 
+                'rent_plan.unit_price'.tr(context), 
                 key: ValueKey('price_${index}_${_itemRows[index]['price']}'),
                 initialValue: NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(_itemRows[index]['price']), 
                 enabled: false,
@@ -833,7 +833,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   }
 
   Widget _buildShippingDropdown() {
-    return _buildDropdown('Jasa Kirim', _selectedShippingId, _shippingCosts.map((s) => DropdownMenuItem(
+    return _buildDropdown('rent_plan.shipping_service'.tr(context), _selectedShippingId, _shippingCosts.map((s) => DropdownMenuItem(
       value: s['constants_id'].toString(),
       child: Text('${s['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(s['field_one']))}', overflow: TextOverflow.ellipsis),
     )).toList(), (val) {
@@ -845,7 +845,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           _tipePengiriman = ship['category_name'];
         });
       }
-    }, hint: 'Pilih Pengiriman');
+    }, hint: 'rent_plan.select_shipping'.tr(context));
   }
 
   Widget _buildBottomAction() {
@@ -863,7 +863,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Estimasi Total', style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13)),
+              Text('rent_plan.estimated_total'.tr(context), style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13)),
               Text(currencyFormat.format(_totalPrice), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
             ],
           ),
@@ -880,7 +880,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               ),
               child: _isSubmitting 
                 ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3)) 
-                : const Text('Buat Pesanan Sekarang', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                : Text('rent_plan.create_order_now'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ),
         ],

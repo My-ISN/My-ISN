@@ -195,4 +195,34 @@ class RentPlanService {
       return {'status': false, 'message': e.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> extendRental(int rentalId, Map<String, dynamic> data, Map<String, File?> files) async {
+    try {
+      final url = Uri.parse('$baseUrl/extend_rental');
+      final request = http.MultipartRequest('POST', url);
+      
+      request.fields['rental_id'] = rentalId.toString();
+      data.forEach((key, value) {
+        if (value is List) {
+          request.fields[key] = json.encode(value);
+        } else {
+          request.fields[key] = value.toString();
+        }
+      });
+
+      for (var entry in files.entries) {
+        if (entry.value != null) {
+          request.files.add(await http.MultipartFile.fromPath(
+            'file_jaminan_${entry.key}', entry.value!.path
+          ));
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
 }

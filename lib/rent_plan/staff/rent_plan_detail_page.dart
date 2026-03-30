@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
+import '../../localization/app_localizations.dart';
 
 
 class RentPlanDetailPage extends StatefulWidget {
@@ -42,6 +43,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   final _alamatDomisiliController = TextEditingController();
   final _invoiceDateController = TextEditingController();
   final _tanggalBerakhirController = TextEditingController();
+
+  // Extension State
+  final _extLamaSewaController = TextEditingController();
+  final _extDiskonController = TextEditingController();
+  final _extNotesController = TextEditingController();
+  final Map<int, String?> _selectedExtJaminanIdsMap = {1: null, 2: null, 3: null};
+  final Map<int, File?> _extFileJaminanMap = {1: null, 2: null, 3: null};
+  DateTime? _newEndDate;
 
   // Address State
   List<dynamic> _provinces = [];
@@ -83,6 +92,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   Map<int, String?> _selectedJaminanIds = {1: null, 2: null, 3: null};
   List<dynamic> _jaminanPribadi = [];
   List<dynamic> _jaminanPerusahaan = [];
+  List<dynamic> _pricingTiers = [];
 
   final List<String> _menuTabs = [
     'OVERVIEW', 'EDIT', 'RENTAL EXTEND', 'INVOICE', 'VIEW DOKUMEN', 
@@ -121,7 +131,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       if (mounted) {
         if (!silent) setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Gagal mengambil detail')),
+          SnackBar(content: Text(response['message'] ?? 'rent_plan.failed_fetch_detail'.tr(context))),
         );
       }
     }
@@ -241,6 +251,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           _jaminanPerusahaan = List<dynamic>.from(data['jaminan_perusahaan'] ?? [])
               .where((j) => j['category_name'].toString().toUpperCase() != 'KTP').toList();
           _shippingCosts = List<dynamic>.from(data['shipping_costs'] ?? []);
+          _pricingTiers = List<dynamic>.from(data['pricing_tiers'] ?? []);
           
           // Retry matching shipping if _rentalData is already loaded
           if (_rentalData != null && _rentalData!['tipe_pengiriman'] != null) {
@@ -347,7 +358,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       final lastUpdate = _lastUpdateTimes[field]!;
       if (now.difference(lastUpdate).inSeconds < 2) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mohon tunggu sebentar...'), duration: Duration(seconds: 1)),
+          SnackBar(content: Text('rent_plan.please_wait'.tr(context)), duration: const Duration(seconds: 1)),
         );
         return;
       }
@@ -366,7 +377,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       _fetchDetail(silent: true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Status berhasil diperbarui'), backgroundColor: Colors.green, duration: Duration(seconds: 1)),
+          SnackBar(content: Text('rent_plan.status_updated'.tr(context)), backgroundColor: Colors.green, duration: const Duration(seconds: 1)),
         );
       }
     } else {
@@ -376,7 +387,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Gagal memperbarui status'), backgroundColor: Colors.red),
+          SnackBar(content: Text(response['message'] ?? 'rent_plan.failed_update_status'.tr(context)), backgroundColor: Colors.red),
         );
       }
     }
@@ -472,7 +483,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     );
   }
 
-  Widget _buildTextField(String label, {TextEditingController? controller, bool enabled = true, TextInputType? keyboardType, Function(String)? onChanged, int maxLines = 1, IconData? icon, String? suffix, bool isRequired = true}) {
+  Widget _buildTextField(String label, {TextEditingController? controller, bool enabled = true, TextInputType? keyboardType, Function(String)? onChanged, int maxLines = 1, IconData? icon, String? suffix, bool isRequired = true, String? hint}) {
     return TextFormField(
       controller: controller,
       enabled: enabled,
@@ -480,9 +491,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       maxLines: maxLines,
       onChanged: onChanged,
       style: const TextStyle(fontSize: 14),
-      validator: isRequired ? (val) => val == null || val.isEmpty ? 'Wajib diisi' : null : null,
+      validator: isRequired ? (val) => val == null || val.isEmpty ? 'main.required'.tr(context) : null : null,
       decoration: InputDecoration(
         labelText: isRequired ? '$label *' : label,
+        hintText: hint,
         prefixIcon: icon != null ? Icon(icon, size: 18, color: Colors.grey[400]) : null,
         suffixText: suffix,
         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
@@ -510,7 +522,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       items: uniqueItems.isEmpty ? null : uniqueItems,
       onChanged: isLoading ? null : onChanged,
       isExpanded: true,
-      hint: Text(isLoading ? 'Sedang memuat...' : (hint ?? 'Pilih $label'), 
+      hint: Text(isLoading ? 'profile.loading'.tr(context) : (hint ?? '${'rent_plan.select'.tr(context)} $label'), 
           style: TextStyle(fontSize: 13, color: Colors.grey[400]), overflow: TextOverflow.ellipsis),
       decoration: InputDecoration(
         labelText: value == null ? null : label,
@@ -551,7 +563,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 children: [
                   Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2),
-                  Text(file != null ? file.path.split('/').last : (existingUrl != null && existingUrl.isNotEmpty ? 'File tersimpan' : 'Ketuk untuk pilih file'), 
+                  Text(file != null ? file.path.split('/').last : (existingUrl != null && existingUrl.isNotEmpty ? 'rent_plan.file_saved'.tr(context) : 'rent_plan.tap_to_select'.tr(context)), 
                     style: TextStyle(fontSize: 12, color: !hasFile ? Colors.grey[500] : Colors.green[700])),
                 ],
               ),
@@ -620,14 +632,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       _fetchDetail(silent: true);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Detail berhasil diperbarui'), backgroundColor: Colors.green),
+          SnackBar(content: Text('rent_plan.detail_updated'.tr(context)), backgroundColor: Colors.green),
         );
         setState(() => _activeTab = 'OVERVIEW');
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Gagal memperbarui detail'), backgroundColor: Colors.red),
+          SnackBar(content: Text(response['message'] ?? 'rent_plan.failed_update_detail'.tr(context)), backgroundColor: Colors.red),
         );
       }
     }
@@ -647,6 +659,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     _alamatDomisiliController.dispose();
     _invoiceDateController.dispose();
     _tanggalBerakhirController.dispose();
+    _extLamaSewaController.dispose();
+    _extDiskonController.dispose();
+    _extNotesController.dispose();
     super.dispose();
   }
 
@@ -661,15 +676,15 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
     if (_rentalData == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(widget.invoiceNumber ?? 'Detail Rental', style: const TextStyle(fontSize: 16))),
-        body: const Center(child: Text('Data tidak ditemukan')),
+        appBar: AppBar(title: Text(widget.invoiceNumber ?? 'rent_plan.rental_detail'.tr(context), style: const TextStyle(fontSize: 16))),
+        body: Center(child: Text('rent_plan.data_not_found'.tr(context))),
       );
     }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(_rentalData!['invoice_number'] ?? widget.invoiceNumber ?? 'Detail Rental', 
+        title: Text(_rentalData!['invoice_number'] ?? widget.invoiceNumber ?? 'rent_plan.rental_detail'.tr(context), 
           style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, fontSize: 16)),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -702,36 +717,32 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       child: Row(
         children: _menuTabs.map((tab) {
           final bool isActive = _activeTab == tab;
+          final bool isUrlTab = ['INVOICE', 'PERJANJIAN SEWA', 'SP-1', 'SP-3 / SOMASI'].contains(tab);
           final bool isHutang = tab == 'HUTANG';
-          final bool hasDebt = _debtData != null;
-          final Color? debtColor = (isHutang && hasDebt) ? Colors.red : null;
+          final double remainingDebt = double.tryParse(_rentalData!['remaining_debt']?.toString() ?? '0') ?? 0;
+          final bool hasDebt = isHutang && remainingDebt > 0;
+          final Color tabActiveColor = hasDebt ? Colors.redAccent : _primaryColor;
           
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: InkWell(
-              onTap: () async {
-                if (['INVOICE', 'PERJANJIAN SEWA', 'SP-1', 'SP-3 / SOMASI'].contains(tab)) {
-                  _launchDocumentUrl(tab);
-                } else {
-                  setState(() => _activeTab = tab);
-                }
-              },
-              borderRadius: BorderRadius.circular(8),
+              onTap: isUrlTab 
+                ? () => _launchDocumentUrl(tab)
+                : () => setState(() => _activeTab = tab),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: debtColor != null
-                    ? (isActive ? debtColor : debtColor.withOpacity(0.1))
-                    : (isActive ? _primaryColor : Theme.of(context).cardColor),
-                  borderRadius: BorderRadius.circular(8),
+                  color: isActive ? tabActiveColor : (hasDebt ? Colors.redAccent.withOpacity(0.1) : Colors.transparent),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: debtColor ?? (isActive ? _primaryColor : Theme.of(context).dividerColor.withOpacity(0.1))
+                    color: isActive ? tabActiveColor : (hasDebt ? Colors.redAccent.withOpacity(0.3) : Theme.of(context).dividerColor.withOpacity(0.1))
                   ),
                 ),
                 child: Text(
-                  tab,
+                  _getTabLabel(tab),
                   style: TextStyle(
-                    color: isActive ? Colors.white : (debtColor ?? Colors.grey[500]),
+                    color: isActive ? Colors.white : (hasDebt ? Colors.redAccent : Colors.grey[600]),
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -744,14 +755,26 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     );
   }
 
+  String _getTabLabel(String tab) {
+    switch (tab) {
+      case 'OVERVIEW': return 'rent_plan.overview'.tr(context);
+      case 'EDIT': return 'rent_plan.edit'.tr(context);
+      case 'RENTAL EXTEND': return 'rent_plan.rental_extend'.tr(context);
+      case 'INVOICE': return 'rent_plan.invoice'.tr(context);
+      case 'VIEW DOKUMEN': return 'rent_plan.view_document'.tr(context);
+      case 'PERJANJIAN SEWA': return 'rent_plan.rental_agreement'.tr(context);
+      case 'SP-1': return 'rent_plan.sp1'.tr(context);
+      case 'SP-3 / SOMASI': return 'rent_plan.sp3_somasi'.tr(context);
+      case 'HUTANG': return 'rent_plan.debt'.tr(context);
+      default: return tab;
+    }
+  }
+
   Future<void> _launchDocumentUrl(String tab) async {
     String endpoint = '';
     switch (tab) {
       case 'INVOICE':
         endpoint = 'invoice';
-        break;
-      case 'VIEW DOKUMEN':
-        endpoint = 'ktp';
         break;
       case 'PERJANJIAN SEWA':
         endpoint = 'agreement';
@@ -775,7 +798,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tidak dapat membuka ${tab.toLowerCase()}')),
+          SnackBar(content: Text('${'rent_plan.opening'.tr(context)} ${tab.toLowerCase()}')),
         );
       }
     }
@@ -786,66 +809,330 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     if (_activeTab == 'VIEW DOKUMEN') return _buildViewDokumenTab();
     if (_activeTab == 'OVERVIEW') return _buildOverviewTab();
     if (_activeTab == 'HUTANG') return _buildHutangTab();
+    if (_activeTab == 'RENTAL EXTEND') return _buildRentalExtendTab();
     return _buildPlaceholderTab();
+  }
+
+  Widget _buildExtJaminanSelector(int index) {
+    final isPribadi = (_rentalData!['jenis_sewa'] ?? 'pribadi').toString().toLowerCase() == 'pribadi';
+    List<dynamic> baseOptions = isPribadi ? _jaminanPribadi : _jaminanPerusahaan;
+    
+    // Filter options to exclude those already selected in OTHER slots
+    List<dynamic> availableOptions = baseOptions.where((j) {
+      String id = j['constants_id']?.toString() ?? j['id']?.toString() ?? '';
+      bool alreadySelectedElsewhere = false;
+      _selectedExtJaminanIdsMap.forEach((key, value) {
+        if (key != index && value == id) alreadySelectedElsewhere = true;
+      });
+      return !alreadySelectedElsewhere;
+    }).toList();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        children: [
+          _buildDropdown(
+            '${'rent_plan.guarantee'.tr(context)} $index', 
+            _selectedExtJaminanIdsMap[index], 
+            availableOptions.map((j) => DropdownMenuItem(
+              value: j['constants_id']?.toString() ?? j['id']?.toString() ?? '', 
+              child: Text(j['category_name']?.toString() ?? '', overflow: TextOverflow.ellipsis)
+            )).toList(), 
+            (val) {
+              setState(() { _selectedExtJaminanIdsMap[index] = val; });
+            }, 
+            hint: '${'rent_plan.select_guarantee'.tr(context)} $index'
+          ),
+          if (_selectedExtJaminanIdsMap[index] != null) ...[
+            const SizedBox(height: 12),
+            _buildFileUploadTile(
+              '${'rent_plan.guarantee_file'.tr(context)} $index', 
+              _extFileJaminanMap[index], 
+              () => _pickExtFile(index), 
+              icon: Icons.upload_file_rounded
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickExtFile(int index) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      setState(() {
+        _extFileJaminanMap[index] = File(result.files.single.path!);
+      });
+    }
+  }
+
+  double _calculatePriceForExtension() {
+    if (_rentalData == null) return 0;
+    int units = int.tryParse(_rentalData!['total_laptop']?.toString() ?? '1') ?? 1;
+    double price = 0;
+    
+    for (var tier in _pricingTiers) {
+      int min = int.tryParse(tier['nama_harga'].toString()) ?? 0;
+      int max = int.tryParse(tier['nama_harga2'].toString()) ?? 999999;
+      
+      if (tier == _pricingTiers.last && units >= min) {
+        price = double.tryParse(tier['harga'].toString()) ?? 0;
+        break;
+      }
+      if (units >= min && units <= max) {
+        price = double.tryParse(tier['harga'].toString()) ?? 0;
+        break;
+      }
+    }
+    return price;
+  }
+
+  Widget _buildRentalExtendTab() {
+    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final isPribadi = (_rentalData!['jenis_sewa'] ?? 'pribadi').toString().toLowerCase() == 'pribadi';
+    
+    // Calculate price
+    final double pricePerDay = _calculatePriceForExtension();
+    final int units = int.tryParse(_rentalData!['total_laptop']?.toString() ?? '1') ?? 1;
+    final int days = int.tryParse(_extLamaSewaController.text) ?? 0;
+    final double totalExt = pricePerDay * days * units;
+
+    return Column(
+      children: [
+        _buildSection(
+          title: 'rent_plan.extension_form'.tr(context),
+          icon: Icons.history_edu_rounded,
+          color: Colors.blue[700]!,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    'rent_plan.duration'.tr(context), 
+                    controller: _extLamaSewaController, 
+                    icon: Icons.timer_outlined,
+                    suffix: 'rent_plan.days'.tr(context),
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => _updateNewEndDate(),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildTextField(
+                    'rent_plan.new_end_date'.tr(context),
+                    controller: TextEditingController(
+                      text: _newEndDate != null ? DateFormat('yyyy-MM-dd').format(_newEndDate!) : '-'
+                    ),
+                    enabled: false,
+                    icon: Icons.calendar_month_rounded,
+                  ),
+                ),
+              ],
+            ),
+            if (days > 0) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.green.withOpacity(0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('rent_plan.ext_price_est'.tr(context), 
+                      style: TextStyle(fontSize: 11, color: Colors.green[700], fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('${currencyFormat.format(pricePerDay)} x $days ${'rent_plan.days'.tr(context)} x $units ${'dashboard.unit'.tr(context)}', 
+                          style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                        Text(currencyFormat.format(totalExt), 
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('${'rent_plan.guarantee'.tr(context)} *', style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+            ),
+            const SizedBox(height: 8),
+            for (int i = 1; i <= (isPribadi ? 3 : 2); i++) ...[
+              _buildExtJaminanSelector(i),
+            ],
+            const SizedBox(height: 24),
+            _buildTextField('rent_plan.discount_code'.tr(context), controller: _extDiskonController, icon: Icons.confirmation_number_outlined, isRequired: false, hint: 'rent_plan.discount_hint'.tr(context)),
+            const SizedBox(height: 16),
+            _buildTextField('rent_plan.additional_notes'.tr(context), controller: _extNotesController, icon: Icons.notes_rounded, isRequired: false, maxLines: 3, hint: 'rent_plan.notes_hint'.tr(context)),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _submitExtension,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: _isSaving 
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : Text('rent_plan.process_extension'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _updateNewEndDate() {
+    final daysStr = _extLamaSewaController.text;
+    if (daysStr.isEmpty) {
+      setState(() => _newEndDate = null);
+      return;
+    }
+    final int days = int.tryParse(daysStr) ?? 0;
+    if (days <= 0) {
+      setState(() => _newEndDate = null);
+      return;
+    }
+    
+    DateTime currentEnd;
+    try {
+      currentEnd = DateFormat('yyyy-MM-dd').parse(_rentalData!['tanggal_berakhir'] ?? '');
+    } catch (_) {
+      currentEnd = DateTime.now();
+    }
+    
+    setState(() {
+      _newEndDate = currentEnd.add(Duration(days: days));
+    });
+  }
+
+  Future<void> _submitExtension() async {
+    final isPribadi = (_rentalData!['jenis_sewa'] ?? 'pribadi').toString().toLowerCase() == 'pribadi';
+    final requiredCount = isPribadi ? 3 : 2;
+    
+    if (_extLamaSewaController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.duration_required'.tr(context))));
+      return;
+    }
+    
+    final selectedIds = _selectedExtJaminanIdsMap.values.where((id) => id != null).cast<String>().toList();
+    if (selectedIds.length < requiredCount) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${'rent_plan.select'.tr(context)} $requiredCount ${'rent_plan.guarantee'.tr(context)}')));
+      return;
+    }
+
+    // Check if files are uploaded for all selected guarantees
+    for (int i = 1; i <= requiredCount; i++) {
+        if (_selectedExtJaminanIdsMap[i] != null && _extFileJaminanMap[i] == null) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${'rent_plan.upload_guarantee_file'.tr(context)} $i')));
+            return;
+        }
+    }
+
+    setState(() => _isSaving = true);
+    
+    final Map<String, dynamic> data = {
+      'lama_sewa': _extLamaSewaController.text,
+      'tanggal_selesai_baru': _newEndDate != null ? DateFormat('yyyy-MM-dd').format(_newEndDate!) : null,
+      'jaminan_ids': selectedIds,
+      'kode_diskon': _extDiskonController.text,
+      'catatan': _extNotesController.text,
+    };
+
+    final Map<String, File?> fileParams = {};
+    _extFileJaminanMap.forEach((key, value) {
+        if (value != null) fileParams[key.toString()] = value;
+    });
+
+    final res = await _rentPlanService.extendRental(widget.rentalId, data, fileParams);
+    
+    setState(() => _isSaving = false);
+
+    if (res['status'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.extension_success'.tr(context)), backgroundColor: Colors.green));
+      _extLamaSewaController.clear();
+      _extDiskonController.clear();
+      _extNotesController.clear();
+      setState(() {
+        _selectedExtJaminanIdsMap.forEach((key, value) { _selectedExtJaminanIdsMap[key] = null; });
+        _extFileJaminanMap.forEach((key, value) { _extFileJaminanMap[key] = null; });
+        _newEndDate = null;
+        _activeTab = 'OVERVIEW';
+      });
+      _fetchDetail();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'rent_plan.extension_failed'.tr(context)), backgroundColor: Colors.red));
+    }
   }
 
   Widget _buildEditTab() {
     return Column(
       children: [
         _buildSection(
-          title: 'Data Penyewa',
+          title: 'rent_plan.renter_data'.tr(context),
           icon: Icons.person_rounded,
           color: _primaryColor,
           children: [
             _buildTipePenyewaToggle(),
             const SizedBox(height: 16),
             if (_jenisSewa == 'pribadi') ...[
-              _buildTextField('NAMA LENGKAP', controller: _namaPribadiController, icon: Icons.badge_rounded),
+              _buildTextField('rent_plan.full_name'.tr(context), controller: _namaPribadiController, icon: Icons.badge_rounded),
               const SizedBox(height: 16),
-              _buildTextField('NIK', controller: _nikPribadiController, icon: Icons.credit_card_rounded, keyboardType: TextInputType.number),
+              _buildTextField('rent_plan.nik'.tr(context), controller: _nikPribadiController, icon: Icons.credit_card_rounded, keyboardType: TextInputType.number),
             ] else ...[
-              _buildTextField('NAMA PERUSAHAAN', controller: _namaPerusahaanController, icon: Icons.business_rounded),
+              _buildTextField('rent_plan.company_name'.tr(context), controller: _namaPerusahaanController, icon: Icons.business_rounded),
               const SizedBox(height: 16),
-              _buildTextField('NOMOR NPWP', controller: _npwpController, icon: Icons.description_rounded),
+              _buildTextField('rent_plan.npwp_number'.tr(context), controller: _npwpController, icon: Icons.description_rounded),
             ],
             const SizedBox(height: 16),
-            _buildTextField('WHATSAPP', controller: _whatsappController, icon: Icons.phone_android_rounded, keyboardType: TextInputType.phone),
+            _buildTextField('rent_plan.whatsapp'.tr(context), controller: _whatsappController, icon: Icons.phone_android_rounded, keyboardType: TextInputType.phone),
           ],
         ),
         const SizedBox(height: 20),
         _buildSection(
-          title: 'Alamat KTP',
+          title: 'rent_plan.ktp_address'.tr(context),
           icon: Icons.assignment_ind_rounded,
           color: Colors.indigo[700]!,
           children: [_buildRegionDropdowns(true)],
         ),
         const SizedBox(height: 20),
         _buildSection(
-          title: 'Alamat Domisili / Instansi',
+          title: 'rent_plan.current_address_section'.tr(context),
           icon: Icons.home_rounded,
           color: Colors.teal[700]!,
           children: [_buildRegionDropdowns(false)],
         ),
         const SizedBox(height: 20),
         _buildSection(
-          title: 'Dokumen & Jaminan',
+          title: 'rent_plan.docs_guarantees'.tr(context),
           icon: Icons.verified_user_rounded,
           color: Colors.deepPurple[700]!,
           children: [
             if (_jenisSewa == 'pribadi') ...[
-              _buildFileUploadTile('KTP Pelanggan', _fileKtp, () => _pickFile(0), icon: Icons.camera_alt_rounded, existingUrl: _rentalData!['file_ktp']),
+              _buildFileUploadTile('rent_plan.customer_ktp'.tr(context), _fileKtp, () => _pickFile(0), icon: Icons.camera_alt_rounded, existingUrl: _rentalData!['file_ktp']),
               const Divider(height: 32),
             ] else ...[
-              _buildFileUploadTile('Upload NPWP', _fileNpwp, () => _pickFile('npwp'), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['file_npwp']),
+              _buildFileUploadTile('rent_plan.upload_npwp'.tr(context), _fileNpwp, () => _pickFile('npwp'), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['file_npwp']),
               const SizedBox(height: 12),
-              _buildFileUploadTile('Upload PO', _filePo, () => _pickFile('po'), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['file_po']),
+              _buildFileUploadTile('rent_plan.upload_po'.tr(context), _filePo, () => _pickFile('po'), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['file_po']),
               const SizedBox(height: 12),
-              _buildFileUploadTile('Upload KTP Pimpinan', _fileKtpPimpinan, () => _pickFile('ktp_pimpinan'), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['file_ktp_pimpinan']),
+              _buildFileUploadTile('rent_plan.upload_leader_ktp'.tr(context), _fileKtpPimpinan, () => _pickFile('ktp_pimpinan'), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['file_ktp_pimpinan']),
               const SizedBox(height: 12),
-              _buildFileUploadTile('Domisili Perusahaan', _fileDomisiliPerusahaan, () => _pickFile('domisili'), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['domisili']),
+              _buildFileUploadTile('rent_plan.company_domicile'.tr(context), _fileDomisiliPerusahaan, () => _pickFile('domisili'), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['domisili']),
               const Divider(height: 32),
             ],
-            Text('Jaminan (Wajib ${_jenisSewa == 'pribadi' ? 3 : 2})', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+            Text('${'rent_plan.guarantee'.tr(context)} (${'main.required'.tr(context)} ${_jenisSewa == 'pribadi' ? 3 : 2})', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
             const SizedBox(height: 12),
             for (int i = 1; i <= (_jenisSewa == 'pribadi' ? 3 : 2); i++) ...[
               _buildJaminanSelector(i),
@@ -855,7 +1142,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         ),
         const SizedBox(height: 20),
         _buildSection(
-          title: 'Detail Sewa',
+          title: 'rent_plan.rental_detail_section'.tr(context),
           icon: Icons.calendar_month_rounded,
           color: Colors.orange[800]!,
           children: [
@@ -874,24 +1161,24 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                         setState(() => _invoiceDateController.text = DateFormat('yyyy-MM-dd').format(date));
                       }
                     },
-                    child: _buildTextField('TANGGAL MULAI', controller: _invoiceDateController, enabled: false, icon: Icons.event_available_rounded),
+                    child: _buildTextField('rent_plan.start_date'.tr(context), controller: _invoiceDateController, enabled: false, icon: Icons.event_available_rounded),
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(child: _buildTextField('LAMA SEWA', controller: _lamaSewaController, suffix: 'Hari', keyboardType: TextInputType.number)),
+                Expanded(child: _buildTextField('rent_plan.duration'.tr(context), controller: _lamaSewaController, suffix: 'rent_plan.days'.tr(context), keyboardType: TextInputType.number)),
               ],
             ),
             const SizedBox(height: 16),
-            _buildTextField('JUMLAH UNIT', controller: _totalLaptopController, icon: Icons.laptop_rounded, keyboardType: TextInputType.number),
+            _buildTextField('rent_plan.unit_count'.tr(context), controller: _totalLaptopController, icon: Icons.laptop_rounded, keyboardType: TextInputType.number),
             const SizedBox(height: 16),
-            _buildDropdown('Tipe Pengiriman', _selectedShippingId, _shippingCosts.map((s) => DropdownMenuItem(
+            _buildDropdown('rent_plan.shipping_type'.tr(context), _selectedShippingId, _shippingCosts.map((s) => DropdownMenuItem(
               value: s['nama_kirim']?.toString() ?? '', 
               child: Text(s['nama_kirim']?.toString() ?? '-', overflow: TextOverflow.ellipsis)
             )).toList(), (val) {
               setState(() => _selectedShippingId = val);
-            }, hint: 'Pilih Tipe Pengiriman'),
+            }, hint: 'rent_plan.select_shipping'.tr(context)),
             const SizedBox(height: 16),
-            _buildTextField('CATATAN', controller: _notesController, maxLines: 3, icon: Icons.notes_rounded, isRequired: false),
+            _buildTextField('rent_plan.notes'.tr(context), controller: _notesController, maxLines: 3, icon: Icons.notes_rounded, isRequired: false),
           ],
         ),
         const SizedBox(height: 30),
@@ -907,8 +1194,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               elevation: 4,
             ),
             child: _isSaving
-              ? const Row(mainAxisSize: MainAxisSize.min, children: [SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)), SizedBox(width: 12), Text('MENYIMPAN...', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1))])
-              : const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.save_rounded), SizedBox(width: 8), Text('SIMPAN PERUBAHAN', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1))]),
+              ? Row(mainAxisSize: MainAxisSize.min, children: [const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)), const SizedBox(width: 12), Text('rent_plan.saving'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1))])
+              : Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.save_rounded), const SizedBox(width: 8), Text('rent_plan.save_changes'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1))]),
           ),
         ),
       ],
@@ -922,10 +1209,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          _buildToggleItem('Pribadi', _jenisSewa == 'pribadi', () => setState(() {
+          _buildToggleItem('rent_plan.personal'.tr(context), _jenisSewa == 'pribadi', () => setState(() {
             _jenisSewa = 'pribadi';
           })),
-          _buildToggleItem('Perusahaan', _jenisSewa == 'perusahaan', () => setState(() {
+          _buildToggleItem('rent_plan.company'.tr(context), _jenisSewa == 'perusahaan', () => setState(() {
             _jenisSewa = 'perusahaan';
             _selectedJaminanIds[3] = null;
             _fileJaminan[3] = null;
@@ -957,37 +1244,37 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   Widget _buildRegionDropdowns(bool isKtp) {
     return Column(
       children: [
-        _buildDropdown('Provinsi', isKtp ? _selectedProvinceKtp : _selectedProvinceCur, _provinces.map((p) => DropdownMenuItem(
+        _buildDropdown('rent_plan.province'.tr(context), isKtp ? _selectedProvinceKtp : _selectedProvinceCur, _provinces.map((p) => DropdownMenuItem(
           value: p['name'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
             if (val != null) {
               setState(() { if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; });
               final pObj = _provinces.firstWhere((p) => p['name'] == val, orElse: () => null);
               if (pObj != null) _loadRegencies(pObj['id'].toString(), isKtp);
             }
-        }, hint: 'Pilih Provinsi'),
+        }, hint: 'rent_plan.select_province'.tr(context)),
         const SizedBox(height: 12),
-        _buildDropdown('Kabupaten', isKtp ? _selectedRegencyKtp : _selectedRegencyCur, (isKtp ? _regenciesKtp : _regenciesCur).map((p) => DropdownMenuItem(
+        _buildDropdown('rent_plan.regency'.tr(context), isKtp ? _selectedRegencyKtp : _selectedRegencyCur, (isKtp ? _regenciesKtp : _regenciesCur).map((p) => DropdownMenuItem(
           value: p['name'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
             if (val != null) {
               setState(() { if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; });
               final rObj = (isKtp ? _regenciesKtp : _regenciesCur).firstWhere((r) => r['name'] == val, orElse: () => null);
               if (rObj != null) _loadDistricts(rObj['id'].toString(), isKtp);
             }
-        }, hint: 'Pilih Kabupaten', isLoading: isKtp ? _isLoadingRegKtp : _isLoadingRegCur),
+        }, hint: 'rent_plan.select_regency'.tr(context), isLoading: isKtp ? _isLoadingRegKtp : _isLoadingRegCur),
         const SizedBox(height: 12),
-        _buildDropdown('Kecamatan', isKtp ? _selectedDistrictKtp : _selectedDistrictCur, (isKtp ? _districtsKtp : _districtsCur).map((p) => DropdownMenuItem(
+        _buildDropdown('rent_plan.district'.tr(context), isKtp ? _selectedDistrictKtp : _selectedDistrictCur, (isKtp ? _districtsKtp : _districtsCur).map((p) => DropdownMenuItem(
           value: p['name'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
             if (val != null) {
               setState(() { if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; });
               final dObj = (isKtp ? _districtsKtp : _districtsCur).firstWhere((d) => d['name'] == val, orElse: () => null);
               if (dObj != null) _loadVillages(dObj['id'].toString(), isKtp);
             }
-        }, hint: 'Pilih Kecamatan', isLoading: isKtp ? _isLoadingDistKtp : _isLoadingDistCur),
+        }, hint: 'rent_plan.select_district'.tr(context), isLoading: isKtp ? _isLoadingDistKtp : _isLoadingDistCur),
         const SizedBox(height: 12),
-        _buildDropdown('Desa', isKtp ? _selectedVillageKtp : _selectedVillageCur, (isKtp ? _villagesKtp : _villagesCur).map((p) => DropdownMenuItem(
+        _buildDropdown('rent_plan.village'.tr(context), isKtp ? _selectedVillageKtp : _selectedVillageCur, (isKtp ? _villagesKtp : _villagesCur).map((p) => DropdownMenuItem(
           value: p['name'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
             if (val != null) setState(() { if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; });
-        }, hint: 'Pilih Desa', isLoading: isKtp ? _isLoadingVillKtp : _isLoadingVillCur),
+        }, hint: 'rent_plan.select_village'.tr(context), isLoading: isKtp ? _isLoadingVillKtp : _isLoadingVillCur),
       ],
     );
   }
@@ -1009,13 +1296,13 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: _primaryColor.withOpacity(0.1))),
       child: Column(
         children: [
-          _buildDropdown('Jaminan $index', _selectedJaminanIds[index], availableOptions.map((j) => DropdownMenuItem(
+          _buildDropdown('${'rent_plan.guarantee'.tr(context)} $index', _selectedJaminanIds[index], availableOptions.map((j) => DropdownMenuItem(
             value: j['constants_id'].toString(), child: Text(j['category_name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
               setState(() { _selectedJaminanIds[index] = val; });
-          }, hint: 'Pilih Jaminan $index'),
+          }, hint: '${'rent_plan.select_guarantee'.tr(context)} $index'),
           if (_selectedJaminanIds[index] != null) ...[
             const SizedBox(height: 12),
-            _buildFileUploadTile('File Jaminan $index', _fileJaminan[index], () => _pickFile(index), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['foto_jaminan$index']),
+            _buildFileUploadTile('${'rent_plan.guarantee_file'.tr(context)} $index', _fileJaminan[index], () => _pickFile(index), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['foto_jaminan$index']),
           ],
         ],
       ),
@@ -1029,23 +1316,23 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     return Column(
       children: [
         // 1. Identitas Penyewa
-        _buildSectionTitle(Icons.person_pin_rounded, 'IDENTITAS PENYEWA'),
+        _buildSectionTitle(Icons.person_pin_rounded, 'rent_plan.renter_identity'.tr(context)),
         _buildOverviewCard([
           _buildRowTwoFields(
-            isPerusahaan ? 'NAMA PERUSAHAAN' : 'NAMA PELANGGAN', 
+            isPerusahaan ? 'rent_plan.company_name'.tr(context) : 'rent_plan.customer_name'.tr(context), 
             _rentalData!['first_name'] ?? _rentalData!['nama_pribadi'] ?? _rentalData!['nama_perusahaan'] ?? '-',
-            isPerusahaan ? 'NPWP' : 'NIK', 
+            isPerusahaan ? 'rent_plan.npwp'.tr(context) : 'rent_plan.nik'.tr(context), 
             _rentalData!['npwp'] ?? _rentalData!['nik'] ?? '-'
           ),
           _buildRowTwoFields(
-            'WHATSAPP', 
+            'rent_plan.whatsapp'.tr(context), 
             _rentalData!['whatsapp'] ?? _rentalData!['renter_contact'] ?? '-',
             '', ''
           ),
           _buildRowTwoFields(
-            'ALAMAT KTP', 
+            'rent_plan.ktp_address'.tr(context), 
             _rentalData!['alamat_ktp_formatted'] ?? _rentalData!['alamat_ktp'] ?? '-',
-            'ALAMAT DOMISILI', 
+            'rent_plan.current_address'.tr(context), 
             _rentalData!['alamat_current_formatted'] ?? _rentalData!['alamat_domisili'] ?? _rentalData!['alamat_instansi'] ?? '-'
           ),
         ]),
@@ -1053,29 +1340,31 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         const SizedBox(height: 20),
 
         // 2. Detail Sewa
-        _buildSectionTitle(Icons.laptop_rounded, 'DETAIL SEWA'),
+        _buildSectionTitle(Icons.laptop_rounded, 'rent_plan.rental_detail_section'.tr(context)),
         _buildOverviewCard([
           _buildRowTwoFields(
-            'LAPTOP', 
+            'rent_plan.laptop'.tr(context), 
             _rentalData!['nama_laptop'] ?? _rentalData!['laptop_name'] ?? _rentalData!['item_name'] ?? '-',
-            'INVOICE NUMBER', 
+            'rent_plan.invoice_number'.tr(context), 
             _rentalData!['invoice_number'] ?? '-'
           ),
           _buildRowTwoFields(
-            'JENIS PENYEWA', 
-            (_rentalData!['jenis_sewa']?.toString() ?? '-').toUpperCase(),
-            'TANGGAL MULAI', 
+            'rent_plan.renter_type'.tr(context), 
+            (_rentalData!['jenis_sewa']?.toString().toLowerCase() ?? 'pribadi') == 'perusahaan'
+              ? 'rent_plan.company'.tr(context).toUpperCase()
+              : 'rent_plan.personal'.tr(context).toUpperCase(),
+            'rent_plan.start_date'.tr(context), 
             _rentalData!['invoice_date'] ?? '-'
           ),
           _buildRowTwoFields(
-            'TANGGAL SELESAI', 
+            'rent_plan.end_date'.tr(context), 
             _rentalData!['tanggal_berakhir'] ?? '-',
-            'JUMLAH UNIT', 
-            '${_rentalData!['total_laptop'] ?? 0} unit'
+            'rent_plan.unit_count'.tr(context), 
+            '${_rentalData!['total_laptop'] ?? 0} ${'dashboard.unit'.tr(context)}'
           ),
           _buildRowTwoFields(
-            'DURASI', 
-            '${_rentalData!['lama_sewa'] ?? 0} hari',
+            'rent_plan.duration'.tr(context), 
+            '${_rentalData!['lama_sewa'] ?? 0} ${'rent_plan.days'.tr(context)}',
             '', ''
           ),
         ]),
@@ -1083,7 +1372,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         const SizedBox(height: 20),
 
           // 3. Harga & Status
-        _buildSectionTitle(Icons.monetization_on_rounded, 'HARGA & STATUS'),
+        _buildSectionTitle(Icons.monetization_on_rounded, 'rent_plan.price_status'.tr(context)),
         _buildOverviewCard([
           Container(
             width: double.infinity,
@@ -1110,7 +1399,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('TOTAL BIAYA', 
+                    Text('rent_plan.total_cost'.tr(context), 
                       style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.bold, letterSpacing: 0.8)),
                     const SizedBox(height: 6),
                     Text(currencyFormat.format(double.tryParse(_rentalData!['grand_total']?.toString() ?? '0') ?? 0), 
@@ -1138,25 +1427,29 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             ),
           ),
           _buildRowTwoFields(
-            'STATUS PEMBAYARAN', 
-            _rentalData!['status_pembayaran'] == 'sudah' ? 'Lunas' : 'Belum Bayar',
-            'STATUS DENDA', 
-            _rentalData!['status_denda'] == 'yes' ? 'Denda' : 'Aman',
+            'rent_plan.payment_status'.tr(context), 
+            _rentalData!['status_pembayaran'] == 'sudah' ? 'rent_plan.paid'.tr(context) : 'rent_plan.unpaid'.tr(context),
+            'rent_plan.fine_status'.tr(context), 
+            _rentalData!['status_denda'] == 'yes' ? 'rent_plan.fine'.tr(context) : 'rent_plan.safe'.tr(context),
             valColor1: _rentalData!['status_pembayaran'] == 'sudah' ? Colors.green : Colors.orange,
             valColor2: _rentalData!['status_denda'] == 'yes' ? Colors.red : Colors.green
           ),
           _buildRowTwoFields(
-            'STATUS APPROVAL', 
-            (_rentalData!['status_approve'] ?? '-').toUpperCase(),
-            'STATUS RENTAL', 
+            'rent_plan.approval_status'.tr(context), 
+            _rentalData!['status_approve'] == 'disetujui' ? 'rent_plan.approved'.tr(context) : 'rent_plan.pending'.tr(context),
+            'rent_plan.rental_status'.tr(context), 
             _getRentalStatusLabel(_rentalData!['status'] ?? '-'),
             valColor1: _rentalData!['status_approve'] == 'disetujui' ? Colors.green : Colors.orange,
             valColor2: _getRentalStatusColor(_rentalData!['status'] ?? '')
           ),
         ]),
+
+        const SizedBox(height: 20),
+
       ],
     );
   }
+
 
   Widget _buildPlaceholderTab() {
     return Center(
@@ -1165,38 +1458,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           const SizedBox(height: 60),
           Icon(Icons.construction_rounded, size: 64, color: Theme.of(context).dividerColor.withOpacity(0.1)),
           const SizedBox(height: 16),
-          Text('Konten Tab $_activeTab sedang dalam pengembangan', 
+          Text('${'rent_plan.tab_content'.tr(context)} $_activeTab ${'rent_plan.under_development'.tr(context)}', 
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey[400], fontSize: 13)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEditField(String label, TextEditingController controller, {TextInputType? keyboardType, int maxLines = 1, String? hint}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-          const SizedBox(height: 6),
-          TextFormField(
-            controller: controller,
-            keyboardType: keyboardType,
-            maxLines: maxLines,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-            decoration: InputDecoration(
-              hintText: hint,
-              isDense: true,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.withOpacity(0.2))),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.withOpacity(0.1))),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: _primaryColor)),
-              filled: true,
-              fillColor: Theme.of(context).cardColor,
-            ),
-          ),
         ],
       ),
     );
@@ -1267,11 +1531,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
   String _getRentalStatusLabel(String status) {
     switch (status.toLowerCase()) {
-      case 'new': return 'New';
-      case 'pending': return 'Pending';
-      case 'confirmed': return 'Aktif';
-      case 'masalah': return 'Masalah';
-      case 'completed': return 'Selesai';
+      case 'new': return 'rent_plan.status_new'.tr(context);
+      case 'pending': return 'rent_plan.status_pending'.tr(context);
+      case 'confirmed': return 'rent_plan.status_active'.tr(context);
+      case 'masalah': return 'rent_plan.status_problem'.tr(context);
+      case 'completed': return 'rent_plan.status_completed'.tr(context);
       default: return status.toUpperCase();
     }
   }
@@ -1316,7 +1580,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Progres Masa Sewa', 
+                      Text('rent_plan.rental_progress'.tr(context), 
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[500])),
                       Row(
                         children: [
@@ -1343,8 +1607,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildDateInfo('Mulai', _rentalData!['invoice_date'] ?? '-'),
-                      _buildDateInfo('Berakhir', _rentalData!['tanggal_berakhir'] ?? '-'),
+                      _buildDateInfo('rent_plan.start'.tr(context), _rentalData!['invoice_date'] ?? '-'),
+                      _buildDateInfo('rent_plan.end'.tr(context), _rentalData!['tanggal_berakhir'] ?? '-'),
                     ],
                   ),
                 ],
@@ -1358,8 +1622,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               children: [
                 Divider(height: 1, color: Theme.of(context).dividerColor.withOpacity(0.1)),
                 _buildStatusItem(
-                  'Status Pembayaran', 
-                  _rentalData!['status_pembayaran'] == 'sudah' ? 'Lunas' : 'Belum Bayar',
+                  'rent_plan.payment_status'.tr(context), 
+                  _rentalData!['status_pembayaran'] == 'sudah' ? 'rent_plan.paid'.tr(context) : 'rent_plan.unpaid'.tr(context),
                   _rentalData!['status_pembayaran'] == 'sudah',
                   Icons.account_balance_wallet_rounded,
                   Colors.green,
@@ -1367,8 +1631,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 ),
                 Divider(height: 1, indent: 56, color: Theme.of(context).dividerColor.withOpacity(0.1)),
                 _buildStatusItem(
-                  'Status Denda', 
-                  _rentalData!['status_denda'] == 'yes' ? 'Kena Denda' : 'Aman',
+                  'rent_plan.fine_status'.tr(context), 
+                  _rentalData!['status_denda'] == 'yes' ? 'rent_plan.fine'.tr(context) : 'rent_plan.safe'.tr(context),
                   _rentalData!['status_denda'] == 'yes',
                   Icons.report_problem_rounded,
                   Colors.red,
@@ -1376,8 +1640,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 ),
                 Divider(height: 1, indent: 56, color: Theme.of(context).dividerColor.withOpacity(0.1)),
                 _buildStatusItem(
-                  'Status Approve', 
-                  _rentalData!['status_approve'] == 'disetujui' ? 'Disetujui' : 'Pending',
+                  'rent_plan.approval_status'.tr(context), 
+                  _rentalData!['status_approve'] == 'disetujui' ? 'rent_plan.approved'.tr(context) : 'rent_plan.pending'.tr(context),
                   _rentalData!['status_approve'] == 'disetujui',
                   Icons.verified_user_rounded,
                   Colors.blue,
@@ -1398,7 +1662,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
   Widget _buildDateInfo(String label, String date) {
     return Column(
-      crossAxisAlignment: label == 'Mulai' ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+      crossAxisAlignment: label == 'rent_plan.start'.tr(context) ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       children: [
         Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
         const SizedBox(height: 4),
@@ -1427,11 +1691,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   Widget _buildMultiChoiceStatus() {
     final String currentStatus = (_rentalData!['status'] ?? 'new').toLowerCase();
     final List<Map<String, dynamic>> statusOptions = [
-      {'val': 'new', 'label': 'New', 'icon': Icons.star_border_rounded, 'color': Colors.blue},
-      {'val': 'pending', 'label': 'Pending', 'icon': Icons.timer_outlined, 'color': Colors.orange},
-      {'val': 'confirmed', 'label': 'Aktif', 'icon': Icons.bolt_rounded, 'color': Colors.green},
-      {'val': 'masalah', 'label': 'Masalah', 'icon': Icons.report_problem_outlined, 'color': Colors.red},
-      {'val': 'completed', 'label': 'Selesai', 'icon': Icons.check_circle_outline_rounded, 'color': Colors.purple},
+      {'val': 'new', 'label': 'rent_plan.status_new'.tr(context), 'icon': Icons.star_border_rounded, 'color': Colors.blue},
+      {'val': 'pending', 'label': 'rent_plan.status_pending'.tr(context), 'icon': Icons.timer_outlined, 'color': Colors.orange},
+      {'val': 'confirmed', 'label': 'rent_plan.status_active'.tr(context), 'icon': Icons.bolt_rounded, 'color': Colors.green},
+      {'val': 'masalah', 'label': 'rent_plan.status_problem'.tr(context), 'icon': Icons.report_problem_outlined, 'color': Colors.red},
+      {'val': 'completed', 'label': 'rent_plan.status_completed'.tr(context), 'icon': Icons.check_circle_outline_rounded, 'color': Colors.purple},
     ];
 
     return Padding(
@@ -1443,7 +1707,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             children: [
               Icon(Icons.assignment_rounded, size: 18, color: Colors.grey[600]),
               const SizedBox(width: 8),
-              Text('Status Rental', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700])),
+              Text('rent_plan.rental_status'.tr(context), style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700])),
             ],
           ),
           const SizedBox(height: 12),
@@ -1498,11 +1762,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(Icons.badge_rounded, 'DOKUMEN IDENTITAS'),
+        _buildSectionTitle(Icons.badge_rounded, 'rent_plan.identity_docs'.tr(context)),
         
         // KTP Image Card
         _buildDocumentImageCard(
-          title: isPerusahaan ? 'KTP PIMPINAN / PJ' : 'KTP PELANGGAN',
+          title: isPerusahaan ? 'rent_plan.leader_ktp'.tr(context) : 'rent_plan.customer_ktp'.tr(context),
           fileName: _rentalData!['file_ktp'],
           baseUrl: baseUrl,
         ),
@@ -1510,27 +1774,27 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         if (isPerusahaan) ...[
           const SizedBox(height: 16),
           _buildDocumentImageCard(
-            title: 'NPWP PERUSAHAAN',
+            title: 'rent_plan.company_npwp'.tr(context),
             fileName: _rentalData!['file_npwp'],
             baseUrl: baseUrl,
           ),
           const SizedBox(height: 16),
           _buildDocumentImageCard(
-            title: 'PURCHASE ORDER (PO)',
+            title: 'rent_plan.purchase_order'.tr(context),
             fileName: _rentalData!['file_po'],
             baseUrl: baseUrl,
           ),
         ],
 
         const SizedBox(height: 24),
-        _buildSectionTitle(Icons.location_on_rounded, 'ALAMAT TERDAFTAR'),
+        _buildSectionTitle(Icons.location_on_rounded, 'rent_plan.registered_address'.tr(context)),
         _buildOverviewCard([
-          _buildAddressRow('ALAMAT KTP', _rentalData!['alamat_ktp_formatted'] ?? _rentalData!['alamat_ktp'] ?? '-'),
+          _buildAddressRow('rent_plan.ktp_address'.tr(context), _rentalData!['alamat_ktp_formatted'] ?? _rentalData!['alamat_ktp'] ?? '-'),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8),
             child: Divider(height: 1, color: Colors.black12),
           ),
-          _buildAddressRow('ALAMAT DOMISILI / SEKARANG', _rentalData!['alamat_current_formatted'] ?? _rentalData!['alamat_domisili'] ?? '-'),
+          _buildAddressRow('rent_plan.current_domicile_address'.tr(context), _rentalData!['alamat_current_formatted'] ?? _rentalData!['alamat_domisili'] ?? '-'),
         ]),
       ],
     );
@@ -1551,7 +1815,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             Icon(Icons.no_photography_outlined, color: Colors.grey[400], size: 20),
             const SizedBox(width: 12),
             Expanded(
-              child: Text('Dokumen $title tidak tersedia', 
+              child: Text('${'rent_plan.document'.tr(context)} $title ${'rent_plan.not_available'.tr(context)}', 
                 style: TextStyle(color: Colors.grey[500], fontSize: 11, fontWeight: FontWeight.bold)),
             ),
           ],
@@ -1581,7 +1845,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5)),
                 ),
-                Text('ZOOM ENABLED', style: TextStyle(fontSize: 8, color: _primaryColor.withOpacity(0.6), fontWeight: FontWeight.bold)),
+                Text('rent_plan.zoom_enabled'.tr(context), style: TextStyle(fontSize: 8, color: _primaryColor.withOpacity(0.6), fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -1642,9 +1906,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.redAccent, size: 48),
             ),
             const SizedBox(height: 32),
-            const Text('Belum Ada Data Hutang', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text('rent_plan.no_debt_data'.tr(context), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Text('Seluruh kewajiban pembayaran penyewa terpantau lunas atau belum tercatat di sistem.', 
+            Text('rent_plan.debt_desc'.tr(context), 
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey[500], fontSize: 13, height: 1.6)),
             const SizedBox(height: 40),
@@ -1653,7 +1917,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               child: ElevatedButton.icon(
                 onPressed: _showAddDebtDialog,
                 icon: const Icon(Icons.add_circle_outline_rounded),
-                label: const Text('BUAT DATA HUTANG BARU', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                label: Text('rent_plan.create_new_debt'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
@@ -1676,32 +1940,54 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(child: _buildDebtSummaryCard('TOTAL HUTANG', currencyFormat.format(total), const Color(0xFFE57373), Icons.account_balance_rounded)),
-            const SizedBox(width: 12),
-            Expanded(child: _buildDebtSummaryCard('DIBAYAR', currencyFormat.format(paid), Colors.green, Icons.check_circle_outline_rounded)),
-          ],
+        Text('rent_plan.debt_details'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const SizedBox(height: 16),
+        _buildDebtSummaryCard(
+          'rent_plan.remaining_debt'.tr(context), 
+          currencyFormat.format(remaining),
+          Colors.red[700]!,
+          Icons.pending_actions_rounded,
+          isFullWidth: true
         ),
         const SizedBox(height: 12),
-        _buildDebtSummaryCard('SISA HUTANG', currencyFormat.format(remaining), Colors.orange, Icons.pending_actions_rounded, isFullWidth: true),
+        Row(
+          children: [
+            Expanded(
+              child: _buildDebtSummaryCard(
+                'rent_plan.total_debt'.tr(context), 
+                currencyFormat.format(total),
+                Colors.orange[800]!,
+                Icons.account_balance_rounded,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildDebtSummaryCard(
+                'rent_plan.total_paid'.tr(context), 
+                currencyFormat.format(paid),
+                Colors.green[700]!,
+                Icons.check_circle_outline_rounded,
+              ),
+            ),
+          ],
+        ),
 
         const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle(Icons.history_rounded, 'RIWAYAT CICILAN'),
+            _buildSectionTitle(Icons.history_rounded, 'rent_plan.installment_history'.tr(context)),
             IconButton(
               onPressed: () => _confirmDeleteDebt(_debtData!['debt_id']),
               icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 22),
-              tooltip: 'Hapus Hutang',
+              tooltip: 'rent_plan.delete_debt'.tr(context),
             ),
           ],
         ),
         const SizedBox(height: 12),
 
         if (_installments.isEmpty)
-          const Center(child: Padding(padding: EdgeInsets.all(20), child: Text('Tidak ada jadwal cicilan')))
+          Center(child: Padding(padding: const EdgeInsets.all(20), child: Text('rent_plan.no_installments'.tr(context))))
         else
           ListView.separated(
             shrinkWrap: true,
@@ -1713,20 +1999,22 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               final status = inst['status']?.toString().toLowerCase() ?? 'belum';
               Color statusColor = Colors.grey;
               IconData statusIcon = Icons.timer_outlined;
-              String statusLabel = 'Belum';
+              String statusLabel = 'rent_plan.unpaid'.tr(context);
 
               if (status == 'lunas') {
                 statusColor = Colors.green;
                 statusIcon = Icons.check_circle_rounded;
-                statusLabel = 'Lunas';
+                statusLabel = 'rent_plan.paid'.tr(context);
               } else if (status == 'terlambat') {
                 statusColor = Colors.red;
                 statusIcon = Icons.warning_rounded;
-                statusLabel = 'Terlambat';
+                statusLabel = 'rent_plan.late'.tr(context);
               } else if (status == 'sebagian') {
                 statusColor = Colors.orange;
                 statusIcon = Icons.pending_rounded;
-                statusLabel = 'Sebagian';
+                statusLabel = 'rent_plan.partial'.tr(context);
+              } else {
+                statusLabel = 'rent_plan.unpaid'.tr(context);
               }
 
               return InkWell(
@@ -1751,9 +2039,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Cicilan #${inst['installment_no']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('${'rent_plan.installment'.tr(context)} #${inst['installment_no']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                             const SizedBox(height: 4),
-                            Text('Jatuh Tempo: ${inst['due_date']}', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                            Text('${'rent_plan.due_date'.tr(context)}: ${inst['due_date']}', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
                           ],
                         ),
                       ),
@@ -1822,9 +2110,22 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     final tempoController = TextEditingController(text: '1');
     final mulaiController = TextEditingController(text: DateFormat('yyyy-MM-dd').format(DateTime.now()));
     final ketController = TextEditingController();
-    final totalFocusNode = FocusNode();
+    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     
     List<Map<String, dynamic>> preview = [];
+
+    void updatePreview() {
+      double total = double.tryParse(totalController.text) ?? 0;
+      int count = int.tryParse(cicilanController.text) ?? 0;
+      int dueDay = int.tryParse(tempoController.text) ?? 1;
+      DateTime start = DateTime.tryParse(mulaiController.text) ?? DateTime.now();
+      
+      if (total > 0 && count > 0) {
+        preview = _calculateInstallmentsPreview(total, count, start, dueDay);
+      } else {
+        preview = [];
+      }
+    }
 
     showModalBottomSheet(
       context: context,
@@ -1832,276 +2133,103 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
-          
-          void updatePreview() {
-            double total = double.tryParse(totalController.text) ?? 0;
-            int count = int.tryParse(cicilanController.text) ?? 0;
-            int dueDay = int.tryParse(tempoController.text) ?? 1;
-            DateTime start = DateTime.tryParse(mulaiController.text) ?? DateTime.now();
-            
-            if (total > 0 && count > 0) {
-              setDialogState(() {
-                preview = _calculateInstallmentsPreview(total, count, start, dueDay);
-              });
-            } else {
-              setDialogState(() { preview = []; });
-            }
-          }
-
           return Container(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 24, right: 24, top: 24),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, -5))
-              ],
             ),
-            child: Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 16, right: 16, top: 12
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40, height: 4,
-                        decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3), borderRadius: BorderRadius.circular(2)),
-                      ),
-                    ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('rent_plan.create_debt_data'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded))
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildDropdown('rent_plan.reason'.tr(context), selectedReason, reasons.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(), (val) {
+                    if (val != null) setDialogState(() => selectedReason = val);
+                  }),
+                  const SizedBox(height: 16),
+                  _buildTextField('rent_plan.total_amount'.tr(context), controller: totalController, icon: Icons.monetization_on_rounded, keyboardType: TextInputType.number, onChanged: (_) => setDialogState(() => updatePreview())),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _buildTextField('rent_plan.installment_count'.tr(context), controller: cicilanController, icon: Icons.repeat_rounded, keyboardType: TextInputType.number, onChanged: (_) => setDialogState(() => updatePreview()))),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildTextField('rent_plan.day_interval'.tr(context), controller: tempoController, icon: Icons.calendar_today_rounded, keyboardType: TextInputType.number, onChanged: (_) => setDialogState(() => updatePreview()))),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: () async {
+                      final date = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
+                      if (date != null) {
+                        setDialogState(() => mulaiController.text = DateFormat('yyyy-MM-dd').format(date));
+                        setDialogState(() => updatePreview());
+                      }
+                    },
+                    child: _buildTextField('rent_plan.start_date'.tr(context), controller: mulaiController, enabled: false, icon: Icons.event_rounded),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField('rent_plan.notes'.tr(context), controller: ketController, maxLines: 2, icon: Icons.notes_rounded, isRequired: false),
+                  if (preview.isNotEmpty) ...[
                     const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(color: const Color(0xFFE57373).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                          child: const Icon(Icons.add_card_rounded, color: Color(0xFFE57373), size: 24),
-                        ),
-                        const SizedBox(width: 16),
-                        const Text('Tambah Data Hutang', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    _buildPremiumFieldLabel('ALASAN HUTANG'),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.grey[50], 
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1))
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: selectedReason,
-                          items: reasons.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
-                          onChanged: (val) {
-                            setDialogState(() { selectedReason = val!; });
-                          },
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    _buildPremiumFieldLabel('TOTAL HUTANG'),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: totalController,
-                      focusNode: totalFocusNode,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: '0',
-                        prefixText: totalFocusNode.hasFocus ? 'Rp ' : null,
-                        filled: true,
-                        fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
-                      ),
-                      onChanged: (_) => updatePreview(),
-                      onTap: () {
-                        setDialogState(() {}); // Force rebuild to show prefix
-                      },
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildPremiumFieldLabel('JUMLAH CICILAN'),
-                              const SizedBox(height: 8),
-                              TextField(
-                                controller: cicilanController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  suffixText: 'Bulan',
-                                  filled: true,
-                                  fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
-                                ),
-                                onChanged: (_) => updatePreview(),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildPremiumFieldLabel('TGL JATUH TEMPO'),
-                              const SizedBox(height: 8),
-                              TextField(
-                                controller: tempoController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  hintText: '1-31',
-                                  filled: true,
-                                  fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
-                                ),
-                                onChanged: (_) => updatePreview(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    _buildPremiumFieldLabel('MULAI CICILAN PERTAMA'),
-                    const SizedBox(height: 8),
-                    InkWell(
-                      onTap: () async {
-                        final date = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
-                        if (date != null) {
-                          setDialogState(() { mulaiController.text = DateFormat('yyyy-MM-dd').format(date); });
-                          updatePreview();
-                        }
-                      },
-                      child: TextField(
-                        controller: mulaiController, enabled: false, 
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.calendar_month_rounded, color: Color(0xFFE57373)),
-                          filled: true,
-                          fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-                          disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
-                        )
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 20),
-                    _buildPremiumFieldLabel('KETERANGAN / CATATAN'),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: ketController, maxLines: 2, 
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
-                      )
-                    ),
-                    
-                    if (preview.isNotEmpty) ...[
-                      const SizedBox(height: 24),
-                      Row(
+                    Text('rent_plan.installment_preview'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 12),
+                    ...preview.take(3).map((p) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(Icons.visibility_outlined, size: 14, color: Colors.blue),
-                          const SizedBox(width: 8),
-                          Text('PREVIEW JADWAL CICILAN', 
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.blue[600])),
+                          Text('${'rent_plan.installment'.tr(context)} #${p['no']} (${p['due_date']})', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          Text(currencyFormat.format(p['amount']), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        constraints: const BoxConstraints(maxHeight: 180), // Limit height for ~5 items
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.03), 
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.blue.withOpacity(0.1))
-                        ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: preview.map((p) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Cicilan #${p['no']} - ${DateFormat('dd MMM yyyy').format(DateTime.parse(p['due_date']))}', 
-                                    style: const TextStyle(fontSize: 12)),
-                                  Text(NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(p['amount']), 
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            )).toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                    
-                    const SizedBox(height: 32),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              side: BorderSide(color: const Color(0xFFE57373).withOpacity(0.5))
-                            ),
-                            child: const Text('BATAL', style: TextStyle(color: Color(0xFFE57373), fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              if (totalController.text.isEmpty || cicilanController.text.isEmpty) return;
-                              Navigator.pop(context);
-                              setState(() => _isLoading = true);
-                              final res = await _rentPlanService.saveDebt({
-                                'rental_id': widget.rentalId.toString(),
-                                'reason': selectedReason,
-                                'total_amount': totalController.text,
-                                'jumlah_cicilan': cicilanController.text,
-                                'jatuh_tempo_tgl': tempoController.text,
-                                'mulai_cicilan': mulaiController.text,
-                                'keterangan': ketController.text,
-                              });
-                              if (res['status'] == true) {
-                                _fetchDetail();
-                              } else {
-                                setState(() => _isLoading = false);
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'Gagal menyimpan')));
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFE57373),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              elevation: 0,
-                            ),
-                            child: const Text('SIMPAN DATA', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 40),
+                    )),
+                    if (preview.length > 3) 
+                      Text('... + ${preview.length - 3} ${'rent_plan.more'.tr(context)}', style: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic, color: Colors.grey)),
                   ],
-                ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        setState(() => _isLoading = true);
+                        final res = await _rentPlanService.saveDebt({
+                          'rental_id': widget.rentalId.toString(),
+                          'reason': selectedReason,
+                          'total_amount': totalController.text,
+                          'jumlah_cicilan': cicilanController.text,
+                          'jatuh_tempo_tgl': tempoController.text,
+                          'mulai_cicilan': mulaiController.text,
+                          'keterangan': ketController.text,
+                        });
+                        if (res['status'] == true) {
+                          _fetchDetail();
+                        } else {
+                          setState(() => _isLoading = false);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'rent_plan.failed_save'.tr(context))));
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 0,
+                      ),
+                      child: Text('rent_plan.save_debt'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
           );
@@ -2177,9 +2305,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     children: [
                       const Icon(Icons.assignment_turned_in_rounded, color: Colors.white, size: 22),
                       const SizedBox(width: 14),
-                      const Expanded(
-                        child: Text('Konfirmasi Pembayaran', 
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 0.5)),
+                      Expanded(
+                        child: Text('rent_plan.payment_confirmation'.tr(context), 
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 0.5)),
                       ),
                       InkWell(
                         onTap: () => Navigator.pop(context),
@@ -2212,20 +2340,20 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(child: _buildSummaryItem('CICILAN KE-', installment['installment_no'].toString(), isDark: isDark)),
+                              Expanded(child: _buildSummaryItem('rent_plan.installment_count_label'.tr(context), installment['installment_no'].toString(), isDark: isDark)),
                               Container(width: 1, height: 30, color: borderColor.withOpacity(0.3)),
                               const SizedBox(width: 12),
-                              Expanded(child: _buildSummaryItem('TOTAL CICILAN', NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalAmount), isDark: isDark)),
+                              Expanded(child: _buildSummaryItem('rent_plan.total_installment'.tr(context), NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(totalAmount), isDark: isDark)),
                               const SizedBox(width: 12),
                               Container(width: 1, height: 30, color: borderColor.withOpacity(0.3)),
                               const SizedBox(width: 12),
-                              Expanded(child: _buildSummaryItem('SISA HARUS BAYAR', NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(remainingAmount), valueColor: Colors.red, isDark: isDark)),
+                              Expanded(child: _buildSummaryItem('rent_plan.remaining_to_pay'.tr(context), NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(remainingAmount), valueColor: Colors.red, isDark: isDark)),
                             ],
                           ),
                         ),
                         const SizedBox(height: 28),
 
-                        Text('NOMINAL DIBAYAR SEKARANG', 
+                        Text('rent_plan.amount_to_pay_now'.tr(context), 
                           style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: subTextColor, letterSpacing: 1)),
                         const SizedBox(height: 10),
                         TextField(
@@ -2259,7 +2387,6 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                             final double input = double.tryParse(val) ?? 0;
                             if (input > remainingAmount) {
                               amountController.text = remainingAmount.toStringAsFixed(0);
-                              // Ensure cursor stays at the end
                               amountController.selection = TextSelection.fromPosition(
                                 TextPosition(offset: amountController.text.length),
                               );
@@ -2271,11 +2398,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
                         Row(
                           children: [
-                            _buildQuickButton('Bayar Penuh (Lunas)', Icons.check_circle_outline_rounded, () {
+                            _buildQuickButton('rent_plan.pay_full'.tr(context), Icons.check_circle_outline_rounded, () {
                               setDialogState(() { amountController.text = remainingAmount.toStringAsFixed(0); });
                             }, const Color(0xFF00C853)),
                             const SizedBox(width: 10),
-                            _buildQuickButton('½ dari sisa', Icons.pie_chart_outline_rounded, () {
+                            _buildQuickButton('rent_plan.half_of_remaining'.tr(context), Icons.pie_chart_outline_rounded, () {
                               setDialogState(() { amountController.text = (remainingAmount / 2).toStringAsFixed(0); });
                             }, Colors.blue),
                           ],
@@ -2300,8 +2427,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                               Expanded(
                                 child: Text(
                                   isFullPayment 
-                                    ? 'Cicilan ini akan lunas!' 
-                                    : 'Bayar sebagian... Sisa Rp ${NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(diff)} otomatis dijadwalkan ke cicilan baru bulan depan.',
+                                    ? 'rent_plan.installment_will_be_paid'.tr(context) 
+                                    : '${'rent_plan.pay_partial'.tr(context)}... ${'rent_plan.remaining'.tr(context)} Rp ${NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(diff)} ${'rent_plan.auto_scheduled_next_month'.tr(context)}.',
                                   style: TextStyle(
                                     color: isFullPayment 
                                       ? (isDark ? Colors.green[300] : Colors.green[800]) 
@@ -2315,7 +2442,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                         ),
                         const SizedBox(height: 28),
 
-                        Text('BUKTI PEMBAYARAN (WAJIB)', 
+                        Text('rent_plan.payment_proof_required'.tr(context), 
                           style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: subTextColor, letterSpacing: 1)),
                         const SizedBox(height: 10),
                         InkWell(
@@ -2337,7 +2464,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                                 Expanded(
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    child: Text(proofFile?.path.split('/').last ?? 'Pilih file bukti transfer...', 
+                                    child: Text(proofFile?.path.split('/').last ?? 'rent_plan.select_payment_proof'.tr(context), 
                                       style: TextStyle(color: subTextColor, fontSize: 13),
                                       overflow: TextOverflow.ellipsis),
                                   ),
@@ -2356,14 +2483,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                         ),
                         const SizedBox(height: 24),
 
-                        Text('CATATAN', 
+                        Text('rent_plan.notes'.tr(context).toUpperCase(), 
                           style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: subTextColor, letterSpacing: 1)),
                         const SizedBox(height: 10),
                         TextField(
                           controller: noteController,
                           style: TextStyle(fontSize: 14, color: textColor),
                           decoration: InputDecoration(
-                            hintText: 'cth: Transfer BCA, ref 12345...',
+                            hintText: 'rent_plan.payment_note_hint'.tr(context),
                             hintStyle: TextStyle(color: subTextColor.withOpacity(0.5), fontSize: 14),
                             filled: true,
                             fillColor: inputBg,
@@ -2393,7 +2520,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                     if (proofFile == null) {
-                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Silakan unggah bukti pembayaran terlebih dahulu')));
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.upload_proof_error'.tr(context))));
                                         return;
                                     }
                                     Navigator.pop(context);
@@ -2408,11 +2535,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                                         _fetchDetail();
                                     } else {
                                         setState(() => _isLoading = false);
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'Gagal memproses pembayaran')));
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'rent_plan.failed_payment'.tr(context))));
                                     }
                                 },
                                 icon: const Icon(Icons.check_rounded, size: 20),
-                                label: const Text('KONFIRMASI', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                label: Text('main.confirm'.tr(context).toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF00C853),
                                   foregroundColor: Colors.white,
@@ -2463,11 +2590,6 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     );
   }
 
-  Widget _buildPremiumFieldLabel(String label) {
-    return Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5));
-  }
-
-
   Widget _buildAddressRow(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2483,15 +2605,15 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Data Hutang?', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Seluruh data hutang dan riwayat cicilan ini akan dihapus permanen secara sistem. Lanjutkan?'),
+        title: Text('rent_plan.confirm_delete'.tr(context)),
+        content: Text('rent_plan.delete_debt_confirm'.tr(context)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('BATAL', style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+            child: Text('main.cancel'.tr(context), style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold)),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () async {
               Navigator.pop(context);
               setState(() => _isLoading = true);
@@ -2500,11 +2622,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 _fetchDetail();
               } else {
                 setState(() => _isLoading = false);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'Gagal menghapus hutang')));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'rent_plan.failed_delete'.tr(context))));
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-            child: const Text('HAPUS', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text('main.delete'.tr(context), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
