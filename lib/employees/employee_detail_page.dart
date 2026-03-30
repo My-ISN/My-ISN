@@ -245,10 +245,11 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
         unselectedLabelColor: Colors.grey[500],
         indicatorColor: _primaryColor,
         indicatorWeight: 3,
-        indicatorPadding: const EdgeInsets.symmetric(horizontal: 16),
+        indicatorSize: TabBarIndicatorSize.label,
+        indicatorPadding: EdgeInsets.zero,
         labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
-        overlayColor: MaterialStateProperty.all(Colors.transparent),
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
         padding: const EdgeInsets.only(left: 0, right: 8),
         tabs: [
           Tab(text: 'employees.tabs.profile'.tr(context)),
