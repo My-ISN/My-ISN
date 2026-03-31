@@ -196,6 +196,18 @@ class RentPlanService {
     }
   }
 
+  Future<Map<String, dynamic>> deleteRentPlan(int rentalId) async {
+    try {
+      final url = Uri.parse('$baseUrl/delete_rent_plan');
+      final response = await http.post(url, body: {
+        'rental_id': rentalId.toString(),
+      });
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> extendRental(int rentalId, Map<String, dynamic> data, Map<String, File?> files) async {
     try {
       final url = Uri.parse('$baseUrl/extend_rental');

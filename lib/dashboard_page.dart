@@ -783,139 +783,172 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 16),
 
-            GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.85,
-              children: [
-                if (_hasPermission('mobile_rent_plan_enable'))
-                  _buildQuickMenuCard(
-                    'dashboard.quick_menu_rent_plan'.tr(context),
-                    Icons.house_rounded,
-                    const Color(0xFF7E57C2),
-                    () {
-                      final user = _dashboardData['user'] ?? widget.userData;
-                      final bool isCustomer = user['user_type'] == 'customer' || 
-                                             user['user_role_id'] == 21 || 
-                                             user['user_role_id'] == '21';
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => isCustomer 
-                            ? client_rp.RentPlanPage(userData: user)
-                            : staff_rp.RentPlanPage(userData: user),
-                        ),
-                      );
-                    },
-                  ),
-                if (_hasPermission('mobile_todo_enable'))
-                  ValueListenableBuilder<int>(
-                    valueListenable: NotificationManager().unreadTodoCount,
-                    builder: (context, count, child) {
-                      return Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          _buildQuickMenuCard(
-                            'dashboard.quick_menu_todo_list'.tr(context),
-                            Icons.assignment_rounded,
-                            const Color(0xFF5C6BC0),
-                            () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => TodoListPage(
-                                    userData: _dashboardData['user'] ?? widget.userData,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          if (count > 0)
-                            Positioned(
-                              right: 4,
-                              top: 4,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
-                                child: Text(
-                                  count > 9 ? '9+' : '$count',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
+            _buildDynamicQuickMenu([
+              if (_hasPermission('mobile_rent_plan_enable'))
+                _buildQuickMenuCard(
+                  'dashboard.quick_menu_rent_plan'.tr(context),
+                  Icons.house_rounded,
+                  const Color(0xFF7E57C2),
+                  () {
+                    final user = _dashboardData['user'] ?? widget.userData;
+                    final bool isCustomer = user['user_type'] == 'customer' || 
+                                           user['user_role_id'] == 21 || 
+                                           user['user_role_id'] == '21';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => isCustomer 
+                          ? client_rp.RentPlanPage(userData: user)
+                          : staff_rp.RentPlanPage(userData: user),
+                      ),
+                    );
+                  },
+                ),
+              if (_hasPermission('mobile_todo_enable'))
+                ValueListenableBuilder<int>(
+                  valueListenable: NotificationManager().unreadTodoCount,
+                  builder: (context, count, child) {
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        _buildQuickMenuCard(
+                          'dashboard.quick_menu_todo_list'.tr(context),
+                          Icons.assignment_rounded,
+                          const Color(0xFF7E57C2),
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TodoListPage(
+                                  userData: _dashboardData['user'] ?? widget.userData,
                                 ),
                               ),
+                            );
+                          },
+                        ),
+                        if (count > 0)
+                          Positioned(
+                            right: 4,
+                            top: 4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 16,
+                                minHeight: 16,
+                              ),
+                              child: Text(
+                                count > 9 ? '9+' : '$count',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                        ],
-                      );
-                    },
-                  ),
-                if (_hasPermission('mobile_employees_enable'))
-                  _buildQuickMenuCard(
-                    'dashboard.quick_menu_employees'.tr(context),
-                    Icons.people_alt_rounded,
-                    const Color(0xFF2ECC71),
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EmployeesPage(
-                            userData: _dashboardData['user'] ?? widget.userData,
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                if (_hasPermission('mobile_worklog_enable'))
-                  _buildQuickMenuCard(
-                    'dashboard.quick_menu_work_log'.tr(context),
-                    Icons.assignment_turned_in_rounded,
-                    const Color(0xFF7E57C2),
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WorkLogPage(
-                            userData: _dashboardData['user'] ?? widget.userData,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                      ],
+                    );
+                  },
+                ),
+              if (_hasPermission('mobile_employees_enable'))
                 _buildQuickMenuCard(
-                  'dashboard.quick_menu_finance'.tr(context),
-                  Icons.payments_rounded,
-                  const Color(0xFFF39C12),
+                  'dashboard.quick_menu_employees'.tr(context),
+                  Icons.people_alt_rounded,
+                  const Color(0xFF7E57C2),
                   () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => FinancePage(
+                        builder: (context) => EmployeesPage(
                           userData: _dashboardData['user'] ?? widget.userData,
                         ),
                       ),
                     );
                   },
                 ),
-
-              ],
-            ),
+              if (_hasPermission('mobile_worklog_enable'))
+                _buildQuickMenuCard(
+                  'dashboard.quick_menu_work_log'.tr(context),
+                  Icons.assignment_turned_in_rounded,
+                  const Color(0xFF7E57C2),
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WorkLogPage(
+                          userData: _dashboardData['user'] ?? widget.userData,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              _buildQuickMenuCard(
+                'dashboard.quick_menu_finance'.tr(context),
+                Icons.payments_rounded,
+                const Color(0xFF7E57C2),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FinancePage(
+                        userData: _dashboardData['user'] ?? widget.userData,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ]),
             const SizedBox(height: 32),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDynamicQuickMenu(List<Widget> items) {
+    if (items.isEmpty) return const SizedBox();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Reduced gap: 10 is spacing between items
+        final double itemWidth = (constraints.maxWidth - (10 * 2)) / 3;
+        // Make height more compact (1.0 means square, 1.1 means slightly taller)
+        // Since text is now single line, 1.05 is a good balance.
+        final double fixedHeight = itemWidth * 1.05;
+
+        final List<List<Widget>> rows = [];
+        for (var i = 0; i < items.length; i += 3) {
+          rows.add(items.sublist(i, i + 3 > items.length ? items.length : i + 3));
+        }
+
+        return Column(
+          children: rows.map((rowItems) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  ...rowItems.map((item) {
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: SizedBox(
+                          height: fixedHeight,
+                          child: item,
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
@@ -946,25 +979,25 @@ class _DashboardPageState extends State<DashboardPage> {
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(icon, color: color, size: 24),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Text(
                   title,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                     height: 1.1,
                   ),

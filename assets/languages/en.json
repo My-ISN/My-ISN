@@ -76,10 +76,10 @@
         "rent_plan": "Rent Plan",
         "todo_list": "Todo List",
         "employees": "Employees",
-        "quick_menu_rent_plan": "Rent\nPlan",
-        "quick_menu_todo_list": "Todo\nList",
+        "quick_menu_rent_plan": "Rent Plan",
+        "quick_menu_todo_list": "Todo List",
         "quick_menu_employees": "Employees",
-        "quick_menu_work_log": "Work\nLog",
+        "quick_menu_work_log": "Work Log",
         "whats_new": "What's New in {version}",
         "update_thanks": "Thank you for updating the app! Here are the latest changes:",
         "cool": "Cool!",
@@ -185,24 +185,24 @@
             "11": "November",
             "12": "December"
         },
-        "weekdays": [
-            "Sunday",
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday"
-        ],
-        "weekdays_short": [
-            "Sun",
-            "Mon",
-            "Tue",
-            "Wed",
-            "Thu",
-            "Fri",
-            "Sat"
-        ],
+        "weekdays": {
+            "0": "Sunday",
+            "1": "Monday",
+            "2": "Tuesday",
+            "3": "Wednesday",
+            "4": "Thursday",
+            "5": "Friday",
+            "6": "Saturday"
+        },
+        "weekdays_short": {
+            "0": "Sun",
+            "1": "Mon",
+            "2": "Tue",
+            "3": "Wed",
+            "4": "Thu",
+            "5": "Fri",
+            "6": "Sat"
+        },
         "error_with_msg": "Error: {message}",
         "server_error_status": "Server Error ({status})",
         "json_parse_error": "Data parsing error (JSON)"
@@ -782,6 +782,11 @@
         "not_available": "Not Available",
         "late": "Late",
         "partial": "Partial",
+        "delete_plan": "Delete Rental",
+        "delete_confirm_title": "Delete Rental?",
+        "delete_confirm_msg": "Are you sure you want to permanently delete this rental data? Deleted data cannot be recovered.",
+        "delete_success": "Rental data deleted successfully",
+        "delete_failed": "Failed to delete rental data",
         "validation": {
             "required": "This field is required"
         }

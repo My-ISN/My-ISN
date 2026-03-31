@@ -16,6 +16,7 @@ class AttendancePage extends StatefulWidget {
 class _AttendancePageState extends State<AttendancePage> {
   DateTime _selectedMonth = DateTime.now();
   bool _isLoading = true;
+  bool _isRefreshing = false;
   Map<String, dynamic> _attendanceData = {};
   final Color _primaryColor = const Color(0xFF7E57C2);
 
@@ -25,8 +26,12 @@ class _AttendancePageState extends State<AttendancePage> {
     _fetchAttendance();
   }
 
-  Future<void> _fetchAttendance() async {
-    setState(() => _isLoading = true);
+  Future<void> _fetchAttendance({bool silent = false}) async {
+    if (silent) {
+      setState(() => _isRefreshing = true);
+    } else {
+      setState(() => _isLoading = true);
+    }
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final month = _selectedMonth.month;
@@ -42,6 +47,7 @@ class _AttendancePageState extends State<AttendancePage> {
           setState(() {
             _attendanceData = data['data'];
             _isLoading = false;
+            _isRefreshing = false;
           });
         }
       } else {
@@ -51,7 +57,10 @@ class _AttendancePageState extends State<AttendancePage> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _isRefreshing = false;
+        });
 
         // Don't show redundant snackbar if we are offline
         if (!ConnectivityStatus.of(context)) return;
@@ -85,7 +94,7 @@ class _AttendancePageState extends State<AttendancePage> {
         _selectedMonth.month + offset,
       );
     });
-    _fetchAttendance();
+    _fetchAttendance(silent: true);
   }
 
   @override
@@ -108,6 +117,18 @@ class _AttendancePageState extends State<AttendancePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildMonthSelector(),
+                          if (_isRefreshing)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(2),
+                                child: LinearProgressIndicator(
+                                  minHeight: 3,
+                                  backgroundColor: _primaryColor.withOpacity(0.1),
+                                  valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                                ),
+                              ),
+                            ),
                           const SizedBox(height: 20),
                           _buildCalendarGrid(),
                           const SizedBox(height: 32),

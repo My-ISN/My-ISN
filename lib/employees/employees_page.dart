@@ -363,8 +363,11 @@ class _EmployeesPageState extends State<EmployeesPage> {
   }
 
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null ? Colors.grey[200] : Colors.white,
+      color: onPressed == null 
+          ? (isDark ? Colors.white12 : Colors.grey[200]) 
+          : Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,
@@ -374,9 +377,17 @@ class _EmployeesPageState extends State<EmployeesPage> {
           height: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.1)),
+            border: Border.all(
+              color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.1),
+            ),
           ),
-          child: Icon(icon, color: onPressed == null ? Colors.grey[400] : _primaryColor, size: 24),
+          child: Icon(
+            icon, 
+            color: onPressed == null 
+                ? (isDark ? Colors.white24 : Colors.grey[400]) 
+                : _primaryColor, 
+            size: 24,
+          ),
         ),
       ),
     );

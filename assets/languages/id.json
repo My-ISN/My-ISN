@@ -76,10 +76,10 @@
         "rent_plan": "Rencana Sewa",
         "todo_list": "Daftar Tugas",
         "employees": "Karyawan",
-        "quick_menu_rent_plan": "Rencana\nSewa",
-        "quick_menu_todo_list": "Daftar\nTugas",
+        "quick_menu_rent_plan": "Rencana Sewa",
+        "quick_menu_todo_list": "Daftar Tugas",
         "quick_menu_employees": "Karyawan",
-        "quick_menu_work_log": "Log\nKerja",
+        "quick_menu_work_log": "Log Kerja",
         "whats_new": "Apa yang Baru di {version}",
         "update_thanks": "Terima kasih telah memperbarui aplikasi! Berikut adalah perubahan terbaru:",
         "cool": "Mantap!",
@@ -185,27 +185,24 @@
             "11": "November",
             "12": "Desember"
         },
-        "weekdays": [
-            "Minggu",
-            "Senin",
-            "Selasa",
-            "Rabu",
-            "Kamis",
-            "Jumat",
-            "Sabtu"
-        ],
-        "weekdays_short": [
-            "Min",
-            "Sen",
-            "Sel",
-            "Rab",
-            "Kam",
-            "Jum",
-            "Sab"
-        ],
-        "error_with_msg": "Kesalahan: {message}",
-        "server_error_status": "Kesalahan Server ({status})",
-        "json_parse_error": "Kesalahan pembacaan data (JSON)"
+        "weekdays": {
+            "0": "Minggu",
+            "1": "Senin",
+            "2": "Selasa",
+            "3": "Rabu",
+            "4": "Kamis",
+            "5": "Jumat",
+            "6": "Sabtu"
+        },
+        "weekdays_short": {
+            "0": "Min",
+            "1": "Sen",
+            "2": "Sel",
+            "3": "Rab",
+            "4": "Kam",
+            "5": "Jum",
+            "6": "Sab"
+        }
     },
     "announcement": {
         "title": "Pengumuman",
@@ -782,6 +779,11 @@
         "not_available": "Tidak Tersedia",
         "late": "Terlambat",
         "partial": "Sebagian",
+        "delete_plan": "Hapus Rental",
+        "delete_confirm_title": "Hapus Rental?",
+        "delete_confirm_msg": "Apakah Anda yakin ingin menghapus data rental ini secara permanen? Data yang dihapus tidak dapat dipulihkan.",
+        "delete_success": "Data rental berhasil dihapus",
+        "delete_failed": "Gagal menghapus data rental",
         "validation": {
             "required": "Bidang ini wajib diisi"
         }

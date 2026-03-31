@@ -65,6 +65,138 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
     super.dispose();
   }
 
+  bool _hasPermission(String key) {
+    if (widget.userData['user_type'] == 'company') return true;
+    final List<String> permissions = (widget.userData['role_resources'] ?? '').toString().split(',');
+    return permissions.contains(key);
+  }
+
+  void _showDeleteConfirmation(int rentalId) {
+    if (!_hasPermission('mobile_rent_plan_delete')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('main.unauthorized_module'.tr(context)), backgroundColor: Colors.red),
+      );
+      return;
+    }
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'rent_plan.delete_confirm_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'rent_plan.delete_confirm_msg'.tr(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _performDelete(rentalId);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('main.delete'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _performDelete(int rentalId) async {
+    setState(() => _isLoading = true);
+    final response = await _rentPlanService.deleteRentPlan(rentalId);
+    if (response['status'] == true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: Colors.white),
+                const SizedBox(width: 12),
+                Text('rent_plan.delete_success'.tr(context)),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+        _fetchRentPlans();
+      }
+    } else {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_rounded, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text(response['message'] ?? 'rent_plan.delete_failed'.tr(context))),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _fetchRentPlans() async {
     setState(() => _isLoading = true);
     final response = await _rentPlanService.getRentPlans(
@@ -153,23 +285,25 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
       ),
       endDrawer: SideDrawer(userData: widget.userData, activePage: 'rent_plan'),
       body: content,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddRentPlanPage(userData: widget.userData),
-            ),
-          );
-          if (result == true) {
-            _fetchRentPlans();
-          }
-        },
-        backgroundColor: _primaryColor,
-        icon: const Icon(Icons.add_shopping_cart_rounded, color: Colors.white),
-        label: Text('rent_plan.add_rental'.tr(context), 
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
+      floatingActionButton: _hasPermission('mobile_rent_plan_add') 
+      ? FloatingActionButton.extended(
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddRentPlanPage(userData: widget.userData),
+              ),
+            );
+            if (result == true) {
+              _fetchRentPlans();
+            }
+          },
+          backgroundColor: _primaryColor,
+          icon: const Icon(Icons.add_shopping_cart_rounded, color: Colors.white),
+          label: Text('rent_plan.add_rental'.tr(context), 
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        )
+      : null,
     );
   }
 
@@ -360,6 +494,22 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                       ),
                     ),
                     _buildStatusPill(status, statusColor),
+                    if (_hasPermission('mobile_rent_plan_delete'))
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _showDeleteConfirmation(int.parse(rental['rental_id'])),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 18),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -593,8 +743,11 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
   }
 
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null ? Colors.grey[200] : Colors.white,
+      color: onPressed == null 
+          ? (isDark ? Colors.white12 : Colors.grey[200]) 
+          : Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,
@@ -604,9 +757,17 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
           height: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.1)),
+            border: Border.all(
+              color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.1),
+            ),
           ),
-          child: Icon(icon, color: onPressed == null ? Colors.grey[400] : _primaryColor, size: 24),
+          child: Icon(
+            icon, 
+            color: onPressed == null 
+                ? (isDark ? Colors.white24 : Colors.grey[400]) 
+                : _primaryColor, 
+            size: 24,
+          ),
         ),
       ),
     );
