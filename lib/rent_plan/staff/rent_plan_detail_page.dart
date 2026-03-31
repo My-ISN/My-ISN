@@ -1756,127 +1756,261 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   }
 
   Widget _buildViewDokumenTab() {
+    if (_rentalData == null) return const SizedBox.shrink();
+
     final isPerusahaan = _rentalData!['jenis_sewa']?.toString().toLowerCase() == 'perusahaan';
-    final String baseUrl = 'https://foxgeen.com/HRIS/uploads/rentals/';
     
+    // BACKEND PROXY URL for GDrive
+    const String proxyBaseUrl = 'https://foxgeen.com/HRIS/mobileapi/display_gdrive_file/';
+    // FALLBACK URL for local files
+    const String localBaseUrl = 'https://foxgeen.com/HRIS/uploads/rentals/';
+
+    // Helper to get image URL (prefers Local Server over GDrive)
+    String getImgUrl(String? gdriveId, String? localFileName, {bool isJaminan = false}) {
+      // 1. Try local file first
+      if (localFileName != null && localFileName.isNotEmpty) {
+        // Semuanya sekarang diarahkan ke /uploads/rentals/ karena baik web maupun mobile simpan di sana
+        return '$localBaseUrl$localFileName';
+      }
+      // 2. Fallback to GDrive if local file name is not available
+      if (gdriveId != null && gdriveId.isNotEmpty) {
+        return '$proxyBaseUrl$gdriveId';
+      }
+      return '';
+    }
+
+    // List of docs to show
+    List<Map<String, dynamic>> docsToShow = [];
+
+    // 1. KTP (Always)
+    docsToShow.add({
+      'title': isPerusahaan ? 'rent_plan.leader_ktp'.tr(context) : 'rent_plan.customer_ktp'.tr(context),
+      'url': getImgUrl(_rentalData!['gdrive_ktp_id'], isPerusahaan ? _rentalData!['file_ktp_pimpinan'] : _rentalData!['file_ktp']),
+    });
+
+    if (isPerusahaan) {
+      // 2. NPWP
+      docsToShow.add({
+        'title': 'rent_plan.company_npwp'.tr(context),
+        'url': getImgUrl(_rentalData!['gdrive_npwp_id'], _rentalData!['file_npwp']),
+      });
+      // 3. PO
+      docsToShow.add({
+        'title': 'rent_plan.purchase_order'.tr(context),
+        'url': getImgUrl(_rentalData!['gdrive_po_id'], _rentalData!['file_po']),
+      });
+      // 4. Domisili
+      docsToShow.add({
+        'title': 'rent_plan.domicile_file'.tr(context),
+        'url': getImgUrl(_rentalData!['gdrive_domisili_id'], _rentalData!['domisili']),
+      });
+    }
+
+    // 5. Jaminan (Dynamic labels)
+    final List<dynamic> allJaminanList = isPerusahaan ? _jaminanPerusahaan : _jaminanPribadi;
+    List<dynamic> savedJaminanIds = [];
+    try {
+      if (_rentalData!['jaminan_tambahan'] != null) {
+        savedJaminanIds = json.decode(_rentalData!['jaminan_tambahan']);
+      }
+    } catch (_) {}
+
+    final int jaminanCount = isPerusahaan ? 2 : 3;
+    for (int i = 1; i <= jaminanCount; i++) {
+        String label = '${'rent_plan.guarantee'.tr(context)} $i';
+        // Try to find actual category name
+        if (savedJaminanIds.length >= i) {
+            final String? cid = savedJaminanIds[i-1]?.toString();
+            final match = allJaminanList.firstWhere((j) => j['id']?.toString() == cid, orElse: () => null);
+            if (match != null) label = match['category_name']?.toString() ?? label;
+        }
+
+        docsToShow.add({
+          'title': label,
+          'url': getImgUrl(_rentalData!['gdrive_jaminan${i}_id'], _rentalData!['foto_jaminan$i'], isJaminan: true),
+        });
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle(Icons.badge_rounded, 'rent_plan.identity_docs'.tr(context)),
+        const SizedBox(height: 12),
         
-        // KTP Image Card
-        _buildDocumentImageCard(
-          title: isPerusahaan ? 'rent_plan.leader_ktp'.tr(context) : 'rent_plan.customer_ktp'.tr(context),
-          fileName: _rentalData!['file_ktp'],
-          baseUrl: baseUrl,
-        ),
-        
-        if (isPerusahaan) ...[
-          const SizedBox(height: 16),
-          _buildDocumentImageCard(
-            title: 'rent_plan.company_npwp'.tr(context),
-            fileName: _rentalData!['file_npwp'],
-            baseUrl: baseUrl,
+        ...docsToShow.map((doc) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _buildDocumentTile(
+            title: doc['title'],
+            imageUrl: doc['url'],
           ),
-          const SizedBox(height: 16),
-          _buildDocumentImageCard(
-            title: 'rent_plan.purchase_order'.tr(context),
-            fileName: _rentalData!['file_po'],
-            baseUrl: baseUrl,
-          ),
-        ],
+        )),
 
-        const SizedBox(height: 24),
-        _buildSectionTitle(Icons.location_on_rounded, 'rent_plan.registered_address'.tr(context)),
-        _buildOverviewCard([
-          _buildAddressRow('rent_plan.ktp_address'.tr(context), _rentalData!['alamat_ktp_formatted'] ?? _rentalData!['alamat_ktp'] ?? '-'),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Divider(height: 1, color: Colors.black12),
-          ),
-          _buildAddressRow('rent_plan.current_domicile_address'.tr(context), _rentalData!['alamat_current_formatted'] ?? _rentalData!['alamat_domisili'] ?? '-'),
-        ]),
       ],
     );
   }
 
-  Widget _buildDocumentImageCard({required String title, String? fileName, required String baseUrl}) {
-    if (fileName == null || fileName.isEmpty) {
-      return Container(
+  Widget _buildDocumentTile({required String title, String? imageUrl}) {
+    final bool hasImage = imageUrl != null && imageUrl.isNotEmpty;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: hasImage ? () => _showImagePopup(imageUrl, title) : null,
+      child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.black.withOpacity(0.05)),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(isDark ? 0.2 : 0.05)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Row(
           children: [
-            Icon(Icons.no_photography_outlined, color: Colors.grey[400], size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text('${'rent_plan.document'.tr(context)} $title ${'rent_plan.not_available'.tr(context)}', 
-                style: TextStyle(color: Colors.grey[500], fontSize: 11, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final String imageUrl = '$baseUrl$fileName';
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(title, 
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5)),
-                ),
-                Text('rent_plan.zoom_enabled'.tr(context), style: TextStyle(fontSize: 8, color: _primaryColor.withOpacity(0.6), fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-            child: Container(
-              height: 180, // Fixed height to prevent being too large
-              width: double.infinity,
-              child: InteractiveViewer(
-                minScale: 1.0,
-                maxScale: 4.0,
-                child: Image.network(
-                  imageUrl,
-                  width: double.infinity,
-                  height: 180,
-                  fit: BoxFit.contain, // Contain keeps aspect ratio within 180 height
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      height: 180,
-                      width: double.infinity,
-                      color: Colors.grey[50],
-                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                    );
-                  },
-                ),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: hasImage ? Colors.black.withOpacity(0.05) : Colors.grey[isDark ? 800 : 100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: hasImage 
+                  ? Hero(
+                      tag: imageUrl,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image_outlined, color: Colors.grey[400], size: 24),
+                      ),
+                    )
+                  : Icon(Icons.no_photography_outlined, color: Colors.grey[400], size: 24),
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  if (!hasImage) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'rent_plan.not_available'.tr(context),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[500],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (hasImage)
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _primaryColor.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.fullscreen_rounded, color: _primaryColor, size: 20),
+              ),
+          ],
+        ),
       ),
+    );
+  }
+
+  void _showImagePopup(String imageUrl, String title) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withOpacity(0.85),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) {
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Stack(
+            children: [
+              // Zoomable Image
+              Center(
+                child: InteractiveViewer(
+                  minScale: 0.5,
+                  maxScale: 5.0,
+                  child: Hero(
+                    tag: imageUrl,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(child: CircularProgressIndicator(color: Colors.white));
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(Icons.broken_image_outlined, color: Colors.white, size: 64),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Top Bar
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.download_rounded, color: Colors.white, size: 28),
+                            onPressed: () async {
+                              final Uri url = Uri.parse(imageUrl);
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url, mode: LaunchMode.externalApplication);
+                              }
+                            },
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 32),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(opacity: anim1, child: ScaleTransition(scale: anim1, child: child));
+      },
     );
   }
 
@@ -2587,17 +2721,6 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           backgroundColor: color.withOpacity(0.05),
         ),
       ),
-    );
-  }
-
-  Widget _buildAddressRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: TextStyle(fontSize: 9, color: Colors.grey[500], fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-        const SizedBox(height: 6),
-        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, height: 1.4)),
-      ],
     );
   }
 
