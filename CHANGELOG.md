@@ -4,6 +4,7 @@
 
 ### Added
 
+- **Speech-to-Text (Todo List)**: Terobosan baru fitur perekaman suara (*voice typing*) pada form "Tambah" dan "Edit" To-Do List menggunakan ikon mikrofon yang responsif dan terintegrasi native.
 - **Modul Perpanjangan Sewa (Rent Extend)**: Implementasi fitur perpanjangan masa sewa laptop dengan kalkulasi harga dinamis berdasarkan tier harga (`mas_harga`) langsung dari detail rental.
 - **Lokalisasi Penuh Modul Rent Plan**: Migrasi seluruh teks hardcoded ke sistem multi-bahasa (`id.json` & `en.json`) mencakup halaman daftar, detail, dan tambah pesanan secara komprehensif.
 - **Live Search Rent Plan**: Fitur pencarian otomatis real-time dengan debounce 500ms untuk akses data penyewaan yang lebih cepat.
@@ -39,6 +40,7 @@
 
 ### Fixed
 
+- **Modul Konfigurasi Role**: Pemisahan mutlak *key identifier* antara akses "Main Finance" Web dan "Mobile Apps Finance" pada sistem ERP HRIS untuk menuntaskan *bug* di mana menu aplikasi tidak bisa dimatikan (*status persistency fix*).
 - **Kalkulasi Harga Unit**: Perbaikan logika penentuan harga sewa laptop pada modul "Tambah Rent Plan" agar otomatis menarik harga dari tier yang aktif (`mas_harga`).
 - **Localization Bug**: Perbaikan kesalahan sintaksis dan pelabelan tipe penyewa (perusahaan/pribadi) yang sebelumnya belum ter-lokalisasi secara dinamis.
 - **Payment Validation**: Validasi input nominal agar tidak dapat melebihi sisa kewajiban cicilan bulan berjalan.

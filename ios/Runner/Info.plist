@@ -9,6 +9,10 @@
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires access to the photo library to upload documents.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Kami membutuhkan akses pengenalan suara agar Anda dapat mendiktekan deskripsi to-do list.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Kami membutuhkan akses mikrofon agar aplikasi dapat merekam suara Anda untuk diubah menjadi teks to-do list.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

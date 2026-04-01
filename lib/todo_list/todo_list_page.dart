@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class TodoListPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -35,10 +36,34 @@ class _TodoListPageState extends State<TodoListPage> {
   final Map<String, DateTime> _lastToggleTimes = {};
   Map<String, dynamic>? _currentUserData;
 
+  stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isSpeechInitialized = false;
+  bool _isListening = false;
+  StateSetter? _currentModalSetState;
+
   @override
   void initState() {
     super.initState();
     _initializeData();
+    _initSpeech();
+  }
+
+  void _initSpeech() async {
+    try {
+      _isSpeechInitialized = await _speech.initialize(
+        onStatus: (val) {
+          if (val == 'done' || val == 'notListening') {
+            _isListening = false;
+            if (_currentModalSetState != null) {
+              try { _currentModalSetState!(() {}); } catch (e) {}
+            }
+          }
+        },
+      );
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint("Speech init error: \$e");
+    }
   }
 
   Future<void> _initializeData() async {
@@ -285,162 +310,232 @@ class _TodoListPageState extends State<TodoListPage> {
 
   void _showEditTodoDialog(dynamic todo) {
     final TextEditingController controller = TextEditingController(text: todo['description']);
+    _isListening = false;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'todo_list.edit_task'.tr(context),
-                style: TextStyle(
-                  color: _primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  letterSpacing: 1,
-                ),
+      builder: (context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModalState) {
+          _currentModalSetState = setModalState;
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: controller,
-                autofocus: true,
-                maxLines: null,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                decoration: InputDecoration(
-                  hintText: 'todo_list.task_desc'.tr(context),
-                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'main.cancel'.tr(context),
-                      style: TextStyle(color: Colors.grey[600]),
+                  Text(
+                    'todo_list.edit_task'.tr(context),
+                    style: TextStyle(
+                      color: _primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (controller.text.trim().isNotEmpty) {
-                        _updateTodo(todo['todo_item_id'], controller.text.trim());
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    maxLines: null,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    decoration: InputDecoration(
+                      hintText: 'todo_list.task_desc'.tr(context),
+                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      suffixIcon: _isSpeechInitialized ? IconButton(
+                        icon: Icon(
+                          _isListening ? Icons.mic : Icons.mic_none,
+                          color: _isListening ? Colors.red : _primaryColor,
+                        ),
+                        onPressed: () async {
+                          if (!_isListening) {
+                            bool available = await _speech.initialize();
+                            if (available) {
+                              setModalState(() => _isListening = true);
+                              _speech.listen(
+                                onResult: (val) {
+                                  setModalState(() {
+                                    controller.text = val.recognizedWords;
+                                    controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+                                  });
+                                },
+                              );
+                            }
+                          } else {
+                            setModalState(() => _isListening = false);
+                            _speech.stop();
+                          }
+                        },
+                      ) : null,
                     ),
-                    child: Text(
-                      'main.save'.tr(context),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          _speech.stop();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'main.cancel'.tr(context),
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (controller.text.trim().isNotEmpty) {
+                            _speech.stop();
+                            _updateTodo(todo['todo_item_id'], controller.text.trim());
+                            Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          'main.save'.tr(context),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        }
       ),
-    );
+    ).whenComplete(() => _speech.stop());
   }
 
   void _showAddTodoDialog() {
     final TextEditingController controller = TextEditingController();
+    _isListening = false;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'todo_list.new_task_title'.tr(context),
-                style: TextStyle(
-                  color: _primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  letterSpacing: 1,
-                ),
+      builder: (context) => StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModalState) {
+          _currentModalSetState = setModalState;
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: controller,
-                autofocus: true,
-                maxLines: null,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                decoration: InputDecoration(
-                  hintText: 'todo_list.task_desc'.tr(context),
-                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'main.cancel'.tr(context),
-                      style: TextStyle(color: Colors.grey[600]),
+                  Text(
+                    'todo_list.new_task_title'.tr(context),
+                    style: TextStyle(
+                      color: _primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (controller.text.trim().isNotEmpty) {
-                        _addTodo(controller.text.trim());
-                        Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    maxLines: null,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    decoration: InputDecoration(
+                      hintText: 'todo_list.task_desc'.tr(context),
+                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      suffixIcon: _isSpeechInitialized ? IconButton(
+                        icon: Icon(
+                          _isListening ? Icons.mic : Icons.mic_none,
+                          color: _isListening ? Colors.red : _primaryColor,
+                        ),
+                        onPressed: () async {
+                          if (!_isListening) {
+                            bool available = await _speech.initialize();
+                            if (available) {
+                              setModalState(() => _isListening = true);
+                              _speech.listen(
+                                onResult: (val) {
+                                  setModalState(() {
+                                    controller.text = val.recognizedWords;
+                                    controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+                                  });
+                                },
+                              );
+                            }
+                          } else {
+                            setModalState(() => _isListening = false);
+                            _speech.stop();
+                          }
+                        },
+                      ) : null,
                     ),
-                    child: Text(
-                      'main.save'.tr(context),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          _speech.stop();
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'main.cancel'.tr(context),
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (controller.text.trim().isNotEmpty) {
+                            _speech.stop();
+                            _addTodo(controller.text.trim());
+                            Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          'main.save'.tr(context),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        }
       ),
-    );
+    ).whenComplete(() => _speech.stop());
   }
 
   @override
