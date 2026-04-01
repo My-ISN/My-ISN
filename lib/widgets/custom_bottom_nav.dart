@@ -78,7 +78,7 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
       ),
       if (hasPayroll)
         BottomNavigationBarItem(
-          icon: const Icon(Icons.payments_outlined),
+          icon: const Icon(Icons.receipt_long_rounded),
           label: 'main.xin_payroll'.tr(context),
         ),
       BottomNavigationBarItem(

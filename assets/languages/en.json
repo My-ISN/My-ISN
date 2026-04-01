@@ -36,7 +36,8 @@
         "female": "Female",
         "active": "Active",
         "inactive": "Inactive",
-        "role_client": "Client"
+        "role_client": "Client",
+        "no_data": "No data"
     },
     "dashboard": {
         "welcome": "Welcome,",
@@ -434,6 +435,12 @@
         "total": "{count} Total",
         "no_employees": "No employees found",
         "add_employee": "Add Employee",
+        "sections": {
+            "profile": "Basic Profile",
+            "account": "Account Information",
+            "work_details": "Work Details",
+            "salary_worklog": "Salary & Work Log"
+        },
         "page_x_of_y": "Page {current} of {total}",
         "showing_x_of_y": "Showing {current} to {total} of {count}",
         "first_name": "First Name",
@@ -446,6 +453,13 @@
         "password": "Password",
         "start_contract": "Start of Contract",
         "leave_categories": "Leave Categories",
+        "office_shift": "Office Shift",
+        "role": "Role",
+        "department": "Department",
+        "designation": "Designation",
+        "basic_salary": "Basic Salary",
+        "hourly_rate": "Hourly Rate",
+        "work_log_hours": "Target Work Log Hours",
         "all": "All",
         "none": "None",
         "per_month": "Per Month",
@@ -489,6 +503,13 @@
         "try_again": "Try Again",
         "fetch_error": "Failed to Load Data",
         "status_work": {
+            "contract": "Employee Contract",
+            "probation": "Probation",
+            "trainee": "Trainee",
+            "permanent": "Permanent",
+            "freelance": "Freelance"
+        },
+        "status_work_list": {
             "contract": "Employee Contract",
             "probation": "Probation",
             "trainee": "Trainee",
@@ -838,14 +859,18 @@
         "title": "Finance",
         "total_balance": "Total Balance",
         "accounts": "Accounts",
-        "deposit": "Income",
+        "deposit": "Deposit",
         "expense": "Expense",
         "transactions": "Transactions",
+        "this_month": "This Month",
         "on_progress_msg": "This feature is currently under development.",
         "account_number": "Account Number",
         "bank_name": "Bank Name",
         "starting_balance": "Starting Balance",
         "current_balance": "Current Balance",
-        "branch": "Branch"
+        "branch": "Branch",
+        "add_account": "Add Account",
+        "add_deposit": "Add Deposit",
+        "add_expense": "Add Expense"
     }
 }

@@ -82,7 +82,7 @@ class SideDrawer extends StatelessWidget {
                 if (_hasPermission('mobile_payroll_enable'))
                   _buildMenuItem(
                     context,
-                    icon: Icons.payments_outlined,
+                    icon: Icons.receipt_long_outlined,
                     title: 'main.xin_payroll'.tr(context),
                     isActive: activePage == 'payroll',
                     onTap: () {
@@ -189,21 +189,22 @@ class SideDrawer extends StatelessWidget {
                       );
                     },
                   ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.payments_rounded,
-                  title: 'dashboard.finance'.tr(context),
-                  isActive: activePage == 'finance',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FinancePage(userData: userData),
-                      ),
-                    );
-                  },
-                ),
+                if (_hasPermission('mobile_finance_enable'))
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'dashboard.finance'.tr(context),
+                    isActive: activePage == 'finance',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FinancePage(userData: userData),
+                        ),
+                      );
+                    },
+                  ),
 
 
                 _buildMenuItem(

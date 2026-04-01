@@ -11,9 +11,20 @@
 - **Modul Hutang**: Desain ulang total dialog "Tambah Hutang" dan "Bayar Cicilan" menggunakan **Premium Bottom Sheet** yang sepenuhnya *theme-aware*.
 - **Hapus Hutang**: Fitur penghapusan data hutang permanen lengkap dengan sinkronisasi ke tabel cicilan dan dialog konfirmasi keamanan.
 - **Mandatori Bukti Pembayaran**: Mewajibkan unggahan file bukti transfer untuk setiap transaksi hutang dengan implementasi `MultipartRequest` dan validasi *real-time*.
-- **Modul Tambah Rent Plan**: Implementasi halaman baru untuk registrasi sewa laptop dengan validasi wilayah (Provinsi/Kota/Kecamatan/Desa) dan pilihan jaminan yang dinamis.
-- **Dasbor Customer**: Peningkatan visual pada halaman dashboard untuk tipe user **Customer**, mencakup ringkasan sewa aktif dan status pembayaran.
-- **Modul Finance (WIP)**: Kerangka dasar modul keuangan perusahaan (under development) untuk pemantauan arus kas dan piutang.
+- **Integrasi Google Drive (Rent Plan)**: Seluruh berkas dokumen penyewa (KTP, NPWP, PO) dan foto jaminan kini otomatis dienkripsi dan disimpan secara aman di **Google Drive Cloud Storage** untuk efisiensi penyimpanan server lokal.
+- **Peningkatan Doc Viewer**: Desain ulang antarmuka *internal document viewer* pada detail rental dengan navigasi tab yang lebih intuitif, mendukung *full-screen visual review* dengan pinch-to-zoom.
+- **Dashboard Quick Apps**: Pembaruan desain menu akses cepat (Quick Apps) dengan layout grid yang lebih modern, responsif, dan visual ikon yang lebih tajam.
+- **Icon Visibility Upgrade**: Pembedaan ikon visual antara menu **Finance** (Ikon Dompet) dan **Payroll** (Ikon Slip Gaji) guna meningkatkan efisiensi navigasi pengguna.
+- **Modul Finance Premium**: Implementasi penuh manajemen keuangan perusahaan dengan standar desain premium.
+  - **Summary & Sectioned UI**: Penggunaan kartu gradasi (`Color(0xFF7E57C2)`) dan *Sectioned Cards* untuk pengelompokan data input.
+  - **Unified Add Data**: Halaman tambah data dinamis untuk **Akun**, **Pemasukan**, dan **Pengeluaran** dalam satu alur.
+  - **Manajemen Akun**: Fitur hapus akun permanen dengan dialog konfirmasi aman dan sinkronisasi saldo real-time.
+  - **Premium Bottom Panel**: Implementasi panel aksi bawah melengkung (*curved top corners*) dengan radius 30 untuk estetika yang lebih modern.
+- **Employees Module Fixes**:
+  - **UI Consistency**: Memindahkan tombol **Simpan** dari AppBar ke *bottomNavigationBar* lebar agar seragam dengan modul Keuangan.
+  - **UI/UX Refinement**: Dukungan penuh Dark/Light theme untuk form Tambah Karyawan dan panel bawah melengkung (radius 30).
+  - **Error Handling**: Perbaikan crash "Unable to load asset" dengan mengganti placeholder yang hilang menjadi foto formal resmi (`default_formal.webp`) atau inisial dinamis.
+  - **Localization Sync**: Perbaikan label lokalisasi yang sebelumnya menampilkan teks JSON mentah (Map string) menjadi label yang tepat di kedua bahasa.
 
 ### Changed
 
@@ -23,7 +34,6 @@
 - **Sinkronisasi Saldo Otomatis**: Perbaikan algoritma backend agar total "Dibayar" pada ringkasan sewa menjumlahkan seluruh `paid_amount` secara *real-time*.
 - **Penataan Ulang UI (Tab EDIT)**: Reorder section untuk alur kerja yang lebih intuitif: Data Penyewa → Alamat KTP → Domisili → Dokumen Jaminan → Detail Sewa (bawah).
 - **Standarisasi UI Popup**: Seluruh dialog input (Add Rent Plan, Add Debt, Pay Installment, Todo) kini menggunakan format **Premium Bottom Sheet** yang konsisten, responsif, dan elegan.
-- **Pembaruan Navigasi Tab**: Restrukturisasi tab pada halaman detail agar lebih intuitif dan sesuai kebutuhan operasional.
 - **Visual Feedback Dinamis**: Warna pill tab "HUTANG" kini otomatis berubah merah hanya jika terdapat hutang aktif. Aksen merah pada menu "Belum Ada Hutang" diperkental menggunakan `RedAccent`.
 - **Performance Optimization**: Optimasi query database pada dashboard dan detail rental untuk meminimalkan waktu loading data yang kompleks.
 
@@ -32,6 +42,7 @@
 - **Kalkulasi Harga Unit**: Perbaikan logika penentuan harga sewa laptop pada modul "Tambah Rent Plan" agar otomatis menarik harga dari tier yang aktif (`mas_harga`).
 - **Localization Bug**: Perbaikan kesalahan sintaksis dan pelabelan tipe penyewa (perusahaan/pribadi) yang sebelumnya belum ter-lokalisasi secara dinamis.
 - **Payment Validation**: Validasi input nominal agar tidak dapat melebihi sisa kewajiban cicilan bulan berjalan.
+- **Pagination UI Fix**: Perbaikan visual pada tombol navigasi halaman (ikon `<` dan `>`) agar sepenuhnya mendukung *Dark/Light mode* dengan *background* yang adaptif.
 - **Null-Safety Fix**: Perbaikan error `withOpacity()` pada warna dinamis saat berpindah tema (Dark/Light mode).
 - **History UI Cleanup**: Perbaikan tampilan list riwayat cicilan agar lebih responsif dan informatif.
 

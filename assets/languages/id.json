@@ -36,7 +36,8 @@
         "female": "Perempuan",
         "active": "Aktif",
         "inactive": "Tidak Aktif",
-        "role_client": "Client"
+        "role_client": "Client",
+        "no_data": "Tidak ada data"
     },
     "dashboard": {
         "welcome": "Selamat Datang,",
@@ -431,6 +432,12 @@
         "total": "{count} Total",
         "no_employees": "Tidak ada karyawan ditemukan",
         "add_employee": "Tambah Karyawan",
+        "sections": {
+            "profile": "Profil Dasar",
+            "account": "Informasi Akun",
+            "work_details": "Detail Pekerjaan",
+            "salary_worklog": "Gaji & Log Kerja"
+        },
         "page_x_of_y": "Halaman {current} dari {total}",
         "showing_x_of_y": "Menampilkan {current} dari {total} entri",
         "first_name": "Nama Depan",
@@ -440,9 +447,16 @@
         "gender": "Jenis Kelamin",
         "email": "Email",
         "username": "Username",
-        "password": "Password",
+        "password": "Kata Sandi",
         "start_contract": "Awal Kontrak",
         "leave_categories": "Kategori Cuti",
+        "office_shift": "Shift Kantor",
+        "role": "Peran/Role",
+        "department": "Departemen",
+        "designation": "Jabatan",
+        "basic_salary": "Gaji Pokok",
+        "hourly_rate": "Tarif Per Jam",
+        "work_log_hours": "Target Jam Log Kerja",
         "all": "Semua",
         "none": "Tidak Ada",
         "per_month": "Per Bulan",
@@ -486,6 +500,13 @@
         "try_again": "Coba Lagi",
         "fetch_error": "Gagal Memuat Data",
         "status_work": {
+            "contract": "Kontrak Karyawan",
+            "probation": "Masa Percobaan",
+            "trainee": "Trainee",
+            "permanent": "Tetap",
+            "freelance": "Pekerja Lepas"
+        },
+        "status_work_list": {
             "contract": "Kontrak Karyawan",
             "probation": "Masa Percobaan",
             "trainee": "Trainee",
@@ -785,7 +806,7 @@
         "delete_success": "Data rental berhasil dihapus",
         "delete_failed": "Gagal menghapus data rental",
         "validation": {
-            "required": "Bidang ini wajib diisi"
+            "required": "Bagian ini wajib diisi"
         }
     },
     "todo_list": {
@@ -797,7 +818,7 @@
         "task_name": "Nama Tugas",
         "task_desc": "Deskripsi Tugas",
         "status": "Status",
-        "due_date": "Batas Waktu",
+        "due_date": "Tenggat Waktu",
         "priority": "Prioritas",
         "low": "Rendah",
         "medium": "Sedang",
@@ -809,9 +830,9 @@
         "delete_success": "Tugas berhasil dihapus",
         "delete_confirm_title": "Hapus Tugas?",
         "delete_confirm_desc": "Apakah Anda yakin ingin menghapus tugas ini?",
-        "fetch_error": "Gagal memuat tugas",
+        "fetch_error": "Gagal memuat daftar tugas",
         "status_update_failed": "Gagal memperbarui status tugas.",
-        "no_tasks": "Hore! Tidak ada tugas saat ini.",
+        "no_tasks": "Hore! Tidak ada tugas untuk saat ini.",
         "search_hint": "Cari tugas...",
         "showing_x_of_y": "Menampilkan {start} sampai {end} dari {total}",
         "total": "{count} Total",
@@ -821,9 +842,9 @@
         "section_title": "Zona Berbahaya",
         "btn_label": "Hapus Akun",
         "btn_desc": "Tindakan ini tidak dapat dibatalkan",
-        "sheet_title": "Peringatan Hapus Akun",
-        "warning_body": "Dengan menghapus akun Anda, semua data pribadi Anda termasuk informasi profil, riwayat transaksi, dan data terkait lainnya akan dihapus secara permanen dari sistem kami.\n\nHal-hal yang perlu Anda ketahui:\n\n• Data yang dihapus tidak dapat dipulihkan.\n• Anda tidak akan bisa login menggunakan akun ini lagi.\n• Anda dapat mendaftar ulang menggunakan email yang sama di kemudian hari.\n• Semua sesi login aktif di perangkat lain akan dihentikan.\n\nJika Anda hanya ingin istirahat, pertimbangkan untuk tidak menghapus akun Anda dan cukup logout saja.\n\nPastikan Anda yakin sebelum melanjutkan. Tim kami tidak dapat membantu memulihkan akun yang sudah dihapus.",
-        "scroll_hint": "Scroll ke bawah untuk melanjutkan",
+        "sheet_title": "Peringatan Penghapusan Akun",
+        "warning_body": "Dengan menghapus akun Anda, seluruh data pribadi termasuk informasi profil, riwayat transaksi, dan data terkait lainnya akan dihapus secara permanen dari sistem kami.\n\nHal-hal yang perlu Anda ketahui:\n\n• Data yang telah dihapus tidak dapat dikembalikan.\n• Anda tidak akan bisa lagi masuk menggunakan akun ini.\n• Anda dapat mendaftar ulang menggunakan alamat email yang sama di kemudian hari.\n• Seluruh sesi login yang aktif di perangkat lain akan dihentikan.\n\nJika Anda hanya ingin berhenti sejenak, pertimbangkan untuk tidak menghapus akun dan cukup keluar (logout) saja.\n\nPastikan Anda sudah yakin sebelum melanjutkan. Tim kami tidak dapat membantu memulihkan akun yang telah dihapus.",
+        "scroll_hint": "Gulir ke bawah untuk melanjutkan",
         "agree_checkbox": "Saya sudah membaca dan memahami konsekuensi penghapusan akun ini",
         "confirm_title": "Konfirmasi Terakhir",
         "confirm_desc": "Apakah Anda benar-benar yakin ingin menghapus akun ini secara permanen? Tindakan ini tidak dapat dibatalkan.",
@@ -835,14 +856,18 @@
         "title": "Keuangan",
         "total_balance": "Total Saldo",
         "accounts": "Daftar Rekening",
-        "deposit": "Pemasukan",
+        "deposit": "Deposit",
         "expense": "Pengeluaran",
-        "transactions": "Histori Transaksi",
-        "on_progress_msg": "Fitur ini sedang dalam tahap pengembangan.",
+        "transactions": "Transaksi",
+        "this_month": "Bulan Ini",
+        "on_progress_msg": "Fitur ini masih dalam tahap pengembangan.",
         "account_number": "Nomor Rekening",
         "bank_name": "Nama Bank",
         "starting_balance": "Saldo Awal",
         "current_balance": "Saldo Saat Ini",
-        "branch": "Cabang"
+        "branch": "Cabang",
+        "add_account": "Tambah Akun",
+        "add_deposit": "Tambah Deposit",
+        "add_expense": "Tambah Pengeluaran"
     }
 }

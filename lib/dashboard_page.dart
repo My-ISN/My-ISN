@@ -887,9 +887,10 @@ class _DashboardPageState extends State<DashboardPage> {
                     );
                   },
                 ),
-              _buildQuickMenuCard(
-                'dashboard.quick_menu_finance'.tr(context),
-                Icons.payments_rounded,
+              if (_hasPermission('mobile_finance_enable'))
+                _buildQuickMenuCard(
+                  'dashboard.quick_menu_finance'.tr(context),
+                Icons.account_balance_wallet_rounded,
                 const Color(0xFF7E57C2),
                 () {
                   Navigator.push(
