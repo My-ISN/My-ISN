@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      const url = 'https://foxgeen.com/HRIS/mobileapi/login';
+      const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/login';
 
       final response = await http
           .post(
@@ -200,7 +200,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (authenticated) {
         final biometricToken = const Uuid().v4();
-        const url = 'https://foxgeen.com/HRIS/mobileapi/register_biometric';
+        const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/register_biometric';
 
         final response = await http.post(
           Uri.parse(url),
@@ -283,7 +283,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (authenticated) {
         setState(() => _isLoading = true);
-        const url = 'https://foxgeen.com/HRIS/mobileapi/login_biometric';
+        const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/login_biometric';
         final response = await http.post(
           Uri.parse(url),
           body: {'biometric_token': token},
@@ -363,7 +363,7 @@ class _LoginPageState extends State<LoginPage> {
           : '';
       final String picture = googleUser.photoUrl ?? '';
 
-      const url = 'https://foxgeen.com/HRIS/mobileapi/google_login';
+      const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/google_login';
       final response = await http.post(
         Uri.parse(url),
         body: {

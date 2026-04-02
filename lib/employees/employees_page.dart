@@ -51,7 +51,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
       // If we want "Show All", we could send a very large limit, but let's stick to the requested values.
       // The user wants pagination to disappear if displaying everything.
       
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_employees?company_id=$companyId&limit=$_selectedLimit&offset=$offset';
+      final url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_employees?company_id=$companyId&limit=$_selectedLimit&offset=$offset';
       
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);

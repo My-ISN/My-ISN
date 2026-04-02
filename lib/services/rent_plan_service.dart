@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
 
 class RentPlanService {
-  static const String baseUrl = 'https://foxgeen.com/HRIS/mobileapi';
+  static const String baseUrl = 'http://17.5.45.192/KODINGAN/PKL/mobileapi';
   final _storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> getRentPlans({String status = 'all', String? search, int limit = 10, int offset = 0}) async {
@@ -237,6 +237,29 @@ class RentPlanService {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> processPayment(int rentalId, String method, {String? subMethod}) async {
+    try {
+      String? userDataString = await _storage.read(key: 'user_data');
+      if (userDataString == null) return {'status': false, 'message': 'User not logged in'};
+      final userData = json.decode(userDataString);
+      final userId = userData['id'] ?? userData['user_id'];
+
+      final url = Uri.parse('$baseUrl/process_rental_payment');
+      final response = await http.post(
+        url,
+        body: {
+          'rental_id': rentalId.toString(),
+          'method': method,
+          'sub_method': subMethod ?? '',
+          'user_id': userId.toString(),
+        },
+      );
       return json.decode(response.body);
     } catch (e) {
       return {'status': false, 'message': e.toString()};

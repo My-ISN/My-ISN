@@ -38,7 +38,7 @@ class _AttendancePageState extends State<AttendancePage> {
       final year = _selectedMonth.year;
 
       final url =
-          'https://foxgeen.com/HRIS/mobileapi/get_attendance?user_id=$userId&month=$month&year=$year';
+          'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_attendance?user_id=$userId&month=$month&year=$year';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
 

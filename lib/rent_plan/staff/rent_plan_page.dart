@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/side_drawer.dart';
 import '../../localization/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -158,6 +159,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
   void _showPaymentModal(Map<String, dynamic> rental) {
     String selectedMethod = 'transfer'; // 'transfer' or 'cash'
     String? selectedBank;
+    bool isProcessing = false;
     
     showModalBottomSheet(
       context: context,
@@ -167,6 +169,68 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
         builder: (context, setSheetState) {
           const Color primaryPurple = Color(0xFF7E57C2);
           
+          Future<void> handlePayment() async {
+            debugPrint('Payment button clicked. Method: $selectedMethod, Bank: $selectedBank');
+            if (isProcessing) return;
+            
+            if (selectedMethod == 'transfer' && selectedBank == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Silakan pilih bank terlebih dahulu')),
+              );
+              return;
+            }
+
+            setSheetState(() => isProcessing = true);
+
+            try {
+              final result = await _rentPlanService.processPayment(
+                int.parse(rental['rental_id'].toString()),
+                selectedMethod,
+                subMethod: selectedBank,
+              );
+
+              if (result['status'] == true) {
+                if (selectedMethod == 'transfer') {
+                  final url = Uri.parse(result['data']['payment_url']);
+                  if (await canLaunchUrl(url)) {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                    if (mounted) Navigator.pop(context);
+                  } else {
+                    throw 'Tidak dapat membuka link pembayaran';
+                  }
+                } else {
+                  // Cash success
+                  if (mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result['message'] ?? 'Pembayaran berhasil dikonfirmasi'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    _fetchRentPlans(); // Refresh the list
+                  }
+                }
+              } else {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(result['message'] ?? 'Gagal memproses pembayaran'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                );
+              }
+            } finally {
+              if (mounted) setSheetState(() => isProcessing = false);
+            }
+          }
           return Container(
             height: MediaQuery.of(context).size.height * 0.9,
             decoration: BoxDecoration(
@@ -284,9 +348,9 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                         // WhatsApp Info
                         Row(
                           children: [
-                            const Icon(Icons.phone_iphone_rounded, color: primaryPurple, size: 18),
+                             const Icon(Icons.phone_iphone_rounded, color: primaryPurple, size: 18),
                             const SizedBox(width: 8),
-                            const Text('34664', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            Text(rental['whatsapp'] ?? '-', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                             const SizedBox(width: 12),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -341,10 +405,14 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () => Navigator.pop(context), // UI only for now
-                          icon: Icon(selectedMethod == 'transfer' ? Icons.link_rounded : Icons.check_circle_rounded),
+                          onPressed: isProcessing ? null : () => handlePayment(),
+                          icon: isProcessing 
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : Icon(selectedMethod == 'transfer' ? Icons.link_rounded : Icons.check_circle_rounded),
                           label: Text(
-                            selectedMethod == 'transfer' ? 'Buat & Kirim Link Bayar' : 'Konfirmasi Bayar Tunai',
+                            isProcessing 
+                                ? (selectedMethod == 'transfer' ? 'Menyiapkan Link...' : 'Memproses...')
+                                : (selectedMethod == 'transfer' ? 'Buat & Kirim Link Bayar' : 'Konfirmasi Bayar Tunai'),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -352,7 +420,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            elevation: 8,
+                            elevation: isProcessing ? 0 : 8,
                             shadowColor: primaryPurple.withOpacity(0.4),
                           ),
                         ),

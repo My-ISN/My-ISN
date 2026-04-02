@@ -49,7 +49,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
     try {
       if (mounted) setState(() => _isLoading = true);
       
-      const url = 'https://foxgeen.com/HRIS/mobileapi/get_employee_detail';
+      const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_employee_detail';
       final response = await http.post(
         Uri.parse(url),
         body: {'user_id': widget.employeeId.toString()},
@@ -784,7 +784,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
   Future<void> _deleteEmployee() async {
     try {
       setState(() => _isLoading = true);
-      const url = 'https://foxgeen.com/HRIS/mobileapi/delete_employee';
+      const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/delete_employee';
       final response = await http.post(
         Uri.parse(url),
         body: {'user_id': widget.employeeId.toString()},

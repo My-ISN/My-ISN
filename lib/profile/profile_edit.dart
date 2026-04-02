@@ -57,7 +57,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   Future<void> _fetchProvinces() async {
     setState(() => _isLoadingProvinces = true);
     try {
-      const url = 'https://foxgeen.com/HRIS/mobileapi/get_provinces';
+      const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_provinces';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true) {
@@ -94,7 +94,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     });
     try {
       final url =
-          'https://foxgeen.com/HRIS/mobileapi/get_regencies?province_id=$provinceId';
+          'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_regencies?province_id=$provinceId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true) {
@@ -253,7 +253,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      const url = 'https://foxgeen.com/HRIS/mobileapi/update_profile';
+      const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/update_profile';
 
       Map<String, String> body = {
         'user_id': userId.toString(),
@@ -312,7 +312,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      const url = 'https://foxgeen.com/HRIS/mobileapi/update_profile';
+      const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/update_profile';
 
       var request = http.MultipartRequest('POST', Uri.parse(url));
 

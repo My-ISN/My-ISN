@@ -58,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
     // Fetch user_type from profile API (same as profile_page.dart)
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_profile_details?user_id=$userId';
+      final url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_profile_details?user_id=$userId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true) {
@@ -86,7 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() => _isLoading = true);
       try {
         final url =
-            'https://foxgeen.com/HRIS/mobileapi/update_biometric_status';
+            'http://17.5.45.192/KODINGAN/PKL/mobileapi/update_biometric_status';
         final response = await http.post(
           Uri.parse(url),
           body: {
@@ -221,7 +221,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (confirm == true) {
       setState(() => _isLoading = true);
       try {
-        final url = 'https://foxgeen.com/HRIS/mobileapi/delete_biometric';
+        final url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/delete_biometric';
         final response = await http.post(
           Uri.parse(url),
           body: {'user_id': widget.userData['id'].toString()},
@@ -357,7 +357,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (authenticated) {
         // Tanya password DULU sebelum set loading, agar halaman tidak jadi kosong di balik dialog
         final biometricToken = const Uuid().v4();
-        const url = 'https://foxgeen.com/HRIS/mobileapi/register_biometric';
+        const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/register_biometric';
 
         String? password = await _promptForPassword();
         if (password == null) return; // user tekan Batal
@@ -1402,7 +1402,7 @@ class _SettingsPageState extends State<SettingsPage> {
     try {
       final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
       final response = await http.post(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_account'),
+        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/delete_account'),
         body: {'user_id': userId},
       );
 

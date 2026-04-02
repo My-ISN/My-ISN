@@ -62,7 +62,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
     try {
       String userId = widget.userData['user_id']?.toString() ?? '';
       final response = await http.post(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_employee_form_data'),
+        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_employee_form_data'),
         body: {'user_id': userId},
       );
       final data = json.decode(response.body);
@@ -92,7 +92,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
     try {
       String companyId = widget.userData['company_id']?.toString() ?? '';
       String creatorId = widget.userData['user_id']?.toString() ?? '';
-      final url = Uri.parse('https://foxgeen.com/HRIS/mobileapi/add_employee');
+      final url = Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/add_employee');
       final request = http.MultipartRequest('POST', url);
       request.fields['company_id'] = companyId;
       request.fields['user_id'] = creatorId;

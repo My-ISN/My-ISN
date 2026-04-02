@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class FinanceService {
-  static const String baseUrl = 'https://foxgeen.com/HRIS/mobileapi';
+  static const String baseUrl = 'http://17.5.45.192/KODINGAN/PKL/mobileapi';
   final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> getFinanceDashboard() async {
