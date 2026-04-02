@@ -77,7 +77,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
     setState(() => _isStatsLoading = true);
     try {
       final response = await http.get(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_worklog_stats?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&month=$_selectedMonth&year=$_selectedYear'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_worklog_stats?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&month=$_selectedMonth&year=$_selectedYear'),
       );
 
       if (response.statusCode == 200) {
@@ -103,7 +103,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
     try {
       final offset = (targetPage - 1) * _selectedLimit;
       final response = await http.get(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_worklog_list?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&page=$targetPage&limit=$_selectedLimit&offset=$offset&month=$_selectedMonth&year=$_selectedYear'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_worklog_list?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&page=$targetPage&limit=$_selectedLimit&offset=$offset&month=$_selectedMonth&year=$_selectedYear'),
       );
 
       if (response.statusCode == 200) {
@@ -768,7 +768,7 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
   Future<void> _fetchDetails() async {
     try {
       final response = await http.get(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_worklog_details?estimate_id=${widget.logId}'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_worklog_details?estimate_id=${widget.logId}'),
       );
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
@@ -863,7 +863,7 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/delete_worklog'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_worklog'),
         body: {'estimate_id': widget.logId},
       );
 

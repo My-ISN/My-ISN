@@ -90,10 +90,10 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     setState(() => _isLoadingLookups = true);
     try {
       final responses = await Future.wait([
-        http.get(Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_departments')),
-        http.get(Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_designations')),
-        http.get(Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_shifts')),
-        http.get(Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_religions')),
+        http.get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_departments')),
+        http.get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_designations')),
+        http.get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_shifts')),
+        http.get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_religions')),
       ]);
 
       if (responses.every((r) => r.statusCode == 200)) {
@@ -116,7 +116,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
 
     setState(() => _isSaving = true);
     try {
-      final url = Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/update_employee');
+      final url = Uri.parse('https://foxgeen.com/HRIS/mobileapi/update_employee');
       final request = http.MultipartRequest('POST', url);
       
       request.fields['user_id'] = widget.employeeData['user_info']['user_id'].toString();
@@ -510,7 +510,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     setState(() => _isSaving = true);
     try {
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/$endpoint'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/$endpoint'),
         body: body,
       );
       final data = json.decode(response.body);
@@ -658,7 +658,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     Navigator.pop(context); // Close dialog
     setState(() => _isSaving = true);
     try {
-      final url = Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/add_user_document');
+      final url = Uri.parse('https://foxgeen.com/HRIS/mobileapi/add_user_document');
       var request = http.MultipartRequest('POST', url);
       
       request.fields['user_id'] = widget.employeeData['user_info']['user_id'].toString();
@@ -693,7 +693,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     setState(() => _isSaving = true);
     try {
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/$endpoint'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/$endpoint'),
         body: body,
       );
       final data = json.decode(response.body);

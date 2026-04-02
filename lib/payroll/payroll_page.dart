@@ -103,7 +103,7 @@ class _PayrollPageState extends State<PayrollPage>
       }
       String? responseBody;
       try {
-        final url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_payroll_staff_list?user_id=$userId';
+        final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_staff_list?user_id=$userId';
         final response = await http.get(Uri.parse(url));
         responseBody = response.body;
         debugPrint('Staff list response body: "$responseBody"');
@@ -146,7 +146,7 @@ class _PayrollPageState extends State<PayrollPage>
   Future<void> _fetchAccounts() async {
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      final url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_payroll_accounts?user_id=$userId';
+      final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_accounts?user_id=$userId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true && mounted) {
@@ -164,7 +164,7 @@ class _PayrollPageState extends State<PayrollPage>
     setState(() => _isActionLoading = true);
     try {
       final monthStr = "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
-      final url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_payroll_preview?staff_id=$_selectedStaffId&salary_month=$monthStr';
+      final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_preview?staff_id=$_selectedStaffId&salary_month=$monthStr';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true && mounted) {
@@ -213,7 +213,7 @@ class _PayrollPageState extends State<PayrollPage>
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final monthStr = "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
       
-      final url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/execute_payroll_payment';
+      final url = 'https://foxgeen.com/HRIS/mobileapi/execute_payroll_payment';
       final response = await http.post(Uri.parse(url), body: {
         'user_id': userId.toString(),
         'staff_id': _selectedStaffId,
@@ -270,7 +270,7 @@ class _PayrollPageState extends State<PayrollPage>
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final url =
-          'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_dashboard_data?user_id=$userId';
+          'https://foxgeen.com/HRIS/mobileapi/get_dashboard_data?user_id=$userId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true && mounted) {
@@ -288,7 +288,7 @@ class _PayrollPageState extends State<PayrollPage>
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final url =
-          'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_payroll_history?user_id=$userId';
+          'https://foxgeen.com/HRIS/mobileapi/get_payroll_history?user_id=$userId';
       final response = await http.get(Uri.parse(url));
       debugPrint('Payroll history response: "${response.body}"');
       final data = json.decode(response.body);
@@ -1034,7 +1034,7 @@ class _PayrollPageState extends State<PayrollPage>
 
   Future<Map<String, dynamic>> _fetchPayslipDetails(String payslipId) async {
     final url =
-        'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_payslip_details?payslip_id=$payslipId';
+        'https://foxgeen.com/HRIS/mobileapi/get_payslip_details?payslip_id=$payslipId';
     final response = await http.get(Uri.parse(url));
     return json.decode(response.body);
   }

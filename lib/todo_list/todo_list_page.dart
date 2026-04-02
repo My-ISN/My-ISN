@@ -93,7 +93,7 @@ class _TodoListPageState extends State<TodoListPage> {
     final userId = _currentUserData!['id'] ?? _currentUserData!['user_id'];
     try {
       await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/mark_todo_seen'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/mark_todo_seen'),
         body: {'user_id': userId.toString()},
       );
       NotificationManager().clearTodoBadge();
@@ -117,7 +117,7 @@ class _TodoListPageState extends State<TodoListPage> {
     try {
       final offset = (targetPage - 1) * _selectedLimit;
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_todos'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_todos'),
         body: {
           'user_id': (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString(),
           'limit': _selectedLimit.toString(),
@@ -199,7 +199,7 @@ class _TodoListPageState extends State<TodoListPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/toggle_todo'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/toggle_todo'),
         body: {'todo_item_id': todo['todo_item_id'].toString()},
       );
 
@@ -238,7 +238,7 @@ class _TodoListPageState extends State<TodoListPage> {
   Future<void> _deleteTodo(dynamic todo) async {
     try {
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/delete_todo'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_todo'),
         body: {'todo_item_id': todo['todo_item_id'].toString()},
       );
 
@@ -253,7 +253,7 @@ class _TodoListPageState extends State<TodoListPage> {
   Future<void> _addTodo(String description) async {
     try {
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/add_todo'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/add_todo'),
         body: {
           'user_id': (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString(),
           'description': description,
@@ -279,7 +279,7 @@ class _TodoListPageState extends State<TodoListPage> {
   Future<void> _updateTodo(dynamic todoId, String description) async {
     try {
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/edit_todo'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/edit_todo'),
         body: {
           'todo_item_id': todoId.toString(),
           'description': description,

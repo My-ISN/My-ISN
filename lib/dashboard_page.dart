@@ -353,7 +353,7 @@ class _DashboardPageState extends State<DashboardPage> {
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final url =
-          'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_dashboard_data?user_id=$userId';
+          'https://foxgeen.com/HRIS/mobileapi/get_dashboard_data?user_id=$userId';
 
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
@@ -396,7 +396,7 @@ class _DashboardPageState extends State<DashboardPage> {
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final url =
-          'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_customer_dashboard?user_id=$userId';
+          'https://foxgeen.com/HRIS/mobileapi/get_customer_dashboard?user_id=$userId';
 
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
@@ -506,7 +506,7 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => _isLoading = true);
     try {
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/clock_break'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/clock_break'),
         body: {'user_id': widget.userData['id']?.toString() ?? ''},
       );
       final data = json.decode(response.body);

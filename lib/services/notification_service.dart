@@ -171,7 +171,7 @@ class NotificationService {
       }
 
       final url = Uri.parse(
-        'http://17.5.45.192/KODINGAN/PKL/mobileapi/save_fcm_token',
+        'https://foxgeen.com/HRIS/mobileapi/save_fcm_token',
       );
       final response = await http.post(
         url,

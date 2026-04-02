@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
 
 class RentPlanService {
-  static const String baseUrl = 'http://17.5.45.192/KODINGAN/PKL/mobileapi';
+  static const String baseUrl = 'https://foxgeen.com/HRIS/mobileapi';
   final _storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> getRentPlans({String status = 'all', String? search, int limit = 10, int offset = 0}) async {

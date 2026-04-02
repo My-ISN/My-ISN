@@ -69,7 +69,7 @@ class _NotificationDiagnosisPageState extends State<NotificationDiagnosisPage> {
     if (mounted) setState(() => _currentStep = 3);
     try {
       final url = Uri.parse(
-        'http://17.5.45.192/KODINGAN/PKL/mobileapi/test_push_direct?token=$token',
+        'https://foxgeen.com/HRIS/mobileapi/test_push_direct?token=$token',
       );
       final response = await http.get(url);
       final data = json.decode(response.body);

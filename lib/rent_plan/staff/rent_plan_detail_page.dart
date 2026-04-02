@@ -1761,7 +1761,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     final isPerusahaan = _rentalData!['jenis_sewa']?.toString().toLowerCase() == 'perusahaan';
     
     // BACKEND PROXY URL for GDrive
-    const String proxyBaseUrl = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/display_gdrive_file/';
+    const String proxyBaseUrl = 'https://foxgeen.com/HRIS/mobileapi/display_gdrive_file/';
     // FALLBACK URL for local files
     const String localBaseUrl = 'https://foxgeen.com/HRIS/uploads/rentals/';
 

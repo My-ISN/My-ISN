@@ -175,12 +175,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
     // 1. Fetch Announcement Count
     final annUrl = Uri.parse(
-      'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_unread_announcements_count?user_id=$userId&department_id=$deptId&designation_id=$desigId',
+      'https://foxgeen.com/HRIS/mobileapi/get_unread_announcements_count?user_id=$userId&department_id=$deptId&designation_id=$desigId',
     );
 
     // 2. Fetch Todo Count
     final todoUrl = Uri.parse(
-      'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_unread_todos_count?user_id=$userId',
+      'https://foxgeen.com/HRIS/mobileapi/get_unread_todos_count?user_id=$userId',
     );
 
     try {

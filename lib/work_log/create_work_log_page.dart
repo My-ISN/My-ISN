@@ -57,7 +57,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
     setState(() => _isLoadingJobs = true);
     try {
       final response = await http.get(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/get_job_desk_list?designation_id=${widget.userData['designation_id']}'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_job_desk_list?designation_id=${widget.userData['designation_id']}'),
       );
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
@@ -99,7 +99,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
       }
 
       final response = await http.post(
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/save_worklog'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/save_worklog'),
         body: body,
       );
 

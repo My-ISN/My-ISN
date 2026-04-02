@@ -43,7 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final url =
-          'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_profile_details?user_id=$userId';
+          'https://foxgeen.com/HRIS/mobileapi/get_profile_details?user_id=$userId';
 
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);

@@ -64,7 +64,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         0;
 
     final url = Uri.parse(
-      'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_announcements?user_id=$userId&department_id=$deptId&designation_id=$desigId',
+      'https://foxgeen.com/HRIS/mobileapi/get_announcements?user_id=$userId&department_id=$deptId&designation_id=$desigId',
     );
 
     try {
@@ -117,7 +117,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   Future<void> _markAsSeen(int announcementId) async {
     if (_currentUserData == null) return;
     final userId = _currentUserData!['user_id'] ?? _currentUserData!['id'];
-    const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/mark_announcement_seen';
+    const url = 'https://foxgeen.com/HRIS/mobileapi/mark_announcement_seen';
 
     // Optimistic update for global count
     NotificationManager().decrement();
@@ -161,7 +161,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
 
     // Lazy load full description
     final detailUrl = Uri.parse(
-      'http://17.5.45.192/KODINGAN/PKL/mobileapi/get_announcement_details?announcement_id=${announcement['announcement_id']}',
+      'https://foxgeen.com/HRIS/mobileapi/get_announcement_details?announcement_id=${announcement['announcement_id']}',
     );
 
     try {
@@ -271,7 +271,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         0;
 
     const url =
-        'http://17.5.45.192/KODINGAN/PKL/mobileapi/mark_all_announcements_seen';
+        'https://foxgeen.com/HRIS/mobileapi/mark_all_announcements_seen';
 
     // Count unread locally for optimistic update
     int unreadCount = 0;
@@ -310,7 +310,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
       return;
     }
     final userId = _currentUserData!['user_id'] ?? _currentUserData!['id'];
-    const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/clear_seen_announcements';
+    const url = 'https://foxgeen.com/HRIS/mobileapi/clear_seen_announcements';
 
     setState(() {
       _announcements.removeWhere((item) => item['is_seen'].toString() != '0');

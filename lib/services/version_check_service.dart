@@ -28,7 +28,7 @@ class AppUpdateInfo {
 class VersionCheckService {
   // Replace with actual API endpoint when available
   static const String _updateUrl =
-      'http://17.5.45.192/KODINGAN/PKL/mobileapi/status';
+      'https://foxgeen.com/HRIS/mobileapi/status';
 
   static Future<AppUpdateInfo?> checkForUpdate() async {
     final latestUpdate = await getLatestVersionInfo();

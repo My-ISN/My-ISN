@@ -79,7 +79,7 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/register'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/register'),
       );
 
       request.fields['first_name'] = _firstNameController.text;
@@ -525,7 +525,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (authenticated) {
         final biometricToken = const Uuid().v4();
-        const url = 'http://17.5.45.192/KODINGAN/PKL/mobileapi/register_biometric';
+        const url = 'https://foxgeen.com/HRIS/mobileapi/register_biometric';
 
         final response = await http.post(
           Uri.parse(url),

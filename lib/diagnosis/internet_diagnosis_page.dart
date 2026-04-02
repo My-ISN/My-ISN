@@ -31,7 +31,7 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
     try {
       final startTime = DateTime.now();
       final response = await http
-          .get(Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/status'))
+          .get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/status'))
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -59,7 +59,7 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
       int successCount = 0;
       for (int i = 0; i < 3; i++) {
         final response = await http
-            .get(Uri.parse('http://17.5.45.192/KODINGAN/PKL/mobileapi/status'))
+            .get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/status'))
             .timeout(const Duration(seconds: 5));
         if (response.statusCode == 200) successCount++;
         await Future.delayed(const Duration(milliseconds: 500));
