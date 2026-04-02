@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import '../services/finance_service.dart';
+import '../localization/app_localizations.dart';
 
 class AddFinanceDataPage extends StatefulWidget {
   final List<dynamic> accounts;
@@ -107,6 +108,10 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
         final double amt = double.tryParse((d['amount'] ?? '0').toString()) ?? 0;
         _amountController.text = _formatCurrency(amt.toInt().toString());
       }
+    } else {
+      // Mode Add Baru — set default untuk payer & payment method
+      _selectedPayerId = widget.userData['id']?.toString();
+      _selectedPaymentMethod = 'Bank';
     }
 
     _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
@@ -117,10 +122,24 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
     
     _fetchMeta();
     
-    // Add listener to update UI when amount changes (for Estimated Total)
-    _amountController.addListener(() {
-      if (mounted) setState(() {});
-    });
+    // Listener untuk format currency otomatis saat user mengetik amount
+    _amountController.addListener(_onAmountChanged);
+  }
+
+  void _onAmountChanged() {
+    final text = _amountController.text;
+    // Hapus semua titik dulu untuk dapat angka murni
+    final raw = text.replaceAll('.', '');
+    if (raw.isEmpty) return;
+    final formatted = _formatCurrency(raw);
+    // Hanya update kalau beda supaya tidak infinite loop
+    if (formatted != text) {
+      _amountController.value = _amountController.value.copyWith(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+    if (mounted) setState(() {});
   }
 
   Future<void> _fetchMeta() async {
@@ -142,6 +161,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
 
   @override
   void dispose() {
+    _amountController.removeListener(_onAmountChanged);
     _amountController.dispose();
     _dateController.dispose();
     _descController.dispose();
@@ -246,7 +266,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('main.error_with_msg'.tr(context, args: {'msg': e.toString()})), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -262,8 +282,8 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
       appBar: AppBar(
         title: Text(
           isEdit 
-              ? (_selectedType == 0 ? 'Edit Account' : (_selectedType == 1 ? 'Edit Income' : 'Edit Expense'))
-              : (_selectedType == 0 ? 'Add Account' : (_selectedType == 1 ? 'Add Income' : 'Add Expense')),
+              ? (_selectedType == 0 ? 'finance.edit_account'.tr(context) : (_selectedType == 1 ? 'finance.edit_deposit'.tr(context) : 'finance.edit_expense'.tr(context)))
+              : (_selectedType == 0 ? 'finance.add_account'.tr(context) : (_selectedType == 1 ? 'finance.add_deposit'.tr(context) : 'finance.add_expense'.tr(context))),
           style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF7E57C2)),
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -278,45 +298,45 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
           children: [
             if (_selectedType == 0) ...[
               _buildSection(
-                title: 'Account Information',
+                title: 'finance.account_info'.tr(context),
                 icon: Icons.account_balance_rounded,
                 color: const Color(0xFF7E57C2),
                 children: [
-                  _buildTextField('Account Title', _accTitleController, Icons.title_rounded, required: true),
+                  _buildTextField('finance.account_title'.tr(context), _accTitleController, Icons.title_rounded, required: true),
                   const SizedBox(height: 16),
-                  _buildTextField('Nama Rekening', _accNameController, Icons.person_rounded, required: true),
+                  _buildTextField('finance.account_holder_name'.tr(context), _accNameController, Icons.person_rounded, required: true),
                   const SizedBox(height: 16),
-                  _buildTextField('Initial Balance', _amountController, Icons.money_rounded, isNumber: true, required: true),
+                  _buildTextField('finance.initial_balance'.tr(context), _amountController, Icons.money_rounded, isNumber: true, required: true),
                   const SizedBox(height: 16),
-                  _buildTextField('Account Number', _accNumberController, Icons.numbers_rounded, required: true),
+                  _buildTextField('finance.account_number'.tr(context), _accNumberController, Icons.numbers_rounded, required: true),
                 ],
               ),
               const SizedBox(height: 20),
               _buildSection(
-                title: 'Bank Details',
+                title: 'finance.bank_details'.tr(context),
                 icon: Icons.business_rounded,
                 color: Colors.indigo[700]!,
                 children: [
                   _buildBankDropdown(),
                   const SizedBox(height: 12),
-                  _buildTextField('Nomor Kartu', _cardNumberController, Icons.credit_card_rounded, required: false),
+                  _buildTextField('finance.card_number'.tr(context), _cardNumberController, Icons.credit_card_rounded, required: false),
                   const SizedBox(height: 16),
-                  _buildTextField('Branch Code', _branchCodeController, Icons.code_rounded, required: false),
+                  _buildTextField('finance.branch_code'.tr(context), _branchCodeController, Icons.code_rounded, required: false),
                   const SizedBox(height: 16),
-                  _buildTextField('Bank Branch', _bankBranchController, Icons.location_on_rounded, required: false),
+                  _buildTextField('finance.bank_branch'.tr(context), _bankBranchController, Icons.location_on_rounded, required: false),
                 ],
               ),
             ] else ...[
               _buildSection(
-                title: 'Transaction Details',
+                title: 'finance.transaction_details'.tr(context),
                 icon: Icons.receipt_long_rounded,
                 color: _selectedType == 1 ? Colors.green[700]! : Colors.red[700]!,
                 children: [
                   _buildAccountDropdown(),
                   const SizedBox(height: 16),
-                  _buildTextField('Amount', _amountController, Icons.payments_rounded, isNumber: true, required: true),
+                  _buildTextField('finance.amount'.tr(context), _amountController, Icons.payments_rounded, isNumber: true, required: true),
                   const SizedBox(height: 16),
-                  _buildDatePicker('Transaction Date'),
+                  _buildDatePicker('finance.date'.tr(context)),
                   const SizedBox(height: 16),
                   _buildCategoryDropdown(),
                   const SizedBox(height: 16),
@@ -326,7 +346,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
                   const SizedBox(height: 16),
                   _buildFilePickerSection(),
                   const SizedBox(height: 16),
-                  _buildTextField('Description', _descController, Icons.description_rounded, maxLines: 3, required: false),
+                  _buildTextField('finance.description'.tr(context), _descController, Icons.description_rounded, maxLines: 3, required: false),
                 ],
               ),
             ],
@@ -381,7 +401,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
       onTap: onTap,
       maxLines: maxLines,
       style: const TextStyle(fontSize: 14),
-      validator: required ? (val) => val == null || val.isEmpty ? 'Required' : null : null,
+      validator: required ? (val) => val == null || val.isEmpty ? 'main.required'.tr(context) : null : null,
       decoration: InputDecoration(
         labelText: required ? '$label *' : label,
         prefixIcon: Icon(icon, size: 18, color: const Color(0xFF7E57C2).withOpacity(0.7)),
@@ -403,7 +423,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
       items: items,
       onChanged: onChanged,
       isExpanded: true,
-      hint: Text(hint ?? 'Select $label', style: TextStyle(fontSize: 13, color: Colors.grey[400])),
+      hint: Text(hint ?? 'main.select_item'.tr(context, args: {'item': label}), style: TextStyle(fontSize: 13, color: Colors.grey[400])),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
@@ -413,12 +433,17 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       icon: const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF7E57C2)),
-      validator: (val) => val == null ? 'Required' : null,
+      validator: (val) => val == null ? 'main.required'.tr(context) : null,
     );
   }
 
   Widget _buildBankDropdown() {
-    return _buildDropdown('Bank', _selectedBank, _banks.map((bank) => DropdownMenuItem(value: bank, child: Text(bank, style: const TextStyle(fontSize: 14)))).toList(), (val) => setState(() => _selectedBank = val));
+    return _buildDropdown(
+      'finance.bank'.tr(context), 
+      _selectedBank, 
+      _banks.map((bank) => DropdownMenuItem(value: bank, child: Text(bank, style: const TextStyle(fontSize: 14)))).toList(), 
+      (val) => setState(() => _selectedBank = val)
+    );
   }
 
   Widget _buildAccountDropdown() {
@@ -433,10 +458,11 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
     }
 
     return _buildDropdown(
-      'Select Account', 
+      'finance.account'.tr(context), 
       effectiveAccountId, 
       items, 
-      (val) => setState(() => _selectedAccountId = val)
+      (val) => setState(() => _selectedAccountId = val),
+      hint: 'finance.select_account'.tr(context)
     );
   }
 
@@ -455,16 +481,16 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
 
     if (items.isEmpty) {
       items = [
-        const DropdownMenuItem(
+        DropdownMenuItem(
           value: '', 
           enabled: false,
-          child: Text('No categories available', style: TextStyle(fontSize: 14, color: Colors.grey))
+          child: Text('finance.no_categories'.tr(context), style: const TextStyle(fontSize: 14, color: Colors.grey))
         )
       ];
     }
 
     return _buildDropdown(
-      'Category', 
+      'finance.category'.tr(context), 
       effectiveCategoryId, 
       items, 
       (val) => setState(() => _selectedCategoryId = val)
@@ -479,22 +505,23 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
 
     String? effectivePayerId = _selectedPayerId;
     if (effectivePayerId != null && !items.any((item) => item.value == effectivePayerId)) {
-      effectivePayerId = null;
+      // Data employees sudah load tapi id tidak cocok — pertahankan saja
+      // Tidak reset ke null agar default user tetap valid ketika data belum ada
     }
 
     if (items.isEmpty) {
       items = [
-        const DropdownMenuItem(
+        DropdownMenuItem(
           value: '', 
           enabled: false,
-          child: Text('No employees found', style: TextStyle(fontSize: 14, color: Colors.grey))
+          child: Text('finance.no_employees'.tr(context), style: const TextStyle(fontSize: 14, color: Colors.grey))
         )
       ];
     }
 
     return _buildDropdown(
-      'Payer', 
-      effectivePayerId, 
+      'finance.payer'.tr(context), 
+      items.any((item) => item.value == effectivePayerId) ? effectivePayerId : null, 
       items, 
       (val) => setState(() => _selectedPayerId = val)
     );
@@ -503,7 +530,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
   Widget _buildPaymentMethodDropdown() {
     List<DropdownMenuItem<String>> items = _paymentMethods.map((method) => DropdownMenuItem(
       value: method, 
-      child: Text(method, style: const TextStyle(fontSize: 14))
+      child: Text('finance.pm_${method.toLowerCase()}'.tr(context), style: const TextStyle(fontSize: 14))
     )).toList();
 
     String? effectiveMethod = _selectedPaymentMethod;
@@ -512,7 +539,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
     }
 
     return _buildDropdown(
-      'Payment Method', 
+      'finance.payment_method'.tr(context), 
       effectiveMethod, 
       items, 
       (val) => setState(() => _selectedPaymentMethod = val)
@@ -554,9 +581,9 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Attachment Proof',
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey),
+        Text(
+          'finance.attachment_proof'.tr(context),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey),
         ),
         const SizedBox(height: 10),
         InkWell(
@@ -580,7 +607,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    _pickedFileName ?? 'Choose file / scan receipt...',
+                    _pickedFileName ?? 'finance.choose_file_hint'.tr(context),
                     style: TextStyle(
                       color: _pickedFileName != null ? Theme.of(context).colorScheme.onSurface : Colors.grey,
                       fontSize: 14,
@@ -651,7 +678,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _selectedType == 0 ? 'Initial Balance' : 'Estimated Total',
+                  _selectedType == 0 ? 'finance.initial_balance'.tr(context) : 'finance.estimated_total'.tr(context),
                   style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
                 ),
                 Text(
@@ -674,7 +701,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
               child: _isLoading 
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text(
-                      _selectedType == 0 ? 'Save Account' : 'Save Transaction',
+                      _selectedType == 0 ? 'finance.save_account'.tr(context) : 'finance.save_transaction'.tr(context),
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
             ),

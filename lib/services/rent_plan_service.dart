@@ -82,7 +82,12 @@ class RentPlanService {
 
   Future<Map<String, dynamic>> getRentFormData() async {
     try {
-      final url = Uri.parse('$baseUrl/get_rent_form_data');
+      String? userDataString = await _storage.read(key: 'user_data');
+      if (userDataString == null) return {'status': false, 'message': 'User not logged in'};
+      final userData = json.decode(userDataString);
+      final userId = userData['id'] ?? userData['user_id'];
+
+      final url = Uri.parse('$baseUrl/get_rent_form_data?user_id=$userId');
       final response = await http.get(url);
       return json.decode(response.body);
     } catch (e) {

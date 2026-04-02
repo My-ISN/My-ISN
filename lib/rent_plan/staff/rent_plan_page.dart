@@ -155,6 +155,302 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
     );
   }
 
+  void _showPaymentModal(Map<String, dynamic> rental) {
+    String selectedMethod = 'transfer'; // 'transfer' or 'cash'
+    String? selectedBank;
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          const Color primaryPurple = Color(0xFF7E57C2);
+          
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.9,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                // Header (Purple Gradient)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [primaryPurple, Color(0xFF9575CD)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.payment_rounded, color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Buat Link Pembayaran Flip',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white, size: 24),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Metode Pembayaran',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Payment Method Selection
+                        Row(
+                          children: [
+                            // Transfer / QRIS
+                            Expanded(
+                              child: _buildPaymentMethodCard(
+                                title: 'Transfer / QRIS',
+                                subtitle: 'Virtual Account (BCA, Mandiri, dll)',
+                                isActive: selectedMethod == 'transfer',
+                                onTap: () => setSheetState(() => selectedMethod = 'transfer'),
+                                icon: Icons.account_balance_rounded,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Tunai (Cash)
+                            Expanded(
+                              child: _buildPaymentMethodCard(
+                                title: 'Tunai (Cash)',
+                                subtitle: 'Titip ke Kurir saat laptop sampai',
+                                isActive: selectedMethod == 'cash',
+                                onTap: () => setSheetState(() => selectedMethod = 'cash'),
+                                icon: Icons.money_rounded,
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        if (selectedMethod == 'transfer') ...[
+                          const SizedBox(height: 24),
+                          const Text(
+                            'PILIH BANK / E-WALLET',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey, letterSpacing: 0.5),
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // Bank Grid
+                          GridView.count(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisCount: 2,
+                            childAspectRatio: 2.8,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            children: [
+                              _buildBankItem('Bank BCA', Icons.account_balance, selectedBank == 'bca', () => setSheetState(() => selectedBank = 'bca')),
+                              _buildBankItem('Bank Mandiri', Icons.account_balance, selectedBank == 'mandiri', () => setSheetState(() => selectedBank = 'mandiri')),
+                              _buildBankItem('Bank BNI', Icons.account_balance, selectedBank == 'bni', () => setSheetState(() => selectedBank = 'bni')),
+                              _buildBankItem('Bank BRI', Icons.account_balance, selectedBank == 'bri', () => setSheetState(() => selectedBank = 'bri')),
+                              _buildBankItem('QRIS (Semua)', Icons.qr_code_scanner_rounded, selectedBank == 'qris', () => setSheetState(() => selectedBank = 'qris')),
+                              _buildBankItem('GoPay / Dana', Icons.account_balance_wallet_rounded, selectedBank == 'ewallet', () => setSheetState(() => selectedBank = 'ewallet')),
+                              _buildBankItem('ShopeePay', Icons.account_balance_wallet_rounded, selectedBank == 'shopeepay', () => setSheetState(() => selectedBank = 'shopeepay')),
+                              _buildBankItem('Kartu Kredit', Icons.credit_card_rounded, selectedBank == 'cc', () => setSheetState(() => selectedBank = 'cc')),
+                            ],
+                          ),
+                        ],
+                        
+                        const SizedBox(height: 32),
+                        
+                        // WhatsApp Info
+                        Row(
+                          children: [
+                            const Icon(Icons.phone_iphone_rounded, color: primaryPurple, size: 18),
+                            const SizedBox(width: 8),
+                            const Text('34664', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            const SizedBox(width: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.green.withOpacity(0.3)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.check_circle_rounded, color: Colors.green[600], size: 14),
+                                  const SizedBox(width: 4),
+                                  Text('WhatsApp Aktif', style: TextStyle(color: Colors.green[600], fontSize: 11, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Icon(Icons.shield_outlined, color: primaryPurple.withOpacity(0.5), size: 16),
+                            const SizedBox(width: 8),
+                            Text('Link dibuat via Flip for Business — aman & realtime', 
+                              style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                // Bottom Actions
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1))),
+                  ),
+                  child: Row(
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                          backgroundColor: Colors.grey[200],
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Batal', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => Navigator.pop(context), // UI only for now
+                          icon: Icon(selectedMethod == 'transfer' ? Icons.link_rounded : Icons.check_circle_rounded),
+                          label: Text(
+                            selectedMethod == 'transfer' ? 'Buat & Kirim Link Bayar' : 'Konfirmasi Bayar Tunai',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryPurple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            elevation: 8,
+                            shadowColor: primaryPurple.withOpacity(0.4),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodCard({
+    required String title,
+    required String subtitle,
+    required bool isActive,
+    required VoidCallback onTap,
+    required IconData icon,
+  }) {
+    const Color primaryPurple = Color(0xFF7E57C2);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isActive ? primaryPurple.withOpacity(0.08) : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive ? primaryPurple : Colors.grey.withOpacity(0.2),
+            width: isActive ? 2 : 1,
+          ),
+          boxShadow: isActive ? [
+            BoxShadow(
+              color: primaryPurple.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ] : [],
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(isActive ? Icons.radio_button_checked : Icons.radio_button_off, 
+                  color: isActive ? primaryPurple : Colors.grey, size: 22),
+                Icon(icon, color: isActive ? primaryPurple : Colors.grey[400], size: 24),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isActive ? primaryPurple : null)),
+            const SizedBox(height: 4),
+            Text(subtitle, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: Colors.grey[500])),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBankItem(String name, IconData icon, bool isActive, VoidCallback onTap) {
+    const Color primaryPurple = Color(0xFF7E57C2);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: isActive ? primaryPurple.withOpacity(0.05) : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? primaryPurple : Colors.grey.withOpacity(0.15),
+            width: isActive ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: isActive ? primaryPurple : Colors.indigo[300], size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(name, style: TextStyle(
+                fontSize: 11, 
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                color: isActive ? primaryPurple : null,
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _performDelete(int rentalId) async {
     setState(() => _isLoading = true);
     final response = await _rentPlanService.deleteRentPlan(rentalId);
@@ -170,8 +466,6 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
               ],
             ),
             backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
         _fetchRentPlans();
@@ -189,8 +483,6 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
               ],
             ),
             backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -232,58 +524,21 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
           _buildPremiumSearchBar(),
           _buildTabBar(),
           Expanded(
-            child: _isLoading 
-              ? Center(child: CircularProgressIndicator(color: _primaryColor))
-              : RefreshIndicator(
-                  onRefresh: _fetchRentPlans,
-                  color: _primaryColor,
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _rentals.isEmpty ? 2 : _rentals.length + 2,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: _buildListHeader(),
-                        );
-                      }
-
-                      if (_rentals.isEmpty) {
-                        return _buildEmptyState();
-                      }
-
-                      if (index == _rentals.length + 1) {
-                        if (_totalCount > 0) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8, bottom: 80),
-                            child: _buildPagination(),
-                          );
-                        } else {
-                          return const SizedBox(height: 80);
-                        }
-                      }
-
-                      final rental = _rentals[index - 1];
-                      return _buildRentalCard(rental);
-                    },
-                  ),
-                ),
+            child: TabBarView(
+              controller: _tabController,
+              children: List.generate(_tabs.length, (index) => _buildRentalList()),
+            ),
           ),
         ],
       );
 
-    if (widget.isTab) {
-      return content;
-    }
-
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(
+      appBar: widget.isTab ? null : CustomAppBar(
         userData: widget.userData,
         showBackButton: false,
       ),
-      endDrawer: SideDrawer(userData: widget.userData, activePage: 'rent_plan'),
+      endDrawer: widget.isTab ? null : SideDrawer(userData: widget.userData, activePage: 'rent_plan'),
       body: content,
       floatingActionButton: _hasPermission('mobile_rent_plan_add') 
       ? FloatingActionButton.extended(
@@ -305,6 +560,46 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
         )
       : null,
     );
+  }
+
+  Widget _buildRentalList() {
+    return _isLoading 
+      ? Center(child: CircularProgressIndicator(color: _primaryColor))
+      : RefreshIndicator(
+          onRefresh: _fetchRentPlans,
+          color: _primaryColor,
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            itemCount: _rentals.isEmpty ? 2 : _rentals.length + 2,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildListHeader(),
+                );
+              }
+
+              if (_rentals.isEmpty) {
+                return _buildEmptyState();
+              }
+
+              if (index == _rentals.length + 1) {
+                if (_totalCount > 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8, bottom: 80),
+                    child: _buildPagination(),
+                  );
+                } else {
+                  return const SizedBox(height: 80);
+                }
+              }
+
+              final rental = _rentals[index - 1];
+              return _buildRentalCard(rental);
+            },
+          ),
+        );
   }
 
   Widget _buildHeaderStats() {
@@ -494,14 +789,33 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                       ),
                     ),
                     _buildStatusPill(status, statusColor),
-                    if (_hasPermission('mobile_rent_plan_delete'))
+                    if (status.toLowerCase() != 'completed') ...[
+                      const SizedBox(width: 8),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _showPaymentModal(rental),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF7E57C2).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.payment_rounded, color: Color(0xFF7E57C2), size: 18),
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (_hasPermission('mobile_rent_plan_delete')) ...[
+                      const SizedBox(width: 8),
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(10),
                           onTap: () => _showDeleteConfirmation(int.parse(rental['rental_id'])),
                           child: Container(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                             decoration: BoxDecoration(
                               color: Colors.red.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(10),
@@ -510,6 +824,7 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
                           ),
                         ),
                       ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -663,11 +978,12 @@ class _RentPlanPageState extends State<RentPlanPage> with SingleTickerProviderSt
 
   Widget _buildPremiumDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(

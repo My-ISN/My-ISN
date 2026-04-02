@@ -37,12 +37,14 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   List<dynamic> _shippingCosts = [];
   List<dynamic> _provinces = [];
   List<dynamic> _pricingTiers = [];
+  List<dynamic> _agreements = [];
 
   // Form Values
   String? _selectedCustomerId;
   String _jenisSewa = 'pribadi'; // pribadi, perusahaan
   DateTime _invoiceDate = DateTime.now();
   int _lamaSewa = 1;
+
 
   // Address KTP
   String? _selectedProvinceKtp;
@@ -95,6 +97,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     _fetchInitialData();
   }
 
+
   Future<void> _fetchInitialData() async {
     final response = await _rentPlanService.getRentFormData();
     if (response['status'] == true) {
@@ -111,6 +114,19 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         _shippingCosts = List<dynamic>.from(data['shipping_costs'] ?? []);
         _provinces = List<dynamic>.from(data['provinces'] ?? []);
         _pricingTiers = List<dynamic>.from(data['pricing_tiers'] ?? []);
+        _agreements = List<dynamic>.from(data['agreements'] ?? []);
+        
+        // Auto-select for client
+        if (widget.userData['user_type'] != 'staff') {
+          _selectedCustomerId = (widget.userData['user_id'] ?? widget.userData['id'] ?? '').toString();
+          if (widget.userData['contact_number'] != null) {
+            _whatsappController.text = widget.userData['contact_number'].toString();
+          }
+          if (widget.userData['first_name'] != null) {
+            _namaLengkapController.text = '${widget.userData['first_name']} ${widget.userData['last_name'] ?? ''}'.trim();
+          }
+        }
+
         _isLoadingData = false;
       });
     } else {
@@ -325,15 +341,218 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       setState(() => _isSubmitting = false);
 
       if (res['status'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.success.created'.tr(context))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('rent_plan.success_create'.tr(context)),
+          backgroundColor: Colors.green,
+        ));
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'rent_plan.error.failed_save'.tr(context))));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(res['message'] ?? 'rent_plan.fail_save'.tr(context)),
+          backgroundColor: Colors.red,
+        ));
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.error.generic'.tr(context, args: {'error': e.toString()}))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('rent_plan.error_occurred'.tr(context, args: {'error': e.toString()})),
+        backgroundColor: Colors.red,
+      ));
     }
+  }
+
+  void _showAgreementPopup() {
+    if (!_formKey.currentState!.validate()) return;
+    
+    // Check required files based on jenisSewa
+    if (_jenisSewa == 'pribadi' && _fileKtp == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.validation.ktp_required'.tr(context)), backgroundColor: Colors.red));
+      return;
+    }
+    
+    // Jaminan validation
+    int requiredGua = _jenisSewa == 'pribadi' ? 3 : 2;
+    int providedGua = _selectedJaminanIds.values.where((v) => v != null).length;
+    if (providedGua < requiredGua) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.validation.guarantee_min'.tr(context, args: {'min': requiredGua.toString()})), backgroundColor: Colors.red));
+      return;
+    }
+
+    if (_agreements.isEmpty) {
+      _submitForm();
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final scrollController = ScrollController();
+        bool hasScrolledToBottom = false;
+        bool hasAgreed = false;
+
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            scrollController.addListener(() {
+              if (scrollController.position.atEdge &&
+                  scrollController.position.pixels != 0 &&
+                  !hasScrolledToBottom) {
+                setSheetState(() => hasScrolledToBottom = true);
+              }
+            });
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.85,
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  // Handle
+                  Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.description_rounded, color: Theme.of(context).colorScheme.primary, size: 28),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'rent_plan.agreement.title'.tr(context),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Scroll hint
+                  if (!hasScrolledToBottom)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.arrow_downward, size: 14, color: Colors.orange),
+                          const SizedBox(width: 6),
+                          Text(
+                            'rent_plan.agreement.scroll_to_bottom'.tr(context),
+                            style: const TextStyle(color: Colors.orange, fontSize: 12, fontStyle: FontStyle.italic),
+                          ),
+                        ],
+                      ),
+                    ),
+                  // Agreement text (scrollable)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (var agreement in _agreements) ...[
+                            Text(
+                              agreement['title'] ?? '',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              agreement['content'] ?? agreement['description'] ?? '',
+                              style: TextStyle(
+                                fontSize: 14,
+                                height: 1.6,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Checkbox + Button (bottom fixed)
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.15))),
+                    ),
+                    child: Column(
+                      children: [
+                        InkWell(
+                          onTap: hasScrolledToBottom
+                              ? () => setSheetState(() => hasAgreed = !hasAgreed)
+                              : null,
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: hasAgreed,
+                                onChanged: hasScrolledToBottom
+                                    ? (v) => setSheetState(() => hasAgreed = v ?? false)
+                                    : null,
+                                activeColor: Theme.of(context).colorScheme.primary,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  'rent_plan.agreement.agree_checkbox'.tr(context),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: hasScrolledToBottom
+                                        ? Theme.of(context).colorScheme.onSurface
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: hasAgreed && hasScrolledToBottom
+                                ? () {
+                                    Navigator.pop(context);
+                                    _submitForm();
+                                  }
+                                : null,
+                            icon: const Icon(Icons.check_circle_outline),
+                            label: Text('rent_plan.create_order_now'.tr(context)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: hasAgreed && hasScrolledToBottom ? Theme.of(context).colorScheme.primary : Colors.grey[300],
+                              foregroundColor: hasAgreed && hasScrolledToBottom ? Colors.white : Colors.grey,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -360,21 +579,23 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               icon: Icons.person_add_rounded,
               color: Theme.of(context).colorScheme.primary,
               children: [
-                _buildDropdown('rent_plan.customer'.tr(context), _selectedCustomerId, _customers.map((c) => DropdownMenuItem(
-                  value: c['user_id'].toString(),
-                  child: Text('${c['first_name']} ${c['last_name']}', overflow: TextOverflow.ellipsis),
-                )).toList(), (val) {
-                  setState(() {
-                    _selectedCustomerId = val;
-                    if (val != null) {
-                      final customer = _customers.firstWhere((c) => c['user_id'].toString() == val, orElse: () => null);
-                      if (customer != null && customer['contact_number'] != null) {
-                        _whatsappController.text = customer['contact_number'].toString();
+                if (widget.userData['user_type'] == 'staff') ...[
+                  _buildDropdown('rent_plan.customer'.tr(context), _selectedCustomerId, _customers.map((c) => DropdownMenuItem(
+                    value: c['user_id'].toString(),
+                    child: Text('${c['first_name']} ${c['last_name']}', overflow: TextOverflow.ellipsis),
+                  )).toList(), (val) {
+                    setState(() {
+                      _selectedCustomerId = val;
+                      if (val != null) {
+                        final customer = _customers.firstWhere((c) => c['user_id'].toString() == val, orElse: () => null);
+                        if (customer != null && customer['contact_number'] != null) {
+                          _whatsappController.text = customer['contact_number'].toString();
+                        }
                       }
-                    }
-                  });
-                }, hint: 'rent_plan.select_customer'.tr(context)),
-                const SizedBox(height: 16),
+                    });
+                  }, hint: 'rent_plan.select_customer'.tr(context)),
+                  const SizedBox(height: 16),
+                ],
                 _buildTextField('rent_plan.whatsapp'.tr(context), controller: _whatsappController, icon: Icons.phone_rounded, keyboardType: TextInputType.phone),
               ],
             ),
@@ -872,7 +1093,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
-              onPressed: _isSubmitting ? null : _submitForm,
+              onPressed: _isSubmitting ? null : _showAgreementPopup,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

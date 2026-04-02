@@ -4,7 +4,9 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../localization/app_localizations.dart';
 import '../services/finance_service.dart';
+
 import '../widgets/custom_app_bar.dart';
+import '../widgets/side_drawer.dart';
 import 'widgets/finance_account_item.dart';
 import 'widgets/finance_transaction_item.dart';
 import 'add_finance_data_page.dart';
@@ -25,6 +27,22 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
     if (widget.userData['role_resources'] == 'all') return true;
     final String resources = widget.userData['role_resources'] ?? '';
     final List<String> resourceList = resources.split(',').map((e) => e.trim()).toList();
+
+    // Mapping legacy web permissions to new mobile granular permissions
+    bool hasMobileView = resourceList.contains('mobile_finance_view') || resourceList.contains('mobile_finance_enable');
+    bool hasMobileAddEdit = resourceList.contains('mobile_finance_add') || resourceList.contains('mobile_finance_enable');
+    bool hasMobileDelete = resourceList.contains('mobile_finance_delete') || resourceList.contains('mobile_finance_enable');
+
+    if (resource == 'finance6' || resource == 'finance5' || resource == 'finance1' || resource == 'hr_finance') {
+      if (hasMobileView) return true;
+    }
+    if (resource == 'finance2' || resource == 'finance3') {
+      if (hasMobileAddEdit) return true;
+    }
+    if (resource == 'finance4') {
+      if (hasMobileDelete) return true;
+    }
+    
     return resourceList.contains(resource);
   }
   final FinanceService _financeService = FinanceService();
@@ -236,13 +254,13 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
             ),
             const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
             const SizedBox(height: 16),
-            const Text(
-              'Delete Account',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              'finance.delete_account_confirm_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
-              'Are you sure you want to delete account "${account['account_name']}"? This action cannot be undone.',
+              'finance.delete_account_confirm_msg'.tr(context, args: {'name': account['account_name'] ?? ''}),
               textAlign: TextAlign.center,
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
             ),
@@ -258,7 +276,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
-                      'Cancel',
+                      'main.cancel'.tr(context),
                       style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     ),
                   ),
@@ -277,7 +295,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: const Text('Delete'),
+                    child: Text('main.delete'.tr(context)),
                   ),
                 ),
               ],
@@ -296,12 +314,12 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
       if (response['status'] == true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.check_circle_rounded, color: Colors.white),
-                  SizedBox(width: 12),
-                  Text('Account deleted successfully'),
+                  const Icon(Icons.check_circle_rounded, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Text('finance.account_deleted_success'.tr(context)),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -348,8 +366,8 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
       if (response['status'] == true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Transaction deleted and balance updated'),
+            SnackBar(
+              content: Text('finance.transaction_deleted_success'.tr(context)),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.fixed,
             ),
@@ -357,13 +375,13 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
           _loadData();
         }
       } else {
-        throw Exception(response['message'] ?? 'Failed to delete transaction');
+        throw Exception(response['message'] ?? 'finance.transaction_deleted_failed'.tr(context));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('main.error_with_msg'.tr(context, args: {'msg': e.toString()})),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.fixed,
           ),
@@ -408,7 +426,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Transaction Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('finance.transaction_details'.tr(context), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_horiz_rounded, color: Colors.grey),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -439,34 +457,34 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                   },
                   itemBuilder: (context) => [
                     if (_hasPermission('finance2'))
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined, size: 20, color: Colors.blue),
-                            SizedBox(width: 12),
-                            Text('Edit Transaction'),
+                            const Icon(Icons.edit_outlined, size: 20, color: Color(0xFF7E57C2)),
+                            const SizedBox(width: 12),
+                            Text('finance.edit_transaction'.tr(context)),
                           ],
                         ),
                       ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'web',
                       child: Row(
                         children: [
-                          Icon(Icons.launch_rounded, size: 20, color: Color(0xFF7E57C2)),
-                          SizedBox(width: 12),
-                          Text('Open Web Ledger'),
+                          const Icon(Icons.launch_rounded, size: 20, color: Color(0xFF7E57C2)),
+                          const SizedBox(width: 12),
+                          Text('finance.open_web_ledger'.tr(context)),
                         ],
                       ),
                     ),
                     if (_hasPermission('finance4'))
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
-                            SizedBox(width: 12),
-                            Text('Delete Transaction', style: TextStyle(color: Colors.red)),
+                            const Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
+                            const SizedBox(width: 12),
+                            Text('finance.delete_transaction'.tr(context), style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -487,7 +505,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
                     child: Text(
-                      isIncome ? 'INCOME / DEPOSIT' : 'EXPENSE / SPENDING',
+                      isIncome ? 'finance.income_deposit'.tr(context) : 'finance.expense_spending'.tr(context),
                       style: TextStyle(color: primaryColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
                     ),
                   ),
@@ -495,15 +513,15 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
               ),
             ),
             const SizedBox(height: 32),
-            _buildDetailRow(Icons.person_rounded, 'Payer', fullName),
+            _buildDetailRow(Icons.person_rounded, 'finance.payer'.tr(context), fullName),
             const Divider(height: 32),
-            _buildDetailRow(Icons.category_rounded, 'Category', category),
+            _buildDetailRow(Icons.category_rounded, 'finance.category'.tr(context), category),
             const Divider(height: 32),
-            _buildDetailRow(Icons.account_balance_wallet_rounded, 'Account', transaction['account_name'] ?? '-'),
+            _buildDetailRow(Icons.account_balance_wallet_rounded, 'finance.account'.tr(context), transaction['account_name'] ?? '-'),
             const Divider(height: 32),
-            _buildDetailRow(Icons.calendar_today_rounded, 'Date', transaction['transaction_date'] ?? '-'),
+            _buildDetailRow(Icons.calendar_today_rounded, 'finance.date'.tr(context), transaction['transaction_date'] ?? '-'),
             const SizedBox(height: 32),
-            const Text('Description', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+            Text('finance.description'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
             const SizedBox(height: 8),
             Container(
               width: double.infinity,
@@ -516,13 +534,13 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
               child: Text(
                 transaction['description']?.toString().isNotEmpty == true 
                     ? transaction['description'] 
-                    : 'No description provided.',
+                    : 'finance.no_description'.tr(context),
                 style: const TextStyle(fontSize: 14, height: 1.5),
               ),
             ),
             if (transaction['attachment_url'] != null && transaction['attachment_url'].toString().isNotEmpty) ...[
               const SizedBox(height: 24),
-              const Text('Attachment', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text('finance.attachment'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
               const SizedBox(height: 12),
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
@@ -532,11 +550,11 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         color: Colors.red.withOpacity(0.1),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(Icons.picture_as_pdf_rounded, color: Colors.red),
-                            SizedBox(width: 12),
-                            Text('View PDF Document', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                            const Icon(Icons.picture_as_pdf_rounded, color: Colors.red),
+                            const SizedBox(width: 12),
+                            Text('finance.view_pdf'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
                           ],
                         ),
                       ),
@@ -556,11 +574,11 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                       errorBuilder: (context, error, stackTrace) => Container(
                         padding: const EdgeInsets.all(20),
                         color: Colors.grey.withOpacity(0.1),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(Icons.broken_image_rounded, color: Colors.grey),
-                            SizedBox(width: 12),
-                            Text('Failed to load image', style: TextStyle(color: Colors.grey)),
+                            const Icon(Icons.broken_image_rounded, color: Colors.grey),
+                            const SizedBox(width: 12),
+                            Text('finance.failed_load_image'.tr(context), style: const TextStyle(color: Colors.grey)),
                           ],
                         ),
                       ),
@@ -591,7 +609,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
 
     if (encodedId == null || transactionId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not generate web link')),
+        SnackBar(content: Text('finance.web_link_error'.tr(context))),
       );
       return;
     }
@@ -605,7 +623,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch browser for transaction $transactionId')),
+          SnackBar(content: Text('finance.web_launch_error'.tr(context, args: {'item': 'transaction', 'id': transactionId.toString()}))),
         );
       }
     }
@@ -639,7 +657,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Account Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('finance.account_details'.tr(context), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_horiz_rounded, color: Colors.grey),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -669,13 +687,13 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                   },
                   itemBuilder: (context) => [
                     if (_hasPermission('finance2'))
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined, size: 20, color: Colors.blue),
-                            SizedBox(width: 12),
-                            Text('Edit Account'),
+                            const Icon(Icons.edit_outlined, size: 20, color: Color(0xFF7E57C2)),
+                            const SizedBox(width: 12),
+                            Text('finance.edit_account'.tr(context)),
                           ],
                         ),
                       ),
@@ -685,18 +703,18 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                         children: [
                           Icon(Icons.launch_rounded, size: 20, color: primaryColor),
                           const SizedBox(width: 12),
-                          const Text('Open Web Ledger'),
+                          Text('finance.open_web_ledger'.tr(context)),
                         ],
                       ),
                     ),
                     if (_hasPermission('finance4'))
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
-                            SizedBox(width: 12),
-                            Text('Delete Account', style: TextStyle(color: Colors.red)),
+                            const Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
+                            const SizedBox(width: 12),
+                            Text('finance.delete_account'.tr(context), style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -717,7 +735,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
                     child: Text(
-                      'CURRENT BALANCE',
+                      'finance.current_balance_caps'.tr(context),
                       style: TextStyle(color: primaryColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
                     ),
                   ),
@@ -725,13 +743,13 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
               ),
             ),
             const SizedBox(height: 32),
-            _buildDetailRow(Icons.account_balance_wallet_rounded, 'Account Name', account['account_name'] ?? '-'),
+            _buildDetailRow(Icons.account_balance_wallet_rounded, 'finance.account_name'.tr(context), account['account_name'] ?? '-'),
             const Divider(height: 32),
-            _buildDetailRow(Icons.account_balance_rounded, 'Bank', account['bank'] ?? '-'),
+            _buildDetailRow(Icons.account_balance_rounded, 'finance.bank'.tr(context), account['bank'] ?? '-'),
             const Divider(height: 32),
-            _buildDetailRow(Icons.numbers_rounded, 'Account Number', account['account_number'] ?? '-'),
+            _buildDetailRow(Icons.numbers_rounded, 'finance.account_number'.tr(context), account['account_number'] ?? '-'),
             const Divider(height: 32),
-            _buildDetailRow(Icons.location_on_rounded, 'Branch', account['bank_branch'] ?? '-'),
+            _buildDetailRow(Icons.location_on_rounded, 'finance.branch'.tr(context), account['bank_branch'] ?? '-'),
             const SizedBox(height: 16),
           ],
         ),
@@ -745,7 +763,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
 
     if (encodedId == null || accountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not generate web link')),
+        SnackBar(content: Text('finance.web_link_error'.tr(context))),
       );
       return;
     }
@@ -759,7 +777,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch browser for account $accountId')),
+          SnackBar(content: Text('finance.web_launch_error'.tr(context, args: {'item': 'account', 'id': accountId.toString()}))),
         );
       }
     }
@@ -790,13 +808,13 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
             ),
             const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
             const SizedBox(height: 16),
-            const Text(
-              'Delete Transaction',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              'finance.delete_transaction_confirm_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
-              'Are you sure you want to delete this transaction? This will permanently remove the record and reverse the balance impact on your account.',
+              'finance.delete_transaction_confirm_msg'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
             ),
@@ -812,7 +830,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
-                      'Cancel',
+                      'main.cancel'.tr(context),
                       style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     ),
                   ),
@@ -831,7 +849,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: const Text('Delete'),
+                    child: Text('main.delete'.tr(context)),
                   ),
                 ),
               ],
@@ -870,8 +888,9 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(
         userData: widget.userData,
-        title: 'My ISN',
+        title: 'finance.title'.tr(context),
       ),
+      endDrawer: SideDrawer(userData: widget.userData, activePage: 'finance'),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : _errorMessage.isNotEmpty
@@ -1540,9 +1559,9 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Pilih Periode',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    'finance.choose_period'.tr(context),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),

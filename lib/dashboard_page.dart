@@ -90,119 +90,260 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _showChangelogDialog(AppUpdateInfo info) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        scrollable: true,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.celebration, color: Color(0xFF7E57C2)),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text('dashboard.whats_new'.tr(context, args: {'version': info.version.split('+')[0]})),
-            ),
-          ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
           children: [
-            Text(
-              'dashboard.update_thanks'.tr(context),
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
-            ),
-            const SizedBox(height: 15),
+            // Handle
             Container(
-              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
               ),
-              child: Text(
-                info.releaseNotes ?? 'announcement.no_description_available'.tr(context),
-                style: const TextStyle(fontSize: 14),
+            ),
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF7E57C2).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.celebration, color: Color(0xFF7E57C2), size: 28),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      'dashboard.whats_new'.tr(context, args: {'version': info.version.split('+')[0]}),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Content (scrollable)
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'dashboard.update_thanks'.tr(context),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white.withOpacity(0.05) 
+                            : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Theme.of(context).dividerColor.withOpacity(0.1),
+                        ),
+                      ),
+                      child: Text(
+                        info.releaseNotes ?? 'announcement.no_description_available'.tr(context),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          height: 1.6,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+            // Actions
+            Container(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1))),
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7E57C2),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'dashboard.cool'.tr(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
             ),
           ],
         ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF7E57C2),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: Text('dashboard.cool'.tr(context), style: const TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
     );
   }
 
   void _showUpdateDialog(AppUpdateInfo updateInfo) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: !updateInfo.isForceUpdate,
+      isScrollControlled: true,
+      isDismissible: !updateInfo.isForceUpdate,
+      enableDrag: !updateInfo.isForceUpdate,
+      backgroundColor: Colors.transparent,
       builder: (context) => WillPopScope(
         onWillPop: () async => !updateInfo.isForceUpdate,
-        child: AlertDialog(
-          scrollable: true,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          title: Row(
+          child: Column(
             children: [
-              const Icon(Icons.system_update, color: Color(0xFF7E57C2)),
-              const SizedBox(width: 10),
+              // Handle
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7E57C2).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.system_update, color: Color(0xFF7E57C2), size: 28),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'main.update_available'.tr(context),
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Content (scrollable)
               Expanded(
-                child: Text('main.update_available'.tr(context)),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${'main.new_version'.tr(context)}: ${updateInfo.version.split('+')[0]}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 16),
+                      if (updateInfo.releaseNotes != null) ...[
+                        Text(
+                          'announcement.whats_new'.tr(context),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          updateInfo.releaseNotes!,
+                          style: TextStyle(
+                            height: 1.6,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      Text(
+                        'main.update_desc'.tr(context),
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ),
+              // Actions
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1))),
+                ),
+                child: Row(
+                  children: [
+                    if (!updateInfo.isForceUpdate) ...[
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text(
+                            'main.later'.tr(context),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final url = Uri.parse(updateInfo.downloadLink);
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF7E57C2),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'main.update_now'.tr(context),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${'main.new_version'.tr(context)}: ${updateInfo.version.split('+')[0]}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              if (updateInfo.releaseNotes != null) ...[
-                const SizedBox(height: 10),
-                Text(
-                  'announcement.whats_new'.tr(context),
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-                Text(updateInfo.releaseNotes!),
-              ],
-              const SizedBox(height: 15),
-              Text('main.update_desc'.tr(context)),
-            ],
-          ),
-          actions: [
-            if (!updateInfo.isForceUpdate)
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('main.later'.tr(context)),
-              ),
-            ElevatedButton(
-              onPressed: () async {
-                final url = Uri.parse(updateInfo.downloadLink);
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7E57C2),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text('main.update_now'.tr(context)),
-            ),
-          ],
         ),
       ),
     );
@@ -229,6 +370,13 @@ class _DashboardPageState extends State<DashboardPage> {
               _isLoading = false;
             }
           });
+        }
+      } else {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'dashboard.fetch_error'.tr(context))),
+          );
         }
       }
     } catch (e) {
@@ -260,6 +408,13 @@ class _DashboardPageState extends State<DashboardPage> {
             _isLoading = false;
           });
         }
+      } else {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'dashboard.fetch_error'.tr(context))),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error fetching customer dashboard data: $e');
@@ -280,7 +435,6 @@ class _DashboardPageState extends State<DashboardPage> {
     final List<Widget> pages = isCustomer ? [
       _buildHomeContent(),
       client_rp.RentPlanPage(userData: user, isTab: true),
-      _buildUnderDevelopmentPage('main.xin_invoice'.tr(context)),
       ProfilePage(userData: user, isTab: true),
     ] : [
       _buildHomeContent(),
@@ -344,43 +498,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildUnderDevelopmentPage(String title) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.construction_rounded,
-              size: 64,
-              color: Color(0xFF7E57C2),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'dashboard.under_development'.tr(context),
-            style: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _clockBreak() async {
     final activeAtt = _dashboardData['attendance'];

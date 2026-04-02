@@ -1,6 +1,27 @@
 # Changelog
 
-## [0.13.0] - 2026-03-29
+## [1.0.1] - 2026-04-02
+
+### Changed
+
+- **Finance — Format Amount Otomatis**: Field nominal pada form Add/Edit Income & Expense kini otomatis memformat angka dengan titik pemisah ribuan saat pengguna mengetik (contoh: `1000` → `1.000`, `1000000` → `1.000.000`). Sebelumnya format hanya diterapkan saat data di-*load* dari server.
+- **Finance — Default Payer = User Login**: Pada mode tambah baru, dropdown **Payer** kini otomatis terisi dengan akun pengguna yang sedang login sebagai nilai default, sehingga tidak perlu memilih ulang secara manual.
+- **Finance — Default Payment Method = Bank**: Dropdown **Payment Method** kini memiliki nilai default **Bank** (Bank Transfer) pada mode tambah baru, sesuai dengan metode pembayaran yang paling umum digunakan.
+- **Todo List — Voice-to-Text Bahasa Indonesia**: Fitur pengenalan suara kini dikunci untuk mendeteksi **Bahasa Indonesia (`id_ID`)**, memastikan akurasi input suara tetap optimal meskipun bahasa sistem HP menggunakan bahasa lain.
+- **UI — Modern Pill Bottom Navigation**: Desain ulang total bar navigasi bawah menggunakan gaya **Modern Pill**. Menu yang aktif kini menampilkan latar belakang "pill" berwarna ungu dengan teks label yang beranimasi mulus (*sliding width transition*).
+- **UI — Floating Navigation Bar**: Implementasi bar navigasi melayang (*floating*) dengan *height* 80px, radius sudut 40, dan bayangan (*box-shadow*) halus untuk estetika yang lebih modern dan premium.
+- **UI — Popup Update & Changelog Premium**: Redesign total jendela notifikasi "Update Tersedia" dan "Apa yang Baru" (Changelog) menjadi **Premium Bottom Sheet** yang seragam dengan desain popup hapus akun, lengkap dengan *drag handle* dan *fixed action buttons* di bagian bawah.
+- **UI — Rent Plan Quick Pay**: Penambahan ikon **Pay** (`Icons.payment_rounded`) pada daftar persewaan untuk akses cepat ke pembayaran.
+- **Rent Plan — Flip-style Payment Modal**: Implementasi UI modal pembayaran mandiri dengan antarmuka **Flip for Business**, mencakup pemilihan metode Transfer/QRIS (dengan grid bank lengkap) atau Tunai (Cash).
+- **UI — Rent Plan List Layout**: Perbaikan jarak (*spacing*) dan ukuran box pada badge status serta tombol hapus di daftar persewaan agar lebih simetris dan rapi.
+
+### Fixed
+
+- **UI — Bottom Nav Overflow**: Perbaikan error `RenderFlex overflow` (pola kuning-hitam) pada bar navigasi yang sebelumnya muncul karena perhitungan lebar item yang tidak memperhitungkan margin horizontal.
+
+---
+
+## [1.0.0] - 2026-04-01
 
 ### Added
 
@@ -17,15 +38,15 @@
 - **Dashboard Quick Apps**: Pembaruan desain menu akses cepat (Quick Apps) dengan layout grid yang lebih modern, responsif, dan visual ikon yang lebih tajam.
 - **Icon Visibility Upgrade**: Pembedaan ikon visual antara menu **Finance** (Ikon Dompet) dan **Payroll** (Ikon Slip Gaji) guna meningkatkan efisiensi navigasi pengguna.
 - **Modul Finance Premium**: Implementasi penuh manajemen keuangan perusahaan dengan standar desain premium.
-  - **Summary & Sectioned UI**: Penggunaan kartu gradasi (`Color(0xFF7E57C2)`) dan *Sectioned Cards* untuk pengelompokan data input.
-  - **Unified Add Data**: Halaman tambah data dinamis untuk **Akun**, **Pemasukan**, dan **Pengeluaran** dalam satu alur.
-  - **Manajemen Akun**: Fitur hapus akun permanen dengan dialog konfirmasi aman dan sinkronisasi saldo real-time.
-  - **Premium Bottom Panel**: Implementasi panel aksi bawah melengkung (*curved top corners*) dengan radius 30 untuk estetika yang lebih modern.
+- **Summary & Sectioned UI**: Penggunaan kartu gradasi (`Color(0xFF7E57C2)`) dan *Sectioned Cards* untuk pengelompokan data input.
+- **Unified Add Data**: Halaman tambah data dinamis untuk **Akun**, **Pemasukan**, dan **Pengeluaran** dalam satu alur.
+- **Manajemen Akun**: Fitur hapus akun permanen dengan dialog konfirmasi aman dan sinkronisasi saldo real-time.
+- **Premium Bottom Panel**: Implementasi panel aksi bawah melengkung (*curved top corners*) dengan radius 30 untuk estetika yang lebih modern.
 - **Employees Module Fixes**:
-  - **UI Consistency**: Memindahkan tombol **Simpan** dari AppBar ke *bottomNavigationBar* lebar agar seragam dengan modul Keuangan.
-  - **UI/UX Refinement**: Dukungan penuh Dark/Light theme untuk form Tambah Karyawan dan panel bawah melengkung (radius 30).
-  - **Error Handling**: Perbaikan crash "Unable to load asset" dengan mengganti placeholder yang hilang menjadi foto formal resmi (`default_formal.webp`) atau inisial dinamis.
-  - **Localization Sync**: Perbaikan label lokalisasi yang sebelumnya menampilkan teks JSON mentah (Map string) menjadi label yang tepat di kedua bahasa.
+- **UI Consistency**: Memindahkan tombol **Simpan** dari AppBar ke *bottomNavigationBar* lebar agar seragam dengan modul Keuangan.
+- **UI/UX Refinement**: Dukungan penuh Dark/Light theme untuk form Tambah Karyawan dan panel bawah melengkung (radius 30).
+- **Error Handling**: Perbaikan crash "Unable to load asset" dengan mengganti placeholder yang hilang menjadi foto formal resmi (`default_formal.webp`) atau inisial dinamis.
+- **Localization Sync**: Perbaikan label lokalisasi yang sebelumnya menampilkan teks JSON mentah (Map string) menjadi label yang tepat di kedua bahasa.
 
 ### Changed
 

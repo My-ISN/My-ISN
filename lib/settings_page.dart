@@ -43,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final info = await PackageInfo.fromPlatform();
     if (mounted) {
       setState(() {
-        _appVersion = "${info.version}-preview";
+        _appVersion = info.version;
       });
     }
   }

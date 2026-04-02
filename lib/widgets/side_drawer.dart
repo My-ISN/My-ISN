@@ -35,6 +35,10 @@ class SideDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCustomer = userData['user_type'] == 'customer' || 
+                           userData['user_role_id'] == 21 || 
+                           userData['user_role_id'] == '21';
+    
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.75,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -61,19 +65,20 @@ class SideDrawer extends StatelessWidget {
                 ),
                 _buildMenuItem(
                   context,
-                  icon: Icons.calendar_today_outlined,
-                  title: 'main.xin_attendance'.tr(context),
-                  isActive: activePage == 'attendance',
+                  icon: isCustomer ? Icons.house_outlined : Icons.calendar_today_outlined,
+                  title: isCustomer ? 'dashboard.rent_plan'.tr(context) : 'main.xin_attendance'.tr(context),
+                  isActive: isCustomer ? activePage == 'rent_plan' : activePage == 'attendance',
                   onTap: () {
                     Navigator.pop(context);
                     if (onTabSelected != null) {
                       onTabSelected!(1);
-                    } else if (activePage != 'attendance') {
+                    } else if (activePage != (isCustomer ? 'rent_plan' : 'attendance')) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              AttendancePage(userData: userData),
+                          builder: (context) => isCustomer
+                              ? client_rp.RentPlanPage(userData: userData)
+                              : AttendancePage(userData: userData),
                         ),
                       );
                     }
@@ -114,7 +119,7 @@ class SideDrawer extends StatelessWidget {
                   },
                 ),
                 const Divider(indent: 16, endIndent: 16),
-                if (_hasPermission('mobile_rent_plan_enable'))
+                if (!isCustomer && _hasPermission('mobile_rent_plan_enable'))
                   _buildMenuItem(
                     context,
                     icon: Icons.house_outlined,
@@ -205,30 +210,27 @@ class SideDrawer extends StatelessWidget {
                       );
                     },
                   ),
-
-
-                _buildMenuItem(
-                  context,
-                  icon: Icons.settings_outlined,
-                  title: 'main.xin_settings'.tr(context),
-                  isActive: activePage == 'settings',
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (activePage != 'settings') {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              SettingsPage(userData: userData),
-                        ),
-                      );
-                    }
-                  },
-                ),
               ],
             ),
           ),
           const Divider(height: 1),
+          _buildMenuItem(
+            context,
+            icon: Icons.settings_outlined,
+            title: 'main.xin_settings'.tr(context),
+            isActive: activePage == 'settings',
+            onTap: () {
+              Navigator.pop(context);
+              if (activePage != 'settings') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(userData: userData),
+                  ),
+                );
+              }
+            },
+          ),
           _buildLogout(context),
           const SizedBox(height: 20),
         ],
@@ -321,10 +323,11 @@ class SideDrawer extends StatelessWidget {
     required String title,
     required bool isActive,
     int? badgeCount,
+    EdgeInsetsGeometry? padding,
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
@@ -381,24 +384,11 @@ class SideDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildLogout(BuildContext context) {
+  Widget _buildLogout(BuildContext context, {EdgeInsetsGeometry? padding}) {
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       child: InkWell(
-        onTap: () async {
-          // Clear user session
-          const storage = FlutterSecureStorage();
-          await storage.delete(key: 'user_data');
-
-          if (!context.mounted) return;
-
-          // Fix for black screen: use pushAndRemoveUntil to clear stack
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-            (route) => false,
-          );
-        },
+        onTap: () => _showLogoutConfirmation(context),
         borderRadius: BorderRadius.circular(10),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -416,6 +406,92 @@ class SideDrawer extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Icon(Icons.logout_rounded, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'main.logout_confirm_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'main.logout_confirm_msg'.tr(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Perform Logout
+                      const storage = FlutterSecureStorage();
+                      await storage.delete(key: 'user_data');
+                      if (context.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                          (route) => false,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('main.xin_logout'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );

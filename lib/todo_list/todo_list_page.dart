@@ -361,6 +361,7 @@ class _TodoListPageState extends State<TodoListPage> {
                             if (available) {
                               setModalState(() => _isListening = true);
                               _speech.listen(
+                                localeId: 'id_ID',
                                 onResult: (val) {
                                   setModalState(() {
                                     controller.text = val.recognizedWords;
@@ -476,6 +477,7 @@ class _TodoListPageState extends State<TodoListPage> {
                             if (available) {
                               setModalState(() => _isListening = true);
                               _speech.listen(
+                                localeId: 'id_ID',
                                 onResult: (val) {
                                   setModalState(() {
                                     controller.text = val.recognizedWords;
@@ -658,11 +660,12 @@ class _TodoListPageState extends State<TodoListPage> {
 
   Widget _buildPremiumDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
@@ -902,14 +905,15 @@ class _TodoListPageState extends State<TodoListPage> {
                       if (value == 'delete') _confirmDelete(todo);
                       if (value == 'toggle') _toggleTodo(todo);
                     },
-                    icon: Icon(Icons.more_vert, size: 20, color: Colors.grey[400]),
+                    icon: Icon(Icons.more_horiz_rounded, size: 20, color: Colors.grey[400]),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            const Icon(Icons.edit_outlined, size: 18),
-                            const SizedBox(width: 8),
+                            Icon(Icons.edit_outlined, size: 20, color: _primaryColor),
+                            const SizedBox(width: 12),
                             Text('todo_list.edit_task'.tr(context)),
                           ],
                         ),
@@ -918,8 +922,8 @@ class _TodoListPageState extends State<TodoListPage> {
                         value: 'toggle',
                         child: Row(
                           children: [
-                            Icon(isCompleted ? Icons.undo : Icons.check_circle, size: 18),
-                            const SizedBox(width: 8),
+                            Icon(isCompleted ? Icons.undo_rounded : Icons.check_circle_rounded, size: 20, color: _primaryColor),
+                            const SizedBox(width: 12),
                             Text(isCompleted ? 'todo_list.pending'.tr(context) : 'todo_list.completed'.tr(context)),
                           ],
                         ),
@@ -929,8 +933,8 @@ class _TodoListPageState extends State<TodoListPage> {
                           value: 'delete',
                           child: Row(
                             children: [
-                              const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                              const SizedBox(width: 8),
+                              const Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
+                              const SizedBox(width: 12),
                               Text('main.delete'.tr(context), style: const TextStyle(color: Colors.red)),
                             ],
                           ),
@@ -947,29 +951,79 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   void _confirmDelete(dynamic todo) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('todo_list.delete_confirm_title'.tr(context)),
-        content: Text('todo_list.delete_confirm_desc'.tr(context)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('main.cancel'.tr(context), style: TextStyle(color: Colors.grey[600])),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _deleteTodo(todo);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-            child: Text('main.delete'.tr(context), style: const TextStyle(color: Colors.white)),
-          ),
-        ],
+            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'todo_list.delete_confirm_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'todo_list.delete_confirm_desc'.tr(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _deleteTodo(todo);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('main.delete'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

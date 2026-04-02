@@ -22,15 +22,14 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
   @override
   void initState() {
     super.initState();
-    // Set padding when bottom nav is visible
+    // Set padding for floating bar (bar height + margin)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ConnectivityStatus.bottomPadding.value = 56.0;
+      ConnectivityStatus.bottomPadding.value = 100.0; 
     });
   }
 
   @override
   void dispose() {
-    // Reset padding when bottom nav is removed
     ConnectivityStatus.bottomPadding.value = 0.0;
     super.dispose();
   }
@@ -45,54 +44,130 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final bool hasPayroll = _hasPermission('mobile_payroll_enable');
     final bool isCustomer = widget.userData['user_type'] == 'customer' || 
                            widget.userData['user_role_id'] == 21 || 
                            widget.userData['user_role_id'] == '21';
+    
+    final Color primaryColor = Theme.of(context).colorScheme.primary;
 
-    final List<BottomNavigationBarItem> items = isCustomer ? [
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.home),
-        label: 'main.xin_dashboard'.tr(context),
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.house_rounded),
-        label: 'main.xin_rent_plan'.tr(context),
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.receipt_long_rounded),
-        label: 'main.xin_invoice'.tr(context),
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.person_outline),
-        label: 'main.xin_profile'.tr(context),
-      ),
+    final List<Map<String, dynamic>> items = isCustomer ? [
+      {
+        'icon': Icons.home_rounded,
+        'label': 'main.xin_dashboard'.tr(context),
+      },
+      {
+        'icon': Icons.house_rounded,
+        'label': 'main.xin_rent_plan'.tr(context),
+      },
+      {
+        'icon': Icons.person_rounded,
+        'label': 'main.xin_profile'.tr(context),
+      },
     ] : [
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.home),
-        label: 'main.xin_dashboard'.tr(context),
-      ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.calendar_month),
-        label: 'main.xin_attendance'.tr(context),
-      ),
+      {
+        'icon': Icons.home_rounded,
+        'label': 'main.xin_dashboard'.tr(context),
+      },
+      {
+        'icon': Icons.calendar_month_rounded,
+        'label': 'main.xin_attendance'.tr(context),
+      },
       if (hasPayroll)
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.receipt_long_rounded),
-          label: 'main.xin_payroll'.tr(context),
-        ),
-      BottomNavigationBarItem(
-        icon: const Icon(Icons.person_outline),
-        label: 'main.xin_profile'.tr(context),
-      ),
+        {
+          'icon': Icons.receipt_long_rounded,
+          'label': 'main.xin_payroll'.tr(context),
+        },
+      {
+        'icon': Icons.person_rounded,
+        'label': 'main.xin_profile'.tr(context),
+      },
     ];
 
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Theme.of(context).colorScheme.primary,
-      currentIndex: widget.currentIndex,
-      onTap: widget.onTap,
-      items: items,
+    // Calculate dynamic widths for smooth animation
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double barPadding = 32 + 24; // Margin horizontal (16*2) + Inner padding (12*2)
+    final int itemCount = items.length;
+    final double totalMargin = itemCount * 4; // Margin horizontal (2*2) per item
+    final double availableWidth = screenWidth - barPadding - totalMargin;
+    
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20), // Bottom margin for floating look
+      child: Container(
+        height: 80, // Increased height
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+          border: isDark ? Border.all(color: Colors.white10) : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(itemCount, (index) {
+            final bool isActive = widget.currentIndex == index;
+            final item = items[index];
+            
+            // Dynamic width calculation: Active item takes ~45%, others share the rest
+            final double activeWidth = availableWidth * 0.45;
+            final double inactiveWidth = (availableWidth - activeWidth) / (itemCount - 1);
+            final double itemWidth = isActive ? activeWidth : inactiveWidth;
+
+            return GestureDetector(
+              onTap: () => widget.onTap(index),
+              behavior: HitTestBehavior.opaque,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400), // Slightly slower for better feel
+                curve: Curves.easeInOutCirc, // Smoother curve for sliding
+                width: itemWidth,
+                height: 56, // Fixed height for the pill
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 0),
+                decoration: BoxDecoration(
+                  color: isActive ? primaryColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      item['icon'],
+                      color: isActive 
+                          ? Colors.white 
+                          : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                      size: 24,
+                    ),
+                    if (isActive) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          item['label'],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.clip, // Avoid ellipsis during animation if possible
+                          softWrap: false,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 }
+
