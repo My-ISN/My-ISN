@@ -468,62 +468,104 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
 
   Widget _buildCategoryDropdown() {
     final categories = _selectedType == 1 ? _incomeCategories : _expenseCategories;
+    final String label = 'finance.category'.tr(context);
     
-    List<DropdownMenuItem<String>> items = categories.map((cat) => DropdownMenuItem(
-      value: cat['constants_id'].toString(), 
-      child: Text(cat['category_name'] ?? 'No Category', style: const TextStyle(fontSize: 14))
-    )).toList();
-
-    String? effectiveCategoryId = _selectedCategoryId;
-    if (effectiveCategoryId != null && !items.any((item) => item.value == effectiveCategoryId)) {
-      effectiveCategoryId = null;
+    // Find current selected name
+    String selectedName = '';
+    if (_selectedCategoryId != null) {
+      final cat = categories.firstWhere(
+        (c) => c['constants_id'].toString() == _selectedCategoryId,
+        orElse: () => null,
+      );
+      selectedName = cat?['category_name'] ?? '';
     }
 
-    if (items.isEmpty) {
-      items = [
-        DropdownMenuItem(
-          value: '', 
-          enabled: false,
-          child: Text('finance.no_categories'.tr(context), style: const TextStyle(fontSize: 14, color: Colors.grey))
-        )
-      ];
-    }
-
-    return _buildDropdown(
-      'finance.category'.tr(context), 
-      effectiveCategoryId, 
-      items, 
-      (val) => setState(() => _selectedCategoryId = val)
+    return _buildSearchField(
+      label: label,
+      value: selectedName,
+      onTap: () {
+        final options = categories.map((cat) => {
+          'id': cat['constants_id'].toString(),
+          'name': (cat['category_name'] ?? 'No Category').toString(),
+        }).toList();
+        
+        _showSearchOptions(
+          title: label,
+          options: options,
+          onSelected: (id) => setState(() => _selectedCategoryId = id),
+        );
+      },
     );
   }
 
   Widget _buildPayerDropdown() {
-    List<DropdownMenuItem<String>> items = _employees.map((emp) => DropdownMenuItem(
-      value: emp['user_id'].toString(), 
-      child: Text('${emp['first_name']} ${emp['last_name']}', style: const TextStyle(fontSize: 14))
-    )).toList();
-
-    String? effectivePayerId = _selectedPayerId;
-    if (effectivePayerId != null && !items.any((item) => item.value == effectivePayerId)) {
-      // Data employees sudah load tapi id tidak cocok — pertahankan saja
-      // Tidak reset ke null agar default user tetap valid ketika data belum ada
+    final String label = 'finance.payer'.tr(context);
+    
+    // Find current selected name
+    String selectedName = '';
+    if (_selectedPayerId != null) {
+      final emp = _employees.firstWhere(
+        (e) => e['user_id'].toString() == _selectedPayerId,
+        orElse: () => null,
+      );
+      if (emp != null) {
+        selectedName = '${emp['first_name']} ${emp['last_name']}';
+      }
     }
 
-    if (items.isEmpty) {
-      items = [
-        DropdownMenuItem(
-          value: '', 
-          enabled: false,
-          child: Text('finance.no_employees'.tr(context), style: const TextStyle(fontSize: 14, color: Colors.grey))
-        )
-      ];
-    }
+    return _buildSearchField(
+      label: label,
+      value: selectedName,
+      onTap: () {
+        final options = _employees.map((emp) => {
+          'id': emp['user_id'].toString(),
+          'name': '${emp['first_name']} ${emp['last_name']}'.toString(),
+        }).toList();
+        
+        _showSearchOptions(
+          title: label,
+          options: options,
+          onSelected: (id) => setState(() => _selectedPayerId = id),
+        );
+      },
+    );
+  }
 
-    return _buildDropdown(
-      'finance.payer'.tr(context), 
-      items.any((item) => item.value == effectivePayerId) ? effectivePayerId : null, 
-      items, 
-      (val) => setState(() => _selectedPayerId = val)
+  Widget _buildSearchField({required String label, required String value, required VoidCallback onTap}) {
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: onTap,
+      child: IgnorePointer(
+        child: TextFormField(
+          controller: TextEditingController(text: value),
+          decoration: InputDecoration(
+            labelText: '$label *',
+            labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
+            prefixIcon: Icon(Icons.search_rounded, size: 18, color: const Color(0xFF7E57C2)),
+            suffixIcon: const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF7E57C2)),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.grey[200]!)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.grey[200]!)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 2)),
+            filled: true,
+            fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          ),
+          validator: (val) => (value.isEmpty) ? 'main.required'.tr(context) : null,
+        ),
+      ),
+    );
+  }
+
+  void _showSearchOptions({required String title, required List<Map<String, String>> options, required Function(String) onSelected}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _SearchPickerModal(
+        title: title,
+        options: options,
+        onSelected: onSelected,
+      ),
     );
   }
 
@@ -706,6 +748,98 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
                     ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SearchPickerModal extends StatefulWidget {
+  final String title;
+  final List<Map<String, String>> options;
+  final Function(String) onSelected;
+
+  const _SearchPickerModal({required this.title, required this.options, required this.onSelected});
+
+  @override
+  State<_SearchPickerModal> createState() => _SearchPickerModalState();
+}
+
+class _SearchPickerModalState extends State<_SearchPickerModal> {
+  String _searchQuery = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = widget.options.where((opt) => opt['name']!.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                Icon(Icons.search_rounded, color: const Color(0xFF7E57C2), size: 28),
+                const SizedBox(width: 12),
+                Text(widget.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const Spacer(),
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: TextField(
+              autofocus: true,
+              onChanged: (val) => setState(() => _searchQuery = val),
+              decoration: InputDecoration(
+                hintText: 'Search...',
+                prefixIcon: const Icon(Icons.filter_list_rounded),
+                filled: true,
+                fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: filtered.isEmpty
+                ? Center(child: Text('No results found', style: TextStyle(color: Colors.grey[500])))
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final item = filtered[index];
+                      return Card(
+                        elevation: 0,
+                        color: Colors.transparent,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child: ListTile(
+                          onTap: () {
+                            widget.onSelected(item['id']!);
+                            Navigator.pop(context);
+                          },
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(color: const Color(0xFF7E57C2).withOpacity(0.1), shape: BoxShape.circle),
+                            child: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF7E57C2), size: 20),
+                          ),
+                          title: Text(item['name']!, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );

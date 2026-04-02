@@ -888,7 +888,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(
         userData: widget.userData,
-        title: 'finance.title'.tr(context),
+        title: 'My ISN'
       ),
       endDrawer: SideDrawer(userData: widget.userData, activePage: 'finance'),
       body: _isLoading 
@@ -1034,7 +1034,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                       Container(width: 1, height: 30, color: Colors.grey[200]),
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
+                          padding: const EdgeInsets.only(left: 14),
                           child: _buildReportStat(
                             _monthlyExpense,
                             'finance.expense'.tr(context),
@@ -1058,26 +1058,35 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey[500],
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             _buildThisMonthBadge(),
           ],
         ),
         const SizedBox(height: 4),
-        Text(
-          'Rp ${_formatCurrency(amount)}',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: isIncome ? Colors.green[600] : Colors.red[600],
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Rp ${_formatCurrency(amount)}',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: isIncome ? Colors.green[600] : Colors.red[600],
+            ),
           ),
         ),
       ],

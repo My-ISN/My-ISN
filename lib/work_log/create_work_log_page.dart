@@ -25,13 +25,13 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
   DateTime _selectedDate = DateTime.now();
   final List<TextEditingController> _itemControllers = [TextEditingController()];
   bool _isSaving = false;
-  List<dynamic> _jobDesks = [];
-  bool _isLoadingJobs = false;
+  List<dynamic> _todoItems = [];
+  bool _isLoadingTodos = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchJobDesks();
+    _fetchTodos();
     if (widget.initialData != null) {
       final estimate = widget.initialData!['estimate'];
       final items = widget.initialData!['items'] as List?;
@@ -53,24 +53,25 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
     }
   }
 
-  Future<void> _fetchJobDesks() async {
-    setState(() => _isLoadingJobs = true);
+  Future<void> _fetchTodos() async {
+    setState(() => _isLoadingTodos = true);
     try {
+      final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
       final response = await http.get(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_job_desk_list?designation_id=${widget.userData['designation_id']}'),
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_todos?user_id=$userId'),
       );
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
         if (result['status'] == true) {
           setState(() {
-            _jobDesks = result['data'];
+            _todoItems = result['data'];
           });
         }
       }
     } catch (e) {
-      debugPrint('Error fetching job desks: $e');
+      debugPrint('Error fetching todos: $e');
     } finally {
-      if (mounted) setState(() => _isLoadingJobs = false);
+      if (mounted) setState(() => _isLoadingTodos = false);
     }
   }
 
@@ -137,29 +138,28 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
     }
   }
 
-  void _showJobDeskPicker() {
+  void _showTodoPicker() {
     showModalBottomSheet(
       context: context,
-
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
-        return _JobDeskPicker(
-          jobDesks: _jobDesks,
-          onSelect: (jobName) {
-
+        return _TodoPicker(
+          todoItems: _todoItems,
+          isLoading: _isLoadingTodos,
+          onSelect: (todoName) {
             setState(() {
               // Add to the last empty controller or add a new one
               bool added = false;
               for (var controller in _itemControllers) {
                 if (controller.text.isEmpty) {
-                  controller.text = jobName;
+                  controller.text = todoName;
                   added = true;
                   break;
                 }
               }
               if (!added) {
-                _itemControllers.add(TextEditingController(text: jobName));
+                _itemControllers.add(TextEditingController(text: todoName));
               }
             });
             Navigator.pop(context);
@@ -250,8 +250,8 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 TextButton.icon(
-                  onPressed: _showJobDeskPicker,
-                  icon: const Icon(Icons.list_alt, size: 18),
+                  onPressed: _showTodoPicker,
+                  icon: const Icon(Icons.playlist_add_check_rounded, size: 20),
                   label: Text('work_log.from_job_desk'.tr(context)),
                   style: TextButton.styleFrom(foregroundColor: _primaryColor),
                 ),
@@ -330,24 +330,28 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
   }
 }
 
-class _JobDeskPicker extends StatefulWidget {
-  final List<dynamic> jobDesks;
+class _TodoPicker extends StatefulWidget {
+  final List<dynamic> todoItems;
+  final bool isLoading;
   final Function(String) onSelect;
 
-  const _JobDeskPicker({required this.jobDesks, required this.onSelect});
-
+  const _TodoPicker({
+    required this.todoItems, 
+    required this.isLoading,
+    required this.onSelect,
+  });
 
   @override
-  State<_JobDeskPicker> createState() => _JobDeskPickerState();
+  State<_TodoPicker> createState() => _TodoPickerState();
 }
 
-class _JobDeskPickerState extends State<_JobDeskPicker> {
+class _TodoPickerState extends State<_TodoPicker> {
   String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
-    final filteredJobs = widget.jobDesks.where((job) {
-      final name = (job['event_title'] ?? '').toString().toLowerCase();
+    final filteredTodos = widget.todoItems.where((todo) {
+      final name = (todo['item_name'] ?? '').toString().toLowerCase();
       return name.contains(_searchQuery.toLowerCase());
     }).toList();
 
@@ -363,7 +367,6 @@ class _JobDeskPickerState extends State<_JobDeskPicker> {
               IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
             ],
           ),
-
           const SizedBox(height: 15),
           TextField(
             onChanged: (v) => setState(() => _searchQuery = v),
@@ -375,17 +378,42 @@ class _JobDeskPickerState extends State<_JobDeskPicker> {
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: widget.jobDesks.isEmpty
-                ? Center(child: Text('employees.no_employees'.tr(context))) // Reuse common label
-
-                : ListView.builder(
-                    itemCount: filteredJobs.length,
+            child: widget.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : widget.todoItems.isEmpty
+                    ? Center(child: Text('todolist.no_todos'.tr(context))) 
+                    : ListView.builder(
+                    itemCount: filteredTodos.length,
                     itemBuilder: (context, index) {
-                      final job = filteredJobs[index];
+                      final todo = filteredTodos[index];
+                      final bool isDone = todo['status'] == 1 || todo['status'] == '1';
+                      
                       return ListTile(
-                        leading: const Icon(Icons.work_outline),
-                        title: Text(job['event_title'] ?? '-'),
-                        onTap: () => widget.onSelect(job['event_title']),
+                        leading: Icon(
+                          isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+                          color: isDone ? Colors.green : Colors.grey,
+                        ),
+                        title: Text(
+                          todo['item_name'] ?? '-',
+                          style: TextStyle(
+                            decoration: isDone ? TextDecoration.lineThrough : null,
+                            color: isDone ? Colors.grey : null,
+                          ),
+                        ),
+                        trailing: isDone 
+                          ? Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'work_log.status_completed'.tr(context),
+                                style: const TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                            )
+                          : null,
+                        onTap: () => widget.onSelect(todo['item_name'] ?? ''),
                       );
                     },
                   ),

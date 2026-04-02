@@ -809,11 +809,12 @@ class _TodoListPageState extends State<TodoListPage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: _primaryColor.withOpacity(0.1),
+            color: _primaryColor.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -822,13 +823,23 @@ class _TodoListPageState extends State<TodoListPage> {
             onTap: () => setState(() => _isStatsExpanded = !_isStatsExpanded),
             borderRadius: BorderRadius.circular(24),
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'todo_list.stats_title'.tr(context),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'todo_list.stats_title'.tr(context),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'todo_list.general_accumulation'.tr(context),
+                        style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ],
                   ),
                   Container(
                     padding: const EdgeInsets.all(8),
@@ -851,23 +862,20 @@ class _TodoListPageState extends State<TodoListPage> {
             curve: Curves.easeInOut,
             child: _isStatsExpanded
                 ? Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     child: Row(
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildStatRow('main.total'.tr(context), _totalCount.toString(), Colors.blue),
-                              const SizedBox(height: 16),
-                              _buildStatRow('todo_list.completed_today'.tr(context), _completedTodayCount.toString(), Colors.deepPurple),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Expanded(child: _buildStatRow('todo_list.complete'.tr(context), _completedCount.toString(), Colors.green)),
-                                  Expanded(child: _buildStatRow('todo_list.pending'.tr(context), _pendingCount.toString(), Colors.orange)),
-                                ],
-                              ),
+                              _buildStatMiniRow('main.total'.tr(context), _totalCount.toString(), Colors.blue),
+                              const SizedBox(height: 12),
+                              _buildStatMiniRow('todo_list.completed_today'.tr(context), _completedTodayCount.toString(), Colors.purple),
+                              const SizedBox(height: 12),
+                              _buildStatMiniRow('todo_list.complete'.tr(context), _completedCount.toString(), Colors.green),
+                              const SizedBox(height: 12),
+                              _buildStatMiniRow('todo_list.pending'.tr(context), _pendingCount.toString(), Colors.orange),
                             ],
                           ),
                         ),
@@ -876,8 +884,8 @@ class _TodoListPageState extends State<TodoListPage> {
                           alignment: Alignment.center,
                           children: [
                             SizedBox(
-                              width: 85,
-                              height: 85,
+                              width: 90,
+                              height: 90,
                               child: CircularProgressIndicator(
                                 value: progress,
                                 strokeWidth: 10,
@@ -886,9 +894,18 @@ class _TodoListPageState extends State<TodoListPage> {
                                 strokeCap: StrokeCap.round,
                               ),
                             ),
-                            Text(
-                              '${(progress * 100).toInt()}%',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${(progress * 100).toInt()}%',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                ),
+                                Text(
+                                  'todo_list.completed'.tr(context).toUpperCase(),
+                                  style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.grey),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -902,13 +919,24 @@ class _TodoListPageState extends State<TodoListPage> {
     );
   }
 
-  Widget _buildStatRow(String label, String value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStatMiniRow(String label, String value, Color color) {
+    return Row(
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
       ],
     );
   }
