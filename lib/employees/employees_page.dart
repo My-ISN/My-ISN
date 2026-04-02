@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/shimmer_loading.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 import 'employee_detail_page.dart';
@@ -261,12 +262,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
   }
 
   Widget _buildLoadingState() {
-    return const Padding(
-      padding: EdgeInsets.only(top: 80),
-      child: Center(
-        child: CircularProgressIndicator(strokeWidth: 3),
-      ),
-    );
+    return const ShimmerList(itemCount: 5);
   }
 
   Widget _buildEmptyState() {

@@ -178,7 +178,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  ValueListenableBuilder<double>(
+                    valueListenable: ConnectivityStatus.bottomPadding,
+                    builder: (context, padding, _) => SizedBox(
+                      height: padding + 20,
+                    ),
+                  ),
                 ],
               ),
             ),

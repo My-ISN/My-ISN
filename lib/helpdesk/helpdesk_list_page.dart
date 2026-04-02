@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/shimmer_loading.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
@@ -357,7 +358,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
 
               if (_isLoading && _allTickets.isEmpty)
                 const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
+                  child: ShimmerList(itemCount: 5),
                 )
               else if (_allTickets.isEmpty)
                 SliverFillRemaining(
@@ -449,7 +450,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -474,9 +475,14 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Ticket Summary',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 18, 
+                          letterSpacing: -0.5,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -508,10 +514,24 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     child: _isStatsLoading 
-                      ? const Center(child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: CircularProgressIndicator(),
-                        ))
+                      ? ShimmerLoading(
+                          child: Column(
+                            children: List.generate(
+                              4,
+                              (index) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: Container(
+                                  height: 16,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
                       : Row(
                           children: [
                             Expanded(
@@ -538,7 +558,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                                   child: CircularProgressIndicator(
                                     value: progress,
                                     strokeWidth: 10,
-                                    backgroundColor: Colors.grey[100],
+                                    backgroundColor: Theme.of(context).dividerColor.withOpacity(0.1),
                                     valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
                                     strokeCap: StrokeCap.round,
                                   ),
@@ -548,9 +568,20 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                                   children: [
                                     Text(
                                       '${(progress * 100).toInt()}%',
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold, 
+                                        fontSize: 18,
+                                        color: Theme.of(context).textTheme.titleLarge?.color,
+                                      ),
                                     ),
-                                    const Text('CLOSED', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.grey)),
+                                    Text(
+                                      'CLOSED', 
+                                      style: TextStyle(
+                                        fontSize: 8, 
+                                        fontWeight: FontWeight.bold, 
+                                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -574,9 +605,23 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
-        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500)),
+        Text(
+          label, 
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7), 
+            fontSize: 13, 
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         const Spacer(),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(
+          value, 
+          style: TextStyle(
+            fontWeight: FontWeight.bold, 
+            fontSize: 14,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
+        ),
       ],
     );
   }
@@ -623,7 +668,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
       height: 38,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
@@ -700,8 +745,8 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
     return Material(
       color: onPressed == null 
-          ? Colors.grey[200]
-          : Colors.white,
+          ? (Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200])
+          : Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,
@@ -730,7 +775,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -746,7 +791,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
         onChanged: _runFilter,
         decoration: InputDecoration(
           hintText: 'Search subject or ticket code...',
-          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+          hintStyle: TextStyle(color: Theme.of(context).hintColor, fontSize: 14),
           prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF7E57C2)),
           suffixIcon: _searchController.text.isNotEmpty 
             ? IconButton(
@@ -763,6 +808,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
           ),
           contentPadding: const EdgeInsets.symmetric(vertical: 18),
         ),
+        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
       ),
     );
   }
@@ -794,7 +840,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.grey.withOpacity(0.1)),
           ),
@@ -829,7 +875,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                   Text(
                     ticket['ticket_code'] ?? '',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),

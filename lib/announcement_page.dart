@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'widgets/connectivity_wrapper.dart';
 import 'widgets/custom_app_bar.dart';
+import 'widgets/shimmer_loading.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'localization/app_localizations.dart';
@@ -346,24 +347,78 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             icon: const Icon(Icons.done_all, color: Color(0xFF7E57C2)),
             tooltip: 'announcement.mark_all_tooltip'.tr(context),
             onPressed: () {
-              showDialog(
+              showModalBottomSheet(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('announcement.mark_all'.tr(context)),
-                  content: Text('announcement.mark_all_desc'.tr(context)),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('announcement.cancel'.tr(context)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _markAllAsRead();
-                      },
-                      child: Text('announcement.yes'.tr(context)),
-                    ),
-                  ],
+                backgroundColor: Colors.transparent,
+                builder: (context) => Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const Icon(Icons.done_all_rounded, color: Color(0xFF7E57C2), size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        'announcement.mark_all'.tr(context),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'announcement.mark_all_desc'.tr(context),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                      ),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: Text(
+                                'announcement.cancel'.tr(context),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _markAllAsRead();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF7E57C2),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                elevation: 0,
+                              ),
+                              child: Text('announcement.yes'.tr(context)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               );
             },
@@ -372,24 +427,78 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             icon: const Icon(Icons.delete_sweep, color: Colors.redAccent),
             tooltip: 'announcement.clear_seen_tooltip'.tr(context),
             onPressed: () {
-              showDialog(
+              showModalBottomSheet(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('announcement.delete_seen'.tr(context)),
-                  content: Text('announcement.delete_seen_desc'.tr(context)),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('announcement.cancel'.tr(context)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _clearSeen();
-                      },
-                      child: Text('announcement.delete'.tr(context)),
-                    ),
-                  ],
+                backgroundColor: Colors.transparent,
+                builder: (context) => Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const Icon(Icons.delete_sweep_rounded, color: Colors.red, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        'announcement.delete_seen'.tr(context),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'announcement.delete_seen_desc'.tr(context),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                      ),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: Text(
+                                'announcement.cancel'.tr(context),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _clearSeen();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                elevation: 0,
+                              ),
+                              child: Text('announcement.delete'.tr(context)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               );
             },
@@ -400,7 +509,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const ShimmerList()
           : _announcements.isEmpty
           ? Center(
               child: Column(

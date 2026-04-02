@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/searchable_dropdown.dart';
 
 class ProfileEditPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -787,46 +788,13 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     required Map<String, String> items,
     required void Function(String?) onChanged,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: items.containsKey(value) ? value : items.keys.first,
-          items: items.entries.map((e) {
-            return DropdownMenuItem(value: e.key, child: Text(e.value));
-          }).toList(),
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Theme.of(context).cardColor,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF7E57C2)),
-            ),
-          ),
-        ),
-      ],
+    final String selectedName = items[value] ?? '';
+
+    return SearchableDropdown(
+      label: label,
+      value: selectedName,
+      options: items.entries.map((e) => {'id': e.key, 'name': e.value}).toList(),
+      onSelected: (id) => onChanged(id),
     );
   }
 
@@ -839,62 +807,18 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     bool enabled = true,
     String? hint,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: items.any((e) => e['name'] == currentValue)
-              ? currentValue
-              : null,
-          items: items.map((e) {
-            return DropdownMenuItem<String>(
-              value: e['name'] as String,
-              onTap: () {
-                onChanged(e['id'].toString(), e['name'] as String);
-              },
-              child: Text(e['name'] as String),
-            );
-          }).toList(),
-          onChanged: enabled ? (val) {} : null,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: enabled
-                ? Theme.of(context).cardColor
-                : (Theme.of(context).brightness == Brightness.light
-                      ? Colors.grey[100]
-                      : Colors.white10),
-            hintText: isLoading
-                ? 'profile.loading'.tr(context)
-                : (hint ??
-                      'profile.select_item'.tr(context, args: {'item': label})),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF7E57C2)),
-            ),
-          ),
-        ),
-      ],
+    return SearchableDropdown(
+      label: label,
+      value: currentValue,
+      placeholder: isLoading ? 'profile.loading'.tr(context) : (hint ?? 'profile.select_item'.tr(context, args: {'item': label})),
+      options: items.map((e) => {
+        'id': e['id'].toString(),
+        'name': e['name'] as String,
+      }).toList(),
+      onSelected: (id) {
+        final item = items.firstWhere((e) => e['id'].toString() == id);
+        onChanged(id, item['name'] as String);
+      },
     );
   }
 }

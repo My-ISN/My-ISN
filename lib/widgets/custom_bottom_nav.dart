@@ -85,13 +85,6 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
       },
     ];
 
-    // Calculate dynamic widths for smooth animation
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double barPadding = 32 + 24; // Margin horizontal (16*2) + Inner padding (12*2)
-    final int itemCount = items.length;
-    final double totalMargin = itemCount * 4; // Margin horizontal (2*2) per item
-    final double availableWidth = screenWidth - barPadding - totalMargin;
-    
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 20), // Bottom margin for floating look
       child: Container(
@@ -109,62 +102,70 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
           ],
           border: isDark ? Border.all(color: Colors.white10) : null,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(itemCount, (index) {
-            final bool isActive = widget.currentIndex == index;
-            final item = items[index];
-            
-            // Dynamic width calculation: Active item takes ~45%, others share the rest
-            final double activeWidth = availableWidth * 0.45;
-            final double inactiveWidth = (availableWidth - activeWidth) / (itemCount - 1);
-            final double itemWidth = isActive ? activeWidth : inactiveWidth;
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final int itemCount = items.length;
+            final double totalMargin = itemCount * 4; // Margin horizontal (2*2) per item
+            final double availableWidth = constraints.maxWidth - totalMargin;
 
-            return GestureDetector(
-              onTap: () => widget.onTap(index),
-              behavior: HitTestBehavior.opaque,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 400), // Slightly slower for better feel
-                curve: Curves.easeInOutCirc, // Smoother curve for sliding
-                width: itemWidth,
-                height: 56, // Fixed height for the pill
-                margin: const EdgeInsets.symmetric(horizontal: 2),
-                padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 0),
-                decoration: BoxDecoration(
-                  color: isActive ? primaryColor : Colors.transparent,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      item['icon'],
-                      color: isActive 
-                          ? Colors.white 
-                          : (isDark ? Colors.grey[400] : Colors.grey[600]),
-                      size: 24,
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(itemCount, (index) {
+                final bool isActive = widget.currentIndex == index;
+                final item = items[index];
+                
+                // Dynamic width calculation: Active item takes ~45%, others share the rest
+                final double activeWidth = availableWidth * 0.45;
+                final double inactiveWidth = (availableWidth - activeWidth) / (itemCount - 1);
+                final double itemWidth = isActive ? activeWidth : inactiveWidth;
+
+                return GestureDetector(
+                  onTap: () => widget.onTap(index),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOutCirc,
+                    width: itemWidth,
+                    height: 56,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 0),
+                    decoration: BoxDecoration(
+                      color: isActive ? primaryColor : Colors.transparent,
+                      borderRadius: BorderRadius.circular(28),
                     ),
-                    if (isActive) ...[
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          item['label'],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.clip, // Avoid ellipsis during animation if possible
-                          softWrap: false,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          item['icon'],
+                          color: isActive 
+                              ? Colors.white 
+                              : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                          size: 24,
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+                        if (isActive) ...[
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              item['label'],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.clip,
+                              softWrap: false,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }),
             );
-          }),
+          },
         ),
       ),
     );

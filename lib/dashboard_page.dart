@@ -5,6 +5,7 @@ import 'widgets/connectivity_wrapper.dart';
 
 import 'widgets/custom_bottom_nav.dart';
 import 'widgets/custom_app_bar.dart';
+import 'widgets/shimmer_loading.dart';
 import 'widgets/side_drawer.dart';
 import 'profile/profile_page.dart';
 import 'attendance_page.dart';
@@ -26,7 +27,8 @@ import 'widgets/on_progress_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
-  const DashboardPage({super.key, required this.userData});
+  final int? initialIndex;
+  const DashboardPage({super.key, required this.userData, this.initialIndex});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -42,6 +44,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex ?? 0;
     _fetchDashboardData();
     _checkAppUpdate();
   }
@@ -540,6 +543,7 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     return Scaffold(
+      extendBody: true,
       appBar: CustomAppBar(userData: user, showBackButton: false),
       body: IndexedStack(index: _currentIndex, children: pages),
       endDrawer: SideDrawer(
@@ -557,14 +561,23 @@ class _DashboardPageState extends State<DashboardPage> {
           });
         },
       ),
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: _currentIndex,
-        userData: user,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.transparent,
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+        ),
+        child: CustomBottomNav(
+          currentIndex: _currentIndex,
+          userData: user,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+        ),
       ),
     );
   }
@@ -624,7 +637,114 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildHomeContent() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_isLoading) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: ShimmerLoading(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile Shimmer
+              Container(
+                height: 92,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Welcome Card Shimmer
+              Container(
+                height: 240,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Stats Row 1 Shimmer
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Stats Row 2 Shimmer
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              // Quick Menu Title Shimmer
+              Container(
+                height: 20,
+                width: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Quick Menu Grid Shimmer
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: 4,
+                itemBuilder: (context, index) => Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     final user = _dashboardData['user'] ?? widget.userData;
     if (user['user_type'] == 'customer' ||
@@ -1149,7 +1269,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 },
               ),
             ]),
-            const SizedBox(height: 32),
+            ValueListenableBuilder<double>(
+              valueListenable: ConnectivityStatus.bottomPadding,
+              builder: (context, padding, _) => SizedBox(
+                height: padding - 10,
+              ),
+            ),
           ],
         ),
       ),
@@ -1409,7 +1534,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
             // Products Available
             _buildProductList(products),
-            const SizedBox(height: 32),
+            ValueListenableBuilder<double>(
+              valueListenable: ConnectivityStatus.bottomPadding,
+              builder: (context, padding, _) => SizedBox(
+                height: padding - 10,
+              ),
+            ),
           ],
         ),
       ),

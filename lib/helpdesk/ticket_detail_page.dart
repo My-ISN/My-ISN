@@ -223,8 +223,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.1))),
+        color: Theme.of(context).cardColor,
+        border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,14 +242,14 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const Spacer(),
               Text(
                 _ticketData['ticket_code'] ?? '',
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
@@ -284,18 +284,18 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey[600]),
+              Icon(Icons.calendar_today_outlined, size: 14, color: Theme.of(context).hintColor),
               const SizedBox(width: 4),
               Text(
                 _ticketData['created_at'] ?? '',
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: Theme.of(context).hintColor, fontSize: 12),
               ),
               const SizedBox(width: 16),
-              Icon(Icons.flag_outlined, size: 14, color: Colors.grey[600]),
+              Icon(Icons.flag_outlined, size: 14, color: Theme.of(context).hintColor),
               const SizedBox(width: 4),
               Text(
                 _getPriorityText(context, _ticketData['ticket_priority'].toString()),
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: Theme.of(context).hintColor, fontSize: 12),
               ),
             ],
           ),
@@ -331,7 +331,9 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isMe ? const Color(0xFF7E57C2) : Colors.grey[200],
+                      color: isMe 
+                          ? const Color(0xFF7E57C2) 
+                          : (Theme.of(context).brightness == Brightness.dark ? Colors.white10 : Colors.grey[200]),
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(16),
                         topRight: const Radius.circular(16),
@@ -341,7 +343,11 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     ),
                     child: Text(
                       reply['reply_text'] ?? '',
-                      style: TextStyle(color: isMe ? Colors.white : Colors.black87),
+                      style: TextStyle(
+                        color: isMe 
+                            ? Colors.white 
+                            : Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                     ),
                   ),
                 ),
@@ -363,7 +369,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     ),
                   Text(
                     reply['created_at'] ?? '',
-                    style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                    style: TextStyle(fontSize: 10, color: Theme.of(context).hintColor),
                   ),
                 ],
               ),
@@ -393,8 +399,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+        color: Theme.of(context).cardColor,
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
       ),
       child: Row(
         children: [
@@ -403,9 +409,9 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               controller: _replyController,
               decoration: InputDecoration(
                 hintText: AppLocalizations.of(context)!.translate('helpdesk.reply'),
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintStyle: TextStyle(color: Theme.of(context).hintColor),
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white10 : Colors.grey[100],
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),

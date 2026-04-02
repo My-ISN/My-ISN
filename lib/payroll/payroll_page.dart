@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../localization/app_localizations.dart';
+import '../widgets/searchable_dropdown.dart';
+import '../widgets/shimmer_loading.dart';
+import '../widgets/connectivity_wrapper.dart';
 
 class PayrollPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -194,15 +197,106 @@ class _PayrollPageState extends State<PayrollPage>
   Future<void> _executePayment() async {
     if (_selectedStaffId == null || _selectedAccountId == null) return;
 
-    final confirm = await showDialog<bool>(
+    final selectedStaffName = _staffList.firstWhere((s) => s['user_id'].toString() == _selectedStaffId.toString())['full_name'] ?? '';
+    final selectedAccountName = _accounts.firstWhere((a) => a['account_id'].toString() == _selectedAccountId.toString())['account_name'] ?? '';
+    final monthStr = "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
+    final netSalary = _previewData?['breakdown']['net_salary'] ?? 0;
+
+    final confirm = await showModalBottomSheet<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('payroll.confirm_payment'.tr(context)),
-        content: Text('payroll.confirm_payment_desc'.tr(context).replaceFirst('{name}', _staffList.firstWhere((s) => s['user_id'] == _selectedStaffId)['full_name'])),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('main.cancel'.tr(context))),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('main.save'.tr(context))),
-        ],
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF7E57C2), size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'payroll.confirm_payment'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF7E57C2).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'IDR ${_formatCurrency(netSalary)}',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF7E57C2),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'payroll.net_salary'.tr(context),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildDetailRow(Icons.person_outline, 'Staff', selectedStaffName),
+            const SizedBox(height: 12),
+            _buildDetailRow(Icons.calendar_today_outlined, 'Bulan', monthStr),
+            const SizedBox(height: 12),
+            _buildDetailRow(Icons.account_balance_outlined, 'Sumber', selectedAccountName),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7E57C2),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('main.save'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
 
@@ -225,25 +319,57 @@ class _PayrollPageState extends State<PayrollPage>
       final data = json.decode(response.body);
       if (data['status'] == true && mounted) {
         // Show success dialog for better feedback
-        await showDialog(
+        await showModalBottomSheet(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Row(
+          backgroundColor: Colors.transparent,
+          builder: (context) => Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.check_circle, color: Colors.green),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text('payroll.payment_success'.tr(context)),
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
+                const Icon(Icons.check_circle_rounded, color: Colors.green, size: 64),
+                const SizedBox(height: 20),
+                Text(
+                  'payroll.payment_success'.tr(context),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'payroll.payment_success_desc'.tr(context),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7E57C2),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: const Text('OK'),
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
-            content: Text('payroll.payment_success_desc'.tr(context)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
           ),
         );
 
@@ -475,19 +601,44 @@ class _PayrollPageState extends State<PayrollPage>
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildReportStat(
-                  'IDR ${_formatCurrency(_payrollStats?['total'])}',
-                  'dashboard.total'.tr(context),
+            if (_payrollStats == null)
+              ShimmerLoading(
+                child: Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ShimmerSkeleton(height: 18, width: 120),
+                        const SizedBox(height: 6),
+                        const ShimmerSkeleton(height: 12, width: 80),
+                      ],
+                    ),
+                    const SizedBox(width: 32),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ShimmerSkeleton(height: 18, width: 120),
+                        const SizedBox(height: 6),
+                        const ShimmerSkeleton(height: 12, width: 80),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 32),
-                _buildReportStat(
-                  'IDR ${_formatCurrency(_payrollStats?['this_month'])}',
-                  'dashboard.this_month'.tr(context),
-                ),
-              ],
-            ),
+              )
+            else
+              Row(
+                children: [
+                  _buildReportStat(
+                    'IDR ${_formatCurrency(_payrollStats?['total'])}',
+                    'dashboard.total'.tr(context),
+                  ),
+                  const SizedBox(width: 32),
+                  _buildReportStat(
+                    'IDR ${_formatCurrency(_payrollStats?['this_month'])}',
+                    'dashboard.this_month'.tr(context),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
@@ -512,7 +663,7 @@ class _PayrollPageState extends State<PayrollPage>
   }
 
   Widget _buildHistoryTab() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_isLoading) return const ShimmerList(padding: EdgeInsets.all(20));
     if (_history.isEmpty) {
       return _buildEmptyState(
         icon: Icons.history_rounded,
@@ -526,8 +677,16 @@ class _PayrollPageState extends State<PayrollPage>
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
-        itemCount: _history.length,
+        itemCount: _history.length + 1,
         itemBuilder: (context, index) {
+          if (index == _history.length) {
+            return ValueListenableBuilder<double>(
+              valueListenable: ConnectivityStatus.bottomPadding,
+              builder: (context, padding, _) => SizedBox(
+                height: padding - 20,
+              ),
+            );
+          }
           final item = _history[index];
           return Container(
             margin: const EdgeInsets.only(bottom: 16),
@@ -635,6 +794,12 @@ class _PayrollPageState extends State<PayrollPage>
                   ),
                 ),
               ),
+            ValueListenableBuilder<double>(
+              valueListenable: ConnectivityStatus.bottomPadding,
+              builder: (context, padding, _) => SizedBox(
+                height: padding - 20,
+              ),
+            ),
           ],
         ),
       ),
@@ -669,22 +834,20 @@ class _PayrollPageState extends State<PayrollPage>
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Text('payroll.no_staff_found'.tr(context), style: const TextStyle(color: Colors.orange, fontSize: 12)),
             ),
-          DropdownButtonFormField<String>(
-            isExpanded: true,
-            value: _selectedStaffId,
-            hint: Text(_isStaffLoading ? 'payroll.loading_staff'.tr(context) : 'payroll.select_staff'.tr(context)),
-            items: _staffList.map((s) => DropdownMenuItem(
-              value: s['user_id'].toString(),
-              child: Text(s['full_name']),
-            )).toList(),
-            onChanged: (val) {
+          SearchableDropdown(
+            label: 'payroll.select_staff'.tr(context),
+            value: _selectedStaffId != null ? (_staffList.firstWhere((s) => s['user_id'].toString() == _selectedStaffId, orElse: () => {'full_name': ''})['full_name'] ?? '') : '',
+            options: _staffList.map((s) => {
+              'id': s['user_id'].toString(),
+              'name': s['full_name'].toString(),
+            }).toList(),
+            onSelected: (val) {
               setState(() {
                 _selectedStaffId = val;
                 _previewData = null;
               });
               _fetchPreview();
             },
-            decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12)),
           ),
           const SizedBox(height: 20),
           Text('payroll.select_month'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -782,38 +945,14 @@ class _PayrollPageState extends State<PayrollPage>
         children: [
           Text('payroll.source_account'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            isExpanded: true,
-            value: _selectedAccountId,
-            hint: Text('payroll.select_source_account'.tr(context), style: TextStyle(color: Colors.grey[400], fontSize: 14)),
-            items: _accounts.map((a) {
-              return DropdownMenuItem(
-                value: a['account_id'].toString(),
-                child: Text(
-                  "${a['account_name']} (IDR ${_formatCurrency(a['account_balance'])})",
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14),
-                ),
-              );
+          SearchableDropdown(
+            label: 'payroll.source_account'.tr(context),
+            value: _selectedAccountId != null ? (_accounts.firstWhere((a) => a['account_id'].toString() == _selectedAccountId, orElse: () => {'account_name': ''})['account_name'] ?? '') : '',
+            options: _accounts.map((a) => {
+              'id': a['account_id'].toString(),
+              'name': "${a['account_name']} (IDR ${_formatCurrency(a['account_balance'])})",
             }).toList(),
-            onChanged: (val) => setState(() => _selectedAccountId = val),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.withOpacity(0.3)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: const Color(0xFF7E57C2).withOpacity(0.5)),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
+            onSelected: (val) => setState(() => _selectedAccountId = val),
           ),
         ],
       ),
@@ -1172,6 +1311,24 @@ class _PayrollPageState extends State<PayrollPage>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey),
+        const SizedBox(width: 12),
+        Text(label, style: const TextStyle(color: Colors.grey)),
+        const Spacer(),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      ],
     );
   }
 }

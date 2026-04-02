@@ -152,6 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
     bool? confirm = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
@@ -170,6 +171,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
+            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
             Text(
               'settings.delete_confirm_title'.tr(context),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -278,11 +281,12 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<bool?> _showRegisterDialog() {
     return showModalBottomSheet<bool>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -297,15 +301,28 @@ class _SettingsPageState extends State<SettingsPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
+            const Icon(
+              Icons.fingerprint_rounded,
+              size: 80,
+              color: Color(0xFF7E57C2),
+            ),
+            const SizedBox(height: 24),
             Text(
               'settings.register_title'.tr(context),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'settings.register_desc'.tr(context),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                fontSize: 15,
+              ),
             ),
             const SizedBox(height: 32),
             Row(
@@ -314,13 +331,18 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context, false),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: Text(
                       'settings.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -329,16 +351,26 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context, true),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: const Color(0xFF7E57C2),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                    child: Text('settings.continue_label'.tr(context)),
+                    child: Text(
+                      'settings.continue_label'.tr(context),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -529,21 +561,28 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Container(
                 width: 40,
                 height: 4,
+                margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                'settings.select_language'.tr(context),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            const Center(
+              child: Icon(
+                Icons.language_rounded,
+                size: 48,
+                color: Color(0xFF7E57C2),
               ),
             ),
             const SizedBox(height: 16),
+            Center(
+              child: Text(
+                'settings.select_language'.tr(context),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 24),
             RadioListTile<String>(
               title: const Text('Bahasa Indonesia'),
               value: 'id',
@@ -596,23 +635,35 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Container(
                 width: 40,
                 height: 4,
+                margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                'settings.theme'.tr(context),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Center(
+              child: Icon(
+                currentMode == ThemeMode.system
+                    ? Icons.brightness_4_rounded
+                    : currentMode == ThemeMode.light
+                        ? Icons.light_mode_rounded
+                        : Icons.dark_mode_rounded,
+                size: 48,
+                color: const Color(0xFF7E57C2),
               ),
             ),
             const SizedBox(height: 16),
+            Center(
+              child: Text(
+                'settings.theme'.tr(context),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 24),
             RadioListTile<ThemeMode>(
               title: Text('settings.theme_system'.tr(context)),
+              secondary: const Icon(Icons.brightness_4_rounded, color: Color(0xFF7E57C2)),
               value: ThemeMode.system,
               groupValue: currentMode,
               activeColor: Theme.of(context).colorScheme.primary,
@@ -625,6 +676,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             RadioListTile<ThemeMode>(
               title: Text('settings.theme_light'.tr(context)),
+              secondary: const Icon(Icons.light_mode_rounded, color: Color(0xFF7E57C2)),
               value: ThemeMode.light,
               groupValue: currentMode,
               activeColor: Theme.of(context).colorScheme.primary,
@@ -637,6 +689,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             RadioListTile<ThemeMode>(
               title: Text('settings.theme_dark'.tr(context)),
+              secondary: const Icon(Icons.dark_mode_rounded, color: Color(0xFF7E57C2)),
               value: ThemeMode.dark,
               groupValue: currentMode,
               activeColor: Theme.of(context).colorScheme.primary,
@@ -707,14 +760,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withOpacity(0.1),
+                        color: const Color(0xFF7E57C2).withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.language,
-                        color: Theme.of(context).colorScheme.primary,
+                      child: const Icon(
+                        Icons.language_rounded,
+                        color: Color(0xFF7E57C2),
                       ),
                     ),
                     title: Text('settings.language'.tr(context)),
@@ -759,14 +810,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withOpacity(0.1),
+                        color: const Color(0xFF7E57C2).withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.dark_mode_outlined,
-                        color: Theme.of(context).colorScheme.primary,
+                        Provider.of<ThemeProvider>(context).themeMode == ThemeMode.system
+                            ? Icons.brightness_4_rounded
+                            : Provider.of<ThemeProvider>(context).themeMode == ThemeMode.light
+                                ? Icons.light_mode_rounded
+                                : Icons.dark_mode_rounded,
+                        color: const Color(0xFF7E57C2),
                       ),
                     ),
                     title: Text('settings.theme'.tr(context)),

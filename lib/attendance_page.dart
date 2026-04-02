@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'localization/app_localizations.dart';
 import 'widgets/connectivity_wrapper.dart';
+import 'widgets/shimmer_loading.dart';
 
 class AttendancePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -106,7 +107,50 @@ class _AttendancePageState extends State<AttendancePage> {
           const SizedBox(height: 16),
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        ShimmerLoading(
+                          child: Container(
+                            height: 60,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        ShimmerLoading(
+                          child: Container(
+                            height: 300,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        ShimmerLoading(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              height: 24,
+                              width: 150,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const ShimmerCard(height: 140),
+                      ],
+                    ),
+                  )
                 : RefreshIndicator(
                     onRefresh: _fetchAttendance,
                     color: _primaryColor,
@@ -142,7 +186,12 @@ class _AttendancePageState extends State<AttendancePage> {
                           ),
                           const SizedBox(height: 16),
                           _buildSummaryCard(),
-                          const SizedBox(height: 100), // Space for bottom nav
+                          ValueListenableBuilder<double>(
+                            valueListenable: ConnectivityStatus.bottomPadding,
+                            builder: (context, padding, _) => SizedBox(
+                              height: padding,
+                            ),
+                          ),
                         ],
                       ),
                     ),

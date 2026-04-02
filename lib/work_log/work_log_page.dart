@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/shimmer_loading.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 import 'create_work_log_page.dart';
@@ -170,8 +171,20 @@ class _WorkLogPageState extends State<WorkLogPage> {
                 ),
               )
             else if (_isLoading && _logs.isEmpty)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: ShimmerLoading(
+                    child: Column(
+                      children: List.generate(
+                        5,
+                        (index) => const ShimmerCard(
+                          margin: EdgeInsets.only(bottom: 16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               )
             else if (_logs.isEmpty && !_isLoading)
               SliverFillRemaining(
@@ -478,9 +491,31 @@ class _WorkLogPageState extends State<WorkLogPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildStatRow('work_log.monthly_target'.tr(context), _targetItems.toString(), Colors.blue),
+                              _isStatsLoading
+                                  ? const ShimmerLoading(
+                                      child: ShimmerSkeleton(
+                                        height: 36,
+                                        width: 140,
+                                      ),
+                                    )
+                                  : _buildStatRow(
+                                      'work_log.monthly_target'.tr(context),
+                                      _targetItems.toString(),
+                                      Colors.blue,
+                                    ),
                               const SizedBox(height: 16),
-                              _buildStatRow('work_log.completed_items'.tr(context), _completedItems.toString(), Colors.green),
+                              _isStatsLoading
+                                  ? const ShimmerLoading(
+                                      child: ShimmerSkeleton(
+                                        height: 36,
+                                        width: 140,
+                                      ),
+                                    )
+                                  : _buildStatRow(
+                                      'work_log.completed_items'.tr(context),
+                                      _completedItems.toString(),
+                                      Colors.green,
+                                    ),
                             ],
                           ),
                         ),
@@ -491,18 +526,32 @@ class _WorkLogPageState extends State<WorkLogPage> {
                             SizedBox(
                               width: 85,
                               height: 85,
-                              child: CircularProgressIndicator(
-                                value: progress,
-                                strokeWidth: 10,
-                                backgroundColor: Colors.grey[100],
-                                valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
-                                strokeCap: StrokeCap.round,
+                              child: _isStatsLoading
+                                  ? const ShimmerLoading(
+                                      child: ShimmerSkeleton(
+                                        height: 85,
+                                        width: 85,
+                                        borderRadius: 50,
+                                      ),
+                                    )
+                                  : CircularProgressIndicator(
+                                      value: progress,
+                                      strokeWidth: 10,
+                                      backgroundColor: Colors.grey[100],
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        _primaryColor,
+                                      ),
+                                      strokeCap: StrokeCap.round,
+                                    ),
+                            ),
+                            if (!_isStatsLoading)
+                              Text(
+                                '${(progress * 100).toInt()}%',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '${(progress * 100).toInt()}%',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                            ),
                           ],
                         ),
                       ],

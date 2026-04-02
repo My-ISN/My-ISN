@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../login_page.dart';
 import '../settings_page.dart';
-import '../profile/profile_page.dart';
-import '../attendance_page.dart';
+import '../dashboard_page.dart';
 import '../rent_plan/staff/rent_plan_page.dart' as staff_rp;
 import '../rent_plan/client/rent_plan_page.dart' as client_rp;
 import '../todo_list/todo_list_page.dart';
@@ -61,7 +60,11 @@ class SideDrawer extends StatelessWidget {
                     if (onTabSelected != null) {
                       onTabSelected!(0);
                     } else if (activePage != 'dashboard') {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: 0)),
+                        (route) => false,
+                      );
                     }
                   },
                 ),
@@ -74,15 +77,22 @@ class SideDrawer extends StatelessWidget {
                     Navigator.pop(context);
                     if (onTabSelected != null) {
                       onTabSelected!(1);
-                    } else if (activePage != (isCustomer ? 'rent_plan' : 'attendance')) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => isCustomer
-                              ? client_rp.RentPlanPage(userData: userData)
-                              : AttendancePage(userData: userData),
-                        ),
-                      );
+                    } else if (isCustomer) {
+                      if (activePage != 'rent_plan') {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: 1)),
+                          (route) => false,
+                        );
+                      }
+                    } else {
+                      if (activePage != 'attendance') {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: 1)),
+                          (route) => false,
+                        );
+                      }
                     }
                   },
                 ),
@@ -97,7 +107,11 @@ class SideDrawer extends StatelessWidget {
                       if (onTabSelected != null) {
                         onTabSelected!(2);
                       } else if (activePage != 'payroll') {
-                        // Handled within dashboard tabs
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: 2)),
+                          (route) => false,
+                        );
                       }
                     },
                   ),
@@ -108,14 +122,16 @@ class SideDrawer extends StatelessWidget {
                   isActive: activePage == 'profile',
                   onTap: () {
                     Navigator.pop(context);
+                    final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+                    int profileIndex = isCustomer ? 2 : (hasPayroll ? 3 : 2);
+                    
                     if (onTabSelected != null) {
-                      onTabSelected!(3);
+                      onTabSelected!(profileIndex);
                     } else if (activePage != 'profile') {
-                      Navigator.push(
+                      Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => ProfilePage(userData: userData),
-                        ),
+                        MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: profileIndex)),
+                        (route) => false,
                       );
                     }
                   },
@@ -294,15 +310,19 @@ class SideDrawer extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
-        if (onTabSelected != null) {
-          onTabSelected!(3);
-        } else if (activePage != 'profile') {
+        final bool isCustomer = userData['user_type'] == 'customer' || 
+                               userData['user_role_id'] == 21 || 
+                               userData['user_role_id'] == '21';
+        final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+        int profileIndex = isCustomer ? 2 : (hasPayroll ? 3 : 2);
 
-          Navigator.push(
+        if (onTabSelected != null) {
+          onTabSelected!(profileIndex);
+        } else if (activePage != 'profile') {
+          Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-              builder: (context) => ProfilePage(userData: userData),
-            ),
+            MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: profileIndex)),
+            (route) => false,
           );
         }
       },

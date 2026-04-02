@@ -1,6 +1,12 @@
 # Changelog
 
-## [1.0.1] - 2026-04-02
+## [1.1.0] - 2026-04-02
+
+### Added
+
+- **Helpdesk — Modul Tiket Pengaduan**: Implementasi menu Helpdesk (`Icons.support_agent_outlined`) untuk pelaporan kendala teknis dan administrasi langsung dari aplikasi mobile.
+- **Quick Menu — AI Bot & Creative Idea**: Penambahan akses cepat untuk menu **AI Bot** dan **Creative Idea** pada sidebar (status: *On Progress*).
+- **Worklog — Seleksi dari Todo List**: Fitur pembuatan laporan kerja (*Worklog*) kini mendukung pengambilan data langsung dari tugas yang sudah selesai pada hari tersebut melalui tombol **"Pilih dari Todo List"** (sebelumnya: "Pilih dari Jobdesk").
 
 ### Changed
 
@@ -14,10 +20,15 @@
 - **UI — Rent Plan Quick Pay**: Penambahan ikon **Pay** (`Icons.payment_rounded`) pada daftar persewaan untuk akses cepat ke pembayaran.
 - **Rent Plan — Flip-style Payment Modal**: Implementasi UI modal pembayaran mandiri dengan antarmuka **Flip for Business**, mencakup pemilihan metode Transfer/QRIS (dengan grid bank lengkap) atau Tunai (Cash).
 - **UI — Rent Plan List Layout**: Perbaikan jarak (*spacing*) dan ukuran box pada badge status serta tombol hapus di daftar persewaan agar lebih simetris dan rapi.
+- **Worklog Picker UI**: Pembaruan antarmuka pencarian tugas pada Worklog. Tugas yang sudah selesai tidak lagi ditampilkan dengan coretan (*strikethrough*) agar lebih bersih, teks dibatasi 1 baris dengan *ellipsis*, dan tugas yang sudah ada di list otomatis difilter keluar dari pilihan.
+- **UI — Home & Sidebar Navigation Refactor**: Perbaikan besar pada sistem navigasi. Berpindah dari halaman independen (seperti Rent Plan) kembali ke tab utama (Attendance, Payroll, Profile) kini secara otomatis mereset *navigation stack*, memastikan **AppBar** dan **BottomNavigationBar** selalu muncul dengan benar tanpa tumpukan halaman (*nested push*).
+- **UI — Standardisasi Searchable Dropdown**: Migrasi seluruh komponen dropdown klasik (`DropdownButtonFormField`) di modul **Karyawan**, **Payroll**, **Profil**, dan **Rental Plan** ke komponen baru `SearchableDropdown`.
+- **UI — Searchable Modal Interface**: Komponen pilihan kini menggunakan antarmuka modal pencarian yang seragam, premium, dan mendukung fitur pencarian teks (searchable), meningkatkan pengalaman pengguna saat memilih data yang panjang.
 
-### Fixed
+### Fixed Bug
 
-- **UI — Bottom Nav Overflow**: Perbaikan error `RenderFlex overflow` (pola kuning-hitam) pada bar navigasi yang sebelumnya muncul karena perhitungan lebar item yang tidak memperhitungkan margin horizontal.
+- **UI — Layout Overflow Fix**: Perbaikan final pada error `RenderFlex overflow` (2.0 pixels) di bar navigasi dengan menggunakan `LayoutBuilder` untuk kalkulasi lebar yang lebih presisi, terutama saat menggunakan *border* di Dark Mode.
+- **Payroll Navigation**: Perbaikan tautan menu Payroll di sidebar yang sebelumnya tidak merespon saat diklik.
 
 ---
 
@@ -59,7 +70,7 @@
 - **Visual Feedback Dinamis**: Warna pill tab "HUTANG" kini otomatis berubah merah hanya jika terdapat hutang aktif. Aksen merah pada menu "Belum Ada Hutang" diperkental menggunakan `RedAccent`.
 - **Performance Optimization**: Optimasi query database pada dashboard dan detail rental untuk meminimalkan waktu loading data yang kompleks.
 
-### Fixed
+### Fixed Bug
 
 - **Modul Konfigurasi Role**: Pemisahan mutlak *key identifier* antara akses "Main Finance" Web dan "Mobile Apps Finance" pada sistem ERP HRIS untuk menuntaskan *bug* di mana menu aplikasi tidak bisa dimatikan (*status persistency fix*).
 - **Kalkulasi Harga Unit**: Perbaikan logika penentuan harga sewa laptop pada modul "Tambah Rent Plan" agar otomatis menarik harga dari tier yang aktif (`mas_harga`).
@@ -96,7 +107,7 @@
 - **UI Consistency**: Notifikasi Snackbar diselaraskan agar muncul dari bawah dan mendorong tombol aksi terapung (FAB) ke atas.
 - **Gradle Update**: Konfigurasi proyek dipaksa menggunakan **Java 17** untuk menghilangkan peringatan *obsolete* Java 8 saat build.
 
-### Fixed
+### Fixed Bug
 
 - **Todo Store Bug**: Perbaikan masalah gagal simpan saat edit Todo (penanganan kolom `updated_at`).
 - **Rental Menu Cleanup**: Pembersihan menu detail rental (menonaktifkan fitur dalam pengembangan dan menghapus menu tidak terpakai).
@@ -109,7 +120,7 @@
 - **Modul Todo List**: Implementasi modul baru Todo List untuk manajemen tugas harian.
 - **Deep Linking Notifikasi**: Klik notifikasi pengumuman/todo langsung membuka halaman detail.
 
-### Fixed
+### Fixed Bug
 
 - **Database Optimization**: Perbaikan query lambat pada dashboard dan daftar karyawan.
 - **Connection Stability**: Optimasi pengecekan login di API.

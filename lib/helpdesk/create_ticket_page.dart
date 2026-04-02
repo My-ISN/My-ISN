@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/searchable_dropdown.dart';
 
 class CreateTicketPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -112,31 +113,31 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                         hintText: l10n.translate('helpdesk.hint_subject'),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).cardColor,
                       ),
                       validator: (value) => (value == null || value.isEmpty) ? l10n.translate('main.required') : null,
                     ),
                     const SizedBox(height: 20),
                     
-                    DropdownButtonFormField<String>(
-                      value: _selectedPriority,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      ),
-                      hint: Text(l10n.translate('helpdesk.select_priority')),
-                      items: [
+                    const SizedBox(height: 8),
+                    SearchableDropdown(
+                      label: l10n.translate('helpdesk.priority'),
+                      value: _selectedPriority == null 
+                        ? '' 
+                        : [
+                            {'id': '1', 'name': l10n.translate('helpdesk.priority_low')},
+                            {'id': '2', 'name': l10n.translate('helpdesk.priority_medium')},
+                            {'id': '3', 'name': l10n.translate('helpdesk.priority_high')},
+                            {'id': '4', 'name': l10n.translate('helpdesk.priority_critical')},
+                          ].firstWhere((item) => item['id'] == _selectedPriority)['name']!,
+                      options: [
                         {'id': '1', 'name': l10n.translate('helpdesk.priority_low')},
                         {'id': '2', 'name': l10n.translate('helpdesk.priority_medium')},
                         {'id': '3', 'name': l10n.translate('helpdesk.priority_high')},
                         {'id': '4', 'name': l10n.translate('helpdesk.priority_critical')},
-                      ].map((item) {
-                        return DropdownMenuItem<String>(
-                          value: item['id'],
-                          child: Text(item['name']!),
-                        );
-                      }).toList(),
-                      onChanged: (value) => setState(() => _selectedPriority = value),
+                      ],
+                      onSelected: (id) => setState(() => _selectedPriority = id),
+                      placeholder: l10n.translate('helpdesk.select_priority'),
                     ),
                     const SizedBox(height: 20),
                     
@@ -152,7 +153,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                         hintText: l10n.translate('helpdesk.hint_description'),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).cardColor,
                       ),
                       validator: (value) => (value == null || value.isEmpty) ? l10n.translate('main.required') : null,
                     ),

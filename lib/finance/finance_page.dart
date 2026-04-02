@@ -6,6 +6,7 @@ import '../localization/app_localizations.dart';
 import '../services/finance_service.dart';
 
 import '../widgets/custom_app_bar.dart';
+import '../widgets/shimmer_loading.dart';
 import '../widgets/side_drawer.dart';
 import 'widgets/finance_account_item.dart';
 import 'widgets/finance_transaction_item.dart';
@@ -892,7 +893,38 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
       ),
       endDrawer: SideDrawer(userData: widget.userData, activePage: 'finance'),
       body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
+        ? SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                  child: ShimmerLoading(
+                    child: Container(
+                      height: 140,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: ShimmerLoading(
+                    child: Column(
+                      children: List.generate(
+                        5,
+                        (index) => const ShimmerCard(
+                          margin: EdgeInsets.only(bottom: 16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
         : _errorMessage.isNotEmpty
           ? Center(child: Text(_errorMessage))
           : Column(
@@ -1093,6 +1125,26 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
     );
   }
 
+  Widget _buildThisMonthBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: const Color(0xFF7E57C2).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFF7E57C2).withOpacity(0.1)),
+      ),
+      child: Text(
+        'finance.this_month'.tr(context).toUpperCase(),
+        style: const TextStyle(
+          color: Color(0xFF7E57C2),
+          fontSize: 7.5,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabBar() {
     if (_availableTabs.isEmpty) return const SizedBox.shrink();
     final Color primaryColor = Theme.of(context).colorScheme.primary;
@@ -1162,8 +1214,8 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
         Expanded(
           child: RefreshIndicator(
             onRefresh: _fetchAccounts,
-            child: _isAccountsLoading 
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFF7E57C2)))
+            child: _isAccountsLoading && _accounts.isEmpty
+              ? const ShimmerList(itemCount: 5)
               : _accounts.isEmpty
                 ? _buildEmptyState()
                 : ListView.builder(
@@ -1197,11 +1249,15 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: _accountsSelectedLimit,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: Color(0xFF7E57C2)),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 16,
+            color: Color(0xFF7E57C2),
+          ),
           style: const TextStyle(
-            color: Color(0xFF7E57C2), 
-            fontWeight: FontWeight.bold, 
-            fontSize: 13
+            color: Color(0xFF7E57C2),
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
           ),
           onChanged: (int? newValue) {
             if (newValue != null) {
@@ -1226,16 +1282,19 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
   Widget _buildAccountsPagination() {
     int totalPages = (_accountsTotalCount / _accountsSelectedLimit).ceil();
     if (totalPages <= 0) totalPages = 1;
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildPageButton(
           icon: Icons.chevron_left_rounded,
-          onPressed: _accountsPage > 1 ? () {
-            setState(() => _accountsPage--);
-            _fetchAccounts();
-          } : null,
+          onPressed:
+              _accountsPage > 1
+                  ? () {
+                    setState(() => _accountsPage--);
+                    _fetchAccounts();
+                  }
+                  : null,
         ),
         const SizedBox(width: 16),
         Container(
@@ -1252,42 +1311,32 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
             ],
           ),
           child: Text(
-            'rent_plan.page_x_of_y'.tr(context, args: {
-              'current': _accountsPage.toString(),
-              'total': totalPages.toString(),
-            }),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+            'rent_plan.page_x_of_y'.tr(
+              context,
+              args: {
+                'current': _accountsPage.toString(),
+                'total': totalPages.toString(),
+              },
+            ),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
           ),
         ),
         const SizedBox(width: 16),
         _buildPageButton(
           icon: Icons.chevron_right_rounded,
-          onPressed: _accountsPage < totalPages ? () {
-            setState(() => _accountsPage++);
-            _fetchAccounts();
-          } : null,
+          onPressed:
+              _accountsPage < totalPages
+                  ? () {
+                    setState(() => _accountsPage++);
+                    _fetchAccounts();
+                  }
+                  : null,
         ),
       ],
-    );
-  }
-
-  Widget _buildThisMonthBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: Text(
-        'finance.this_month'.tr(context).toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white54,
-          fontSize: 7.5,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.5,
-        ),
-      ),
     );
   }
 
@@ -1305,7 +1354,7 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
           ),
           if (_isTransactionsLoading && _transactions.isEmpty)
             const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+              child: ShimmerList(itemCount: 6),
             )
           else if (_transactions.isEmpty)
             SliverFillRemaining(

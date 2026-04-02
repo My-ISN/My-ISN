@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
+import '../../widgets/searchable_dropdown.dart';
 import '../../localization/app_localizations.dart';
 
 
@@ -508,34 +509,6 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     );
   }
 
-  Widget _buildDropdown(String label, String? value, List<DropdownMenuItem<String>> items, Function(String?) onChanged, {String? hint, bool isLoading = false}) {
-    final Map<String, DropdownMenuItem<String>> uniqueItemsMap = {};
-    for (var item in items) {
-      if (item.value != null && !uniqueItemsMap.containsKey(item.value)) {
-        uniqueItemsMap[item.value!] = item;
-      }
-    }
-    final List<DropdownMenuItem<String>> uniqueItems = uniqueItemsMap.values.toList();
-
-    return DropdownButtonFormField<String>(
-      value: (uniqueItems.any((item) => item.value == value)) ? value : null,
-      items: uniqueItems.isEmpty ? null : uniqueItems,
-      onChanged: isLoading ? null : onChanged,
-      isExpanded: true,
-      hint: Text(isLoading ? 'profile.loading'.tr(context) : (hint ?? '${'rent_plan.select'.tr(context)} $label'), 
-          style: TextStyle(fontSize: 13, color: Colors.grey[400]), overflow: TextOverflow.ellipsis),
-      decoration: InputDecoration(
-        labelText: value == null ? null : label,
-        labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200]!)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Theme.of(context).dividerColor)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-      icon: Icon(Icons.arrow_drop_down_rounded, color: Theme.of(context).colorScheme.primary),
-    );
-  }
-
   Widget _buildFileUploadTile(String label, File? file, VoidCallback onTap, {IconData? icon, String? existingUrl}) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     bool hasFile = file != null || (existingUrl != null && existingUrl.isNotEmpty);
@@ -831,17 +804,19 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       margin: const EdgeInsets.only(bottom: 12),
       child: Column(
         children: [
-          _buildDropdown(
-            '${'rent_plan.guarantee'.tr(context)} $index', 
-            _selectedExtJaminanIdsMap[index], 
-            availableOptions.map((j) => DropdownMenuItem(
-              value: j['constants_id']?.toString() ?? j['id']?.toString() ?? '', 
-              child: Text(j['category_name']?.toString() ?? '', overflow: TextOverflow.ellipsis)
-            )).toList(), 
-            (val) {
+          SearchableDropdown(
+            label: '${'rent_plan.guarantee'.tr(context)} $index',
+            value: _selectedExtJaminanIdsMap[index] != null 
+                ? availableOptions.firstWhere((j) => (j['constants_id']?.toString() ?? j['id']?.toString()) == _selectedExtJaminanIdsMap[index], orElse: () => {})['category_name'] ?? '' 
+                : '',
+            options: availableOptions.map((j) => {
+              'id': j['constants_id']?.toString() ?? j['id']?.toString() ?? '',
+              'name': j['category_name']?.toString() ?? ''
+            }).toList(),
+            onSelected: (val) {
               setState(() { _selectedExtJaminanIdsMap[index] = val; });
-            }, 
-            hint: '${'rent_plan.select_guarantee'.tr(context)} $index'
+            },
+            placeholder: '${'rent_plan.select_guarantee'.tr(context)} $index',
           ),
           if (_selectedExtJaminanIdsMap[index] != null) ...[
             const SizedBox(height: 12),
@@ -1171,12 +1146,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             const SizedBox(height: 16),
             _buildTextField('rent_plan.unit_count'.tr(context), controller: _totalLaptopController, icon: Icons.laptop_rounded, keyboardType: TextInputType.number),
             const SizedBox(height: 16),
-            _buildDropdown('rent_plan.shipping_type'.tr(context), _selectedShippingId, _shippingCosts.map((s) => DropdownMenuItem(
-              value: s['nama_kirim']?.toString() ?? '', 
-              child: Text(s['nama_kirim']?.toString() ?? '-', overflow: TextOverflow.ellipsis)
-            )).toList(), (val) {
-              setState(() => _selectedShippingId = val);
-            }, hint: 'rent_plan.select_shipping'.tr(context)),
+            _buildShippingDropdown(),
             const SizedBox(height: 16),
             _buildTextField('rent_plan.notes'.tr(context), controller: _notesController, maxLines: 3, icon: Icons.notes_rounded, isRequired: false),
           ],
@@ -1199,6 +1169,37 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildShippingDropdown() {
+    final String selectedName = _selectedShippingId != null 
+        ? _shippingCosts.firstWhere((s) => s['nama_kirim']?.toString() == _selectedShippingId, orElse: () => {})['nama_kirim'] != null 
+          ? '${_shippingCosts.firstWhere((s) => s['nama_kirim']?.toString() == _selectedShippingId)['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(_shippingCosts.firstWhere((s) => s['nama_kirim']?.toString() == _selectedShippingId)['field_one']))}'
+          : _selectedShippingId ?? ''
+        : '';
+
+    return SearchableDropdown(
+      label: 'rent_plan.shipping_service'.tr(context),
+      value: selectedName,
+      options: _shippingCosts.map((s) => {
+        'id': s['nama_kirim'].toString(),
+        'name': '${s['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(s['field_one']))}'
+      }).toList(),
+      onSelected: (val) {
+        if (val != null) {
+          final ship = _shippingCosts.firstWhere((s) => s['nama_kirim'].toString() == val, orElse: () => null);
+          setState(() {
+            _selectedShippingId = val;
+            if (ship != null) {
+              _tipePengiriman = ship['category_name'] ?? val;
+            } else {
+              _tipePengiriman = val;
+            }
+          });
+        }
+      },
+      placeholder: 'rent_plan.select_shipping'.tr(context),
     );
   }
 
@@ -1242,39 +1243,74 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   }
 
   Widget _buildRegionDropdowns(bool isKtp) {
+    final String? currentProvinceName = isKtp ? _selectedProvinceKtp : _selectedProvinceCur;
+    final String? currentRegencyName = isKtp ? _selectedRegencyKtp : _selectedRegencyCur;
+    final String? currentDistrictName = isKtp ? _selectedDistrictKtp : _selectedDistrictCur;
+    final String? currentVillageName = isKtp ? _selectedVillageKtp : _selectedVillageCur;
+
+    final List<dynamic> currentRegencies = isKtp ? _regenciesKtp : _regenciesCur;
+    final List<dynamic> currentDistricts = isKtp ? _districtsKtp : _districtsCur;
+    final List<dynamic> currentVillages = isKtp ? _villagesKtp : _villagesCur;
+
     return Column(
       children: [
-        _buildDropdown('rent_plan.province'.tr(context), isKtp ? _selectedProvinceKtp : _selectedProvinceCur, _provinces.map((p) => DropdownMenuItem(
-          value: p['name'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
-            if (val != null) {
-              setState(() { if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; });
-              final pObj = _provinces.firstWhere((p) => p['name'] == val, orElse: () => null);
-              if (pObj != null) _loadRegencies(pObj['id'].toString(), isKtp);
-            }
-        }, hint: 'rent_plan.select_province'.tr(context)),
+        SearchableDropdown(
+          label: 'profile.state_province'.tr(context),
+          value: currentProvinceName ?? '',
+          options: _provinces.map((p) => {
+            'id': p['name'].toString(), // DB stores names
+            'name': p['name'].toString()
+          }).toList(),
+          onSelected: (val) {
+            setState(() { if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; });
+            final pObj = _provinces.firstWhere((p) => p['name'] == val);
+            _loadRegencies(pObj['id'].toString(), isKtp);
+          },
+          placeholder: 'rent_plan.select_province'.tr(context),
+        ),
         const SizedBox(height: 12),
-        _buildDropdown('rent_plan.regency'.tr(context), isKtp ? _selectedRegencyKtp : _selectedRegencyCur, (isKtp ? _regenciesKtp : _regenciesCur).map((p) => DropdownMenuItem(
-          value: p['name'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
-            if (val != null) {
-              setState(() { if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; });
-              final rObj = (isKtp ? _regenciesKtp : _regenciesCur).firstWhere((r) => r['name'] == val, orElse: () => null);
-              if (rObj != null) _loadDistricts(rObj['id'].toString(), isKtp);
-            }
-        }, hint: 'rent_plan.select_regency'.tr(context), isLoading: isKtp ? _isLoadingRegKtp : _isLoadingRegCur),
+        SearchableDropdown(
+          label: 'profile.city_regency'.tr(context),
+          value: currentRegencyName ?? '',
+          options: currentRegencies.map((p) => {
+            'id': p['name'].toString(),
+            'name': p['name'].toString()
+          }).toList(),
+          onSelected: (val) {
+            setState(() { if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; });
+            final rObj = currentRegencies.firstWhere((r) => r['name'] == val);
+            _loadDistricts(rObj['id'].toString(), isKtp);
+          },
+          placeholder: (isKtp ? _isLoadingRegKtp : _isLoadingRegCur) ? 'profile.loading'.tr(context) : 'rent_plan.select_regency'.tr(context),
+        ),
         const SizedBox(height: 12),
-        _buildDropdown('rent_plan.district'.tr(context), isKtp ? _selectedDistrictKtp : _selectedDistrictCur, (isKtp ? _districtsKtp : _districtsCur).map((p) => DropdownMenuItem(
-          value: p['name'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
-            if (val != null) {
-              setState(() { if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; });
-              final dObj = (isKtp ? _districtsKtp : _districtsCur).firstWhere((d) => d['name'] == val, orElse: () => null);
-              if (dObj != null) _loadVillages(dObj['id'].toString(), isKtp);
-            }
-        }, hint: 'rent_plan.select_district'.tr(context), isLoading: isKtp ? _isLoadingDistKtp : _isLoadingDistCur),
+        SearchableDropdown(
+          label: 'rent_plan.district'.tr(context),
+          value: currentDistrictName ?? '',
+          options: currentDistricts.map((p) => {
+            'id': p['name'].toString(),
+            'name': p['name'].toString()
+          }).toList(),
+          onSelected: (val) {
+            setState(() { if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; });
+            final dObj = currentDistricts.firstWhere((d) => d['name'] == val);
+            _loadVillages(dObj['id'].toString(), isKtp);
+          },
+          placeholder: (isKtp ? _isLoadingDistKtp : _isLoadingDistCur) ? 'profile.loading'.tr(context) : 'rent_plan.select_district'.tr(context),
+        ),
         const SizedBox(height: 12),
-        _buildDropdown('rent_plan.village'.tr(context), isKtp ? _selectedVillageKtp : _selectedVillageCur, (isKtp ? _villagesKtp : _villagesCur).map((p) => DropdownMenuItem(
-          value: p['name'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
-            if (val != null) setState(() { if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; });
-        }, hint: 'rent_plan.select_village'.tr(context), isLoading: isKtp ? _isLoadingVillKtp : _isLoadingVillCur),
+        SearchableDropdown(
+          label: 'rent_plan.village'.tr(context),
+          value: currentVillageName ?? '',
+          options: currentVillages.map((p) => {
+            'id': p['name'].toString(),
+            'name': p['name'].toString()
+          }).toList(),
+          onSelected: (val) {
+            setState(() { if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; });
+          },
+          placeholder: (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) ? 'profile.loading'.tr(context) : 'rent_plan.select_village'.tr(context),
+        ),
       ],
     );
   }
@@ -1296,10 +1332,20 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: _primaryColor.withOpacity(0.1))),
       child: Column(
         children: [
-          _buildDropdown('${'rent_plan.guarantee'.tr(context)} $index', _selectedJaminanIds[index], availableOptions.map((j) => DropdownMenuItem(
-            value: j['constants_id'].toString(), child: Text(j['category_name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
+          SearchableDropdown(
+            label: '${'rent_plan.guarantee'.tr(context)} $index',
+            value: _selectedJaminanIds[index] != null 
+                ? availableOptions.firstWhere((j) => j['constants_id'].toString() == _selectedJaminanIds[index], orElse: () => {})['category_name'] ?? '' 
+                : '',
+            options: availableOptions.map((j) => {
+              'id': j['constants_id'].toString(),
+              'name': j['category_name'].toString()
+            }).toList(),
+            onSelected: (val) {
               setState(() { _selectedJaminanIds[index] = val; });
-          }, hint: '${'rent_plan.select_guarantee'.tr(context)} $index'),
+            },
+            placeholder: '${'rent_plan.select_guarantee'.tr(context)} $index',
+          ),
           if (_selectedJaminanIds[index] != null) ...[
             const SizedBox(height: 12),
             _buildFileUploadTile('${'rent_plan.guarantee_file'.tr(context)} $index', _fileJaminan[index], () => _pickFile(index), icon: Icons.upload_file_rounded, existingUrl: _rentalData!['foto_jaminan$index']),
@@ -2286,9 +2332,15 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  _buildDropdown('rent_plan.reason'.tr(context), selectedReason, reasons.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(), (val) {
-                    if (val != null) setDialogState(() => selectedReason = val);
-                  }),
+                  SearchableDropdown(
+                    label: 'rent_plan.reason'.tr(context),
+                    value: selectedReason,
+                    options: reasons.map((r) => {'id': r, 'name': r}).toList(),
+                    onSelected: (val) {
+                      if (val != null) setDialogState(() => selectedReason = val);
+                    },
+                    placeholder: 'rent_plan.reason'.tr(context),
+                  ),
                   const SizedBox(height: 16),
                   _buildTextField('rent_plan.total_amount'.tr(context), controller: totalController, icon: Icons.monetization_on_rounded, keyboardType: TextInputType.number, onChanged: (_) => setDialogState(() => updatePreview())),
                   const SizedBox(height: 16),
@@ -2725,32 +2777,86 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   }
 
   void _confirmDeleteDebt(dynamic debtId) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('rent_plan.confirm_delete'.tr(context)),
-        content: Text('rent_plan.delete_debt_confirm'.tr(context)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('main.cancel'.tr(context), style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              setState(() => _isLoading = true);
-              final res = await _rentPlanService.deleteDebt(int.parse(debtId.toString()));
-              if (res['status'] == true) {
-                _fetchDetail();
-              } else {
-                setState(() => _isLoading = false);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'rent_plan.failed_delete'.tr(context))));
-              }
-            },
-            child: Text('main.delete'.tr(context), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'rent_plan.confirm_delete'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'rent_plan.delete_debt_confirm'.tr(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      setState(() => _isLoading = true);
+                      final res = await _rentPlanService.deleteDebt(int.parse(debtId.toString()));
+                      if (res['status'] == true) {
+                        _fetchDetail();
+                      } else {
+                        setState(() => _isLoading = false);
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res['message'] ?? 'rent_plan.failed_delete'.tr(context))));
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('main.delete'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

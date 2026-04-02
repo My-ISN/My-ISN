@@ -25,13 +25,10 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
   DateTime _selectedDate = DateTime.now();
   final List<TextEditingController> _itemControllers = [TextEditingController()];
   bool _isSaving = false;
-  List<dynamic> _todoItems = [];
-  bool _isLoadingTodos = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchTodos();
     if (widget.initialData != null) {
       final estimate = widget.initialData!['estimate'];
       final items = widget.initialData!['items'] as List?;
@@ -53,27 +50,6 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
     }
   }
 
-  Future<void> _fetchTodos() async {
-    setState(() => _isLoadingTodos = true);
-    try {
-      final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
-      final response = await http.get(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_todos?user_id=$userId'),
-      );
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        if (result['status'] == true) {
-          setState(() {
-            _todoItems = result['data'];
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint('Error fetching todos: $e');
-    } finally {
-      if (mounted) setState(() => _isLoadingTodos = false);
-    }
-  }
 
   Future<void> _saveLog() async {
     final items = _itemControllers.map((c) => c.text.trim()).where((t) => t.isNotEmpty).toList();
@@ -139,30 +115,65 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
   }
 
   void _showTodoPicker() {
+    final dateStr = _selectedDate.toIso8601String().split('T')[0];
+    final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) {
-        return _TodoPicker(
-          todoItems: _todoItems,
-          isLoading: _isLoadingTodos,
-          onSelect: (todoName) {
-            setState(() {
-              // Add to the last empty controller or add a new one
-              bool added = false;
-              for (var controller in _itemControllers) {
-                if (controller.text.isEmpty) {
-                  controller.text = todoName;
-                  added = true;
-                  break;
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        List<dynamic> modalTodos = [];
+        bool modalLoading = true;
+        bool hasFetched = false;
+
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            if (!hasFetched) {
+              hasFetched = true;
+              final url = 'https://foxgeen.com/HRIS/mobileapi/get_todos?user_id=$userId&date=$dateStr';
+              http.get(Uri.parse(url)).then((response) {
+                if (!ctx.mounted) return;
+                if (response.statusCode == 200) {
+                  final result = json.decode(response.body);
+                  if (result['status'] == true) {
+                    setModalState(() {
+                      modalTodos = List<dynamic>.from(result['data']);
+                      modalLoading = false;
+                    });
+                  } else {
+                    setModalState(() => modalLoading = false);
+                  }
+                } else {
+                  setModalState(() => modalLoading = false);
                 }
-              }
-              if (!added) {
-                _itemControllers.add(TextEditingController(text: todoName));
-              }
-            });
-            Navigator.pop(context);
+              }).catchError((e) {
+                if (ctx.mounted) setModalState(() => modalLoading = false);
+              });
+            }
+
+            final currentSelectedItems = _itemControllers.map((c) => c.text.trim()).toList();
+            return _TodoPicker(
+              todoItems: modalTodos,
+              isLoading: modalLoading,
+              selectedItems: currentSelectedItems,
+              onSelect: (todoName) {
+                setState(() {
+                  bool added = false;
+                  for (var controller in _itemControllers) {
+                    if (controller.text.isEmpty) {
+                      controller.text = todoName;
+                      added = true;
+                      break;
+                    }
+                  }
+                  if (!added) {
+                    _itemControllers.add(TextEditingController(text: todoName));
+                  }
+                });
+                Navigator.pop(ctx);
+              },
+            );
           },
         );
       },
@@ -209,7 +220,9 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                     );
                   },
                 );
-                if (date != null) setState(() => _selectedDate = date);
+                if (date != null) {
+                  setState(() => _selectedDate = date);
+                }
               },
               child: Container(
                 padding: const EdgeInsets.all(16),
@@ -333,11 +346,13 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
 class _TodoPicker extends StatefulWidget {
   final List<dynamic> todoItems;
   final bool isLoading;
+  final List<String> selectedItems;
   final Function(String) onSelect;
 
   const _TodoPicker({
     required this.todoItems, 
     required this.isLoading,
+    required this.selectedItems,
     required this.onSelect,
   });
 
@@ -350,74 +365,111 @@ class _TodoPickerState extends State<_TodoPicker> {
 
   @override
   Widget build(BuildContext context) {
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
     final filteredTodos = widget.todoItems.where((todo) {
-      final name = (todo['item_name'] ?? '').toString().toLowerCase();
-      return name.contains(_searchQuery.toLowerCase());
+      final name = (todo['item_name'] ?? '').toString();
+      final matchesSearch = name.toLowerCase().contains(_searchQuery.toLowerCase());
+      final isAlreadySelected = widget.selectedItems.contains(name);
+      return matchesSearch && !isAlreadySelected;
     }).toList();
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
-      padding: const EdgeInsets.all(20),
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('work_log.select_job'.tr(context), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-            ],
+          const SizedBox(height: 12),
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                const Icon(Icons.playlist_add_check_rounded, color: Color(0xFF7E57C2), size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'work_log.select_job'.tr(context),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded)),
+              ],
+            ),
           ),
-          const SizedBox(height: 15),
-          TextField(
-            onChanged: (v) => setState(() => _searchQuery = v),
-            decoration: InputDecoration(
-              hintText: 'work_log.search_job'.tr(context),
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: TextField(
+              onChanged: (v) => setState(() => _searchQuery = v),
+              decoration: InputDecoration(
+                hintText: 'work_log.search_job'.tr(context),
+                prefixIcon: const Icon(Icons.search, size: 20),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                filled: true,
+                fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+              ),
             ),
           ),
           const SizedBox(height: 20),
           Expanded(
             child: widget.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : widget.todoItems.isEmpty
-                    ? Center(child: Text('todolist.no_todos'.tr(context))) 
+                : filteredTodos.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.assignment_turned_in_outlined, size: 48, color: Colors.grey[300]),
+                            const SizedBox(height: 16),
+                            Text(
+                              _searchQuery.isEmpty 
+                                ? 'todo_list.no_todos'.tr(context) 
+                                : 'main.no_results'.tr(context),
+                              style: TextStyle(color: Colors.grey[500]),
+                            ),
+                          ],
+                        )
+                      ) 
                     : ListView.builder(
-                    itemCount: filteredTodos.length,
-                    itemBuilder: (context, index) {
-                      final todo = filteredTodos[index];
-                      final bool isDone = todo['status'] == 1 || todo['status'] == '1';
-                      
-                      return ListTile(
-                        leading: Icon(
-                          isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
-                          color: isDone ? Colors.green : Colors.grey,
-                        ),
-                        title: Text(
-                          todo['item_name'] ?? '-',
-                          style: TextStyle(
-                            decoration: isDone ? TextDecoration.lineThrough : null,
-                            color: isDone ? Colors.grey : null,
-                          ),
-                        ),
-                        trailing: isDone 
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: filteredTodos.length,
+                        itemBuilder: (context, index) {
+                          final todo = filteredTodos[index];
+                          final bool isDone = todo['status'] == 1 || todo['status'] == '1';
+                          
+                          return ListTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                color: (isDone ? Colors.green : Colors.grey).withOpacity(0.1),
+                                shape: BoxShape.circle,
                               ),
-                              child: Text(
-                                'work_log.status_completed'.tr(context),
-                                style: const TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                              child: Icon(
+                                isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked,
+                                color: isDone ? Colors.green : Colors.grey,
+                                size: 20,
                               ),
-                            )
-                          : null,
-                        onTap: () => widget.onSelect(todo['item_name'] ?? ''),
-                      );
-                    },
-                  ),
+                            ),
+                            title: Text(
+                              todo['item_name'] ?? '-',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                            ),
+                            subtitle: isDone 
+                              ? Text('work_log.status_completed'.tr(context), style: const TextStyle(color: Colors.green, fontSize: 11))
+                              : null,
+                            trailing: const Icon(Icons.add_circle_outline_rounded, size: 20, color: Color(0xFF7E57C2)),
+                            onTap: () => widget.onSelect(todo['item_name'] ?? ''),
+                          );
+                        },
+                      ),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );

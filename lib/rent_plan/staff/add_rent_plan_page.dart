@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../services/rent_plan_service.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../widgets/searchable_dropdown.dart';
 import '../../localization/app_localizations.dart';
 
 class AddRentPlanPage extends StatefulWidget {
@@ -580,20 +581,28 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               color: Theme.of(context).colorScheme.primary,
               children: [
                 if (widget.userData['user_type'] == 'staff') ...[
-                  _buildDropdown('rent_plan.customer'.tr(context), _selectedCustomerId, _customers.map((c) => DropdownMenuItem(
-                    value: c['user_id'].toString(),
-                    child: Text('${c['first_name']} ${c['last_name']}', overflow: TextOverflow.ellipsis),
-                  )).toList(), (val) {
-                    setState(() {
-                      _selectedCustomerId = val;
-                      if (val != null) {
+                  SearchableDropdown(
+                    label: 'rent_plan.customer'.tr(context),
+                    value: _selectedCustomerId != null 
+                        ? _customers.firstWhere((c) => c['user_id'].toString() == _selectedCustomerId, orElse: () => {})['first_name'] != null 
+                          ? '${_customers.firstWhere((c) => c['user_id'].toString() == _selectedCustomerId)['first_name']} ${_customers.firstWhere((c) => c['user_id'].toString() == _selectedCustomerId)['last_name'] ?? ''}'
+                          : ''
+                        : '',
+                    options: _customers.map((c) => {
+                      'id': c['user_id'].toString(),
+                      'name': '${c['first_name']} ${c['last_name'] ?? ''}'
+                    }).toList(),
+                    onSelected: (val) {
+                      setState(() {
+                        _selectedCustomerId = val;
                         final customer = _customers.firstWhere((c) => c['user_id'].toString() == val, orElse: () => null);
                         if (customer != null && customer['contact_number'] != null) {
                           _whatsappController.text = customer['contact_number'].toString();
                         }
-                      }
-                    });
-                  }, hint: 'rent_plan.select_customer'.tr(context)),
+                      });
+                    },
+                    placeholder: 'rent_plan.select_customer'.tr(context),
+                  ),
                   const SizedBox(height: 16),
                 ],
                 _buildTextField('rent_plan.whatsapp'.tr(context), controller: _whatsappController, icon: Icons.phone_rounded, keyboardType: TextInputType.phone),
@@ -804,67 +813,72 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     super.dispose();
   }
 
-  Widget _buildDropdown(String label, String? value, List<DropdownMenuItem<String>> items, Function(String?) onChanged, {String? hint, bool isLoading = false}) {
-    // Deduplicate items by value
-    final Map<String, DropdownMenuItem<String>> uniqueItemsMap = {};
-    for (var item in items) {
-      if (item.value != null && !uniqueItemsMap.containsKey(item.value)) {
-        uniqueItemsMap[item.value!] = item;
-      }
-    }
-    final List<DropdownMenuItem<String>> uniqueItems = uniqueItemsMap.values.toList();
-
-    return DropdownButtonFormField<String>(
-      value: (uniqueItems.any((item) => item.value == value)) ? value : null,
-      items: uniqueItems.isEmpty ? null : uniqueItems,
-      onChanged: isLoading ? null : onChanged,
-      isExpanded: true,
-      hint: Text(isLoading ? 'rent_plan.loading'.tr(context) : (hint ?? 'rent_plan.select_item'.tr(context, args: {'item': label})), 
-          style: TextStyle(fontSize: 13, color: Colors.grey[400]), overflow: TextOverflow.ellipsis),
-      decoration: InputDecoration(
-        labelText: value == null ? null : label,
-        labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200]!)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Theme.of(context).dividerColor)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
-      icon: Icon(Icons.arrow_drop_down_rounded, color: Theme.of(context).colorScheme.primary),
-      validator: (val) => val == null ? 'rent_plan.validation.required'.tr(context) : null,
-    );
-  }
 
   Widget _buildRegionDropdowns(bool isKtp) {
+    final String? currentProvinceId = isKtp ? _selectedProvinceKtp : _selectedProvinceCur;
+    final String? currentRegencyId = isKtp ? _selectedRegencyKtp : _selectedRegencyCur;
+    final String? currentDistrictId = isKtp ? _selectedDistrictKtp : _selectedDistrictCur;
+    final String? currentVillageId = isKtp ? _selectedVillageKtp : _selectedVillageCur;
+
+    final String selectedProvinceName = currentProvinceId != null 
+        ? _provinces.firstWhere((p) => p['id'].toString() == currentProvinceId, orElse: () => {})['name'] ?? '' : '';
+    
+    final List<dynamic> currentRegencies = isKtp ? _regenciesKtp : _regenciesCur;
+    final String selectedRegencyName = currentRegencyId != null 
+        ? currentRegencies.firstWhere((r) => r['id'].toString() == currentRegencyId, orElse: () => {})['name'] ?? '' : '';
+
+    final List<dynamic> currentDistricts = isKtp ? _districtsKtp : _districtsCur;
+    final String selectedDistrictName = currentDistrictId != null 
+        ? currentDistricts.firstWhere((d) => d['id'].toString() == currentDistrictId, orElse: () => {})['name'] ?? '' : '';
+
+    final List<dynamic> currentVillages = isKtp ? _villagesKtp : _villagesCur;
+    final String selectedVillageName = currentVillageId != null 
+        ? currentVillages.firstWhere((v) => v['id'].toString() == currentVillageId, orElse: () => {})['name'] ?? '' : '';
+
     return Column(
       children: [
-        _buildDropdown('profile.state_province'.tr(context), isKtp ? _selectedProvinceKtp : _selectedProvinceCur, _provinces.map((p) => DropdownMenuItem(
-          value: p['id'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
-            if (val != null) {
-              setState(() { if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; });
-              _loadRegencies(val, isKtp);
-            }
-        }, hint: 'rent_plan.select_province'.tr(context)),
+        SearchableDropdown(
+          label: 'profile.state_province'.tr(context),
+          value: selectedProvinceName,
+          options: _provinces.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          onSelected: (val) {
+            setState(() { if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; });
+            _loadRegencies(val, isKtp);
+          },
+          placeholder: 'rent_plan.select_province'.tr(context),
+        ),
         const SizedBox(height: 12),
-        _buildDropdown('profile.city_regency'.tr(context), isKtp ? _selectedRegencyKtp : _selectedRegencyCur, (isKtp ? _regenciesKtp : _regenciesCur).map((p) => DropdownMenuItem(
-          value: p['id'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
-            if (val != null) {
-              setState(() { if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; });
-              _loadDistricts(val, isKtp);
-            }
-        }, hint: 'rent_plan.select_regency'.tr(context), isLoading: isKtp ? _isLoadingRegKtp : _isLoadingRegCur),
+        SearchableDropdown(
+          label: 'profile.city_regency'.tr(context),
+          value: selectedRegencyName,
+          options: currentRegencies.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          onSelected: (val) {
+            setState(() { if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; });
+            _loadDistricts(val, isKtp);
+          },
+          placeholder: (isKtp ? _isLoadingRegKtp : _isLoadingRegCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_regency'.tr(context),
+        ),
         const SizedBox(height: 12),
-        _buildDropdown('rent_plan.district'.tr(context), isKtp ? _selectedDistrictKtp : _selectedDistrictCur, (isKtp ? _districtsKtp : _districtsCur).map((p) => DropdownMenuItem(
-          value: p['id'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
-            if (val != null) {
-              setState(() { if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; });
-              _loadVillages(val, isKtp);
-            }
-        }, hint: 'rent_plan.select_district'.tr(context), isLoading: isKtp ? _isLoadingDistKtp : _isLoadingDistCur),
+        SearchableDropdown(
+          label: 'rent_plan.district'.tr(context),
+          value: selectedDistrictName,
+          options: currentDistricts.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          onSelected: (val) {
+            setState(() { if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; });
+            _loadVillages(val, isKtp);
+          },
+          placeholder: (isKtp ? _isLoadingDistKtp : _isLoadingDistCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_district'.tr(context),
+        ),
         const SizedBox(height: 12),
-        _buildDropdown('rent_plan.village'.tr(context), isKtp ? _selectedVillageKtp : _selectedVillageCur, (isKtp ? _villagesKtp : _villagesCur).map((p) => DropdownMenuItem(
-          value: p['id'].toString(), child: Text(p['name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
-            if (val != null) setState(() { if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; });
-        }, hint: 'rent_plan.select_village'.tr(context), isLoading: isKtp ? _isLoadingVillKtp : _isLoadingVillCur),
+        SearchableDropdown(
+          label: 'rent_plan.village'.tr(context),
+          value: selectedVillageName,
+          options: currentVillages.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          onSelected: (val) {
+            setState(() { if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; });
+          },
+          placeholder: (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_village'.tr(context),
+        ),
       ],
     );
   }
@@ -996,10 +1010,20 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.1))),
       child: Column(
         children: [
-          _buildDropdown('${'rent_plan.guarantee'.tr(context)} $index', _selectedJaminanIds[index], availableOptions.map((j) => DropdownMenuItem(
-            value: j['constants_id'].toString(), child: Text(j['category_name'], overflow: TextOverflow.ellipsis))).toList(), (val) {
+          SearchableDropdown(
+            label: '${'rent_plan.guarantee'.tr(context)} $index',
+            value: _selectedJaminanIds[index] != null 
+                ? availableOptions.firstWhere((j) => j['constants_id'].toString() == _selectedJaminanIds[index], orElse: () => {})['category_name'] ?? '' 
+                : '',
+            options: availableOptions.map((j) => {
+              'id': j['constants_id'].toString(),
+              'name': j['category_name'].toString()
+            }).toList(),
+            onSelected: (val) {
               setState(() { _selectedJaminanIds[index] = val; });
-          }, hint: '${'rent_plan.select_guarantee'.tr(context)} $index'),
+            },
+            placeholder: '${'rent_plan.select_guarantee'.tr(context)} $index',
+          ),
           if (_selectedJaminanIds[index] != null) ...[
             const SizedBox(height: 12),
             _buildFileUploadTile('${'rent_plan.guarantee_file'.tr(context)} $index', _fileJaminan[index], () => _pickFile(index), icon: Icons.upload_file_rounded),
@@ -1027,10 +1051,20 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50], borderRadius: BorderRadius.circular(16), border: Border.all(color: isDark ? Colors.white12 : Theme.of(context).dividerColor)),
       child: Column(
         children: [
-          _buildDropdown('rent_plan.laptop'.tr(context), _itemRows[index]['laptop_id'], _laptops.map((l) => DropdownMenuItem(
-            value: l['id'].toString(), child: Text(l['nama_laptop'], overflow: TextOverflow.ellipsis))).toList(), (val) {
+          SearchableDropdown(
+            label: 'rent_plan.laptop'.tr(context),
+            value: _itemRows[index]['laptop_id'] != null 
+                ? _laptops.firstWhere((l) => l['id'].toString() == _itemRows[index]['laptop_id'], orElse: () => {})['nama_laptop'] ?? '' 
+                : '',
+            options: _laptops.map((l) => {
+              'id': l['id'].toString(),
+              'name': l['nama_laptop'].toString()
+            }).toList(),
+            onSelected: (val) {
               setState(() { _itemRows[index]['laptop_id'] = val; _calculatePriceForRow(index); });
-          }, hint: 'rent_plan.select_laptop'.tr(context)),
+            },
+            placeholder: 'rent_plan.select_laptop'.tr(context),
+          ),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -1054,19 +1088,29 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   }
 
   Widget _buildShippingDropdown() {
-    return _buildDropdown('rent_plan.shipping_service'.tr(context), _selectedShippingId, _shippingCosts.map((s) => DropdownMenuItem(
-      value: s['constants_id'].toString(),
-      child: Text('${s['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(s['field_one']))}', overflow: TextOverflow.ellipsis),
-    )).toList(), (val) {
-      if (val != null) {
+    final String selectedName = _selectedShippingId != null 
+        ? _shippingCosts.firstWhere((s) => s['constants_id'].toString() == _selectedShippingId, orElse: () => {})['category_name'] != null 
+          ? '${_shippingCosts.firstWhere((s) => s['constants_id'].toString() == _selectedShippingId)['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(_shippingCosts.firstWhere((s) => s['constants_id'].toString() == _selectedShippingId)['field_one']))}'
+          : ''
+        : '';
+
+    return SearchableDropdown(
+      label: 'rent_plan.shipping_service'.tr(context),
+      value: selectedName,
+      options: _shippingCosts.map((s) => {
+        'id': s['constants_id'].toString(),
+        'name': '${s['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(s['field_one']))}'
+      }).toList(),
+      onSelected: (val) {
         final ship = _shippingCosts.firstWhere((s) => s['constants_id'].toString() == val);
         setState(() {
           _selectedShippingId = val;
           _shippingCostAmount = int.parse(ship['field_one']);
           _tipePengiriman = ship['category_name'];
         });
-      }
-    }, hint: 'rent_plan.select_shipping'.tr(context));
+      },
+      placeholder: 'rent_plan.select_shipping'.tr(context),
+    );
   }
 
   Widget _buildBottomAction() {

@@ -7,6 +7,7 @@ import '../staff/add_rent_plan_page.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/side_drawer.dart';
+import '../../widgets/connectivity_wrapper.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -31,6 +32,7 @@ class _RentPlanPageState extends State<RentPlanPage>
   int _selectedLimit = 10;
   int _totalCount = 0;
   final List<int> _limitOptions = [10, 25, 50, 100];
+  final ValueNotifier<bool> _isNearBottom = ValueNotifier(false);
 
   final List<Map<String, String>> _tabs = [
     {'key': 'new', 'label': 'rent_plan.filter.new'},
@@ -50,6 +52,7 @@ class _RentPlanPageState extends State<RentPlanPage>
         setState(() {
           _currentStatus = _tabs[_tabController.index]['key']!;
           _currentPage = 1;
+          _isNearBottom.value = false;
           _fetchRentPlans();
         });
       }
@@ -86,7 +89,9 @@ class _RentPlanPageState extends State<RentPlanPage>
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response['message'] ?? 'rent_plan.failed_fetch'.tr(context)),
+            content: Text(
+              response['message'] ?? 'rent_plan.failed_fetch'.tr(context),
+            ),
           ),
         );
       }
@@ -99,36 +104,57 @@ class _RentPlanPageState extends State<RentPlanPage>
         : RefreshIndicator(
             onRefresh: _fetchRentPlans,
             color: _primaryColor,
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              itemCount: _rentals.isEmpty ? 2 : _rentals.length + 2,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _buildListHeader(),
-                  );
-                }
-
-                if (_rentals.isEmpty) {
-                  return _buildEmptyState();
-                }
-
-                if (index == _rentals.length + 1) {
-                  if (_totalCount > 0) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8, bottom: 80),
-                      child: _buildPagination(),
-                    );
-                  } else {
-                    return const SizedBox(height: 80);
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (scrollInfo.depth == 0) {
+                  final bool isBottom = scrollInfo.metrics.maxScrollExtent > 0 &&
+                      scrollInfo.metrics.pixels >
+                          scrollInfo.metrics.maxScrollExtent - 100;
+                  if (_isNearBottom.value != isBottom) {
+                    _isNearBottom.value = isBottom;
                   }
                 }
-
-                final rental = _rentals[index - 1];
-                return _buildRentalCard(rental);
+                return false;
               },
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                itemCount: _rentals.isEmpty ? 2 : _rentals.length + 2,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _buildListHeader(),
+                    );
+                  }
+
+                  if (_rentals.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  if (index == _rentals.length + 1) {
+                    if (_totalCount > 0) {
+                      return ValueListenableBuilder<double>(
+                        valueListenable: ConnectivityStatus.bottomPadding,
+                        builder: (context, padding, _) => Padding(
+                          padding: EdgeInsets.only(top: 8, bottom: padding + 20),
+                          child: _buildPagination(),
+                        ),
+                      );
+                    } else {
+                      return ValueListenableBuilder<double>(
+                        valueListenable: ConnectivityStatus.bottomPadding,
+                        builder: (context, padding, _) => SizedBox(
+                          height: padding + 20,
+                        ),
+                      );
+                    }
+                  }
+
+                  final rental = _rentals[index - 1];
+                  return _buildRentalCard(rental);
+                },
+              ),
             ),
           );
   }
@@ -142,7 +168,10 @@ class _RentPlanPageState extends State<RentPlanPage>
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: List.generate(_tabs.length, (index) => _buildRentalList()),
+            children: List.generate(
+              _tabs.length,
+              (index) => _buildRentalList(),
+            ),
           ),
         ),
       ],
@@ -150,25 +179,47 @@ class _RentPlanPageState extends State<RentPlanPage>
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: widget.isTab ? null : CustomAppBar(userData: widget.userData, showBackButton: false),
-      endDrawer: widget.isTab ? null : SideDrawer(userData: widget.userData, activePage: 'rent_plan'),
+      appBar: widget.isTab
+          ? null
+          : CustomAppBar(userData: widget.userData, showBackButton: false),
+      endDrawer: widget.isTab
+          ? null
+          : SideDrawer(userData: widget.userData, activePage: 'rent_plan'),
       body: content,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddRentPlanPage(userData: widget.userData),
+      floatingActionButton: ValueListenableBuilder<double>(
+        valueListenable: ConnectivityStatus.bottomPadding,
+        builder: (context, padding, _) => ValueListenableBuilder<bool>(
+          valueListenable: _isNearBottom,
+          builder: (context, isNearBottom, _) => AnimatedPadding(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            padding: EdgeInsets.only(
+              bottom: padding > 0 ? (isNearBottom ? padding + 100 : padding + 20) : 0,
             ),
-          );
-          if (result == true) {
-            _fetchRentPlans();
-          }
-        },
-        backgroundColor: _primaryColor,
-        icon: const Icon(Icons.add_shopping_cart_rounded, color: Colors.white),
-        label: Text('rent_plan.add_rental'.tr(context), 
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddRentPlanPage(userData: widget.userData),
+                  ),
+                );
+                if (result == true) {
+                  _fetchRentPlans();
+                }
+              },
+              backgroundColor: _primaryColor,
+              icon: const Icon(Icons.add_shopping_cart_rounded, color: Colors.white),
+              label: Text(
+                'rent_plan.add_rental'.tr(context),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -198,24 +249,28 @@ class _RentPlanPageState extends State<RentPlanPage>
                 _fetchRentPlans();
               }
             });
-            setState(() {}); 
+            setState(() {});
           },
           decoration: InputDecoration(
             hintText: 'rent_plan.search_hint'.tr(context),
             hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
             prefixIcon: Icon(Icons.search_rounded, color: _primaryColor),
-            suffixIcon: _searchController.text.isNotEmpty 
-              ? IconButton(
-                  icon: const Icon(Icons.cancel_rounded, size: 20, color: Colors.grey),
-                  onPressed: () {
-                    setState(() {
-                      _searchController.clear();
-                      _currentPage = 1;
-                    });
-                    _fetchRentPlans();
-                  },
-                )
-              : null,
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(
+                      Icons.cancel_rounded,
+                      size: 20,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _searchController.clear();
+                        _currentPage = 1;
+                      });
+                      _fetchRentPlans();
+                    },
+                  )
+                : null,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide.none,
@@ -363,13 +418,22 @@ class _RentPlanPageState extends State<RentPlanPage>
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'rent_plan.rental_type_laptop_count'.tr(context, args: {
-                              'type': (rental['jenis_sewa'] ?? 'pribadi').toString().toLowerCase() == 'perusahaan' 
-                                ? 'rent_plan.company'.tr(context) 
-                                : 'rent_plan.personal'.tr(context),
-                              'count': (rental['total_laptop'] ?? 0).toString(),
-                              'duration': (rental['lama_sewa'] ?? 0).toString()
-                            }),
+                            'rent_plan.rental_type_laptop_count'.tr(
+                              context,
+                              args: {
+                                'type':
+                                    (rental['jenis_sewa'] ?? 'pribadi')
+                                            .toString()
+                                            .toLowerCase() ==
+                                        'perusahaan'
+                                    ? 'rent_plan.company'.tr(context)
+                                    : 'rent_plan.personal'.tr(context),
+                                'count': (rental['total_laptop'] ?? 0)
+                                    .toString(),
+                                'duration': (rental['lama_sewa'] ?? 0)
+                                    .toString(),
+                              },
+                            ),
                             style: TextStyle(
                               color: Colors.grey[500],
                               fontSize: 13,
@@ -425,8 +489,16 @@ class _RentPlanPageState extends State<RentPlanPage>
                         const SizedBox(height: 4),
                         Text(
                           daysLeft < 0
-                              ? 'rent_plan.days_late'.tr(context, args: {'days': daysLeft.abs().toString()})
-                              : (daysLeft == 0 ? 'rent_plan.today'.tr(context) : 'rent_plan.days_left'.tr(context, args: {'days': daysLeft.toString()})),
+                              ? 'rent_plan.days_late'.tr(
+                                  context,
+                                  args: {'days': daysLeft.abs().toString()},
+                                )
+                              : (daysLeft == 0
+                                    ? 'rent_plan.today'.tr(context)
+                                    : 'rent_plan.days_left'.tr(
+                                        context,
+                                        args: {'days': daysLeft.toString()},
+                                      )),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -470,12 +542,18 @@ class _RentPlanPageState extends State<RentPlanPage>
 
   String _getRentalStatusLabel(String status) {
     switch (status.toLowerCase()) {
-      case 'new': return 'rent_plan.status_new'.tr(context);
-      case 'pending': return 'rent_plan.status_pending'.tr(context);
-      case 'confirmed': return 'rent_plan.status_active'.tr(context);
-      case 'masalah': return 'rent_plan.status_problem'.tr(context);
-      case 'completed': return 'rent_plan.status_completed'.tr(context);
-      default: return status.toUpperCase();
+      case 'new':
+        return 'rent_plan.status_new'.tr(context);
+      case 'pending':
+        return 'rent_plan.status_pending'.tr(context);
+      case 'confirmed':
+        return 'rent_plan.status_active'.tr(context);
+      case 'masalah':
+        return 'rent_plan.status_problem'.tr(context);
+      case 'completed':
+        return 'rent_plan.status_completed'.tr(context);
+      default:
+        return status.toUpperCase();
     }
   }
 
@@ -505,7 +583,11 @@ class _RentPlanPageState extends State<RentPlanPage>
           children: [
             Text(
               'rent_plan.show'.tr(context),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
             ),
             const SizedBox(width: 8),
             _buildPremiumDropdown(),
@@ -518,7 +600,10 @@ class _RentPlanPageState extends State<RentPlanPage>
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            'rent_plan.total_count'.tr(context, args: {'count': _totalCount.toString()}),
+            'rent_plan.total_count'.tr(
+              context,
+              args: {'count': _totalCount.toString()},
+            ),
             style: TextStyle(
               color: _primaryColor,
               fontSize: 12,
@@ -542,8 +627,16 @@ class _RentPlanPageState extends State<RentPlanPage>
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: _selectedLimit,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _primaryColor),
-          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: _primaryColor,
+          ),
+          style: TextStyle(
+            color: _primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
           onChanged: (int? newValue) {
             if (newValue != null) {
               setState(() {
@@ -595,10 +688,13 @@ class _RentPlanPageState extends State<RentPlanPage>
             ],
           ),
           child: Text(
-            'rent_plan.page_x_of_y'.tr(context, args: {
-              'current': _currentPage.toString(),
-              'total': totalPages.toString(),
-            }),
+            'rent_plan.page_x_of_y'.tr(
+              context,
+              args: {
+                'current': _currentPage.toString(),
+                'total': totalPages.toString(),
+              },
+            ),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -673,4 +769,3 @@ class _RentPlanPageState extends State<RentPlanPage>
     );
   }
 }
-

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/searchable_dropdown.dart';
 
 class EmployeeEditPage extends StatefulWidget {
   final Map<String, dynamic> employeeData;
@@ -394,20 +395,16 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
   }
 
   Widget _buildDropdown({required String label, required String key, required Map<String, String> items}) {
+    final String currentId = _controllers[key]!.text;
+    final String selectedName = items[currentId] ?? '';
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey)),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: items.containsKey(_controllers[key]!.text) ? _controllers[key]!.text : null,
-            items: items.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))).toList(),
-            onChanged: (val) => setState(() => _controllers[key]!.text = val!),
-            decoration: _inputDecoration(),
-          ),
-        ],
+      child: SearchableDropdown(
+        label: label,
+        value: selectedName,
+        options: items.entries.map((e) => {'id': e.key, 'name': e.value}).toList(),
+        onSelected: (id) => setState(() => _controllers[key]!.text = id),
       ),
     );
   }
@@ -419,25 +416,23 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     required String idKey,
     required String nameKey,
   }) {
-    String? currentVal = _controllers[key]!.text;
-    if (!items.any((e) => e[idKey].toString() == currentVal)) {
-      currentVal = null;
-    }
+    final String currentId = _controllers[key]!.text;
+    final dynamic selectedItem = items.firstWhere(
+      (e) => e[idKey].toString() == currentId,
+      orElse: () => null,
+    );
+    final String selectedName = selectedItem != null ? selectedItem[nameKey].toString() : '';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey)),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: currentVal,
-            items: items.map((e) => DropdownMenuItem(value: e[idKey].toString(), child: Text(e[nameKey]))).toList(),
-            onChanged: (val) => setState(() => _controllers[key]!.text = val!),
-            decoration: _inputDecoration(),
-          ),
-        ],
+      child: SearchableDropdown(
+        label: label,
+        value: selectedName,
+        options: items.map((e) => {
+          'id': e[idKey].toString(),
+          'name': e[nameKey].toString(),
+        }).toList(),
+        onSelected: (id) => setState(() => _controllers[key]!.text = id),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/custom_app_bar.dart';
+import '../widgets/shimmer_loading.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -20,7 +21,8 @@ class TodoListPage extends StatefulWidget {
 class _TodoListPageState extends State<TodoListPage> {
   final Color _primaryColor = const Color(0xFF7E57C2);
   bool _isLoading = true;
-  List<dynamic> _todos = [];
+  List<dynamic> _allTodos = []; // Master list for client-side pagination
+  List<dynamic> _todos = [];    // Current page slice
 
   // Pagination
   int _selectedLimit = 10;
@@ -117,26 +119,26 @@ class _TodoListPageState extends State<TodoListPage> {
     final int targetPage = page ?? _currentPage;
     setState(() => _isLoading = true);
     try {
-      final offset = (targetPage - 1) * _selectedLimit;
-      final response = await http.post(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_todos'),
-        body: {
-          'user_id': (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString(),
-          'limit': _selectedLimit.toString(),
-          'offset': offset.toString(),
-        },
-      );
+      final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
+      final url = 'https://foxgeen.com/HRIS/mobileapi/get_todos?user_id=$userId';
+      
+      final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
         if (result['status'] == true) {
           setState(() {
             _currentPage = targetPage;
-            _todos = result['data'];
-            _totalCount = result['total_count'] ?? 0;
+            _allTodos = result['data'] ?? [];
+            _totalCount = result['total_count'] ?? _allTodos.length;
             _completedCount = result['completed_count'] ?? 0;
             _pendingCount = result['pending_count'] ?? 0;
             _completedTodayCount = result['completed_today_count'] ?? 0;
+            
+            // Initial sort
+            _sortTodos(_allTodos);
+            // Apply pagination slice
+            _paginateLocal();
           });
 
           // Handle deep linking for highlighting specific Todo
@@ -151,14 +153,25 @@ class _TodoListPageState extends State<TodoListPage> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _sortTodos();
         });
       }
     }
   }
 
-  void _sortTodos() {
-    _todos.sort((a, b) {
+  void _paginateLocal() {
+    final start = (_currentPage - 1) * _selectedLimit;
+    int end = start + _selectedLimit;
+    if (end > _allTodos.length) end = _allTodos.length;
+    
+    if (start >= _allTodos.length) {
+      _todos = [];
+    } else {
+      _todos = _allTodos.sublist(start, end);
+    }
+  }
+
+  void _sortTodos(List<dynamic> list) {
+    list.sort((a, b) {
       bool aDone = (a['is_done'] == '1' || a['is_done'] == 1 || a['is_done'] == true);
       bool bDone = (b['is_done'] == '1' || b['is_done'] == 1 || b['is_done'] == true);
       
@@ -214,7 +227,7 @@ class _TodoListPageState extends State<TodoListPage> {
     final bool newStatus = !originalStatus;
 
     setState(() {
-      _todos[index]['is_done'] = newStatus ? 1 : 0;
+      _allTodos[index]['is_done'] = newStatus ? 1 : 0;
       if (newStatus) {
         _completedCount++;
         _pendingCount--;
@@ -222,12 +235,10 @@ class _TodoListPageState extends State<TodoListPage> {
       } else {
         _completedCount--;
         _pendingCount++;
-        // We don't necessarily know if the one we unchecked was from today, 
-        // but for immediate UI feedback we can decrement. 
-        // The _fetchTodos() call right after will sync it correctly.
         if (_completedTodayCount > 0) _completedTodayCount--;
       }
-      _sortTodos();
+      _sortTodos(_allTodos);
+      _paginateLocal();
     });
 
     try {
@@ -252,7 +263,7 @@ class _TodoListPageState extends State<TodoListPage> {
   void _revertToggle(int index, bool originalStatus) {
     if (mounted) {
       setState(() {
-        _todos[index]['is_done'] = originalStatus ? 1 : 0;
+        _allTodos[index]['is_done'] = originalStatus ? 1 : 0;
         if (!originalStatus) {
           _completedCount--;
           _pendingCount++;
@@ -260,6 +271,8 @@ class _TodoListPageState extends State<TodoListPage> {
           _completedCount++;
           _pendingCount--;
         }
+        _sortTodos(_allTodos);
+        _paginateLocal();
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('todo_list.status_update_failed'.tr(context)), backgroundColor: Colors.red),
@@ -596,8 +609,17 @@ class _TodoListPageState extends State<TodoListPage> {
               ),
             ),
             if (_isLoading && _todos.isEmpty)
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator(color: Color(0xFF7E57C2))),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Column(
+                    children: [
+                      const ShimmerCard(height: 120),
+                      const SizedBox(height: 20),
+                      const ShimmerList(itemCount: 5),
+                    ],
+                  ),
+                ),
               )
             else if (_todos.isEmpty && !_isLoading)
               SliverFillRemaining(
@@ -889,7 +911,7 @@ class _TodoListPageState extends State<TodoListPage> {
                               child: CircularProgressIndicator(
                                 value: progress,
                                 strokeWidth: 10,
-                                backgroundColor: Colors.grey[100],
+                                backgroundColor: Theme.of(context).dividerColor.withOpacity(0.1),
                                 valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
                                 strokeCap: StrokeCap.round,
                               ),
