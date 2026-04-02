@@ -111,7 +111,8 @@
         "unit": "Unit",
         "dashboard_help_msg": "Hello My ISN admin, I need help regarding my products or rental...",
         "finance": "Finance",
-        "quick_menu_finance": "Finance"
+        "quick_menu_finance": "Finance",
+        "quick_menu_helpdesk": "Helpdesk"
     },
     "login": {
         "welcome_back": "Welcome back, Please login into an account",
@@ -937,5 +938,32 @@
         "pm_paystack": "Paystack",
         "pm_cheque": "Cheque",
         "choose_period": "Choose Period"
+    },
+    "helpdesk": {
+        "title": "Helpdesk",
+        "create_ticket": "Create New Ticket",
+        "ticket_list": "Ticket List",
+        "subject": "Subject",
+        "priority": "Priority",
+        "description": "Description",
+        "status": "Status",
+        "created_at": "Created at",
+        "no_tickets": "No tickets yet",
+        "send": "Send",
+        "reply": "Reply",
+        "open": "Open",
+        "closed": "Closed",
+        "priority_low": "Low",
+        "priority_medium": "Medium",
+        "priority_high": "High",
+        "priority_critical": "Critical",
+        "ticket_code": "Ticket Code",
+        "success_create": "Ticket created successfully",
+        "failed_create": "Failed to create ticket",
+        "success_reply": "Reply sent successfully",
+        "failed_reply": "Failed to send reply",
+        "hint_description": "Describe your issue in detail...",
+        "hint_subject": "e.g. Login failed, Profile page error",
+        "select_priority": "Select Priority"
     }
 }

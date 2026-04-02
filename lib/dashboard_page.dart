@@ -10,6 +10,7 @@ import 'profile/profile_page.dart';
 import 'attendance_page.dart';
 import 'payroll/payroll_page.dart';
 import 'localization/app_localizations.dart';
+import 'helpdesk/helpdesk_list_page.dart';
 
 
 import 'services/version_check_service.dart';
@@ -1014,6 +1015,21 @@ class _DashboardPageState extends State<DashboardPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => FinancePage(
+                        userData: _dashboardData['user'] ?? widget.userData,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              _buildQuickMenuCard(
+                'dashboard.quick_menu_helpdesk'.tr(context),
+                Icons.support_agent_rounded,
+                const Color(0xFF7E57C2),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HelpdeskListPage(
                         userData: _dashboardData['user'] ?? widget.userData,
                       ),
                     ),

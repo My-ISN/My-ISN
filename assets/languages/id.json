@@ -111,7 +111,8 @@
         "unit": "Unit",
         "dashboard_help_msg": "Halo admin My ISN, saya butuh bantuan mengenai produk\/rental saya...",
         "finance": "Keuangan",
-        "quick_menu_finance": "Keuangan"
+        "quick_menu_finance": "Keuangan",
+        "quick_menu_helpdesk": "Helpdesk"
     },
     "login": {
         "welcome_back": "Selamat datang kembali, Silakan masuk ke akun Anda",
@@ -937,5 +938,32 @@
         "pm_paystack": "Paystack",
         "pm_cheque": "Cek",
         "choose_period": "Pilih Periode"
+    },
+    "helpdesk": {
+        "title": "Helpdesk",
+        "create_ticket": "Buat Tiket Baru",
+        "ticket_list": "Daftar Tiket",
+        "subject": "Subjek",
+        "priority": "Prioritas",
+        "description": "Deskripsi",
+        "status": "Status",
+        "created_at": "Dibuat pada",
+        "no_tickets": "Belum ada tiket",
+        "send": "Kirim",
+        "reply": "Balas",
+        "open": "Terbuka",
+        "closed": "Selesai",
+        "priority_low": "Rendah",
+        "priority_medium": "Sedang",
+        "priority_high": "Tinggi",
+        "priority_critical": "Kritis",
+        "ticket_code": "Kode Tiket",
+        "success_create": "Tiket berhasil dibuat",
+        "failed_create": "Gagal membuat tiket",
+        "success_reply": "Balasan berhasil dikirim",
+        "failed_reply": "Gagal mengirim balasan",
+        "hint_description": "Jelaskan kendala Anda secara detail...",
+        "hint_subject": "Contoh: Gagal login, Error di halaman profile",
+        "select_priority": "Pilih Prioritas"
     }
 }

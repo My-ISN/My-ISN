@@ -11,6 +11,7 @@ import 'localization/app_localizations.dart';
 import 'providers/language_provider.dart';
 import 'providers/theme_provider.dart';
 import 'diagnosis/diagnosis_hub_page.dart';
+import 'helpdesk/helpdesk_list_page.dart';
 import 'login_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -967,10 +968,15 @@ class _SettingsPageState extends State<SettingsPage> {
                       _buildInfoTile(
                         icon: Icons.help_outline,
                         title: 'settings.help_support'.tr(context),
-                        onTap: () => _launchWhatsApp(
-                          '0895384314416',
-                          'settings.whatsapp_help_msg'.tr(context),
-                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  HelpdeskListPage(userData: widget.userData),
+                            ),
+                          );
+                        },
                       ),
                       const Divider(height: 1, indent: 70),
                       _buildInfoTile(
@@ -1127,40 +1133,6 @@ class _SettingsPageState extends State<SettingsPage> {
           SnackBar(
             content: Text(
               'settings.link_error'.tr(context, args: {'error': e.toString()}),
-            ),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _launchWhatsApp(String phone, String message) async {
-    // Remove leading 0 and replace with 62
-    String formattedPhone = phone;
-    if (phone.startsWith('0')) {
-      formattedPhone = '62${phone.substring(1)}';
-    }
-
-    final String urlString =
-        "whatsapp://send?phone=$formattedPhone&text=${Uri.encodeComponent(message)}";
-    final Uri url = Uri.parse(urlString);
-
-    try {
-      if (!await launchUrl(url)) {
-        // Fallback to web link if whatsapp app is not installed
-        final String webUrlString =
-            "https://wa.me/$formattedPhone?text=${Uri.encodeComponent(message)}";
-        final Uri webUrl = Uri.parse(webUrlString);
-        if (!await launchUrl(webUrl, mode: LaunchMode.externalApplication)) {
-          throw Exception('Could not launch WhatsApp');
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'settings.wa_error'.tr(context, args: {'error': e.toString()}),
             ),
           ),
         );
