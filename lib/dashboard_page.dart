@@ -12,7 +12,6 @@ import 'payroll/payroll_page.dart';
 import 'localization/app_localizations.dart';
 import 'helpdesk/helpdesk_list_page.dart';
 
-
 import 'services/version_check_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -23,7 +22,7 @@ import 'todo_list/todo_list_page.dart';
 import 'employees/employees_page.dart';
 import 'work_log/work_log_page.dart';
 import 'finance/finance_page.dart';
-
+import 'widgets/on_progress_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -50,12 +49,15 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _hasPermission(String resource) {
     // Prefer data from dashboard refresh if available
     final userData = _dashboardData['user'] ?? widget.userData;
-    
+
     // Admin has all permissions
     if (userData['role_resources'] == 'all') return true;
 
     final String resources = userData['role_resources'] ?? '';
-    final List<String> resourceList = resources.split(',').map((e) => e.trim()).toList();
+    final List<String> resourceList = resources
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
     return resourceList.contains(resource);
   }
 
@@ -72,22 +74,28 @@ class _DashboardPageState extends State<DashboardPage> {
 
     // 2. Check if user just updated (Changelog/What's New)
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    final String currentVersionWithBuild = "${packageInfo.version}+${packageInfo.buildNumber}";
-    final String? lastSeenVersion = await storage.read(key: 'last_seen_version');
+    final String currentVersionWithBuild =
+        "${packageInfo.version}+${packageInfo.buildNumber}";
+    final String? lastSeenVersion = await storage.read(
+      key: 'last_seen_version',
+    );
 
     if (lastSeenVersion != null && lastSeenVersion != currentVersionWithBuild) {
       // Version changed! Show what's new if the server has notes for this current version
       final latestInfo = await VersionCheckService.getLatestVersionInfo();
-      if (latestInfo != null && 
-          latestInfo.version == currentVersionWithBuild && 
-          latestInfo.releaseNotes != null && 
+      if (latestInfo != null &&
+          latestInfo.version == currentVersionWithBuild &&
+          latestInfo.releaseNotes != null &&
           mounted) {
         _showChangelogDialog(latestInfo);
       }
     }
 
     // Update last seen version
-    await storage.write(key: 'last_seen_version', value: currentVersionWithBuild);
+    await storage.write(
+      key: 'last_seen_version',
+      value: currentVersionWithBuild,
+    );
   }
 
   void _showChangelogDialog(AppUpdateInfo info) {
@@ -124,13 +132,23 @@ class _DashboardPageState extends State<DashboardPage> {
                       color: const Color(0xFF7E57C2).withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.celebration, color: Color(0xFF7E57C2), size: 28),
+                    child: const Icon(
+                      Icons.celebration,
+                      color: Color(0xFF7E57C2),
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      'dashboard.whats_new'.tr(context, args: {'version': info.version.split('+')[0]}),
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      'dashboard.whats_new'.tr(
+                        context,
+                        args: {'version': info.version.split('+')[0]},
+                      ),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -147,7 +165,9 @@ class _DashboardPageState extends State<DashboardPage> {
                       'dashboard.update_thanks'.tr(context),
                       style: TextStyle(
                         fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -155,20 +175,20 @@ class _DashboardPageState extends State<DashboardPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).brightness == Brightness.dark 
-                            ? Colors.white.withOpacity(0.05) 
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white.withOpacity(0.05)
                             : Colors.grey[100],
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Theme.of(context).dividerColor.withOpacity(0.1),
+                          color: Theme.of(
+                            context,
+                          ).dividerColor.withOpacity(0.1),
                         ),
                       ),
                       child: Text(
-                        info.releaseNotes ?? 'announcement.no_description_available'.tr(context),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          height: 1.6,
-                        ),
+                        info.releaseNotes ??
+                            'announcement.no_description_available'.tr(context),
+                        style: const TextStyle(fontSize: 14, height: 1.6),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -181,7 +201,9 @@ class _DashboardPageState extends State<DashboardPage> {
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1))),
+                border: Border(
+                  top: BorderSide(color: Colors.grey.withOpacity(0.1)),
+                ),
               ),
               child: SizedBox(
                 width: double.infinity,
@@ -191,7 +213,9 @@ class _DashboardPageState extends State<DashboardPage> {
                     backgroundColor: const Color(0xFF7E57C2),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     elevation: 0,
                   ),
                   child: Text(
@@ -245,13 +269,20 @@ class _DashboardPageState extends State<DashboardPage> {
                         color: const Color(0xFF7E57C2).withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.system_update, color: Color(0xFF7E57C2), size: 28),
+                      child: const Icon(
+                        Icons.system_update,
+                        color: Color(0xFF7E57C2),
+                        size: 28,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
                         'main.update_available'.tr(context),
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -266,7 +297,10 @@ class _DashboardPageState extends State<DashboardPage> {
                     children: [
                       Text(
                         '${'main.new_version'.tr(context)}: ${updateInfo.version.split('+')[0]}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       if (updateInfo.releaseNotes != null) ...[
@@ -279,7 +313,9 @@ class _DashboardPageState extends State<DashboardPage> {
                           updateInfo.releaseNotes!,
                           style: TextStyle(
                             height: 1.6,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.8),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -298,7 +334,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
-                  border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1))),
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.withOpacity(0.1)),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -308,12 +346,18 @@ class _DashboardPageState extends State<DashboardPage> {
                           onPressed: () => Navigator.pop(context),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            side: BorderSide(
+                              color: Colors.grey.withOpacity(0.3),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           child: Text(
                             'main.later'.tr(context),
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                         ),
                       ),
@@ -324,14 +368,19 @@ class _DashboardPageState extends State<DashboardPage> {
                         onPressed: () async {
                           final url = Uri.parse(updateInfo.downloadLink);
                           if (await canLaunchUrl(url)) {
-                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                            await launchUrl(
+                              url,
+                              mode: LaunchMode.externalApplication,
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF7E57C2),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           elevation: 0,
                         ),
                         child: Text(
@@ -365,7 +414,9 @@ class _DashboardPageState extends State<DashboardPage> {
             _dashboardData = data['data'];
             // If customer, also fetch customer specific dashboard info
             final user = _dashboardData['user'] ?? widget.userData;
-            if (user['user_type'] == 'customer' || user['user_role_id'] == 21 || user['user_role_id'] == '21') {
+            if (user['user_type'] == 'customer' ||
+                user['user_role_id'] == 21 ||
+                user['user_role_id'] == '21') {
               _fetchCustomerDashboard();
             } else {
               _isLoading = false;
@@ -376,7 +427,11 @@ class _DashboardPageState extends State<DashboardPage> {
         if (mounted) {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'dashboard.fetch_error'.tr(context))),
+            SnackBar(
+              content: Text(
+                data['message'] ?? 'dashboard.fetch_error'.tr(context),
+              ),
+            ),
           );
         }
       }
@@ -413,7 +468,11 @@ class _DashboardPageState extends State<DashboardPage> {
         if (mounted) {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'dashboard.fetch_error'.tr(context))),
+            SnackBar(
+              content: Text(
+                data['message'] ?? 'dashboard.fetch_error'.tr(context),
+              ),
+            ),
           );
         }
       }
@@ -428,22 +487,24 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final user = _dashboardData['user'] ?? widget.userData;
-    final bool isCustomer = user['user_type'] == 'customer' || 
-                           user['user_role_id'] == 21 || 
-                           user['user_role_id'] == '21';
+    final bool isCustomer =
+        user['user_type'] == 'customer' ||
+        user['user_role_id'] == 21 ||
+        user['user_role_id'] == '21';
     final bool hasPayroll = _hasPermission('mobile_payroll_enable');
 
-    final List<Widget> pages = isCustomer ? [
-      _buildHomeContent(),
-      client_rp.RentPlanPage(userData: user, isTab: true),
-      ProfilePage(userData: user, isTab: true),
-    ] : [
-      _buildHomeContent(),
-      AttendancePage(userData: user),
-      if (hasPayroll)
-        PayrollPage(userData: user),
-      ProfilePage(userData: user, isTab: true),
-    ];
+    final List<Widget> pages = isCustomer
+        ? [
+            _buildHomeContent(),
+            client_rp.RentPlanPage(userData: user, isTab: true),
+            ProfilePage(userData: user, isTab: true),
+          ]
+        : [
+            _buildHomeContent(),
+            AttendancePage(userData: user),
+            if (hasPayroll) PayrollPage(userData: user),
+            ProfilePage(userData: user, isTab: true),
+          ];
 
     // Ensure _currentIndex is within bounds if pages list changed
     if (_currentIndex >= pages.length) {
@@ -454,23 +515,32 @@ class _DashboardPageState extends State<DashboardPage> {
     String activePage = '';
     if (isCustomer) {
       switch (_currentIndex) {
-        case 0: activePage = 'dashboard'; break;
-        case 1: activePage = 'rent_plan'; break;
-        case 2: activePage = 'invoice'; break;
-        case 3: activePage = 'profile'; break;
+        case 0:
+          activePage = 'dashboard';
+          break;
+        case 1:
+          activePage = 'rent_plan';
+          break;
+        case 2:
+          activePage = 'invoice';
+          break;
+        case 3:
+          activePage = 'profile';
+          break;
       }
     } else {
-      if (_currentIndex == 0) activePage = 'dashboard';
-      else if (_currentIndex == 1) activePage = 'attendance';
-      else if (hasPayroll && _currentIndex == 2) activePage = 'payroll';
-      else if (_currentIndex == (hasPayroll ? 3 : 2)) activePage = 'profile';
+      if (_currentIndex == 0)
+        activePage = 'dashboard';
+      else if (_currentIndex == 1)
+        activePage = 'attendance';
+      else if (hasPayroll && _currentIndex == 2)
+        activePage = 'payroll';
+      else if (_currentIndex == (hasPayroll ? 3 : 2))
+        activePage = 'profile';
     }
 
     return Scaffold(
-      appBar: CustomAppBar(
-        userData: user,
-        showBackButton: false,
-      ),
+      appBar: CustomAppBar(userData: user, showBackButton: false),
       body: IndexedStack(index: _currentIndex, children: pages),
       endDrawer: SideDrawer(
         userData: user,
@@ -498,7 +568,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-
 
   Future<void> _clockBreak() async {
     final activeAtt = _dashboardData['attendance'];
@@ -554,30 +623,35 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-
   Widget _buildHomeContent() {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     final user = _dashboardData['user'] ?? widget.userData;
-    if (user['user_type'] == 'customer' || user['user_role_id'] == 21 || user['user_role_id'] == '21') {
+    if (user['user_type'] == 'customer' ||
+        user['user_role_id'] == 21 ||
+        user['user_role_id'] == '21') {
       return _buildCustomerContent();
     }
 
     final attendance = _dashboardData['attendance'];
-    final bool hasClockIn = attendance != null &&
+    final bool hasClockIn =
+        attendance != null &&
         attendance['clock_in'] != null &&
         attendance['clock_in'].toString().isNotEmpty &&
         attendance['clock_in'].toString() != '-';
-    final bool hasClockOut = attendance != null &&
+    final bool hasClockOut =
+        attendance != null &&
         attendance['clock_out'] != null &&
         attendance['clock_out'].toString().isNotEmpty &&
         attendance['clock_out'].toString() != '-';
 
-    final bool hasBreakIn = attendance != null &&
+    final bool hasBreakIn =
+        attendance != null &&
         attendance['break_in'] != null &&
         attendance['break_in'].toString().isNotEmpty &&
         attendance['break_in'].toString() != '-';
-    final bool hasBreakOut = attendance != null &&
+    final bool hasBreakOut =
+        attendance != null &&
         attendance['break_out'] != null &&
         attendance['break_out'].toString().isNotEmpty &&
         attendance['break_out'].toString() != '-';
@@ -590,7 +664,6 @@ class _DashboardPageState extends State<DashboardPage> {
     } else if (hasClockIn) {
       breakLabel = 'dashboard.start_break'.tr(context);
     }
-
 
     return RefreshIndicator(
       onRefresh: _fetchDashboardData,
@@ -700,8 +773,10 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                           child: Text(
                             (_dashboardData['user']?['role_name'] ??
-                                widget.userData['role_name'] ??
-                                'Staff').toString().roleTr(context),
+                                    widget.userData['role_name'] ??
+                                    'Staff')
+                                .toString()
+                                .roleTr(context),
                             style: const TextStyle(
                               color: Colors.green,
                               fontWeight: FontWeight.bold,
@@ -896,7 +971,11 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 const Spacer(),
-                Icon(Icons.auto_awesome_rounded, size: 16, color: Colors.grey[400]),
+                Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 16,
+                  color: Colors.grey[400],
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -909,15 +988,16 @@ class _DashboardPageState extends State<DashboardPage> {
                   const Color(0xFF7E57C2),
                   () {
                     final user = _dashboardData['user'] ?? widget.userData;
-                    final bool isCustomer = user['user_type'] == 'customer' || 
-                                           user['user_role_id'] == 21 || 
-                                           user['user_role_id'] == '21';
+                    final bool isCustomer =
+                        user['user_type'] == 'customer' ||
+                        user['user_role_id'] == 21 ||
+                        user['user_role_id'] == '21';
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => isCustomer 
-                          ? client_rp.RentPlanPage(userData: user)
-                          : staff_rp.RentPlanPage(userData: user),
+                        builder: (context) => isCustomer
+                            ? client_rp.RentPlanPage(userData: user)
+                            : staff_rp.RentPlanPage(userData: user),
                       ),
                     );
                   },
@@ -938,7 +1018,8 @@ class _DashboardPageState extends State<DashboardPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => TodoListPage(
-                                  userData: _dashboardData['user'] ?? widget.userData,
+                                  userData:
+                                      _dashboardData['user'] ?? widget.userData,
                                 ),
                               ),
                             );
@@ -1008,29 +1089,60 @@ class _DashboardPageState extends State<DashboardPage> {
               if (_hasPermission('mobile_finance_enable'))
                 _buildQuickMenuCard(
                   'dashboard.quick_menu_finance'.tr(context),
-                Icons.account_balance_wallet_rounded,
+                  Icons.account_balance_wallet_rounded,
+                  const Color(0xFF7E57C2),
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FinancePage(
+                          userData: _dashboardData['user'] ?? widget.userData,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              if (_hasPermission('mobile_helpdesk_view'))
+                _buildQuickMenuCard(
+                  'dashboard.quick_menu_helpdesk'.tr(context),
+                  Icons.support_agent_rounded,
+                  const Color(0xFF7E57C2),
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HelpdeskListPage(
+                          userData: _dashboardData['user'] ?? widget.userData,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              _buildQuickMenuCard(
+                'dashboard.quick_menu_ai_bot'.tr(context),
+                Icons.smart_toy_rounded,
                 const Color(0xFF7E57C2),
                 () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => FinancePage(
-                        userData: _dashboardData['user'] ?? widget.userData,
+                      builder: (context) => OnProgressPage(
+                        title: 'dashboard.quick_menu_ai_bot'.tr(context),
                       ),
                     ),
                   );
                 },
               ),
               _buildQuickMenuCard(
-                'dashboard.quick_menu_helpdesk'.tr(context),
-                Icons.support_agent_rounded,
+                'dashboard.quick_menu_creative_idea'.tr(context),
+                Icons.lightbulb_rounded,
                 const Color(0xFF7E57C2),
                 () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => HelpdeskListPage(
-                        userData: _dashboardData['user'] ?? widget.userData,
+                      builder: (context) => OnProgressPage(
+                        title: 'dashboard.quick_menu_creative_idea'.tr(context),
                       ),
                     ),
                   );
@@ -1057,7 +1169,9 @@ class _DashboardPageState extends State<DashboardPage> {
 
         final List<List<Widget>> rows = [];
         for (var i = 0; i < items.length; i += 3) {
-          rows.add(items.sublist(i, i + 3 > items.length ? items.length : i + 3));
+          rows.add(
+            items.sublist(i, i + 3 > items.length ? items.length : i + 3),
+          );
         }
 
         return Column(
@@ -1070,10 +1184,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     return Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: SizedBox(
-                          height: fixedHeight,
-                          child: item,
-                        ),
+                        child: SizedBox(height: fixedHeight, child: item),
                       ),
                     );
                   }),
@@ -1318,7 +1429,11 @@ class _DashboardPageState extends State<DashboardPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            setState(() => _currentIndex = (_hasPermission('mobile_payroll_enable') ? 3 : 2));
+            setState(
+              () => _currentIndex = (_hasPermission('mobile_payroll_enable')
+                  ? 3
+                  : 2),
+            );
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
@@ -1327,18 +1442,34 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 ClipOval(
                   child: Container(
-                    width: 60, height: 60,
+                    width: 60,
+                    height: 60,
                     color: Theme.of(context).brightness == Brightness.light
                         ? const Color(0xFFF1F5F9)
                         : Theme.of(context).scaffoldBackgroundColor,
-                    child: ((_dashboardData['user']?['profile_photo'] ?? widget.userData['profile_photo']) != null && 
-                            (_dashboardData['user']?['profile_photo'] ?? widget.userData['profile_photo']).toString().isNotEmpty)
+                    child:
+                        ((_dashboardData['user']?['profile_photo'] ??
+                                    widget.userData['profile_photo']) !=
+                                null &&
+                            (_dashboardData['user']?['profile_photo'] ??
+                                    widget.userData['profile_photo'])
+                                .toString()
+                                .isNotEmpty)
                         ? Image.network(
                             'https://foxgeen.com/HRIS/public/uploads/users/thumb/${_dashboardData['user']?['profile_photo'] ?? widget.userData['profile_photo']}',
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 36, color: Colors.white),
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                                  Icons.person,
+                                  size: 36,
+                                  color: Colors.white,
+                                ),
                           )
-                        : const Icon(Icons.person, size: 36, color: Colors.white),
+                        : const Icon(
+                            Icons.person,
+                            size: 36,
+                            color: Colors.white,
+                          ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1347,8 +1478,13 @@ class _DashboardPageState extends State<DashboardPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _dashboardData['user']?['nama'] ?? widget.userData['nama'] ?? 'User',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        _dashboardData['user']?['nama'] ??
+                            widget.userData['nama'] ??
+                            'User',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
@@ -1377,8 +1513,16 @@ class _DashboardPageState extends State<DashboardPage> {
         border: Border.all(color: Colors.green.withOpacity(0.2)),
       ),
       child: Text(
-        (_dashboardData['user']?['role_name'] ?? widget.userData['role_name'] ?? 'Staff').toString().roleTr(context),
-        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
+        (_dashboardData['user']?['role_name'] ??
+                widget.userData['role_name'] ??
+                'Staff')
+            .toString()
+            .roleTr(context),
+        style: const TextStyle(
+          color: Colors.green,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -1396,37 +1540,64 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-
   Widget _buildHelpSection(Map contact) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF3F51B5),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('BUTUH BANTUAN?', style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
+          const Text(
+            'BUTUH BANTUAN?',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 8),
-          Text(contact['company_name'] ?? 'PT. ISKOM SARANA NUSANTARA', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            contact['company_name'] ?? 'PT. ISKOM SARANA NUSANTARA',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(contact['address'] ?? '', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+          Text(
+            contact['address'] ?? '',
+            style: const TextStyle(color: Colors.white70, fontSize: 11),
+          ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-                            onPressed: () => _launchWhatsApp(
+              onPressed: () => _launchWhatsApp(
                 '0895384314416',
                 'dashboard.dashboard_help_msg'.tr(context),
               ),
               icon: const Icon(Icons.chat, color: Colors.white, size: 18),
-              label: Text('dashboard.contact_via_wa'.tr(context), style: const TextStyle(fontSize: 11, color: Colors.white)),
+              label: Text(
+                'dashboard.contact_via_wa'.tr(context),
+                style: const TextStyle(fontSize: 11, color: Colors.white),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF25D366),
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ),
@@ -1440,47 +1611,80 @@ class _DashboardPageState extends State<DashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('dashboard.available_products'.tr(context), Icons.laptop_windows_rounded),
+        _buildSectionHeader(
+          'dashboard.available_products'.tr(context),
+          Icons.laptop_windows_rounded,
+        ),
         const SizedBox(height: 12),
-        ...products.map((p) => InkWell(
-          onTap: () => _showProductSpecs(p),
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.withOpacity(0.1)),
-            ),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    '$laptopBaseUrl${p['gambar']}',
-                    width: 40, height: 40, fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      width: 40, height: 40, color: Colors.grey.withOpacity(0.1),
-                      child: const Icon(Icons.laptop, size: 24, color: Colors.grey),
-                    ),
+        ...products
+            .map(
+              (p) => InkWell(
+                onTap: () => _showProductSpecs(p),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.withOpacity(0.1)),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(p['nama_laptop'] ?? 'Laptop', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11), overflow: TextOverflow.ellipsis),
-                      Text('${p['procesor'] ?? 'Core'} - ${p['ram'] ?? '8GB'}', style: TextStyle(color: Colors.grey[500], fontSize: 9)),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          '$laptopBaseUrl${p['gambar']}',
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                width: 40,
+                                height: 40,
+                                color: Colors.grey.withOpacity(0.1),
+                                child: const Icon(
+                                  Icons.laptop,
+                                  size: 24,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p['nama_laptop'] ?? 'Laptop',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              '${p['procesor'] ?? 'Core'} - ${p['ram'] ?? '8GB'}',
+                              style: TextStyle(
+                                color: Colors.grey[500],
+                                fontSize: 9,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: Colors.grey.withOpacity(0.5),
+                      ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, size: 20, color: Colors.grey.withOpacity(0.5)),
-              ],
-            ),
-          ),
-        )).toList(),
+              ),
+            )
+            .toList(),
       ],
     );
   }
@@ -1500,8 +1704,12 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Container(
               margin: const EdgeInsets.only(top: 12),
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: Colors.grey.withOpacity(0.3), borderRadius: BorderRadius.circular(2)),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -1509,34 +1717,81 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('dashboard.available_products'.tr(context).toUpperCase(), 
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, letterSpacing: 1.2)),
+                    Text(
+                      'dashboard.available_products'.tr(context).toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Image.network(
                         'https://foxgeen.com/HRIS/uploads/products/${p['gambar']}',
-                        height: 200, width: double.infinity, fit: BoxFit.contain,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) => Container(
-                          height: 200, width: double.infinity, color: Colors.grey.withOpacity(0.1),
-                          child: const Icon(Icons.laptop, size: 80, color: Colors.grey),
+                          height: 200,
+                          width: double.infinity,
+                          color: Colors.grey.withOpacity(0.1),
+                          child: const Icon(
+                            Icons.laptop,
+                            size: 80,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(p['nama_laptop'] ?? 'Laptop', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                    if (p['catatan'] != null && p['catatan'].toString().isNotEmpty) ...[
+                    Text(
+                      p['nama_laptop'] ?? 'Laptop',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (p['catatan'] != null &&
+                        p['catatan'].toString().isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      Text(p['catatan'], style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                      Text(
+                        p['catatan'],
+                        style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                      ),
                     ],
                     const SizedBox(height: 32),
-                    Text('dashboard.specification'.tr(context), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    Text(
+                      'dashboard.specification'.tr(context),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
                     const SizedBox(height: 16),
-                    _buildSpecItem('dashboard.processor'.tr(context), p['procesor'] ?? '-'),
-                    _buildSpecItem('dashboard.ram'.tr(context), p['ram'] ?? '-'),
-                    _buildSpecItem('dashboard.storage'.tr(context), p['hardisk'] ?? '-'),
-                    _buildSpecItem('dashboard.stock'.tr(context), '${p['stok'] ?? 0} ${'dashboard.unit'.tr(context)}'),
-                    _buildSpecItem('dashboard.condition'.tr(context), (p['kondisi'] ?? '-').toString().toUpperCase()),
+                    _buildSpecItem(
+                      'dashboard.processor'.tr(context),
+                      p['procesor'] ?? '-',
+                    ),
+                    _buildSpecItem(
+                      'dashboard.ram'.tr(context),
+                      p['ram'] ?? '-',
+                    ),
+                    _buildSpecItem(
+                      'dashboard.storage'.tr(context),
+                      p['hardisk'] ?? '-',
+                    ),
+                    _buildSpecItem(
+                      'dashboard.stock'.tr(context),
+                      '${p['stok'] ?? 0} ${'dashboard.unit'.tr(context)}',
+                    ),
+                    _buildSpecItem(
+                      'dashboard.condition'.tr(context),
+                      (p['kondisi'] ?? '-').toString().toUpperCase(),
+                    ),
                   ],
                 ),
               ),
@@ -1554,12 +1809,14 @@ class _DashboardPageState extends State<DashboardPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 13)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
         ],
       ),
     );
   }
-
 
   String _formatPrice(dynamic price) {
     if (price == null) return '0';
@@ -1594,7 +1851,10 @@ class _DashboardPageState extends State<DashboardPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('settings.wa_error'.tr(context, args: {'error': e.toString()}))),
+            content: Text(
+              'settings.wa_error'.tr(context, args: {'error': e.toString()}),
+            ),
+          ),
         );
       }
     }

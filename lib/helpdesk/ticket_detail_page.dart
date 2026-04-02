@@ -33,9 +33,18 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     _fetchTicketDetails();
   }
 
+  bool _hasPermission(String resource) {
+    if (widget.userData['role_access'] == '1') return true;
+    final String? resources = widget.userData['role_resources'];
+    if (resources == null || resources.isEmpty) return false;
+    final List<String> resourceList = resources.split(',');
+    return resourceList.contains(resource);
+  }
+
   Future<void> _fetchTicketDetails() async {
     try {
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_ticket_details?ticket_id=${widget.ticketId}';
+      final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
+      final url = 'https://foxgeen.com/HRIS/mobileapi/get_ticket_details?ticket_id=${widget.ticketId}&user_id=$userId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
 
@@ -59,32 +68,80 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     final message = _replyController.text.trim();
     if (message.isEmpty) return;
 
-    setState(() => _isSending = true);
+    if (!_hasPermission('mobile_helpdesk_answer')) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Anda tidak memiliki izin untuk membalas tiket ini')),
+        );
+      }
+      return;
+    }
+
+    final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
+    
+    // Create optimistic reply for immediate feedback
+    final optimisticReply = {
+      'sent_by': userId,
+      'reply_text': message,
+      'created_at': 'Sending...',
+      'profile_photo': widget.userData['profile_photo'],
+      'is_optimistic': true,
+    };
+
+    // Store current replies to restore if needed
+    final originalReplies = List.from(_replies);
+
+    setState(() {
+      _replies.add(optimisticReply);
+      _replyController.clear();
+      _isSending = true;
+    });
+    _scrollToBottom();
+
     try {
-      final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final url = 'https://foxgeen.com/HRIS/mobileapi/add_ticket_reply';
       final response = await http.post(
         Uri.parse(url),
         body: {
           'ticket_id': widget.ticketId,
-          'user_id': userId.toString(),
+          'user_id': userId,
           'message': message,
         },
       );
 
       final data = json.decode(response.body);
       if (data['status'] == true) {
-        _replyController.clear();
+        // Success: Refresh details to get real data from server
         await _fetchTicketDetails();
       } else {
+        // Failure: Revert UI and show error
+        setState(() {
+          _replies = originalReplies;
+          _replyController.text = message; // Put message back in text field
+        });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'Failed to send reply')),
+            SnackBar(
+              content: Text(data['message'] ?? 'Failed to send reply'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
     } catch (e) {
       debugPrint('Helpdesk: Error sending reply: $e');
+      setState(() {
+        _replies = originalReplies;
+        _replyController.text = message;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to send reply. Please check your connection.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSending = false);
     }
@@ -153,7 +210,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                       },
                     ),
                   ),
-                  if (_ticketData['ticket_status'].toString() != '2') _buildReplyBox(),
+                  if (_ticketData['ticket_status'].toString() != '2') _buildReplyInput(),
                 ],
               ),
       ),
@@ -167,24 +224,49 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.1))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            children: [
+              CircleAvatar(
+                radius: 12,
+                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                child: Icon(Icons.person, size: 14, color: Theme.of(context).colorScheme.primary),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${_ticketData['first_name'] ?? ''} ${_ticketData['last_name'] ?? ''}'.trim().toUpperCase(),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+              const Spacer(),
+              Text(
+                _ticketData['ticket_code'] ?? '',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                _ticketData['subject'] ?? '',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              Expanded(
+                child: Text(
+                  _ticketData['subject'] ?? '',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
@@ -223,61 +305,91 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
   }
 
   Widget _buildChatBubble(Map<String, dynamic> reply, bool isMe) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (!isMe) ...[
-                CircleAvatar(
-                  radius: 14,
-                  backgroundImage: reply['profile_photo'] != null && reply['profile_photo'] != ''
-                      ? NetworkImage('https://foxgeen.com/HRIS/uploads/users/thumb/${reply['profile_photo']}')
-                      : const AssetImage('assets/images/user_placeholder.png') as ImageProvider,
-                ),
-                const SizedBox(width: 8),
-              ],
-              Flexible(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isMe ? const Color(0xFF1E88E5) : Colors.grey[200],
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: Radius.circular(isMe ? 16 : 0),
-                      bottomRight: Radius.circular(isMe ? 0 : 16),
+    final bool isOptimistic = reply['is_optimistic'] ?? false;
+
+    return Opacity(
+      opacity: isOptimistic ? 0.6 : 1.0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (!isMe) ...[
+                  CircleAvatar(
+                    radius: 14,
+                    backgroundImage: reply['profile_photo'] != null && reply['profile_photo'] != ''
+                        ? NetworkImage('https://foxgeen.com/HRIS/uploads/users/thumb/${reply['profile_photo']}')
+                        : const AssetImage('assets/images/user_placeholder.png') as ImageProvider,
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isMe ? const Color(0xFF7E57C2) : Colors.grey[200],
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(16),
+                        topRight: const Radius.circular(16),
+                        bottomLeft: Radius.circular(isMe ? 16 : 0),
+                        bottomRight: Radius.circular(isMe ? 0 : 16),
+                      ),
+                    ),
+                    child: Text(
+                      reply['reply_text'] ?? '',
+                      style: TextStyle(color: isMe ? Colors.white : Colors.black87),
                     ),
                   ),
-                  child: Text(
-                    reply['reply_text'] ?? '',
-                    style: TextStyle(color: isMe ? Colors.white : Colors.black87),
-                  ),
                 ),
-              ),
-              if (isMe) ...[
-                const SizedBox(width: 8),
+                if (isMe) ...[
+                  const SizedBox(width: 8),
+                ],
               ],
-            ],
-          ),
-          const SizedBox(height: 4),
-          Padding(
-            padding: EdgeInsets.only(left: isMe ? 0 : 40, right: isMe ? 8 : 0),
-            child: Text(
-              reply['created_at'] ?? '',
-              style: TextStyle(fontSize: 10, color: Colors.grey[500]),
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Padding(
+              padding: EdgeInsets.only(left: isMe ? 0 : 40, right: isMe ? 8 : 0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isOptimistic) 
+                    const Padding(
+                      padding: EdgeInsets.only(right: 4),
+                      child: SizedBox(width: 10, height: 10, child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.grey)),
+                    ),
+                  Text(
+                    reply['created_at'] ?? '',
+                    style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildReplyBox() {
+  Widget _buildReplyInput() {
+    if (!_hasPermission('mobile_helpdesk_answer')) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          border: Border(top: BorderSide(color: Colors.grey[300]!)),
+        ),
+        child: const Center(
+          child: Text(
+            'Anda tidak memiliki izin untuk membalas tiket ini.',
+            style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+          ),
+        ),
+      );
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -305,7 +417,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           ),
           const SizedBox(width: 8),
           CircleAvatar(
-            backgroundColor: const Color(0xFF1E88E5),
+            backgroundColor: const Color(0xFF7E57C2),
             child: IconButton(
               onPressed: _isSending ? null : _sendReply,
               icon: _isSending 

@@ -31,6 +31,8 @@ class _TodoListPageState extends State<TodoListPage> {
   // Stats
   int _completedCount = 0;
   int _pendingCount = 0;
+  int _completedTodayCount = 0;
+  bool _isStatsExpanded = true;
 
   // Throttling
   final Map<String, DateTime> _lastToggleTimes = {};
@@ -104,7 +106,7 @@ class _TodoListPageState extends State<TodoListPage> {
 
   bool _hasPermission(String resource) {
     if (_currentUserData == null) return false;
-    if (_currentUserData!['role_resources'] == 'all') return true;
+    if (_currentUserData!['role_access'] == '1' || _currentUserData!['role_resources'] == 'all') return true;
     final String resources = _currentUserData!['role_resources'] ?? '';
     final List<String> resourceList = resources.split(',');
     return resourceList.contains(resource);
@@ -134,6 +136,7 @@ class _TodoListPageState extends State<TodoListPage> {
             _totalCount = result['total_count'] ?? 0;
             _completedCount = result['completed_count'] ?? 0;
             _pendingCount = result['pending_count'] ?? 0;
+            _completedTodayCount = result['completed_today_count'] ?? 0;
           });
 
           // Handle deep linking for highlighting specific Todo
@@ -145,8 +148,32 @@ class _TodoListPageState extends State<TodoListPage> {
     } catch (e) {
       debugPrint('Error fetching todos: $e');
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _sortTodos();
+        });
+      }
     }
+  }
+
+  void _sortTodos() {
+    _todos.sort((a, b) {
+      bool aDone = (a['is_done'] == '1' || a['is_done'] == 1 || a['is_done'] == true);
+      bool bDone = (b['is_done'] == '1' || b['is_done'] == 1 || b['is_done'] == true);
+      
+      if (aDone && !bDone) return 1;
+      if (!aDone && bDone) return -1;
+      
+      // Secondary sort: newest first
+      try {
+        DateTime aDate = DateTime.parse(a['created_at']);
+        DateTime bDate = DateTime.parse(b['created_at']);
+        return bDate.compareTo(aDate);
+      } catch (e) {
+        return 0;
+      }
+    });
   }
 
   void _highlightInitialTodo() {
@@ -191,10 +218,16 @@ class _TodoListPageState extends State<TodoListPage> {
       if (newStatus) {
         _completedCount++;
         _pendingCount--;
+        _completedTodayCount++;
       } else {
         _completedCount--;
         _pendingCount++;
+        // We don't necessarily know if the one we unchecked was from today, 
+        // but for immediate UI feedback we can decrement. 
+        // The _fetchTodos() call right after will sync it correctly.
+        if (_completedTodayCount > 0) _completedTodayCount--;
       }
+      _sortTodos();
     });
 
     try {
@@ -207,9 +240,8 @@ class _TodoListPageState extends State<TodoListPage> {
         // Revert on failure
         _revertToggle(index, originalStatus);
       } else {
-        // Optional: Silent refresh to stay in sync with database (e.g. server-side timestamps)
-        // But for performance, we don't necessarily need to call _fetchTodos() immediately 
-        // unless we expect other fields to change.
+        // Refresh to stay in sync with global server-side sorting
+        _fetchTodos();
       }
     } catch (e) {
       debugPrint('Error toggling todo: $e');
@@ -612,13 +644,13 @@ class _TodoListPageState extends State<TodoListPage> {
         ),
       ),
       floatingActionButton: _hasPermission('mobile_todo_add')
-      ? FloatingActionButton.extended(
-        onPressed: _showAddTodoDialog,
-        backgroundColor: _primaryColor,
-        icon: const Icon(Icons.add_task, color: Colors.white),
-        label: Text('todo_list.add_task'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      )
-      : null,
+          ? FloatingActionButton.extended(
+              onPressed: _showAddTodoDialog,
+              backgroundColor: _primaryColor,
+              icon: const Icon(Icons.add_task, color: Colors.white),
+              label: Text('todo_list.add_task'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            )
+          : null,
     );
   }
 
@@ -768,56 +800,188 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Widget _buildHeaderCard(BuildContext context) {
+    double progress = _totalCount > 0 ? (_completedCount / _totalCount) : 0;
+    if (progress > 1.0) progress = 1.0;
+
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Theme.of(context).brightness == Brightness.dark
-            ? Border.all(color: Colors.white24)
-            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: _primaryColor.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildMiniInfo(context, 'main.total'.tr(context), _totalCount.toString(), Colors.blue),
-          _buildMiniInfo(context, 'todo_list.completed'.tr(context), _completedCount.toString(), Colors.green),
-          _buildMiniInfo(context, 'todo_list.pending'.tr(context), _pendingCount.toString(), Colors.orange),
+          InkWell(
+            onTap: () => setState(() => _isStatsExpanded = !_isStatsExpanded),
+            borderRadius: BorderRadius.circular(24),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'todo_list.stats_title'.tr(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isStatsExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                      color: _primaryColor,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: _isStatsExpanded
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildStatRow('main.total'.tr(context), _totalCount.toString(), Colors.blue),
+                              const SizedBox(height: 16),
+                              _buildStatRow('todo_list.completed_today'.tr(context), _completedTodayCount.toString(), Colors.deepPurple),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(child: _buildStatRow('todo_list.complete'.tr(context), _completedCount.toString(), Colors.green)),
+                                  Expanded(child: _buildStatRow('todo_list.pending'.tr(context), _pendingCount.toString(), Colors.orange)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox(
+                              width: 85,
+                              height: 85,
+                              child: CircularProgressIndicator(
+                                value: progress,
+                                strokeWidth: 10,
+                                backgroundColor: Colors.grey[100],
+                                valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                                strokeCap: StrokeCap.round,
+                              ),
+                            ),
+                            Text(
+                              '${(progress * 100).toInt()}%',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildMiniInfo(BuildContext context, String label, String value, Color color) {
+  Widget _buildStatRow(String label, String value, Color color) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w500)),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[400] : Colors.grey[600],
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
       ],
     );
+  }
+
+  Widget _buildAgeBadge(String createdAt, bool isCompleted) {
+    try {
+      final createdDate = DateTime.parse(createdAt);
+      final now = DateTime.now();
+      final difference = now.difference(createdDate);
+      
+      final int minutes = difference.inMinutes;
+      final int hours = difference.inHours;
+      final int days = difference.inDays;
+
+      Color badgeColor;
+      String label;
+
+      if (isCompleted) {
+        badgeColor = Colors.grey;
+      } else {
+        if (days < 1) {
+          badgeColor = Colors.green;
+        } else if (days < 3) {
+          badgeColor = Colors.orange;
+        } else {
+          badgeColor = Colors.red;
+        }
+      }
+
+      if (difference.inSeconds < 60) {
+        label = 'time.just_now'.tr(context);
+      } else if (minutes < 60) {
+        String unitKey = minutes == 1 ? 'time.minute' : 'time.minutes';
+        String unit = unitKey.tr(context);
+        if (unit == unitKey) unit = 'time.minute'.tr(context);
+        label = '$minutes $unit ${'time.ago'.tr(context)}';
+      } else if (hours < 24) {
+        String unitKey = hours == 1 ? 'time.hour' : 'time.hours';
+        String unit = unitKey.tr(context);
+        if (unit == unitKey) unit = 'time.hour'.tr(context);
+        label = '$hours $unit ${'time.ago'.tr(context)}';
+      } else if (days < 30) {
+        String unitKey = days == 1 ? 'time.day' : 'time.days';
+        String unit = unitKey.tr(context);
+        if (unit == unitKey) unit = 'time.day'.tr(context);
+        label = '$days $unit ${'time.ago'.tr(context)}';
+      } else {
+        final months = (days / 30).floor();
+        String unitKey = months == 1 ? 'time.month' : 'time.months';
+        String unit = unitKey.tr(context);
+        if (unit == unitKey) unit = 'time.month'.tr(context);
+        label = '$months $unit ${'time.ago'.tr(context)}';
+      }
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+        decoration: BoxDecoration(
+          color: badgeColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: badgeColor.withOpacity(0.2)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: badgeColor,
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    } catch (e) {
+      return const SizedBox.shrink();
+    }
   }
 
   Widget _buildTodoItem(BuildContext context, dynamic todo) {
@@ -845,7 +1009,15 @@ class _TodoListPageState extends State<TodoListPage> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onLongPress: () => _hasPermission('mobile_todo_delete') ? _confirmDelete(todo) : null,
+            onLongPress: () {
+              if (_hasPermission('mobile_todo_delete')) {
+                _confirmDelete(todo);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Anda tidak memiliki izin untuk menghapus tugas')),
+                );
+              }
+            },
             onTap: () => _toggleTodo(todo),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -890,10 +1062,16 @@ class _TodoListPageState extends State<TodoListPage> {
                           children: [
                             Icon(Icons.calendar_today, size: 10, color: Colors.grey[500]),
                             const SizedBox(width: 4),
-                            Text(
-                              date,
-                              style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                            Flexible(
+                              child: Text(
+                                date,
+                                style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
                             ),
+                            const SizedBox(width: 8),
+                            _buildAgeBadge(date, isCompleted),
                           ],
                         ),
                       ],

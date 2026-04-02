@@ -10,6 +10,8 @@ import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
 import '../work_log/work_log_page.dart';
 import '../finance/finance_page.dart';
+import '../helpdesk/helpdesk_list_page.dart';
+import '../widgets/on_progress_page.dart';
 import '../localization/app_localizations.dart';
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -146,7 +148,7 @@ class SideDrawer extends StatelessWidget {
                     builder: (context, count, child) {
                       return _buildMenuItem(
                         context,
-                        icon: Icons.list_alt_outlined,
+                        icon: Icons.assignment_outlined,
                         title: 'dashboard.todo_list'.tr(context),
                         isActive: activePage == 'todo_list',
                         badgeCount: count,
@@ -181,7 +183,7 @@ class SideDrawer extends StatelessWidget {
                 if (_hasPermission('mobile_worklog_enable'))
                   _buildMenuItem(
                     context,
-                    icon: Icons.assignment_outlined,
+                    icon: Icons.assignment_turned_in_outlined,
                     title: 'work_log.title'.tr(context),
                     isActive: activePage == 'work_log',
                     onTap: () {
@@ -194,6 +196,40 @@ class SideDrawer extends StatelessWidget {
                       );
                     },
                   ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.smart_toy_outlined,
+                  title: 'dashboard.quick_menu_ai_bot'.tr(context),
+                  isActive: activePage == 'ai_bot',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OnProgressPage(
+                          title: 'dashboard.quick_menu_ai_bot'.tr(context),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.lightbulb_outline,
+                  title: 'dashboard.quick_menu_creative_idea'.tr(context),
+                  isActive: activePage == 'creative_idea',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OnProgressPage(
+                          title: 'dashboard.quick_menu_creative_idea'.tr(context),
+                        ),
+                      ),
+                    );
+                  },
+                ),
                 if (_hasPermission('mobile_finance_enable'))
                   _buildMenuItem(
                     context,
@@ -206,6 +242,22 @@ class SideDrawer extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => FinancePage(userData: userData),
+                        ),
+                      );
+                    },
+                  ),
+                if (_hasPermission('mobile_helpdesk_view'))
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.support_agent_outlined,
+                    title: 'dashboard.helpdesk'.tr(context),
+                    isActive: activePage == 'helpdesk',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HelpdeskListPage(userData: userData),
                         ),
                       );
                     },

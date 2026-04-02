@@ -56,6 +56,7 @@
         "late": "Terlambat",
         "present": "Hadir",
         "other": "Lainnya",
+        "under_development_title": "Segera Hadir!",
         "under_development": "Fitur ini masih dalam tahap pengembangan. Nantikan segera!",
         "holiday": "Hari Libur",
         "weekend": "Akhir Pekan",
@@ -112,7 +113,10 @@
         "dashboard_help_msg": "Halo admin My ISN, saya butuh bantuan mengenai produk\/rental saya...",
         "finance": "Keuangan",
         "quick_menu_finance": "Keuangan",
-        "quick_menu_helpdesk": "Helpdesk"
+        "helpdesk": "Helpdesk",
+        "quick_menu_helpdesk": "Helpdesk",
+        "quick_menu_ai_bot": "Bot AI",
+        "quick_menu_creative_idea": "Ide Kreatif"
     },
     "login": {
         "welcome_back": "Selamat datang kembali, Silakan masuk ke akun Anda",
@@ -838,7 +842,11 @@
         "medium": "Sedang",
         "high": "Tinggi",
         "completed": "Selesai",
+        "complete": "Selesai",
         "pending": "Tertunda",
+        "completed_today": "Selesai Hari Ini",
+        "stats_title": "Statistik Tugas",
+        "finished": "Selesai",
         "save_success": "Tugas berhasil disimpan",
         "update_success": "Tugas berhasil diperbarui",
         "delete_success": "Tugas berhasil dihapus",
@@ -916,6 +924,7 @@
         "web_launch_error": "Tidak dapat membuka browser untuk {item} {id}",
         "account_info": "Informasi Akun",
         "bank_details": "Detail Bank",
+        "bank": "Bank",
         "account_title": "Judul Akun",
         "account_holder_name": "Nama Pemegang Akun",
         "initial_balance": "Saldo Awal",
@@ -965,5 +974,14 @@
         "hint_description": "Jelaskan kendala Anda secara detail...",
         "hint_subject": "Contoh: Gagal login, Error di halaman profile",
         "select_priority": "Pilih Prioritas"
+    },
+    "time": {
+        "ago": "lalu",
+        "just_now": "baru saja",
+        "minute": "menit",
+        "hour": "jam",
+        "day": "hari",
+        "month": "bulan",
+        "year": "tahun"
     }
 }

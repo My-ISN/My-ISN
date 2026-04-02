@@ -31,7 +31,10 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedPriority == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.translate('helpdesk.select_priority'))),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.translate('helpdesk.select_priority')),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -55,14 +58,20 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
       if (data['status'] == true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.translate('helpdesk.success_create'))),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.translate('helpdesk.success_create')),
+              backgroundColor: Colors.green,
+            ),
           );
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? AppLocalizations.of(context)!.translate('helpdesk.failed_create'))),
+            SnackBar(
+              content: Text(data['message'] ?? AppLocalizations.of(context)!.translate('helpdesk.failed_create')),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -103,7 +112,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                         hintText: l10n.translate('helpdesk.hint_subject'),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: Colors.white,
                       ),
                       validator: (value) => (value == null || value.isEmpty) ? l10n.translate('main.required') : null,
                     ),
@@ -143,7 +152,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                         hintText: l10n.translate('helpdesk.hint_description'),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: Colors.white,
                       ),
                       validator: (value) => (value == null || value.isEmpty) ? l10n.translate('main.required') : null,
                     ),
@@ -155,7 +164,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _submitTicket,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E88E5),
+                          backgroundColor: const Color(0xFF7E57C2),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                         child: _isLoading 
