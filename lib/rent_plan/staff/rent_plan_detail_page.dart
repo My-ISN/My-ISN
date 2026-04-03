@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import '../../widgets/searchable_dropdown.dart';
 import '../../localization/app_localizations.dart';
+import '../../widgets/secondary_app_bar.dart';
 
 
 class RentPlanDetailPage extends StatefulWidget {
@@ -89,8 +90,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   File? _filePo;
   File? _fileKtpPimpinan;
   File? _fileDomisiliPerusahaan;
-  Map<int, File?> _fileJaminan = {1: null, 2: null, 3: null};
-  Map<int, String?> _selectedJaminanIds = {1: null, 2: null, 3: null};
+  final Map<int, File?> _fileJaminan = {1: null, 2: null, 3: null};
+  final Map<int, String?> _selectedJaminanIds = {1: null, 2: null, 3: null};
   List<dynamic> _jaminanPribadi = [];
   List<dynamic> _jaminanPerusahaan = [];
   List<dynamic> _pricingTiers = [];
@@ -230,8 +231,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
       setState(() {
-        if (key == 0) _fileKtp = File(result.files.single.path!);
-        else if (key is int) _fileJaminan[key] = File(result.files.single.path!);
+        if (key == 0) {
+          _fileKtp = File(result.files.single.path!);
+        } else if (key is int) _fileJaminan[key] = File(result.files.single.path!);
         else if (key == 'npwp') _fileNpwp = File(result.files.single.path!);
         else if (key == 'po') _filePo = File(result.files.single.path!);
         else if (key == 'ktp_pimpinan') _fileKtpPimpinan = File(result.files.single.path!);
@@ -642,30 +644,22 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text(widget.invoiceNumber ?? 'Detail Rental', style: const TextStyle(fontSize: 16))),
+      appBar: SecondaryAppBar(title: widget.invoiceNumber ?? 'Detail Rental'),
         body: Center(child: CircularProgressIndicator(color: _primaryColor)),
       );
     }
 
     if (_rentalData == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(widget.invoiceNumber ?? 'rent_plan.rental_detail'.tr(context), style: const TextStyle(fontSize: 16))),
+      appBar: SecondaryAppBar(title: widget.invoiceNumber ?? 'rent_plan.rental_detail'.tr(context)),
         body: Center(child: Text('rent_plan.data_not_found'.tr(context))),
       );
     }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(_rentalData!['invoice_number'] ?? widget.invoiceNumber ?? 'rent_plan.rental_detail'.tr(context), 
-          style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface, fontSize: 16)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).colorScheme.onSurface, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
+      appBar: SecondaryAppBar(
+        title: _rentalData!['invoice_number'] ?? widget.invoiceNumber ?? 'rent_plan.rental_detail'.tr(context),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -704,7 +698,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 : () => setState(() => _activeTab = tab),
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: isActive ? tabActiveColor : (hasDebt ? Colors.redAccent.withOpacity(0.1) : Colors.transparent),
                   borderRadius: BorderRadius.circular(12),
@@ -716,7 +710,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   _getTabLabel(tab),
                   style: TextStyle(
                     color: isActive ? Colors.white : (hasDebt ? Colors.redAccent : Colors.grey[600]),
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -921,9 +915,13 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('${currencyFormat.format(pricePerDay)} x $days ${'rent_plan.days'.tr(context)} x $units ${'dashboard.unit'.tr(context)}', 
-                          style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                        Expanded(
+                          child: Text('${currencyFormat.format(pricePerDay)} x $days ${'rent_plan.days'.tr(context)} x $units ${'dashboard.unit'.tr(context)}', 
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                        ),
+                        const SizedBox(width: 8),
                         Text(currencyFormat.format(totalExt), 
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
                       ],
@@ -1187,18 +1185,16 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         'name': '${s['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(s['field_one']))}'
       }).toList(),
       onSelected: (val) {
-        if (val != null) {
-          final ship = _shippingCosts.firstWhere((s) => s['nama_kirim'].toString() == val, orElse: () => null);
-          setState(() {
-            _selectedShippingId = val;
-            if (ship != null) {
-              _tipePengiriman = ship['category_name'] ?? val;
-            } else {
-              _tipePengiriman = val;
-            }
-          });
-        }
-      },
+        final ship = _shippingCosts.firstWhere((s) => s['nama_kirim'].toString() == val, orElse: () => null);
+        setState(() {
+          _selectedShippingId = val;
+          if (ship != null) {
+            _tipePengiriman = ship['category_name'] ?? val;
+          } else {
+            _tipePengiriman = val;
+          }
+        });
+            },
       placeholder: 'rent_plan.select_shipping'.tr(context),
     );
   }
@@ -1262,7 +1258,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             'name': p['name'].toString()
           }).toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; });
+            setState(() { if (isKtp) {
+              _selectedProvinceKtp = val;
+            } else {
+              _selectedProvinceCur = val;
+            } });
             final pObj = _provinces.firstWhere((p) => p['name'] == val);
             _loadRegencies(pObj['id'].toString(), isKtp);
           },
@@ -1277,7 +1277,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             'name': p['name'].toString()
           }).toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; });
+            setState(() { if (isKtp) {
+              _selectedRegencyKtp = val;
+            } else {
+              _selectedRegencyCur = val;
+            } });
             final rObj = currentRegencies.firstWhere((r) => r['name'] == val);
             _loadDistricts(rObj['id'].toString(), isKtp);
           },
@@ -1292,7 +1296,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             'name': p['name'].toString()
           }).toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; });
+            setState(() { if (isKtp) {
+              _selectedDistrictKtp = val;
+            } else {
+              _selectedDistrictCur = val;
+            } });
             final dObj = currentDistricts.firstWhere((d) => d['name'] == val);
             _loadVillages(dObj['id'].toString(), isKtp);
           },
@@ -1307,7 +1315,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             'name': p['name'].toString()
           }).toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; });
+            setState(() { if (isKtp) {
+              _selectedVillageKtp = val;
+            } else {
+              _selectedVillageCur = val;
+            } });
           },
           placeholder: (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) ? 'profile.loading'.tr(context) : 'rent_plan.select_village'.tr(context),
         ),
@@ -1553,7 +1565,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label1, style: TextStyle(fontSize: 9, color: Colors.grey[500], fontWeight: FontWeight.bold)),
+                Text(label1, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9, color: Colors.grey[500], fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text(val1, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: valColor1)),
               ],
@@ -1564,7 +1576,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label2, style: TextStyle(fontSize: 9, color: Colors.grey[500], fontWeight: FontWeight.bold)),
+                  Text(label2, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9, color: Colors.grey[500], fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text(val2, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: valColor2)),
                 ],
@@ -1710,7 +1722,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     return Column(
       crossAxisAlignment: label == 'rent_plan.start'.tr(context) ? CrossAxisAlignment.start : CrossAxisAlignment.end,
       children: [
-        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
+        Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: Colors.grey[500], fontWeight: FontWeight.w500)),
         const SizedBox(height: 4),
         Text(date, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
       ],
@@ -1724,8 +1736,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
         child: Icon(icon, color: color, size: 22),
       ),
-      title: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: value ? color : Colors.grey[500])),
+      title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      subtitle: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: value ? color : Colors.grey[500])),
       trailing: Switch.adaptive(
         value: value,
         onChanged: onChanged,
@@ -1945,6 +1957,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                       fontWeight: FontWeight.bold,
                       color: isDark ? Colors.white : Colors.black87,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   if (!hasImage) ...[
                     const SizedBox(height: 4),
@@ -2337,7 +2351,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     value: selectedReason,
                     options: reasons.map((r) => {'id': r, 'name': r}).toList(),
                     onSelected: (val) {
-                      if (val != null) setDialogState(() => selectedReason = val);
+                      setDialogState(() => selectedReason = val);
                     },
                     placeholder: 'rent_plan.reason'.tr(context),
                   ),

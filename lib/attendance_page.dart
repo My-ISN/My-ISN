@@ -102,9 +102,13 @@ class _AttendancePageState extends State<AttendancePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).cardColor,
+        elevation: 0,
+        toolbarHeight: 0,
+      ),
       body: Column(
         children: [
-          const SizedBox(height: 16),
           Expanded(
             child: _isLoading
                 ? SingleChildScrollView(
@@ -179,7 +183,7 @@ class _AttendancePageState extends State<AttendancePage> {
                             ),
                           const SizedBox(height: 20),
                           _buildCalendarGrid(),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 20),
                           Text(
                             'attendance.summary'.tr(context),
                             style: TextStyle(
@@ -258,7 +262,7 @@ class _AttendancePageState extends State<AttendancePage> {
     final weekdayLabels = ['0', '1', '2', '3', '4', '5', '6'];
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
@@ -296,30 +300,43 @@ class _AttendancePageState extends State<AttendancePage> {
                 )
                 .toList(),
           ),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 7,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
+          const SizedBox(height: 12),
+          // Menggunakan Column & Row manual agar tinggi benar-benar pas (tidak ada sisa ruang)
+          Column(
+            children: List.generate(
+              ((daysInMonth + firstDayOffset) / 7).ceil(),
+              (rowIndex) {
+                return Row(
+                  children: List.generate(7, (colIndex) {
+                    final index = rowIndex * 7 + colIndex;
+                    if (index < firstDayOffset ||
+                        index >= daysInMonth + firstDayOffset) {
+                      return const Expanded(child: SizedBox());
+                    }
+
+                    final day = index - firstDayOffset + 1;
+                    final dateStr =
+                        '${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+
+                    final record =
+                        (_attendanceData['records'] as List?)?.firstWhere(
+                          (r) => r['date'] == dateStr,
+                          orElse: () => null,
+                        );
+
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 1.5),
+                        child: AspectRatio(
+                          aspectRatio: 1.05,
+                          child: _buildDayCell(day, record),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
             ),
-            itemCount: daysInMonth + firstDayOffset,
-            itemBuilder: (context, index) {
-              if (index < firstDayOffset) return const SizedBox();
-
-              final day = index - firstDayOffset + 1;
-              final dateStr =
-                  '${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
-
-              final record = (_attendanceData['records'] as List?)?.firstWhere(
-                (r) => r['date'] == dateStr,
-                orElse: () => null,
-              );
-
-              return _buildDayCell(day, record);
-            },
           ),
         ],
       ),
@@ -410,6 +427,7 @@ class _AttendancePageState extends State<AttendancePage> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
@@ -420,107 +438,110 @@ class _AttendancePageState extends State<AttendancePage> {
           ),
         ),
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white24
-                      : Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    '$dayLabel, $day $monthLabel ${_selectedMonth.year}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white24
+                        : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                if (holiday != null) ...[
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '$dayLabel, $day $monthLabel ${_selectedMonth.year}',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.errorContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        holiday['name'],
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (holiday != null) ...[
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        textAlign: TextAlign.right,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          holiday['name'],
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onErrorContainer,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: _buildDetailItem(
-                'attendance.details'.tr(context),
-                record?['status'] == 'Present'
-                    ? 'attendance.present'.tr(context)
-                    : (record?['status'] == 'Late'
-                          ? 'attendance.late'.tr(context)
-                          : (record?['status'] ??
-                                'attendance.no_data'.tr(context))),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDetailItem(
-                    'attendance.check_in'.tr(context),
-                    record?['clock_in'] ?? '-',
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildDetailItem(
-                    'attendance.check_out'.tr(context),
-                    record?['clock_out'] ?? '-',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (record?['is_late'] == true || record?['is_early'] == true)
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: _buildDetailItem(
+                  'attendance.details'.tr(context),
+                  record?['status'] == 'Present'
+                      ? 'attendance.present'.tr(context)
+                      : (record?['status'] == 'Late'
+                            ? 'attendance.late'.tr(context)
+                            : (record?['status'] ??
+                                  'attendance.no_data'.tr(context))),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDetailItem(
+                      'attendance.check_in'.tr(context),
+                      record?['clock_in'] ?? '-',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildDetailItem(
+                      'attendance.check_out'.tr(context),
+                      record?['clock_out'] ?? '-',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (record?['is_late'] == true || record?['is_early'] == true)
+                SizedBox(
+                  width: double.infinity,
+                  child: _buildDetailItem(
                   'attendance.notes'.tr(context),
                   "${record?['is_late'] == true ? 'attendance.late_with_time'.tr(context, args: {'time': record?['late_time']}) : ''}"
                   "${record?['is_late'] == true && record?['is_early'] == true ? ' & ' : ''}"
                   "${record?['is_early'] == true ? 'attendance.early_with_time'.tr(context, args: {'time': record?['early_time']}) : ''}",
                 ),
               ),
-            const SizedBox(height: 32),
-          ],
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );

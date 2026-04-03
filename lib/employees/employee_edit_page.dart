@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
+import '../widgets/secondary_app_bar.dart';
 
 class EmployeeEditPage extends StatefulWidget {
   final Map<String, dynamic> employeeData;
@@ -98,6 +99,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
       ]);
 
       if (responses.every((r) => r.statusCode == 200)) {
+        if (!mounted) return;
         setState(() {
           _departments = json.decode(responses[0].body)['data'];
           _designations = json.decode(responses[1].body)['data'];
@@ -158,26 +160,86 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    String title = 'employees.edit_title'.tr(context);
+    String title;
+    switch (widget.section) {
+      case 'kontrak':
+        title = 'employees.edit_contract'.tr(context);
+        break;
+      case 'pekerjaan':
+        title = 'employees.edit_employment'.tr(context);
+        break;
+      case 'pribadi':
+        title = 'employees.edit_personal'.tr(context);
+        break;
+      case 'riwayat':
+        title = 'employees.edit_history'.tr(context);
+        break;
+      case 'dokumen':
+        title = 'employees.edit_documents'.tr(context);
+        break;
+      default:
+        title = 'employees.edit_profile'.tr(context);
+    }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title, style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold)),
-        backgroundColor: Theme.of(context).cardColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.close, color: _primaryColor),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          if (_isSaving)
-            const Center(child: Padding(padding: EdgeInsets.only(right: 16), child: CircularProgressIndicator()))
-          else
-            TextButton(
-              onPressed: _save,
-              child: Text('employees.save'.tr(context), style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold)),
+      appBar: SecondaryAppBar(
+        title: title,
+      ),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withOpacity(0.1),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, -6),
             ),
-        ],
+          ],
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: _primaryColor.withOpacity(0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: _isSaving ? null : _save,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _primaryColor,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
+            ),
+            child: _isSaving
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : Text(
+                    'employees.save'.tr(context).toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+          ),
+        ),
       ),
       body: _isLoadingLookups 
         ? const Center(child: CircularProgressIndicator())
@@ -195,140 +257,255 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
   }
 
   List<Widget> _buildFormFields() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (widget.section == 'profil') {
       return [
-        _buildTextField(label: 'profile.first_name'.tr(context), key: 'first_name'),
-        _buildTextField(label: 'profile.last_name'.tr(context), key: 'last_name'),
-        _buildTextField(label: 'profile.email'.tr(context), key: 'email', keyboardType: TextInputType.emailAddress),
-        _buildTextField(label: 'profile.phone'.tr(context), key: 'contact_number', keyboardType: TextInputType.phone),
-        _buildTextField(label: 'profile.address'.tr(context), key: 'address_1'),
-        _buildTextField(label: 'profile.city_regency'.tr(context), key: 'city'),
-        _buildTextField(label: 'profile.state_province'.tr(context), key: 'state'),
-        _buildTextField(label: 'profile.zip_code'.tr(context), key: 'zipcode'),
-        _buildTextField(label: 'profile.nationality'.tr(context), key: 'nationality'),
+        _buildTextField(
+          label: 'profile.first_name'.tr(context),
+          key: 'first_name',
+          prefixIcon: const Icon(Icons.person_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.last_name'.tr(context),
+          key: 'last_name',
+          prefixIcon: const Icon(Icons.person_outline_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.email'.tr(context),
+          key: 'email',
+          keyboardType: TextInputType.emailAddress,
+          prefixIcon: const Icon(Icons.email_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.phone'.tr(context),
+          key: 'contact_number',
+          keyboardType: TextInputType.phone,
+          prefixIcon: const Icon(Icons.phone_android_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.address'.tr(context),
+          key: 'address_1',
+          prefixIcon: const Icon(Icons.home_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.city_regency'.tr(context),
+          key: 'city',
+          prefixIcon: const Icon(Icons.location_city_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.state_province'.tr(context),
+          key: 'state',
+          prefixIcon: const Icon(Icons.map_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.zip_code'.tr(context),
+          key: 'zipcode',
+          prefixIcon: const Icon(Icons.pin_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.nationality'.tr(context),
+          key: 'nationality',
+          prefixIcon: const Icon(Icons.flag_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
       ];
     } else if (widget.section == 'kontrak') {
       return [
-        _buildTextField(label: 'profile.basic_salary'.tr(context), key: 'basic_salary', keyboardType: TextInputType.number),
-        _buildTextField(label: 'profile.hourly_rate'.tr(context), key: 'hourly_rate', keyboardType: TextInputType.number),
-        _buildDropdown(
-          label: 'employees.payslip_type'.tr(context), 
-          key: 'salay_type', 
-          items: {'1': 'employees.per_month'.tr(context), '0': 'employees.none'.tr(context)}
+        _buildTextField(
+          label: 'profile.basic_salary'.tr(context),
+          key: 'basic_salary',
+          keyboardType: TextInputType.number,
+          prefixIcon: const Icon(Icons.payments_rounded, size: 20, color: Color(0xFF7E57C2)),
         ),
-        _buildTextField(label: 'employees.worklog_target'.tr(context), key: 'worklog', keyboardType: TextInputType.number),
-        _buildDropdown(
-          label: 'employees.status_target_worklog'.tr(context), 
-          key: 'worklog_active', 
-          items: {
-            '1': 'main.active'.tr(context), 
-            '0': 'main.inactive'.tr(context)
-          }
+        _buildTextField(
+          label: 'profile.hourly_rate'.tr(context),
+          key: 'hourly_rate',
+          keyboardType: TextInputType.number,
+          prefixIcon: const Icon(Icons.timer_rounded, size: 20, color: Color(0xFF7E57C2)),
         ),
-        _buildDateField(label: 'profile.contract_date'.tr(context), key: 'date_of_joining'),
-        _buildDateField(label: 'profile.contract_end'.tr(context), key: 'date_of_leaving'),
-        _buildTextField(label: 'employees.leave_categories'.tr(context), key: 'leave_categories'),
+        _buildDropdown(
+          label: 'employees.payslip_type'.tr(context),
+          key: 'salay_type',
+          items: {'1': 'employees.per_month'.tr(context), '0': 'employees.none'.tr(context)},
+          icon: Icons.receipt_long_rounded,
+        ),
+        _buildTextField(
+          label: 'employees.worklog_target'.tr(context),
+          key: 'worklog',
+          keyboardType: TextInputType.number,
+          prefixIcon: const Icon(Icons.assignment_turned_in_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildDropdown(
+          label: 'employees.status_target_worklog'.tr(context),
+          key: 'worklog_active',
+          items: {'1': 'main.active'.tr(context), '0': 'main.inactive'.tr(context)},
+          icon: Icons.toggle_on_rounded,
+        ),
+        _buildDateField(
+          label: 'profile.contract_date'.tr(context),
+          key: 'date_of_joining',
+          prefixIcon: const Icon(Icons.calendar_today_rounded, size: 18, color: Color(0xFF7E57C2)),
+        ),
+        _buildDateField(
+          label: 'profile.contract_end'.tr(context),
+          key: 'date_of_leaving',
+          prefixIcon: const Icon(Icons.event_busy_rounded, size: 18, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'employees.leave_categories'.tr(context),
+          key: 'leave_categories',
+          prefixIcon: const Icon(Icons.beach_access_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
       ];
     } else if (widget.section == 'pekerjaan') {
       return [
         _buildApiDropdown(
-          label: 'profile.department'.tr(context), 
-          key: 'department_id', 
-          items: _departments, 
-          idKey: 'department_id', 
-          nameKey: 'department_name'
+          label: 'profile.department'.tr(context),
+          key: 'department_id',
+          items: _departments,
+          idKey: 'department_id',
+          nameKey: 'department_name',
+          icon: Icons.business_rounded,
         ),
         _buildApiDropdown(
-          label: 'profile.designation'.tr(context), 
-          key: 'designation_id', 
-          items: _designations, 
-          idKey: 'designation_id', 
-          nameKey: 'designation_name'
+          label: 'profile.designation'.tr(context),
+          key: 'designation_id',
+          items: _designations,
+          idKey: 'designation_id',
+          nameKey: 'designation_name',
+          icon: Icons.work_rounded,
         ),
         _buildApiDropdown(
-          label: 'profile.office_shift'.tr(context), 
-          key: 'office_shift_id', 
-          items: _shifts, 
-          idKey: 'office_shift_id', 
-          nameKey: 'shift_name'
+          label: 'profile.office_shift'.tr(context),
+          key: 'office_shift_id',
+          items: _shifts,
+          idKey: 'office_shift_id',
+          nameKey: 'shift_name',
+          icon: Icons.access_time_filled_rounded,
         ),
         _buildDropdown(
-          label: 'employees.status_work_label'.tr(context), 
-          key: 'status_work', 
+          label: 'employees.status_work_label'.tr(context),
+          key: 'status_work',
           items: {
             '1': 'employees.status_work_list.contract'.tr(context),
             '2': 'employees.status_work_list.probation'.tr(context),
             '3': 'employees.status_work_list.trainee'.tr(context),
             '4': 'employees.status_work_list.permanent'.tr(context),
             '5': 'employees.status_work_list.freelance'.tr(context),
-          }
+          },
+          icon: Icons.badge_rounded,
         ),
       ];
     } else if (widget.section == 'pribadi') {
       return [
-        _buildDateField(label: 'profile.dob'.tr(context), key: 'date_of_birth'),
-        _buildDropdown(
-          label: 'profile.gender'.tr(context), 
-          key: 'gender', 
-          items: {'1': 'main.male'.tr(context), '2': 'main.female'.tr(context)}
+        _buildDateField(
+          label: 'profile.dob'.tr(context),
+          key: 'date_of_birth',
+          prefixIcon: const Icon(Icons.cake_rounded, size: 18, color: Color(0xFF7E57C2)),
         ),
         _buildDropdown(
-          label: 'profile.marital_status'.tr(context), 
-          key: 'marital_status', 
+          label: 'profile.gender'.tr(context),
+          key: 'gender',
+          items: {'1': 'main.male'.tr(context), '2': 'main.female'.tr(context)},
+          icon: Icons.people_rounded,
+        ),
+        _buildDropdown(
+          label: 'profile.marital_status'.tr(context),
+          key: 'marital_status',
           items: {
-            '0': 'profile.single'.tr(context), 
-            '1': 'profile.married'.tr(context), 
-            '2': 'profile.widowed'.tr(context), 
+            '0': 'profile.single'.tr(context),
+            '1': 'profile.married'.tr(context),
+            '2': 'profile.widowed'.tr(context),
             '3': 'profile.separated'.tr(context)
-          }
+          },
+          icon: Icons.favorite_rounded,
         ),
         _buildApiDropdown(
-          label: 'profile.religion'.tr(context), 
-          key: 'religion_id', 
-          items: _religions, 
-          idKey: 'constants_id', 
-          nameKey: 'category_name'
+          label: 'profile.religion'.tr(context),
+          key: 'religion_id',
+          items: _religions,
+          idKey: 'constants_id',
+          nameKey: 'category_name',
+          icon: Icons.mosque_rounded,
         ),
-        _buildTextField(label: 'profile.blood_group'.tr(context), key: 'blood_group'),
-        
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Divider(),
+        _buildTextField(
+          label: 'profile.blood_group'.tr(context),
+          key: 'blood_group',
+          prefixIcon: const Icon(Icons.bloodtype_rounded, size: 20, color: Color(0xFF7E57C2)),
         ),
-        Text('employees.bank_info'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-        const SizedBox(height: 16),
-        _buildTextField(label: 'profile.bank_name'.tr(context), key: 'bank_name'),
-        _buildTextField(label: 'profile.account_title'.tr(context), key: 'account_title'),
-        _buildTextField(label: 'profile.account_number'.tr(context), key: 'account_number'),
-        _buildTextField(label: 'profile.swift_code'.tr(context), key: 'swift_code'),
-        _buildTextField(label: 'profile.bank_branch'.tr(context), key: 'bank_branch'),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Row(
+            children: [
+              Text(
+                'employees.bank_info'.tr(context).toUpperCase(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(child: Divider(color: isDark ? Colors.grey[800] : Colors.grey[200])),
+            ],
+          ),
+        ),
+        _buildTextField(
+          label: 'profile.bank_name'.tr(context),
+          key: 'bank_name',
+          prefixIcon: const Icon(Icons.account_balance_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.account_title'.tr(context),
+          key: 'account_title',
+          prefixIcon: const Icon(Icons.person_pin_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.account_number'.tr(context),
+          key: 'account_number',
+          keyboardType: TextInputType.number,
+          prefixIcon: const Icon(Icons.numbers_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.swift_code'.tr(context),
+          key: 'swift_code',
+          prefixIcon: const Icon(Icons.speed_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
+        _buildTextField(
+          label: 'profile.bank_branch'.tr(context),
+          key: 'bank_branch',
+          prefixIcon: const Icon(Icons.location_on_rounded, size: 20, color: Color(0xFF7E57C2)),
+        ),
       ];
     } else if (widget.section == 'riwayat') {
       return [
         _buildListManager(
-          title: 'employees.work_exp'.tr(context),
+          title: 'employees.work_exp'.tr(context).toUpperCase(),
           items: widget.employeeData['experience'] as List? ?? [],
           onAdd: () => _showAddExperienceDialog(),
           onDelete: (id) => _deleteListItem('delete_experience', {'experience_id': id}),
           subtitle: (item) => '${item['company_name']} - ${item['post']}',
+          isDark: isDark,
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 40),
         _buildListManager(
-          title: 'employees.education'.tr(context),
+          title: 'employees.education'.tr(context).toUpperCase(),
           items: widget.employeeData['education'] as List? ?? [],
           onAdd: () => _showAddEducationDialog(),
           onDelete: (id) => _deleteListItem('delete_education', {'education_id': id}),
           subtitle: (item) => '${item['school_university']} - ${item['education_level']}',
+          isDark: isDark,
         ),
       ];
     } else if (widget.section == 'dokumen') {
       return [
         _buildListManager(
-          title: 'employees.emp_docs'.tr(context),
+          title: 'employees.emp_docs'.tr(context).toUpperCase(),
           items: widget.employeeData['documents'] as List? ?? [],
           onAdd: () => _showAddDocumentDialog(),
           onDelete: (id) => _deleteListItem('delete_user_document', {'document_id': id}),
-          subtitle: (item) => '${item['name']} (${item['type']})',
+          subtitle: (item) => '${item['document_name']} (${item['document_type']})',
+          isDark: isDark,
         ),
       ];
     }
@@ -336,65 +513,91 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
   }
 
   Widget _buildTextField({
-    required String label, 
-    required String key, 
+    required String label,
+    required String key,
     TextInputType? keyboardType,
+    Widget? prefixIcon,
+    int maxLines = 1,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    Widget? suffixIcon,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey)),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _controllers[key],
-            keyboardType: keyboardType,
-            decoration: _inputDecoration(),
+      child: TextFormField(
+        controller: _controllers[key],
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        readOnly: readOnly,
+        onTap: onTap,
+        style: const TextStyle(fontSize: 14),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
+          prefixIcon: prefixIcon != null
+              ? Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: prefixIcon,
+                )
+              : null,
+          suffixIcon: suffixIcon,
+          filled: true,
+          fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.1)),
           ),
-        ],
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.1)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildDateField({required String label, required String key}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey)),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _controllers[key],
-            readOnly: true,
-            onTap: () async {
-              DateTime initialDate = DateTime.now();
-              if (_controllers[key]!.text.isNotEmpty) {
-                try {
-                  initialDate = DateTime.parse(_controllers[key]!.text);
-                } catch (_) {}
-              }
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: initialDate,
-                firstDate: DateTime(1900),
-                lastDate: DateTime(2100),
-              );
-              if (picked != null) {
-                setState(() {
-                  _controllers[key]!.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
-                });
-              }
-            },
-            decoration: _inputDecoration().copyWith(suffixIcon: const Icon(Icons.calendar_month_outlined)),
-          ),
-        ],
-      ),
+  Widget _buildDateField({required String label, required String key, Widget? prefixIcon}) {
+    return _buildTextField(
+      label: label,
+      key: key,
+      readOnly: true,
+      prefixIcon: prefixIcon,
+      suffixIcon: const Icon(Icons.calendar_month_rounded, size: 20, color: Color(0xFF7E57C2)),
+      onTap: () async {
+        DateTime initialDate = DateTime.now();
+        if (_controllers[key]!.text.isNotEmpty) {
+          try {
+            initialDate = DateTime.parse(_controllers[key]!.text);
+          } catch (_) {}
+        }
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: initialDate,
+          firstDate: DateTime(1900),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null) {
+          setState(() {
+            _controllers[key]!.text =
+                "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+          });
+        }
+      },
     );
   }
 
-  Widget _buildDropdown({required String label, required String key, required Map<String, String> items}) {
+  Widget _buildDropdown({
+    required String label,
+    required String key,
+    required Map<String, String> items,
+    IconData? icon,
+  }) {
     final String currentId = _controllers[key]!.text;
     final String selectedName = items[currentId] ?? '';
 
@@ -403,6 +606,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
       child: SearchableDropdown(
         label: label,
         value: selectedName,
+        icon: icon,
         options: items.entries.map((e) => {'id': e.key, 'name': e.value}).toList(),
         onSelected: (id) => setState(() => _controllers[key]!.text = id),
       ),
@@ -410,11 +614,12 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
   }
 
   Widget _buildApiDropdown({
-    required String label, 
-    required String key, 
+    required String label,
+    required String key,
     required List<dynamic> items,
     required String idKey,
     required String nameKey,
+    IconData? icon,
   }) {
     final String currentId = _controllers[key]!.text;
     final dynamic selectedItem = items.firstWhere(
@@ -428,10 +633,13 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
       child: SearchableDropdown(
         label: label,
         value: selectedName,
-        options: items.map((e) => {
-          'id': e[idKey].toString(),
-          'name': e[nameKey].toString(),
-        }).toList(),
+        icon: icon,
+        options: items
+            .map((e) => {
+                  'id': e[idKey].toString(),
+                  'name': e[nameKey].toString(),
+                })
+            .toList(),
         onSelected: (id) => setState(() => _controllers[key]!.text = id),
       ),
     );
@@ -443,6 +651,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     required VoidCallback onAdd,
     required Function(dynamic) onDelete,
     required String Function(dynamic) subtitle,
+    required bool isDark,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,35 +659,97 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                letterSpacing: 1.2,
+              ),
+            ),
             IconButton(
               onPressed: onAdd,
-              icon: Icon(Icons.add_circle_outline, color: _primaryColor),
+              icon: Icon(Icons.add_circle_rounded, color: _primaryColor, size: 28),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         if (items.isEmpty)
-          Text('attendance.no_data'.tr(context), style: const TextStyle(color: Colors.grey))
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.withOpacity(0.1)),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.inbox_rounded, color: Colors.grey.withOpacity(0.5), size: 40),
+                const SizedBox(height: 12),
+                Text(
+                  'attendance.no_data'.tr(context),
+                  style: TextStyle(color: Colors.grey.withOpacity(0.7), fontSize: 13),
+                ),
+              ],
+            ),
+          )
         else
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length,
-            separatorBuilder: (context, index) => const Divider(),
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final item = items[index];
-              // Use appropriate ID key based on the list type
-              final idKey = item.containsKey('experience_id') ? 'experience_id' : 
-                          item.containsKey('education_id') ? 'education_id' : 
-                          item.containsKey('id') ? 'id' : 'document_id';
+              final idKey = item.containsKey('experience_id')
+                  ? 'experience_id'
+                  : item.containsKey('education_id')
+                      ? 'education_id'
+                      : item.containsKey('id')
+                          ? 'id'
+                          : 'document_id';
 
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(subtitle(item), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                  onPressed: () => onDelete(item[idKey]),
+              return Container(
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      item.containsKey('experience_id')
+                          ? Icons.work_outline_rounded
+                          : item.containsKey('education_id')
+                              ? Icons.school_outlined
+                              : Icons.description_outlined,
+                      color: _primaryColor,
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    subtitle(item),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 22),
+                    onPressed: () => onDelete(item[idKey]),
+                  ),
                 ),
               );
             },
@@ -508,6 +779,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/$endpoint'),
         body: body,
       );
+      if (!mounted) return;
       final data = json.decode(response.body);
       if (data['status'] == true) {
         if (mounted) Navigator.pop(context, true); // Refresh detail
@@ -668,6 +940,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
+      if (!mounted) return;
       var data = json.decode(response.body);
       
       if (data['status'] == true) {
@@ -691,6 +964,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/$endpoint'),
         body: body,
       );
+      if (!mounted) return;
       final data = json.decode(response.body);
       if (data['status'] == true) {
         if (mounted) Navigator.pop(context, true); // Refresh
@@ -702,16 +976,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     }
   }
 
-  InputDecoration _inputDecoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: Theme.of(context).cardColor,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.withOpacity(0.2))),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.withOpacity(0.2))),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: _primaryColor)),
-    );
-  }
+
 
   @override
   void dispose() {

@@ -46,8 +46,9 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
         throw Exception('Server returned ${response.statusCode}');
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() => _step1Error = 'diagnosis.internet_error'.tr(context));
+      }
       return;
     }
 
@@ -71,8 +72,9 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
         throw Exception('Connection unstable');
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() => _step2Error = 'diagnosis.internet_error'.tr(context));
+      }
     }
   }
 

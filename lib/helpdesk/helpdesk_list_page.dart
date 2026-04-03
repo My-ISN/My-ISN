@@ -442,8 +442,9 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
     for (var item in _stats['priority']) {
       int count = int.parse(item['count'].toString());
       String p = item['ticket_priority'].toString();
-      if (p == '1') low = count;
-      else if (p == '2') med = count;
+      if (p == '1') {
+        low = count;
+      } else if (p == '2') med = count;
       else if (p == '3') high = count;
       else if (p == '4') crit = count;
     }

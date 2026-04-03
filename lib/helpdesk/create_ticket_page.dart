@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../widgets/custom_app_bar.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
+import '../widgets/secondary_app_bar.dart';
 
 class CreateTicketPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -88,11 +88,8 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: SecondaryAppBar(
         title: l10n!.translate('helpdesk.create_ticket'),
-        showBackButton: true,
-        showActions: false,
-        userData: widget.userData,
       ),
       body: ConnectivityWrapper(
         child: SingleChildScrollView(

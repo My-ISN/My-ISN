@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'widgets/connectivity_wrapper.dart';
 import 'widgets/custom_app_bar.dart';
 import 'widgets/shimmer_loading.dart';
+import 'widgets/secondary_app_bar.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'localization/app_localizations.dart';
@@ -330,18 +331,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
     
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
-          onPressed: () => Navigator.pop(context, true),
-        ),
-        title: Text(
-          'announcement.title'.tr(context),
-          style: const TextStyle(
-            color: Color(0xFF7E57C2),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      appBar: SecondaryAppBar(
+        onBackPressed: () => Navigator.pop(context, true),
+        title: 'announcement.title'.tr(context),
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all, color: Color(0xFF7E57C2)),
@@ -505,8 +497,6 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           ),
           const SizedBox(width: 8),
         ],
-        backgroundColor: Theme.of(context).cardColor,
-        elevation: 0,
       ),
       body: _isLoading
           ? const ShimmerList()

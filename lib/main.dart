@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'services/notification_service.dart';
@@ -90,9 +91,7 @@ class MyApp extends StatelessWidget {
           primary: const Color(0xFF7E57C2),
           brightness: Brightness.light,
           surface: Colors.white,
-          surfaceContainerHighest: const Color(
-            0xFFF1F5F9,
-          ), // Light blueish gray
+          surfaceContainerHighest: const Color(0xFFF1F5F9),
         ),
         scaffoldBackgroundColor: const Color(0xFFF8FAFF),
         appBarTheme: const AppBarTheme(
@@ -101,6 +100,9 @@ class MyApp extends StatelessWidget {
         ),
         cardColor: Colors.white,
         useMaterial3: true,
+        textTheme: GoogleFonts.poppinsTextTheme(
+          ThemeData.light().textTheme,
+        ),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -117,6 +119,9 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
         useMaterial3: true,
+        textTheme: GoogleFonts.poppinsTextTheme(
+          ThemeData.dark().textTheme,
+        ),
       ),
       themeMode: themeProvider.themeMode,
       builder: (context, child) {

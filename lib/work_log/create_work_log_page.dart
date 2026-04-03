@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../widgets/custom_app_bar.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/secondary_app_bar.dart';
 
 class CreateWorkLogPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -186,13 +186,10 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
     return Scaffold(
 
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(
-        userData: widget.userData, 
-        showBackButton: true,
+      appBar: SecondaryAppBar(
         title: widget.estimateId == null 
           ? 'work_log.create_title'.tr(context)
           : 'work_log.edit_title'.tr(context),
-        showActions: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

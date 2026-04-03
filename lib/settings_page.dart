@@ -13,6 +13,7 @@ import 'providers/theme_provider.dart';
 import 'diagnosis/diagnosis_hub_page.dart';
 import 'helpdesk/helpdesk_list_page.dart';
 import 'login_page.dart';
+import 'widgets/secondary_app_bar.dart';
 
 class SettingsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -710,22 +711,8 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'main.xin_settings'.tr(context),
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+      appBar: SecondaryAppBar(
+        title: 'main.xin_settings'.tr(context),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -887,7 +874,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         trailing: Switch(
                           value: _isFingerprintEnabled,
                           onChanged: _toggleFingerprint,
-                          activeColor: Theme.of(context).colorScheme.primary,
+                          activeThumbColor: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       if (_hasToken) ...[

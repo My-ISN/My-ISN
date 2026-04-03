@@ -5,8 +5,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
+import '../widgets/secondary_app_bar.dart';
 
 class ProfileEditPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -60,6 +62,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     try {
       const url = 'https://foxgeen.com/HRIS/mobileapi/get_provinces';
       final response = await http.get(Uri.parse(url));
+      if (!mounted) return;
       final data = json.decode(response.body);
       if (data['status'] == true) {
         setState(() => _provinces = data['data']);
@@ -97,6 +100,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       final url =
           'https://foxgeen.com/HRIS/mobileapi/get_regencies?province_id=$provinceId';
       final response = await http.get(Uri.parse(url));
+      if (!mounted) return;
       final data = json.decode(response.body);
       if (data['status'] == true) {
         setState(() => _regencies = data['data']);
@@ -152,6 +156,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     );
 
     if (croppedFile != null) {
+      if (!mounted) return;
       setState(() {
         _image = File(croppedFile.path);
       });
@@ -383,46 +388,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          _getPageTitle(context),
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-        ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          if (_isSaving)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: widget.section == 'header'
-                  ? _saveHeaderSection
-                  : _saveProfile,
-              child: Text(
-                'profile.save'.tr(context),
-                style: const TextStyle(
-                  color: Color(0xFF7E57C2),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-        ],
+      appBar: SecondaryAppBar(
+        title: _getPageTitle(context),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -431,6 +398,68 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: _buildFormFields(),
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withOpacity(0.1),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, -6),
+            ),
+          ],
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFF7E57C2).withOpacity(0.1),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF7E57C2).withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: _isSaving
+                ? null
+                : (widget.section == 'header' ? _saveHeaderSection : _saveProfile),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF7E57C2),
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
+            ),
+            child: _isSaving
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : Text(
+                    'profile.save'.tr(context).toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
           ),
         ),
       ),
@@ -524,28 +553,31 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.first_name'.tr(context),
           controller: _controllers['first_name']!,
+          prefixIcon: const Icon(Icons.person_rounded, size: 18, color: Color(0xFF7E57C2)),
+          required: true,
           validator: (v) => v!.isEmpty ? 'profile.required'.tr(context) : null,
           textCapitalization: TextCapitalization.characters,
           inputFormatters: [UpperCaseTextFormatter()],
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.last_name'.tr(context),
           controller: _controllers['last_name']!,
+          prefixIcon: const Icon(Icons.person_outline_rounded, size: 18, color: Color(0xFF7E57C2)),
           textCapitalization: TextCapitalization.characters,
           inputFormatters: [UpperCaseTextFormatter()],
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.email'.tr(context),
           controller: _controllers['email']!,
+          prefixIcon: const Icon(Icons.email_rounded, size: 18, color: Color(0xFF7E57C2)),
+          required: true,
           keyboardType: TextInputType.emailAddress,
           validator: (v) => v!.isEmpty ? 'profile.required'.tr(context) : null,
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.phone'.tr(context),
           controller: _controllers['contact_number']!,
+          prefixIcon: const Icon(Icons.phone_android_rounded, size: 18, color: Color(0xFF7E57C2)),
           keyboardType: TextInputType.phone,
         ),
       ];
@@ -557,24 +589,25 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             child: _buildTextField(
               label: 'profile.dob'.tr(context),
               controller: _controllers['date_of_birth']!,
-              suffixIcon: const Icon(Icons.calendar_today, size: 20),
+              prefixIcon: const Icon(Icons.cake_rounded, size: 18, color: Color(0xFF7E57C2)),
+              suffixIcon: const Icon(Icons.calendar_today_rounded, size: 20, color: Color(0xFF7E57C2)),
             ),
           ),
         ),
-        const SizedBox(height: 16),
         _buildDropdownField(
           label: 'profile.gender'.tr(context),
           value: _controllers['gender']!.text,
+          icon: Icons.people_rounded,
           items: {
             '1': 'profile.male'.tr(context),
             '2': 'profile.female'.tr(context),
           },
           onChanged: (v) => setState(() => _controllers['gender']!.text = v!),
         ),
-        const SizedBox(height: 16),
         _buildDropdownField(
           label: 'profile.marital_status'.tr(context),
           value: _controllers['marital_status']!.text,
+          icon: Icons.favorite_rounded,
           items: {
             '0': 'profile.single'.tr(context),
             '1': 'profile.married'.tr(context),
@@ -584,10 +617,10 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           onChanged: (v) =>
               setState(() => _controllers['marital_status']!.text = v!),
         ),
-        const SizedBox(height: 16),
         _buildDropdownField(
           label: 'profile.religion'.tr(context),
           value: _controllers['religion_id']!.text,
+          icon: Icons.mosque_rounded,
           items: {
             '': 'profile.select_religion'.tr(context),
             '23': 'profile.islam'.tr(context),
@@ -603,25 +636,25 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.blood_group'.tr(context),
           controller: _controllers['blood_group']!,
+          prefixIcon: const Icon(Icons.bloodtype_rounded, size: 18, color: Color(0xFF7E57C2)),
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.nationality'.tr(context),
           controller: _controllers['nationality']!,
+          prefixIcon: const Icon(Icons.flag_rounded, size: 18, color: Color(0xFF7E57C2)),
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.address'.tr(context),
           controller: _controllers['address_1']!,
+          prefixIcon: const Icon(Icons.home_rounded, size: 18, color: Color(0xFF7E57C2)),
           maxLines: 2,
         ),
-        const SizedBox(height: 16),
-        // State Dropdown
         _buildLocationDropdown(
           label: 'profile.state_province'.tr(context),
           items: _provinces,
           currentValue: _controllers['state']!.text,
           isLoading: _isLoadingProvinces,
+          icon: Icons.map_rounded,
           onChanged: (val, name) {
             setState(() {
               _controllers['state']!.text = name;
@@ -629,14 +662,13 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             _fetchRegencies(val);
           },
         ),
-        const SizedBox(height: 16),
-        // City Dropdown
         _buildLocationDropdown(
           label: 'profile.city_regency'.tr(context),
           items: _regencies,
           currentValue: _controllers['city']!.text,
           isLoading: _isLoadingRegencies,
           enabled: _regencies.isNotEmpty,
+          icon: Icons.location_city_rounded,
           hint: _controllers['state']!.text.isEmpty
               ? 'profile.select_state_first'.tr(context)
               : 'profile.select_city'.tr(context),
@@ -650,6 +682,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.zip_code'.tr(context),
           controller: _controllers['zipcode']!,
+          prefixIcon: const Icon(Icons.pin_rounded, size: 18, color: Color(0xFF7E57C2)),
           keyboardType: TextInputType.number,
         ),
       ];
@@ -658,23 +691,24 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.bio'.tr(context),
           controller: _controllers['bio']!,
+          prefixIcon: const Icon(Icons.info_outline_rounded, size: 18, color: Color(0xFF7E57C2)),
           maxLines: 3,
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.experience'.tr(context),
           controller: _controllers['experience']!,
+          prefixIcon: const Icon(Icons.work_outline_rounded, size: 18, color: Color(0xFF7E57C2)),
           maxLines: 3,
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.fb_url'.tr(context),
           controller: _controllers['fb_profile']!,
+          prefixIcon: const FaIcon(FontAwesomeIcons.facebook, size: 18, color: Color(0xFF7E57C2)),
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.linkedin_url'.tr(context),
           controller: _controllers['linkedin_profile']!,
+          prefixIcon: const FaIcon(FontAwesomeIcons.linkedin, size: 18, color: Color(0xFF7E57C2)),
         ),
       ];
     } else if (widget.section == 'bank') {
@@ -682,32 +716,33 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.account_title'.tr(context),
           controller: _controllers['account_title']!,
+          prefixIcon: const Icon(Icons.person_pin_rounded, size: 18, color: Color(0xFF7E57C2)),
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.account_number'.tr(context),
           controller: _controllers['account_number']!,
+          prefixIcon: const Icon(Icons.numbers_rounded, size: 18, color: Color(0xFF7E57C2)),
           keyboardType: TextInputType.number,
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.bank_name'.tr(context),
           controller: _controllers['bank_name']!,
+          prefixIcon: const Icon(Icons.account_balance_rounded, size: 18, color: Color(0xFF7E57C2)),
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.iban'.tr(context),
           controller: _controllers['iban']!,
+          prefixIcon: const Icon(Icons.public_rounded, size: 18, color: Color(0xFF7E57C2)),
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.swift_code'.tr(context),
           controller: _controllers['swift_code']!,
+          prefixIcon: const Icon(Icons.speed_rounded, size: 18, color: Color(0xFF7E57C2)),
         ),
-        const SizedBox(height: 16),
         _buildTextField(
           label: 'profile.bank_branch'.tr(context),
           controller: _controllers['bank_branch']!,
+          prefixIcon: const Icon(Icons.location_on_rounded, size: 18, color: Color(0xFF7E57C2)),
         ),
       ];
     }
@@ -737,48 +772,53 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     int maxLines = 1,
     String? Function(String?)? validator,
     Widget? suffixIcon,
+    Widget? prefixIcon,
+    bool required = false,
     TextCapitalization textCapitalization = TextCapitalization.none,
     List<TextInputFormatter>? inputFormatters,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        textCapitalization: textCapitalization,
+        inputFormatters: inputFormatters,
+        maxLines: maxLines,
+        validator: validator,
+        style: const TextStyle(fontSize: 14),
+        decoration: InputDecoration(
+          labelText: required ? '$label *' : label,
+          labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
+          prefixIcon: prefixIcon != null 
+            ? Padding(
+                padding: const EdgeInsets.all(12),
+                child: prefixIcon,
+              )
+            : null,
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 48,
+            minHeight: 48,
+          ),
+          suffixIcon: suffixIcon,
+          filled: true,
+          fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.grey[200]!),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.grey[200]!),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 2),
           ),
         ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          textCapitalization: textCapitalization,
-          inputFormatters: inputFormatters,
-          maxLines: maxLines,
-          validator: validator,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Theme.of(context).cardColor,
-            suffixIcon: suffixIcon,
-            contentPadding: const EdgeInsets.all(16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF7E57C2)),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -787,14 +827,19 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     required String value,
     required Map<String, String> items,
     required void Function(String?) onChanged,
+    IconData? icon,
   }) {
     final String selectedName = items[value] ?? '';
 
-    return SearchableDropdown(
-      label: label,
-      value: selectedName,
-      options: items.entries.map((e) => {'id': e.key, 'name': e.value}).toList(),
-      onSelected: (id) => onChanged(id),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: SearchableDropdown(
+        label: label,
+        value: selectedName,
+        icon: icon,
+        options: items.entries.map((e) => {'id': e.key, 'name': e.value}).toList(),
+        onSelected: (id) => onChanged(id),
+      ),
     );
   }
 
@@ -806,19 +851,24 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     required void Function(String id, String name) onChanged,
     bool enabled = true,
     String? hint,
+    IconData? icon,
   }) {
-    return SearchableDropdown(
-      label: label,
-      value: currentValue,
-      placeholder: isLoading ? 'profile.loading'.tr(context) : (hint ?? 'profile.select_item'.tr(context, args: {'item': label})),
-      options: items.map((e) => {
-        'id': e['id'].toString(),
-        'name': e['name'] as String,
-      }).toList(),
-      onSelected: (id) {
-        final item = items.firstWhere((e) => e['id'].toString() == id);
-        onChanged(id, item['name'] as String);
-      },
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: SearchableDropdown(
+        label: label,
+        value: currentValue,
+        icon: icon,
+        placeholder: isLoading ? 'profile.loading'.tr(context) : (hint ?? 'profile.select_item'.tr(context, args: {'item': label})),
+        options: items.map((e) => {
+          'id': e['id'].toString(),
+          'name': e['name'] as String,
+        }).toList(),
+        onSelected: (id) {
+          final item = items.firstWhere((e) => e['id'].toString() == id);
+          onChanged(id, item['name'] as String);
+        },
+      ),
     );
   }
 }

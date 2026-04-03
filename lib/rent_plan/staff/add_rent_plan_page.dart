@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../services/rent_plan_service.dart';
 import 'package:intl/intl.dart';
-import '../../widgets/custom_app_bar.dart';
 import '../../widgets/searchable_dropdown.dart';
 import '../../localization/app_localizations.dart';
+import '../../widgets/secondary_app_bar.dart';
 
 class AddRentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -79,11 +79,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   File? _filePo;
   File? _fileKtpPimpinan;
   File? _fileDomisiliPerusahaan;
-  Map<int, File?> _fileJaminan = {1: null, 2: null, 3: null};
-  Map<int, String?> _selectedJaminanIds = {1: null, 2: null, 3: null};
+  final Map<int, File?> _fileJaminan = {1: null, 2: null, 3: null};
+  final Map<int, String?> _selectedJaminanIds = {1: null, 2: null, 3: null};
 
   // Items
-  List<Map<String, dynamic>> _itemRows = [
+  final List<Map<String, dynamic>> _itemRows = [
     {'laptop_id': null, 'qty': 1, 'price': 0}
   ];
 
@@ -232,8 +232,9 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
       setState(() {
-        if (key == 0) _fileKtp = File(result.files.single.path!);
-        else if (key is int) _fileJaminan[key] = File(result.files.single.path!);
+        if (key == 0) {
+          _fileKtp = File(result.files.single.path!);
+        } else if (key is int) _fileJaminan[key] = File(result.files.single.path!);
         else if (key == 'npwp') _fileNpwp = File(result.files.single.path!);
         else if (key == 'po') _filePo = File(result.files.single.path!);
         else if (key == 'ktp_pimpinan') _fileKtpPimpinan = File(result.files.single.path!);
@@ -562,10 +563,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(
-        userData: widget.userData,
-        showBackButton: true,
-        showActions: false,
+      appBar: SecondaryAppBar(
         title: 'rent_plan.add_new_order'.tr(context),
       ),
       body: Form(
@@ -631,7 +629,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                 Row(
                   children: [
                     Expanded(child: _buildDatePicker('rent_plan.rent_start'.tr(context))),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     Expanded(child: _buildTextField('rent_plan.rent_duration'.tr(context), 
                       suffix: 'rent_plan.days'.tr(context),
                       initialValue: _lamaSewa.toString(), 
@@ -639,7 +637,9 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                       onChanged: (val) {
                         setState(() {
                           _lamaSewa = int.tryParse(val) ?? 1;
-                          for (int i = 0; i < _itemRows.length; i++) _calculatePriceForRow(i);
+                          for (int i = 0; i < _itemRows.length; i++) {
+                            _calculatePriceForRow(i);
+                          }
                         });
                       }
                     )),
@@ -797,7 +797,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)),
         filled: true,
         fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),
     );
   }
@@ -842,7 +842,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           value: selectedProvinceName,
           options: _provinces.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; });
+            setState(() { if (isKtp) {
+              _selectedProvinceKtp = val;
+            } else {
+              _selectedProvinceCur = val;
+            } });
             _loadRegencies(val, isKtp);
           },
           placeholder: 'rent_plan.select_province'.tr(context),
@@ -853,7 +857,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           value: selectedRegencyName,
           options: currentRegencies.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; });
+            setState(() { if (isKtp) {
+              _selectedRegencyKtp = val;
+            } else {
+              _selectedRegencyCur = val;
+            } });
             _loadDistricts(val, isKtp);
           },
           placeholder: (isKtp ? _isLoadingRegKtp : _isLoadingRegCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_regency'.tr(context),
@@ -864,7 +872,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           value: selectedDistrictName,
           options: currentDistricts.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; });
+            setState(() { if (isKtp) {
+              _selectedDistrictKtp = val;
+            } else {
+              _selectedDistrictCur = val;
+            } });
             _loadVillages(val, isKtp);
           },
           placeholder: (isKtp ? _isLoadingDistKtp : _isLoadingDistCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_district'.tr(context),
@@ -875,7 +887,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           value: selectedVillageName,
           options: currentVillages.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; });
+            setState(() { if (isKtp) {
+              _selectedVillageKtp = val;
+            } else {
+              _selectedVillageCur = val;
+            } });
           },
           placeholder: (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_village'.tr(context),
         ),
@@ -890,7 +906,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         if (date != null) setState(() => _invoiceDate = date);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         constraints: const BoxConstraints(minHeight: 64),
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.white,

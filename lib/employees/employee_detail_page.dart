@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../localization/app_localizations.dart';
 import 'employee_edit_page.dart';
+import '../widgets/secondary_app_bar.dart';
 
 class EmployeeDetailPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -168,26 +169,12 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
   }
 
   PreferredSizeWidget _buildRedesignedAppBar() {
-    return AppBar(
-      title: Text(
-        'employees.detail_title'.tr(context),
-        style: TextStyle(
-          color: _primaryColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 20,
-        ),
-      ),
-      backgroundColor: Theme.of(context).cardColor,
-      elevation: 0,
-      centerTitle: false,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios_new_rounded, color: _primaryColor, size: 20),
-        onPressed: () => Navigator.pop(context),
-      ),
+    return SecondaryAppBar(
+      title: 'employees.detail_title'.tr(context),
       actions: [
         if (_hasPermission('mobile_employees_add'))
           IconButton(
-            icon: Icon(Icons.edit_outlined, color: _primaryColor, size: 22),
+            icon: const Icon(Icons.edit_outlined, color: Color(0xFF7E57C2), size: 22),
             onPressed: () {
               String section = 'profil';
               switch (_tabController.index) {
@@ -232,9 +219,9 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
+          bottom: BorderSide(color: Colors.grey.withOpacity(0.05), width: 1),
         ),
       ),
       child: TabBar(
@@ -267,7 +254,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
     final info = _employeeData?['user_info'];
     if (info == null) return Center(child: Text('employees.overview.profile_data_not_available'.tr(context)));
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           _buildProfileHeader(info),
@@ -276,7 +263,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
             _buildInfoRow(Icons.email_outlined, 'profile.email'.tr(context), info['email']),
             _buildInfoRow(Icons.phone_android_outlined, 'profile.phone'.tr(context), info['contact_number']),
             _buildInfoRow(Icons.location_on_outlined, 'profile.address'.tr(context), '${info['address_1'] ?? ''} ${info['city'] ?? ''}'),
-            _buildInfoRow(Icons.person_pin_circle_outlined, 'register.username'.tr(context), info['username']),
+            _buildInfoRow(Icons.person_pin_circle_outlined, 'register.username'.tr(context), info['username'], last: true),
           ]),
         ],
       ),
@@ -284,39 +271,42 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
   }
 
   Widget _buildProfileHeader(dynamic info) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+        ),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF512DA8), Color(0xFF7E57C2)],
+              ),
               shape: BoxShape.circle,
-              border: Border.all(color: _primaryColor.withOpacity(0.2), width: 2),
             ),
             child: CircleAvatar(
               radius: 50,
-              backgroundColor: _primaryColor.withOpacity(0.05),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               backgroundImage: (info['profile_photo'] != null && !info['profile_photo'].contains('default_profile'))
                   ? NetworkImage(info['profile_photo'])
                   : null,
               child: (info['profile_photo'] == null || info['profile_photo'].contains('default_profile'))
-                  ? Text(
-                      info['full_name'].substring(0, 1).toUpperCase(),
-                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: _primaryColor),
-                    )
+                  ? Icon(Icons.person, size: 50, color: Colors.grey.withOpacity(0.5))
                   : null,
             ),
           ),
@@ -353,37 +343,59 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
   }
 
   Widget _buildInfoSection(String title, List<Widget> children) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          child: Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
           ),
-          const SizedBox(height: 24),
-          ...children,
-        ],
-      ),
+        ),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+            border: Border.all(
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
+  Widget _buildInfoRow(IconData icon, String label, String? value, {bool last = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        border: last
+            ? null
+            : Border(
+                bottom: BorderSide(
+                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.08),
+                ),
+              ),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -399,15 +411,26 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  label,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w500),
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   (value == null || value.trim().isEmpty) ? 'employees.none'.tr(context) : value,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -433,7 +456,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
     if (emp == null) return Center(child: Text('employees.contract_data.not_available'.tr(context)));
     
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           _buildInfoSection('employees.contract_data.title'.tr(context), [
@@ -441,7 +464,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
             _buildInfoRow(Icons.business_outlined, 'profile.department'.tr(context), emp['department_name']),
             _buildInfoRow(Icons.badge_outlined, 'profile.designation'.tr(context), emp['designation_name']),
             _buildInfoRow(Icons.analytics_outlined, 'employees.work_log'.tr(context), emp['worklog'].toString()),
-            _buildInfoRow(Icons.check_circle_outline, 'employees.status_target_worklog'.tr(context), emp['worklog_active'] == 1 ? 'main.active'.tr(context) : 'main.inactive'.tr(context)),
+            _buildInfoRow(Icons.check_circle_outline, 'employees.status_target_worklog'.tr(context), emp['worklog_active'] == 1 ? 'main.active'.tr(context) : 'main.inactive'.tr(context), last: true),
           ]),
           const SizedBox(height: 24),
           _buildInfoSection('employees.salary_shift.title'.tr(context), [
@@ -449,13 +472,13 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
             _buildInfoRow(Icons.timer_outlined, 'profile.hourly_rate'.tr(context), 'Rp ${emp['hourly_rate'].toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}'),
             _buildInfoRow(Icons.description_outlined, 'employees.payslip_type'.tr(context), emp['salay_type']),
             _buildInfoRow(Icons.schedule_outlined, 'profile.office_shift'.tr(context), emp['shift_name']),
-            _buildInfoRow(Icons.work_outline, 'employees.status_work_label'.tr(context), _formatStatusWork(emp['status_work'])),
+            _buildInfoRow(Icons.work_outline, 'employees.status_work_label'.tr(context), _formatStatusWork(emp['status_work']), last: true),
           ]),
           const SizedBox(height: 24),
           _buildInfoSection('employees.period_leave.title'.tr(context), [
             _buildInfoRow(Icons.start_outlined, 'employees.start_contract'.tr(context), emp['contract_date']),
             _buildInfoRow(Icons.event_available_outlined, 'profile.contract_end'.tr(context), emp['contract_end']),
-            _buildInfoRow(Icons.beach_access_outlined, 'employees.leave_categories'.tr(context), emp['leave_categories'] == 'all' ? 'employees.all'.tr(context) : (emp['leave_categories'] ?? 'employees.none'.tr(context))),
+            _buildInfoRow(Icons.beach_access_outlined, 'employees.leave_categories'.tr(context), emp['leave_categories'] == 'all' ? 'employees.all'.tr(context) : (emp['leave_categories'] ?? 'employees.none'.tr(context)), last: true),
           ]),
           const SizedBox(height: 24),
           if (options != null && options['allowances'].isNotEmpty) ...[
@@ -472,71 +495,93 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
   }
 
   Widget _buildListSection(String title, List<dynamic> items) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          child: Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
           ),
-          const SizedBox(height: 16),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: items.length,
-            separatorBuilder: (context, index) => const Divider(),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(item['title'], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                subtitle: Text(item['month_year'] ?? 'employees.none'.tr(context), style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-                trailing: Text(
-                  'Rp ${item['amount'].toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                  style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold),
-                ),
-              );
-            },
+        ),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+            border: Border.all(
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+            ),
           ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: items.length,
+                separatorBuilder: (context, index) => Divider(height: 1, color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.08)),
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    title: Text(item['title'], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    subtitle: Text(item['month_year'] ?? 'employees.none'.tr(context), style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                    trailing: Text(
+                      'Rp ${item['amount'].toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+                      style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildEmploymentTab() {
     final emp = _employeeData?['employment'];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (emp == null) return Center(child: Text('employees.employment_detail.not_available'.tr(context)));
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          _buildInfoSection('employees.employment_detail.title'.tr(context), [
+          _buildInfoSection('employees.employment_detail.detail_title'.tr(context), [
             _buildInfoRow(Icons.badge_outlined, 'profile.employee_id'.tr(context), emp['employee_id']),
             _buildInfoRow(Icons.business_outlined, 'profile.department'.tr(context), emp['department_name']),
             _buildInfoRow(Icons.work_outline, 'profile.designation'.tr(context), emp['designation_name']),
             _buildInfoRow(Icons.schedule_outlined, 'profile.office_shift'.tr(context), emp['shift_name']),
             _buildInfoRow(Icons.calendar_today_outlined, 'profile.contract_date'.tr(context), emp['date_of_joining']),
-            _buildInfoRow(Icons.person_outline, 'profile.manager'.tr(context), emp['manager']),
+            _buildInfoRow(Icons.person_outline, 'profile.manager'.tr(context), emp['manager'], last: true),
           ]),
           const SizedBox(height: 24),
           _buildInfoSection('employees.role_desc'.tr(context), [
-            Text(
-              emp['role_description'] ?? 'announcement.no_description'.tr(context),
-              style: TextStyle(color: Colors.grey[700], height: 1.5),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                emp['role_description'] ?? 'announcement.no_description'.tr(context),
+                style: TextStyle(
+                  color: isDark ? Colors.grey[300] : Colors.grey[700],
+                  height: 1.5,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ]),
         ],
@@ -554,7 +599,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
     }
  
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           _buildInfoSection('employees.personal_info'.tr(context), [
@@ -562,14 +607,14 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
             _buildInfoRow(Icons.cake_outlined, 'profile.dob'.tr(context), personal['date_of_birth']),
             _buildInfoRow(Icons.favorite_border, 'profile.marital_status'.tr(context), personal['marital_status']),
             _buildInfoRow(Icons.mosque_outlined, 'profile.religion'.tr(context), personal['religion']),
-            _buildInfoRow(Icons.bloodtype_outlined, 'profile.blood_group'.tr(context), personal['blood_group']),
+            _buildInfoRow(Icons.bloodtype_outlined, 'profile.blood_group'.tr(context), personal['blood_group'], last: true),
           ]),
           const SizedBox(height: 24),
           _buildInfoSection('employees.bank_info'.tr(context), [
             _buildInfoRow(Icons.account_balance_outlined, 'profile.bank_name'.tr(context), bank['bank_name']),
             _buildInfoRow(Icons.account_circle_outlined, 'profile.account_title'.tr(context), bank['account_title']),
             _buildInfoRow(Icons.numbers_outlined, 'profile.account_number'.tr(context), bank['account_number']),
-            _buildInfoRow(Icons.code_outlined, 'SWIFT/IBAN', '${bank['swift_code'] ?? 'employees.none'.tr(context)} / ${bank['iban'] ?? 'employees.none'.tr(context)}'),
+            _buildInfoRow(Icons.code_outlined, 'SWIFT/IBAN', '${bank['swift_code'] ?? 'employees.none'.tr(context)} / ${bank['iban'] ?? 'employees.none'.tr(context)}', last: true),
           ]),
         ],
       ),
@@ -581,7 +626,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
     final edu = _employeeData?['education'] as List? ?? [];
     
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           _buildHistorySection('employees.work_exp'.tr(context), exp, (item) => '${item['company_name']} - ${item['post']}'),
@@ -593,112 +638,148 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
   }
 
   Widget _buildHistorySection(String title, List<dynamic> items, String Function(dynamic) subtitle) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          child: Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          if (items.isEmpty)
-            Text('attendance.no_data'.tr(context), style: const TextStyle(color: Colors.grey))
-          else
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: items.length,
-              separatorBuilder: (context, index) => const Divider(),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                final years = (item['from_year'] == null || item['from_year'].toString() == 'null' || item['from_year'].toString().isEmpty) 
-                    ? '-' 
-                    : '${item['from_year']} - ${item['to_year'] ?? '-'}';
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(subtitle(item), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                  subtitle: Text(
-                    years,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 11),
-                  ),
-                );
-              },
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
             ),
-        ],
-      ),
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+            border: Border.all(
+              color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (items.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text('attendance.no_data'.tr(context), style: const TextStyle(color: Colors.grey)),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: items.length,
+                  separatorBuilder: (context, index) => Divider(height: 1, color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.08)),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    final years = (item['from_year'] == null || item['from_year'].toString() == 'null' || item['from_year'].toString().isEmpty) 
+                        ? '-' 
+                        : '${item['from_year']} - ${item['to_year'] ?? '-'}';
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      title: Text(subtitle(item), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                      subtitle: Text(
+                        years,
+                        style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                      ),
+                    );
+                  },
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildDocumentsTab() {
     final docs = _employeeData?['documents'] as List? ?? [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('employees.emp_docs'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            if (docs.isEmpty)
-              Text('attendance.no_data'.tr(context), style: const TextStyle(color: Colors.grey))
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: docs.length,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) {
-                  final doc = docs[index];
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: _primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(Icons.insert_drive_file_outlined, color: _primaryColor),
-                    ),
-                    title: Text(doc['name'], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    subtitle: Text(doc['type'], style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-                    trailing: IconButton(
-                      icon: Icon(Icons.download_rounded, color: _primaryColor),
-                      onPressed: () {
-                        // Implement download link if needed, or just show the URL
-                        debugPrint('Download: ${doc['file']}');
-                      },
-                    ),
-                  );
-                },
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 12),
+            child: Text(
+              'employees.emp_docs'.tr(context),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
               ),
-          ],
-        ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+              border: Border.all(
+                color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (docs.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text('attendance.no_data'.tr(context), style: const TextStyle(color: Colors.grey)),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: docs.length,
+                    separatorBuilder: (context, index) => Divider(height: 1, color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.08)),
+                    itemBuilder: (context, index) {
+                      final doc = docs[index];
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: _primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.insert_drive_file_outlined, color: _primaryColor),
+                        ),
+                        title: Text(doc['name'], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                        subtitle: Text(doc['type'], style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                        trailing: IconButton(
+                          icon: Icon(Icons.download_rounded, color: _primaryColor),
+                          onPressed: () {
+                            debugPrint('Download: ${doc['file']}');
+                          },
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -732,11 +813,11 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
               'employees.delete_title'.tr(context),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               'employees.delete_confirm'.tr(context),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+              style: TextStyle(color: Colors.grey[600]),
             ),
             const SizedBox(height: 32),
             Row(
@@ -745,14 +826,10 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                    child: Text(
-                      'main.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                    ),
+                    child: Text('main.cancel'.tr(context)),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -765,8 +842,8 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       elevation: 0,
                     ),
                     child: Text('main.delete'.tr(context)),
@@ -774,7 +851,6 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
                 ),
               ],
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -783,33 +859,37 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage> with TickerProv
 
   Future<void> _deleteEmployee() async {
     try {
-      setState(() => _isLoading = true);
+      if (mounted) setState(() => _isLoading = true);
+      
       const url = 'https://foxgeen.com/HRIS/mobileapi/delete_employee';
       final response = await http.post(
         Uri.parse(url),
         body: {'user_id': widget.employeeId.toString()},
-      );
+      ).timeout(const Duration(seconds: 15));
       
       final data = json.decode(response.body);
       if (data['status'] == true) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('employees.delete_success'.tr(context)), backgroundColor: Colors.green),
-        );
-        Navigator.pop(context, true);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('employees.delete_success'.tr(context)), backgroundColor: Colors.green),
+          );
+          Navigator.pop(context, true);
+        }
       } else {
-        if (!mounted) return;
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'employees.delete_error'.tr(context)), backgroundColor: Colors.red),
-        );
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'employees.delete_error'.tr(context)), backgroundColor: Colors.red),
+          );
+        }
       }
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('employees.delete_conn_error'.tr(context)), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('profile.conn_error'.tr(context)), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 }

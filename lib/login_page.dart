@@ -500,10 +500,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Stack(
           children: [
             // Decorative background circles
@@ -534,13 +536,11 @@ class _LoginPageState extends State<LoginPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(
-                                0xFF7E57C2,
-                              ).withOpacity(0.1),
+                              color: colorScheme.primary.withOpacity(0.1),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -548,28 +548,33 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(15),
-                          child: Image.asset(
-                            'assets/images/icon.webp',
-                            height: 60,
-                            width: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.business_outlined,
-                                size: 60,
-                                color: Color(0xFF7E57C2),
-                              );
-                            },
+                          child: Container(
+                            color: Theme.of(context).cardColor,
+                            child: Image.asset(
+                              'assets/images/icon.webp',
+                              height: 60,
+                              width: 60,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(
+                                  Icons.business_outlined,
+                                  size: 60,
+                                  color: Color(0xFF7E57C2),
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'main.app_name'.tr(context),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF4A4A4A),
+                          color: Theme.of(context).brightness == Brightness.dark 
+                            ? Colors.white 
+                            : colorScheme.onSurface.withOpacity(0.8),
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -578,7 +583,7 @@ class _LoginPageState extends State<LoginPage> {
                         'login.welcome_back'.tr(context),
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade500,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -737,30 +742,29 @@ class _LoginPageState extends State<LoginPage> {
                       // Alternative Login Separator
                       Row(
                         children: [
-                          Expanded(child: Divider(color: Colors.grey.shade100, thickness: 1)),
+                          Expanded(child: Divider(color: Theme.of(context).dividerColor.withOpacity(0.1), thickness: 1)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
                               'login.or'.tr(context),
                               style: TextStyle(
-                                color: Colors.grey.shade400,
+                                color: Theme.of(context).hintColor,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                          Expanded(child: Divider(color: Colors.grey.shade100, thickness: 1)),
+                          Expanded(child: Divider(color: Theme.of(context).dividerColor.withOpacity(0.1), thickness: 1)),
                         ],
                       ),
                       const SizedBox(height: 20),
 
-                      // Biometric Login (if enabled)
                       if (_canCheckBiometrics) ...[
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.fingerprint_rounded,
                             size: 56,
-                            color: Color(0xFF7E57C2),
+                            color: colorScheme.primary,
                           ),
                           onPressed: _isLoading ? null : _loginWithBiometric,
                           tooltip: 'login.login_fingerprint'.tr(context),
@@ -780,14 +784,16 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           label: Text(
                             'login.login_google'.tr(context),
-                            style: const TextStyle(
-                              color: Color(0xFF4A4A4A),
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.grey.shade200),
+                            side: BorderSide(
+                              color: Theme.of(context).dividerColor.withOpacity(0.1)
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -816,7 +822,9 @@ class _LoginPageState extends State<LoginPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FE),
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? Colors.white.withOpacity(0.05) 
+            : const Color(0xFFF8F9FE),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -829,10 +837,10 @@ class _LoginPageState extends State<LoginPage> {
       child: TextFormField(
         controller: controller,
         obscureText: isPassword && obscureText,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF4A4A4A),
+          color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: const Color(0xFF7E57C2), size: 22),

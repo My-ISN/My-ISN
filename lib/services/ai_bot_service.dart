@@ -20,7 +20,7 @@ class AiBotService {
         url,
         body: {
           'message': message,
-          if (userId != null) 'user_id': userId,
+          'user_id': ?userId,
         },
       );
 

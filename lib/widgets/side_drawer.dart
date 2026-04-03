@@ -213,38 +213,6 @@ class SideDrawer extends StatelessWidget {
                       );
                     },
                   ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.smart_toy_outlined,
-                  title: 'dashboard.quick_menu_ai_bot'.tr(context),
-                  isActive: activePage == 'ai_bot',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AiBotPage(userData: userData),
-                      ),
-                    );
-                  },
-                ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.lightbulb_outline,
-                  title: 'dashboard.quick_menu_creative_idea'.tr(context),
-                  isActive: activePage == 'creative_idea',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => OnProgressPage(
-                          title: 'dashboard.quick_menu_creative_idea'.tr(context),
-                        ),
-                      ),
-                    );
-                  },
-                ),
                 if (_hasPermission('mobile_finance_enable'))
                   _buildMenuItem(
                     context,
@@ -277,6 +245,38 @@ class SideDrawer extends StatelessWidget {
                       );
                     },
                   ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.smart_toy_outlined,
+                  title: 'dashboard.quick_menu_ai_bot'.tr(context),
+                  isActive: activePage == 'ai_bot',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AiBotPage(userData: userData),
+                      ),
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.lightbulb_outline,
+                  title: 'dashboard.quick_menu_creative_idea'.tr(context),
+                  isActive: activePage == 'creative_idea',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OnProgressPage(
+                          title: 'dashboard.quick_menu_creative_idea'.tr(context),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),

@@ -231,8 +231,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           final bool isActive = _activeTab == tab;
 
           String label = tab;
-          if (tab == 'OVERVIEW') label = 'rent_plan.overview'.tr(context);
-          else if (tab == 'INVOICE') label = 'rent_plan.invoice'.tr(context);
+          if (tab == 'OVERVIEW') {
+            label = 'rent_plan.overview'.tr(context);
+          } else if (tab == 'INVOICE') label = 'rent_plan.invoice'.tr(context);
           else if (tab == 'VIEW_DOKUMEN') label = 'rent_plan.view_document'.tr(context);
           else if (tab == 'PERJANJIAN_SEWA') label = 'rent_plan.rental_agreement'.tr(context);
 
@@ -281,9 +282,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
   Future<void> _launchDocumentUrl(String tab) async {
     String endpoint = '';
-    if (tab == 'INVOICE')
+    if (tab == 'INVOICE') {
       endpoint = 'invoice';
-    else if (tab == 'PERJANJIAN_SEWA')
+    } else if (tab == 'PERJANJIAN_SEWA')
       endpoint = 'agreement';
 
     if (endpoint.isEmpty) return;
@@ -300,7 +301,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('rent_plan.opening'.tr(context) + ' ${tab.toLowerCase()}')),
+          SnackBar(content: Text('${'rent_plan.opening'.tr(context)} ${tab.toLowerCase()}')),
         );
       }
     }

@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:async';
 import '../announcement_page.dart';
 import '../todo_list/todo_list_page.dart';
-import 'connectivity_wrapper.dart';
 import 'top_notification.dart';
 import '../localization/app_localizations.dart';
 

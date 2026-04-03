@@ -97,91 +97,23 @@ class _ProfilePageState extends State<ProfilePage> {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
-                  _buildHeader(),
-                  const SizedBox(height: 16),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
-                        if (basic['user_type'] != 'customer') ...[
-                          _buildMenuTile(
-                            icon: Icons.assignment_outlined,
-                            title: 'profile.contract'.tr(context),
-                            subtitle: 'profile.contract_desc'.tr(context),
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProfileContractPage(
-                                  data: _profileData['contract'] ?? {},
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                        _buildMenuTile(
-                          icon: Icons.person_outline,
-                          title: 'profile.basic_info'.tr(context),
-                          subtitle: 'profile.basic_info_desc'.tr(context),
-                          onTap: () =>
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProfileBasicPage(
-                                    data: _profileData['basic_info'] ?? {},
-                                    userData: widget.userData,
-                                    fullProfileData: _profileData,
-                                  ),
-                                ),
-                              ).then((value) {
-                                if (value == true) _fetchProfileDetails();
-                              }),
-                        ),
-                        const SizedBox(height: 10),
-                        _buildMenuTile(
-                          icon: Icons.info_outline,
-                          title: 'profile.personal_info'.tr(context),
-                          subtitle: 'profile.personal_info_desc'.tr(context),
-                          onTap: () =>
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProfilePersonalPage(
-                                    data: _profileData['personal_info'] ?? {},
-                                    userData: widget.userData,
-                                    fullProfileData: _profileData,
-                                  ),
-                                ),
-                              ).then((value) {
-                                if (value == true) _fetchProfileDetails();
-                              }),
-                        ),
-                        const SizedBox(height: 10),
-                        _buildMenuTile(
-                          icon: Icons.account_balance_outlined,
-                          title: 'profile.bank_account'.tr(context),
-                          subtitle: 'profile.bank_account_desc'.tr(context),
-                          onTap: () =>
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProfileBankPage(
-                                    data: _profileData['bank_info'] ?? {},
-                                    userData: widget.userData,
-                                    fullProfileData: _profileData,
-                                  ),
-                                ),
-                              ).then((value) {
-                                if (value == true) _fetchProfileDetails();
-                              }),
-                        ),
+                        SizedBox(height: MediaQuery.of(context).padding.top + 20),
+                        _buildMainInfoCard(),
+                        const SizedBox(height: 24),
+                        _buildDetailInfoContainer(),
+                        const SizedBox(height: 24),
+                        _buildMenuSection(),
                       ],
                     ),
                   ),
                   ValueListenableBuilder<double>(
                     valueListenable: ConnectivityStatus.bottomPadding,
                     builder: (context, padding, _) => SizedBox(
-                      height: (padding + 40).clamp(0.0, double.infinity),
+                      height: (padding + 20).clamp(0.0, double.infinity),
                     ),
                   ),
                 ],
@@ -217,10 +149,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildHeader() {
-    final basic = _profileData['basic_info'] ?? {};
-    final contract = _profileData['contract'] ?? {};
 
+  Widget _buildMainInfoCard() {
+    final basic = _profileData['basic_info'] ?? {};
     String fullName = '${basic['first_name'] ?? ''} ${basic['last_name'] ?? ''}'
         .trim();
     if (fullName.isEmpty) {
@@ -228,119 +159,68 @@ class _ProfilePageState extends State<ProfilePage> {
           widget.userData['nama'] ?? widget.userData['first_name'] ?? 'User';
     }
 
-    return Column(
+    return Stack(
       children: [
-        Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            // Minimal spacer for top padding
-            const SizedBox(height: 120, width: double.infinity),
-
-            // Edit Profile Button Positioned at Top Right
-            Positioned(
-              top: 0,
-              right: 16,
-              child: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProfileEditPage(
-                        userData: widget.userData,
-                        profileData: _profileData,
-                        section: 'header',
-                      ),
-                    ),
-                  ).then((value) {
-                    if (value == true) {
-                      _fetchProfileDetails();
-                    }
-                  });
-                },
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.edit_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
-                  ),
-                ),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-            ),
-
-            // Avatar Positioned
-            Positioned(
-              top: 10,
-              child: Container(
-                padding: const EdgeInsets.all(4),
+            ],
+            border: Theme.of(context).brightness == Brightness.dark
+                ? Border.all(color: Colors.white10)
+                : null,
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.light
-                      ? Colors.white
-                      : Theme.of(context).cardColor,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF512DA8), Color(0xFF7E57C2)],
+                  ),
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 10,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
                 ),
                 child: CircleAvatar(
-                  radius: 55,
-                  backgroundColor:
-                      Theme.of(context).brightness == Brightness.light
-                      ? const Color(0xFFF1F5F9)
-                      : Theme.of(context).cardColor,
-                  backgroundImage:
-                      (basic['profile_photo'] != null &&
+                  radius: 50,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  backgroundImage: (basic['profile_photo'] != null &&
                           basic['profile_photo'].toString().isNotEmpty)
                       ? NetworkImage(
                           'https://foxgeen.com/HRIS/public/uploads/users/thumb/${basic['profile_photo']}',
                         )
                       : (widget.userData['profile_photo'] != null &&
-                            widget.userData['profile_photo']
-                                .toString()
-                                .isNotEmpty)
-                      ? NetworkImage(
-                          'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
-                        )
-                      : null,
-                  child:
-                      (basic['profile_photo'] == null ||
+                              widget.userData['profile_photo']
+                                  .toString()
+                                  .isNotEmpty)
+                          ? NetworkImage(
+                              'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
+                            )
+                          : null,
+                  child: (basic['profile_photo'] == null ||
                               basic['profile_photo'].toString().isEmpty) &&
                           (widget.userData['profile_photo'] == null ||
                               widget.userData['profile_photo']
                                   .toString()
                                   .isEmpty)
-                      ? const Icon(Icons.person, size: 55, color: Colors.white)
+                      ? const Icon(Icons.person, size: 50, color: Colors.grey)
                       : null,
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 10,
-        ), // Reduced space for avatar overlap since move up
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            children: [
+              const SizedBox(height: 16),
               Text(
                 fullName,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                  color: Theme.of(context).colorScheme.onSurface,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -349,103 +229,222 @@ class _ProfilePageState extends State<ProfilePage> {
                 '@${basic['username'] ?? widget.userData['username'] ?? 'username'}',
                 style: TextStyle(
                   color: Colors.grey[600],
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 12),
-              // Role Badge
+              const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: const Color(0xFF2ECC71).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.green.withOpacity(0.2)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  border:
+                      Border.all(color: const Color(0xFF2ECC71).withOpacity(0.2)),
                 ),
                 child: Text(
-                  (basic['role_name'] ?? widget.userData['role_name'] ?? 'Staff').toString().roleTr(context),
+                  (basic['role_name'] ?? widget.userData['role_name'] ?? 'Staff')
+                      .toString()
+                      .roleTr(context),
                   style: const TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2ECC71),
+                    fontWeight: FontWeight.w800,
                     fontSize: 12,
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Info Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Theme.of(context).brightness == Brightness.dark
-                      ? Border.all(color: Colors.white24)
-                      : null,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    if (basic['user_type'] != 'customer') ...[
-                      _buildEnhancedInfoRow(
-                        Icons.business_rounded,
-                        contract['department_name'] ?? '-',
-                        "profile.department".tr(context),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Divider(height: 1),
-                      ),
-                    ],
-                    _buildEnhancedInfoRow(
-                      Icons.email_rounded,
-                      basic['email'] ?? widget.userData['email'] ?? '-',
-                      "profile.email".tr(context),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Divider(height: 1),
-                    ),
-                    _buildEnhancedInfoRow(
-                      Icons.phone_android_rounded,
-                      basic['contact_number'] ??
-                          widget.userData['contact_number'] ??
-                          '-',
-                      "profile.phone".tr(context),
-                    ),
-                    if (basic['user_type'] != 'customer') ...[
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Divider(height: 1),
-                      ),
-                      _buildEnhancedInfoRow(
-                        Icons.person_pin_rounded,
-                        contract['manager_name'] ?? '-',
-                        "profile.manager".tr(context),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
             ],
           ),
+        ),
+        Positioned(
+          top: 12,
+          right: 12,
+          child: IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileEditPage(
+                    userData: widget.userData,
+                    profileData: _profileData,
+                    section: 'header',
+                  ),
+                ),
+              ).then((value) {
+                if (value == true) {
+                  _fetchProfileDetails();
+                }
+              });
+            },
+            icon: Icon(
+              Icons.edit_rounded,
+              color: Theme.of(context).hintColor.withOpacity(0.5),
+              size: 20,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailInfoContainer() {
+    final basic = _profileData['basic_info'] ?? {};
+    final contract = _profileData['contract'] ?? {};
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white10)
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'profile.basic_info'.tr(context),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (basic['user_type'] != 'customer') ...[
+            _buildEnhancedInfoRow(
+              Icons.business_rounded,
+              contract['department_name'] ?? '-',
+              "profile.department".tr(context),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Divider(height: 1, thickness: 0.5),
+            ),
+          ],
+          _buildEnhancedInfoRow(
+            Icons.email_rounded,
+            basic['email'] ?? widget.userData['email'] ?? '-',
+            "profile.email".tr(context),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Divider(height: 1, thickness: 0.5),
+          ),
+          _buildEnhancedInfoRow(
+            Icons.phone_android_rounded,
+            basic['contact_number'] ?? widget.userData['contact_number'] ?? '-',
+            "profile.phone".tr(context),
+          ),
+          if (basic['user_type'] != 'customer') ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Divider(height: 1, thickness: 0.5),
+            ),
+            _buildEnhancedInfoRow(
+              Icons.person_pin_rounded,
+              contract['manager_name'] ?? '-',
+              "profile.manager".tr(context),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuSection() {
+    final basic = _profileData['basic_info'] ?? {};
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 16),
+          child: Text(
+            'profile.others'.tr(context),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        if (basic['user_type'] != 'customer') ...[
+          _buildMenuTile(
+            icon: Icons.assignment_rounded,
+            title: 'profile.contract'.tr(context),
+            subtitle: 'profile.contract_desc'.tr(context),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfileContractPage(
+                  data: _profileData['contract'] ?? {},
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        _buildMenuTile(
+          icon: Icons.account_circle_rounded,
+          title: 'profile.basic_info'.tr(context),
+          subtitle: 'profile.basic_info_desc'.tr(context),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfileBasicPage(
+                data: _profileData['basic_info'] ?? {},
+                userData: widget.userData,
+                fullProfileData: _profileData,
+              ),
+            ),
+          ).then((value) {
+            if (value == true) _fetchProfileDetails();
+          }),
+        ),
+        const SizedBox(height: 12),
+        _buildMenuTile(
+          icon: Icons.contact_page_rounded,
+          title: 'profile.personal_info'.tr(context),
+          subtitle: 'profile.personal_info_desc'.tr(context),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfilePersonalPage(
+                data: _profileData['personal_info'] ?? {},
+                userData: widget.userData,
+                fullProfileData: _profileData,
+              ),
+            ),
+          ).then((value) {
+            if (value == true) _fetchProfileDetails();
+          }),
+        ),
+        const SizedBox(height: 12),
+        _buildMenuTile(
+          icon: Icons.account_balance_rounded,
+          title: 'profile.bank_account'.tr(context),
+          subtitle: 'profile.bank_account_desc'.tr(context),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfileBankPage(
+                data: _profileData['bank_info'] ?? {},
+                userData: widget.userData,
+                fullProfileData: _profileData,
+              ),
+            ),
+          ).then((value) {
+            if (value == true) _fetchProfileDetails();
+          }),
         ),
       ],
     );
@@ -508,25 +507,25 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Theme.of(context).brightness == Brightness.dark
-            ? Border.all(color: Colors.white24)
-            : null,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Theme.of(context).brightness == Brightness.dark
+            ? Border.all(color: Colors.white10)
+            : null,
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         leading: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(
             icon,
@@ -536,13 +535,23 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
         ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            subtitle,
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          ),
         ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+        trailing: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Colors.grey.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 20),
+        ),
         onTap: onTap,
       ),
     );

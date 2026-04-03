@@ -23,6 +23,7 @@ class FinancePage extends StatefulWidget {
 class _FinancePageState extends State<FinancePage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<Map<String, dynamic>> _availableTabs = [];
+  final Color _primaryColor = const Color(0xFF7E57C2);
 
   bool _hasPermission(String resource) {
     if (widget.userData['role_resources'] == 'all') return true;
@@ -1034,11 +1035,18 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
                       'finance.total_balance'.tr(context),
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    Icon(
-                      _isHeaderExpanded ? Icons.expand_less : Icons.expand_more,
-                      size: 20,
-                      color: Colors.grey,
+                    Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
                     ),
+                    child: Icon(
+                      _isHeaderExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                      color: _primaryColor,
+                      size: 20,
+                    ),
+                  ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -1393,45 +1401,51 @@ class _FinancePageState extends State<FinancePage> with SingleTickerProviderStat
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Left Group: Show [Limit] [DatePicker]
-        Row(
-          children: [
-            Text(
-              'rent_plan.show'.tr(context),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
-            ),
-            const SizedBox(width: 8),
-            _buildLimitDropdown(),
-            const SizedBox(width: 8),
-            // DatePicker (Month-Year)
-            InkWell(
-              onTap: _showMonthYearPicker,
-              child: Container(
-                height: 38,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                Text(
+                  'rent_plan.show'.tr(context),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.calendar_month_rounded, size: 14, color: Color(0xFF7E57C2)),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${_months.firstWhere((m) => m['id'] == _selectedMonth)['name']!.tr(context).substring(0, 3)} $_selectedYear',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                const SizedBox(width: 8),
+                _buildLimitDropdown(),
+                const SizedBox(width: 8),
+                // DatePicker (Month-Year)
+                InkWell(
+                  onTap: _showMonthYearPicker,
+                  child: Container(
+                    height: 38,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.withOpacity(0.1)),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: Colors.grey),
-                  ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.calendar_month_rounded, size: 14, color: Color(0xFF7E57C2)),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${_months.firstWhere((m) => m['id'] == _selectedMonth)['name']!.tr(context).substring(0, 3)} $_selectedYear',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: Colors.grey),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-
-        // Right Group: Total Badge (Pill version like Image 2)
+        const SizedBox(width: 12),
+        // Right Group: Total Badge
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(

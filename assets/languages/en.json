@@ -235,6 +235,7 @@
     },
     "profile": {
         "conn_error": "Failed to load data. Check your internet connection.",
+        "others": "Others",
         "contract": "Contract",
         "contract_desc": "Contract & salary information",
         "contract_details": "Contract Details",
@@ -438,6 +439,12 @@
     "employees": {
         "title": "Employees",
         "detail_title": "Employee Detail",
+        "edit_profile": "Edit Profile",
+        "edit_contract": "Edit Contract",
+        "edit_employment": "Edit Employment",
+        "edit_personal": "Edit Personal",
+        "edit_history": "Edit History",
+        "edit_documents": "Edit Documents",
         "search_hint": "Search name, role, or department...",
         "show": "Show",
         "total": "{count} Total",
@@ -853,6 +860,7 @@
         "save_success": "Task saved successfully",
         "update_success": "Task updated successfully",
         "delete_success": "Task deleted successfully",
+        "delete_failed": "Failed to delete task",
         "delete_confirm_title": "Delete Task?",
         "delete_confirm_desc": "Are you sure you want to delete this task?",
         "fetch_error": "Failed to load tasks",

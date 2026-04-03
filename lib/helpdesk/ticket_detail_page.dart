@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../widgets/custom_app_bar.dart';
+import '../widgets/secondary_app_bar.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 
@@ -186,11 +186,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: SecondaryAppBar(
         title: _ticketData['ticket_code'] ?? l10n!.translate('helpdesk.title'),
-        showBackButton: true,
-        showActions: false,
-        userData: widget.userData,
       ),
       body: ConnectivityWrapper(
         child: _isLoading
@@ -223,8 +220,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.05))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,12 +378,15 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
   }
 
   Widget _buildReplyInput() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (!_hasPermission('mobile_helpdesk_answer')) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[100],
-          border: Border(top: BorderSide(color: Colors.grey[300]!)),
+          color: isDark ? Colors.grey[900] : Colors.grey[100],
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
         ),
         child: const Center(
           child: Text(
@@ -396,42 +396,62 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
         ),
       );
     }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _replyController,
-              decoration: InputDecoration(
-                hintText: AppLocalizations.of(context)!.translate('helpdesk.reply'),
-                hintStyle: TextStyle(color: Theme.of(context).hintColor),
-                filled: true,
-                fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white10 : Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              maxLines: null,
-            ),
-          ),
-          const SizedBox(width: 8),
-          CircleAvatar(
-            backgroundColor: const Color(0xFF7E57C2),
-            child: IconButton(
-              onPressed: _isSending ? null : _sendReply,
-              icon: _isSending 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Icon(Icons.send, color: Colors.white, size: 20),
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24), // Extra bottom padding for safety
+        child: SafeArea(
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: TextField(
+                    controller: _replyController,
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)!.translate('helpdesk.reply'),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (_isSending)
+                const SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              else
+                FloatingActionButton.small(
+                  onPressed: _sendReply,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  child: const Icon(Icons.send, size: 18),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

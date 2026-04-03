@@ -40,7 +40,7 @@ class _TodoListPageState extends State<TodoListPage> {
   final Map<String, DateTime> _lastToggleTimes = {};
   Map<String, dynamic>? _currentUserData;
 
-  stt.SpeechToText _speech = stt.SpeechToText();
+  final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isSpeechInitialized = false;
   bool _isListening = false;
   StateSetter? _currentModalSetState;
@@ -281,17 +281,45 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Future<void> _deleteTodo(dynamic todo) async {
+    if (_currentUserData == null) return;
+    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
+    
     try {
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_todo'),
-        body: {'todo_item_id': todo['todo_item_id'].toString()},
+        body: {
+          'todo_item_id': todo['todo_item_id'].toString(),
+          'user_id': userId,
+        },
       );
 
       if (response.statusCode == 200) {
         _fetchTodos();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('todo_list.delete_success'.tr(context)),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${'todo_list.delete_failed'.tr(context)} (\${response.statusCode})'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
-      debugPrint('Error deleting todo: $e');
+      debugPrint('Error deleting todo: \$e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: \$e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -322,11 +350,15 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Future<void> _updateTodo(dynamic todoId, String description) async {
+    if (_currentUserData == null) return;
+    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
+
     try {
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/edit_todo'),
         body: {
           'todo_item_id': todoId.toString(),
+          'user_id': userId,
           'description': description,
         },
       );

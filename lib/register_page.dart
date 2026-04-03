@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 import 'dashboard_page.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'localization/app_localizations.dart';
+import 'widgets/secondary_app_bar.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -169,27 +170,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF4A4A4A), size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            'register.title'.tr(context),
-            style: const TextStyle(
-              color: Color(0xFF4A4A4A),
-              fontWeight: FontWeight.w900,
-              fontSize: 22,
-              letterSpacing: -0.5,
-            ),
-          ),
-          centerTitle: true,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: SecondaryAppBar(
+          title: 'register.title'.tr(context),
         ),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -235,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         height: 86,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.08),
@@ -366,17 +355,21 @@ class _RegisterPageState extends State<RegisterPage> {
               
               Text(
                 'register.gender'.tr(context),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF4A4A4A),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white 
+                    : const Color(0xFF4A4A4A),
                 ),
               ),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FE),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                    ? Colors.white.withOpacity(0.05) 
+                    : const Color(0xFFF8F9FE),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -391,8 +384,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     value: _selectedGender,
                     isExpanded: true,
                     icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF7E57C2)),
-                    style: const TextStyle(
-                      color: Color(0xFF4A4A4A),
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -659,16 +652,20 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14, 
             fontWeight: FontWeight.w900,
-            color: Color(0xFF4A4A4A),
+            color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.white 
+              : const Color(0xFF4A4A4A),
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FE),
+            color: Theme.of(context).brightness == Brightness.dark 
+              ? Colors.white.withOpacity(0.05) 
+              : const Color(0xFFF8F9FE),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -682,10 +679,10 @@ class _RegisterPageState extends State<RegisterPage> {
             controller: controller,
             obscureText: isPassword,
             keyboardType: keyboardType,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF4A4A4A),
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
             onChanged: autoCapitalize
                 ? (value) {

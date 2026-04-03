@@ -1032,7 +1032,7 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
                 Expanded(child: Text(item['item_name'] ?? '-')),
               ],
             ),
-          )).toList(),
+          )),
           const SizedBox(height: 30),
         ],
       ),

@@ -515,11 +515,13 @@ class _RentPlanPageState extends State<RentPlanPage>
                               size: 16,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Link dibuat via Flip for Business — aman & realtime',
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 11,
+                            Expanded(
+                              child: Text(
+                                'Link dibuat via Flip for Business — aman & realtime',
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 11,
+                                ),
                               ),
                             ),
                           ],
@@ -1288,62 +1290,69 @@ class _RentPlanPageState extends State<RentPlanPage>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'rent_plan.total_cost'.tr(context),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                            fontWeight: FontWeight.w500,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'rent_plan.total_cost'.tr(context),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[500],
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          currencyFormat.format(totalHarga),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                          const SizedBox(height: 4),
+                          Text(
+                            currencyFormat.format(totalHarga),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'rent_plan.time_remaining'.tr(context),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
-                            fontWeight: FontWeight.w500,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'rent_plan.time_remaining'.tr(context),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[500],
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          daysLeft < 0
-                              ? 'rent_plan.days_late'.tr(
-                                  context,
-                                  args: {'days': daysLeft.abs().toString()},
-                                )
-                              : (daysLeft == 0
-                                    ? 'rent_plan.today'.tr(context)
-                                    : 'rent_plan.days_left'.tr(
-                                        context,
-                                        args: {'days': daysLeft.toString()},
-                                      )),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: daysLeft < 0
-                                ? Colors.red
-                                : (daysLeft <= 3
-                                      ? Colors.orange
-                                      : Colors.green),
+                          const SizedBox(height: 4),
+                          Text(
+                            daysLeft < 0
+                                ? 'rent_plan.days_late'.tr(
+                                    context,
+                                    args: {'days': daysLeft.abs().toString()},
+                                  )
+                                : (daysLeft == 0
+                                      ? 'rent_plan.today'.tr(context)
+                                      : 'rent_plan.days_left'.tr(
+                                          context,
+                                          args: {'days': daysLeft.toString()},
+                                        )),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: daysLeft < 0
+                                  ? Colors.red
+                                  : (daysLeft <= 3
+                                        ? Colors.orange
+                                        : Colors.green),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

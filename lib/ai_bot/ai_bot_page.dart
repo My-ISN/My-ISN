@@ -53,11 +53,12 @@ class _AiBotPageState extends State<AiBotPage> {
     });
   }
 
-  Future<void> _handleSendMessage() async {
-    final text = _messageController.text.trim();
+  Future<void> _handleSendMessage({String? customText}) async {
+    final text = customText ?? _messageController.text.trim();
     if (text.isEmpty || _isLoading) return;
 
-    _messageController.clear();
+    if (customText == null) _messageController.clear();
+    
     setState(() {
       _messages.add(ChatMessage(
         text: text,
@@ -105,27 +106,82 @@ class _AiBotPageState extends State<AiBotPage> {
   }
 
   void _clearChat() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('ai_bot.clear_chat'.tr(context)),
-        content: Text('ai_bot.clear_chat_confirm'.tr(context)),
-        actions: [
-            TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('main.xin_cancel'.tr(context)),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _messages.clear();
-                _addWelcomeMessage();
-              });
-              Navigator.pop(context);
-            },
-            child: Text('main.delete'.tr(context), style: const TextStyle(color: Colors.red)),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'ai_bot.clear_chat'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'ai_bot.clear_chat_confirm'.tr(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _messages.clear();
+                        _addWelcomeMessage();
+                      });
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text('main.delete'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
@@ -201,7 +257,7 @@ class _AiBotPageState extends State<AiBotPage> {
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: colorScheme.primary.withOpacity(0.1),
-                  child: Icon(Icons.psychology, size: 20, color: colorScheme.primary),
+                  child: Icon(Icons.smart_toy_rounded, size: 20, color: colorScheme.primary),
                 ),
                 const SizedBox(width: 8),
               ],
@@ -239,10 +295,35 @@ class _AiBotPageState extends State<AiBotPage> {
               ),
               if (message.isUser) ...[
                 const SizedBox(width: 8),
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: colorScheme.secondary.withOpacity(0.1),
-                  child: Icon(Icons.person, size: 20, color: colorScheme.secondary),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: (widget.userData['profile_photo'] != null && 
+                            widget.userData['profile_photo'].toString().isNotEmpty)
+                        ? Image.network(
+                            'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.person,
+                              size: 20,
+                              color: colorScheme.secondary,
+                            ),
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Icon(
+                                Icons.person,
+                                size: 20,
+                                color: colorScheme.secondary,
+                              );
+                            },
+                          )
+                        : Icon(Icons.person, size: 20, color: colorScheme.secondary),
+                  ),
                 ),
               ],
             ],
@@ -275,7 +356,7 @@ class _AiBotPageState extends State<AiBotPage> {
           CircleAvatar(
             radius: 16,
             backgroundColor: colorScheme.primary.withOpacity(0.1),
-            child: Icon(Icons.psychology, size: 20, color: colorScheme.primary),
+            child: Icon(Icons.smart_toy_rounded, size: 20, color: colorScheme.primary),
           ),
           const SizedBox(width: 8),
           Container(
@@ -313,12 +394,57 @@ class _AiBotPageState extends State<AiBotPage> {
     );
   }
 
+  Widget _buildQuickActions() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    final List<String> questions = [
+      'berapa harga sewa?',
+      'Laptop apa saja?',
+      'bagaimana cara sewa?',
+      'area pengiriman?',
+    ];
+
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: questions.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ActionChip(
+              onPressed: () => _handleSendMessage(customText: questions[index]),
+              label: Text(
+                questions[index],
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white70 : colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor: isDark ? Colors.grey[800] : colorScheme.primary.withOpacity(0.05),
+              side: BorderSide(
+                color: isDark ? Colors.white12 : colorScheme.primary.withOpacity(0.1),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildInputArea() {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         boxShadow: [
@@ -329,7 +455,13 @@ class _AiBotPageState extends State<AiBotPage> {
           ),
         ],
       ),
-      child: SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildQuickActions(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: SafeArea(
         child: Row(
           children: [
             Expanded(
@@ -352,7 +484,7 @@ class _AiBotPageState extends State<AiBotPage> {
             ),
             const SizedBox(width: 8),
             FloatingActionButton.small(
-              onPressed: _handleSendMessage,
+              onPressed: () => _handleSendMessage(),
               backgroundColor: colorScheme.primary,
               foregroundColor: Colors.white,
               elevation: 0,
@@ -361,6 +493,9 @@ class _AiBotPageState extends State<AiBotPage> {
           ],
         ),
       ),
+    ),
+  ],
+),
     );
   }
 

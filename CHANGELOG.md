@@ -1,34 +1,36 @@
 # Changelog
 
-## [1.1.0] - 2026-04-02
+## [1.1.0] - 2026-04-03
 
 ### Added
 
 - **Helpdesk — Modul Tiket Pengaduan**: Implementasi menu Helpdesk (`Icons.support_agent_outlined`) untuk pelaporan kendala teknis dan administrasi langsung dari aplikasi mobile.
+- **Asisten AI Cerdas (FoxBot)**: Implementasi asisten AI interaktif menggunakan **Google Gemini 1.5 Flash** untuk membantu menjawab pertanyaan seputar penyewaan laptop, stok, dan prosedur sewa secara real-time.
+- **Quick Action Pills**: Penambahan tombol aksi cepat di bagian atas keyboard Bot AI untuk pertanyaan umum (harga sewa, daftar laptop, cara sewa, dll) agar pengguna lebih mudah berinteraksi.
 - **Quick Menu — AI Bot & Creative Idea**: Penambahan akses cepat untuk menu **AI Bot** dan **Creative Idea** pada sidebar (status: *On Progress*).
 - **Worklog — Seleksi dari Todo List**: Fitur pembuatan laporan kerja (*Worklog*) kini mendukung pengambilan data langsung dari tugas yang sudah selesai pada hari tersebut melalui tombol **"Pilih dari Todo List"** (sebelumnya: "Pilih dari Jobdesk").
 
 ### Changed
 
-- **Finance — Format Amount Otomatis**: Field nominal pada form Add/Edit Income & Expense kini otomatis memformat angka dengan titik pemisah ribuan saat pengguna mengetik (contoh: `1000` → `1.000`, `1000000` → `1.000.000`). Sebelumnya format hanya diterapkan saat data di-*load* dari server.
-- **Finance — Default Payer = User Login**: Pada mode tambah baru, dropdown **Payer** kini otomatis terisi dengan akun pengguna yang sedang login sebagai nilai default, sehingga tidak perlu memilih ulang secara manual.
-- **Finance — Default Payment Method = Bank**: Dropdown **Payment Method** kini memiliki nilai default **Bank** (Bank Transfer) pada mode tambah baru, sesuai dengan metode pembayaran yang paling umum digunakan.
-- **Todo List — Voice-to-Text Bahasa Indonesia**: Fitur pengenalan suara kini dikunci untuk mendeteksi **Bahasa Indonesia (`id_ID`)**, memastikan akurasi input suara tetap optimal meskipun bahasa sistem HP menggunakan bahasa lain.
-- **UI — Modern Pill Bottom Navigation**: Desain ulang total bar navigasi bawah menggunakan gaya **Modern Pill**. Menu yang aktif kini menampilkan latar belakang "pill" berwarna ungu dengan teks label yang beranimasi mulus (*sliding width transition*).
-- **UI — Floating Navigation Bar**: Implementasi bar navigasi melayang (*floating*) dengan *height* 80px, radius sudut 40, dan bayangan (*box-shadow*) halus untuk estetika yang lebih modern dan premium.
-- **UI — Popup Update & Changelog Premium**: Redesign total jendela notifikasi "Update Tersedia" dan "Apa yang Baru" (Changelog) menjadi **Premium Bottom Sheet** yang seragam dengan desain popup hapus akun, lengkap dengan *drag handle* dan *fixed action buttons* di bagian bawah.
-- **UI — Rent Plan Quick Pay**: Penambahan ikon **Pay** (`Icons.payment_rounded`) pada daftar persewaan untuk akses cepat ke pembayaran.
-- **Rent Plan — Flip-style Payment Modal**: Implementasi UI modal pembayaran mandiri dengan antarmuka **Flip for Business**, mencakup pemilihan metode Transfer/QRIS (dengan grid bank lengkap) atau Tunai (Cash).
-- **UI — Rent Plan List Layout**: Perbaikan jarak (*spacing*) dan ukuran box pada badge status serta tombol hapus di daftar persewaan agar lebih simetris dan rapi.
-- **Worklog Picker UI**: Pembaruan antarmuka pencarian tugas pada Worklog. Tugas yang sudah selesai tidak lagi ditampilkan dengan coretan (*strikethrough*) agar lebih bersih, teks dibatasi 1 baris dengan *ellipsis*, dan tugas yang sudah ada di list otomatis difilter keluar dari pilihan.
-- **UI — Home & Sidebar Navigation Refactor**: Perbaikan besar pada sistem navigasi. Berpindah dari halaman independen (seperti Rent Plan) kembali ke tab utama (Attendance, Payroll, Profile) kini secara otomatis mereset *navigation stack*, memastikan **AppBar** dan **BottomNavigationBar** selalu muncul dengan benar tanpa tumpukan halaman (*nested push*).
-- **UI — Standardisasi Searchable Dropdown**: Migrasi seluruh komponen dropdown klasik (`DropdownButtonFormField`) di modul **Karyawan**, **Payroll**, **Profil**, dan **Rental Plan** ke komponen baru `SearchableDropdown`.
-- **UI — Searchable Modal Interface**: Komponen pilihan kini menggunakan antarmuka modal pencarian yang seragam, premium, dan mendukung fitur pencarian teks (searchable), meningkatkan pengalaman pengguna saat memilih data yang panjang.
+- **UI — Modernisasi Masif (Visi 2026)**: Desain ulang lebih dari 50% antarmuka aplikasi dengan standar premium untuk pengalaman pengguna yang lebih intuitif dan elit.
+- **UI — Full Theme Integration (Login & Register)**: Integrasi penuh sistem tema (*Light/Dark Mode*) pada halaman modul otentikasi. Menghapus seluruh warna *hardcoded* guna memastikan kenyamanan visual yang konsisten.
+- **UI — Helpdesk Interaction Redesign**: Area input balasan tiket kini menggunakan desain premium yang identik dengan antarmuka Chat Bot AI, lengkap dengan *floating action buttons* dan *rounded containers*.
+- **UI — Standardisasi Form & Detail**: Implementasi `SecondaryAppBar` dan tata letak berbasis *sectioned cards* pada seluruh halaman Tambah/Edit (Finance, Worklog) dan Detail (Ticket, Employee, Rent Plan).
+- **UI — Branding Refinement**: Logo aplikasi pada halaman login diperbarui dengan container sirkular premium dan efek bayangan (*shadow*) yang adaptif terhadap tema.
+- **Finance — Format Amount Otomatis**: Field nominal pada form Add/Edit Income & Expense kini otomatis memformat angka dengan titik pemisah ribuan saat pengguna mengetik (contoh: `1000` → `1.000`).
+- **Finance — Default Values**: Akun 'Payer' kini otomatis terisi user yang sedang login dan 'Payment Method' default menjadi **Bank Transfer**.
+- **Todo List — Voice-to-Text Bahasa Indonesia**: Fitur pengenalan suara dikunci untuk mendeteksi **Bahasa Indonesia (`id_ID`)** demi akurasi maksimal.
+- **UI — Modern Pill Bottom Navigation**: Desain ulang total bar navigasi bawah menggunakan gaya **Modern Pill** dengan animasi *sliding width transition* yang mulus.
+- **UI — Popup Update & Changelog Premium**: Redesign total jendela notifikasi menjadi **Premium Bottom Sheet** yang seragam dengan desain sistem lainnya.
+- **UI — Rent Plan List Layout**: Perbaikan simetri pada badge status dan tombol aksi di daftar persewaan agar lebih rapi.
+- **UI — Rent Plan Long Text Handling**: Penanganan label Bahasa Indonesia yang panjang pada halaman Detail Rent Plan menggunakan teknik **ellipsis** pada label dan **flexible wrapping** pada nilai data untuk mencegah *RenderFlex* overflow.
 
 ### Fixed Bug
 
-- **UI — Layout Overflow Fix**: Perbaikan final pada error `RenderFlex overflow` (2.0 pixels) di bar navigasi dengan menggunakan `LayoutBuilder` untuk kalkulasi lebar yang lebih presisi, terutama saat menggunakan *border* di Dark Mode.
-- **Payroll Navigation**: Perbaikan tautan menu Payroll di sidebar yang sebelumnya tidak merespon saat diklik.
+- **UI — CustomBottomNav Stability**: Perbaikan fatal error `setState() called when widget tree was locked` saat transisi navigasi antar halaman utama.
+- **UI — LoginPage Syntax Fix**: Perbaikan kesalahan struktur *widget tree* (kurung tutup) pada modul branding yang menyebabkan kegagalan build.
+- **UI — Layout Overflow Fix**: Perbaikan error `RenderFlex overflow` pada bar navigasi menggunakan `LayoutBuilder` untuk kalkulasi lebar yang presisi.
+- **Payroll Navigation**: Perbaikan tautan menu Payroll di sidebar yang sebelumnya tidak merespon saat diklik.g sebelumnya tidak merespon saat diklik.
 
 ---
 

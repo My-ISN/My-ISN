@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import '../services/finance_service.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
+import '../widgets/secondary_app_bar.dart';
 
 class AddFinanceDataPage extends StatefulWidget {
   final List<dynamic> accounts;
@@ -280,17 +281,10 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
     final isEdit = widget.initialData != null;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          isEdit 
+      appBar: SecondaryAppBar(
+        title: isEdit 
               ? (_selectedType == 0 ? 'finance.edit_account'.tr(context) : (_selectedType == 1 ? 'finance.edit_deposit'.tr(context) : 'finance.edit_expense'.tr(context)))
               : (_selectedType == 0 ? 'finance.add_account'.tr(context) : (_selectedType == 1 ? 'finance.add_deposit'.tr(context) : 'finance.add_expense'.tr(context))),
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF7E57C2)),
-        ),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
       ),
       body: Form(
         key: _formKey,

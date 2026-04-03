@@ -488,6 +488,23 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  String _formatWorkingDuration(String? duration) {
+    if (duration == null || duration == '-' || duration.isEmpty) return '-';
+
+    // Jika mengandung kata "Tahun" atau "Year", hilangkan bagian "Hari" (Day)
+    // Format biasanya: "1 Tahun 2 Bulan 5 Hari" -> "1 Tahun 2 Bulan"
+    if (duration.contains('Tahun') ||
+        duration.contains('Year') ||
+        duration.contains('Years')) {
+      final regExpID = RegExp(r'\s*\d+\s+Hari$');
+      final regExpEN = RegExp(r'\s*\d+\s+Day(s)?$');
+
+      return duration.replaceAll(regExpID, '').replaceAll(regExpEN, '').trim();
+    }
+
+    return duration;
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = _dashboardData['user'] ?? widget.userData;
@@ -533,9 +550,9 @@ class _DashboardPageState extends State<DashboardPage> {
           break;
       }
     } else {
-      if (_currentIndex == 0)
+      if (_currentIndex == 0) {
         activePage = 'dashboard';
-      else if (_currentIndex == 1)
+      } else if (_currentIndex == 1)
         activePage = 'attendance';
       else if (hasPayroll && _currentIndex == 2)
         activePage = 'payroll';
@@ -793,6 +810,7 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 8),
             // Profile Section
             Container(
               decoration: BoxDecoration(
@@ -834,8 +852,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                     fit: BoxFit.cover,
                                     loadingBuilder:
                                         (context, child, loadingProgress) {
-                                          if (loadingProgress == null)
+                                          if (loadingProgress == null) {
                                             return child;
+                                          }
                                           return const Icon(
                                             Icons.person,
                                             size: 36,
@@ -1037,7 +1056,9 @@ class _DashboardPageState extends State<DashboardPage> {
                 Expanded(
                   child: _buildStatCard(
                     'dashboard.working_duration'.tr(context),
-                    _dashboardData['stats']?['working_duration'] ?? '-',
+                    _formatWorkingDuration(
+                      _dashboardData['stats']?['working_duration'],
+                    ),
                     Icons.hourglass_empty,
                     const Color(0xFF2ECC71),
                   ),
@@ -1148,24 +1169,32 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                         if (count > 0)
                           Positioned(
-                            right: 4,
-                            top: 4,
+                            right: 8,
+                            top: 5,
                             child: Container(
                               padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
+                              decoration: BoxDecoration(
+                                color: Colors.redAccent,
                                 shape: BoxShape.circle,
+                                border: Border.all(color: Theme.of(context).cardColor, width: 1.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               constraints: const BoxConstraints(
-                                minWidth: 16,
-                                minHeight: 16,
+                                minWidth: 18,
+                                minHeight: 18,
                               ),
                               child: Text(
                                 count > 9 ? '9+' : '$count',
                                 style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w900,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -1367,7 +1396,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   maxLines: 2,
                   style: const TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
                     height: 1.1,
                   ),
                 ),
@@ -1813,7 +1843,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
             )
-            .toList(),
+            ,
       ],
     );
   }
