@@ -181,7 +181,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ValueListenableBuilder<double>(
                     valueListenable: ConnectivityStatus.bottomPadding,
                     builder: (context, padding, _) => SizedBox(
-                      height: padding + 20,
+                      height: (padding + 40).clamp(0.0, double.infinity),
                     ),
                   ),
                 ],

@@ -168,8 +168,12 @@ class _AttendancePageState extends State<AttendancePage> {
                                 borderRadius: BorderRadius.circular(2),
                                 child: LinearProgressIndicator(
                                   minHeight: 3,
-                                  backgroundColor: _primaryColor.withOpacity(0.1),
-                                  valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                                  backgroundColor: _primaryColor.withOpacity(
+                                    0.1,
+                                  ),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    _primaryColor,
+                                  ),
                                 ),
                               ),
                             ),
@@ -189,7 +193,7 @@ class _AttendancePageState extends State<AttendancePage> {
                           ValueListenableBuilder<double>(
                             valueListenable: ConnectivityStatus.bottomPadding,
                             builder: (context, padding, _) => SizedBox(
-                              height: padding,
+                              height: padding.clamp(0.0, double.infinity),
                             ),
                           ),
                         ],
@@ -480,7 +484,10 @@ class _AttendancePageState extends State<AttendancePage> {
                 'attendance.details'.tr(context),
                 record?['status'] == 'Present'
                     ? 'attendance.present'.tr(context)
-                    : (record?['status'] == 'Late' ? 'attendance.late'.tr(context) : (record?['status'] ?? 'attendance.no_data'.tr(context))),
+                    : (record?['status'] == 'Late'
+                          ? 'attendance.late'.tr(context)
+                          : (record?['status'] ??
+                                'attendance.no_data'.tr(context))),
               ),
             ),
             const SizedBox(height: 16),

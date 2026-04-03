@@ -137,15 +137,15 @@ class _RentPlanPageState extends State<RentPlanPage>
                       return ValueListenableBuilder<double>(
                         valueListenable: ConnectivityStatus.bottomPadding,
                         builder: (context, padding, _) => Padding(
-                          padding: EdgeInsets.only(top: 8, bottom: padding + 20),
+                          padding: EdgeInsets.only(top: 8, bottom: padding.clamp(0.0, double.infinity)),
                           child: _buildPagination(),
                         ),
-                      );
+                       );
                     } else {
                       return ValueListenableBuilder<double>(
                         valueListenable: ConnectivityStatus.bottomPadding,
                         builder: (context, padding, _) => SizedBox(
-                          height: padding + 20,
+                          height: padding.clamp(0.0, double.infinity),
                         ),
                       );
                     }

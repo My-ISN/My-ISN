@@ -116,16 +116,20 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Map<String, dynamic> userData;
   final bool showBackButton;
   final String? title;
+  final Widget? subtitle;
   final PreferredSizeWidget? bottom;
   final bool showActions;
+  final List<Widget>? extraActions;
 
   const CustomAppBar({
     super.key,
     required this.userData,
     this.showBackButton = false,
     this.title,
+    this.subtitle,
     this.bottom,
     this.showActions = true,
+    this.extraActions,
   });
 
   @override
@@ -215,15 +219,24 @@ class _CustomAppBarState extends State<CustomAppBar> {
     return AppBar(
       elevation: 0,
       automaticallyImplyLeading: widget.showBackButton,
-      title: Text(
-        widget.title ?? 'My ISN',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            widget.title ?? 'My ISN',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: widget.subtitle != null ? 18 : 20,
+            ),
+          ),
+          if (widget.subtitle != null) widget.subtitle!,
+        ],
       ),
       bottom: widget.bottom,
       actions: widget.showActions ? [
+        if (widget.extraActions != null) ...widget.extraActions!,
         ValueListenableBuilder<int>(
           valueListenable: _notifManager.unreadCount,
           builder: (context, count, child) {

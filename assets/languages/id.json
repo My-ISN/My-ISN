@@ -988,5 +988,15 @@
         "day": "hari",
         "month": "bulan",
         "year": "tahun"
+    },
+    "ai_bot": {
+        "title": "Asisten AI",
+        "welcome_msg": "Halo! Saya asisten cerdas Anda. Ada yang bisa saya bantu terkait penyewaan laptop hari ini?",
+        "hint_text": "Tanyakan sesuatu...",
+        "typing": "Asisten AI sedang mengetik...",
+        "error_msg": "Maaf, terjadi kesalahan. Silakan coba lagi.",
+        "clear_chat": "Bersihkan Percakapan",
+        "clear_chat_confirm": "Apakah Anda yakin ingin menghapus riwayat chat di layar ini?",
+        "disclaimer": "Asisten AI dapat membuat kesalahan. Pertimbangkan untuk memeriksa informasi penting."
     }
 }

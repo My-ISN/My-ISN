@@ -24,6 +24,7 @@ import 'employees/employees_page.dart';
 import 'work_log/work_log_page.dart';
 import 'finance/finance_page.dart';
 import 'widgets/on_progress_page.dart';
+import 'ai_bot/ai_bot_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -1246,9 +1247,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => OnProgressPage(
-                        title: 'dashboard.quick_menu_ai_bot'.tr(context),
-                      ),
+                      builder: (context) => AiBotPage(userData: user),
                     ),
                   );
                 },
@@ -1272,7 +1271,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,
               builder: (context, padding, _) => SizedBox(
-                height: padding - 10,
+                height: padding.clamp(0.0, double.infinity),
               ),
             ),
           ],
@@ -1537,7 +1536,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,
               builder: (context, padding, _) => SizedBox(
-                height: padding - 10,
+                height: padding.clamp(0.0, double.infinity),
               ),
             ),
           ],

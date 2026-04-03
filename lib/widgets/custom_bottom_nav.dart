@@ -19,18 +19,23 @@ class CustomBottomNav extends StatefulWidget {
 }
 
 class _CustomBottomNavState extends State<CustomBottomNav> {
+  static int _activeInstances = 0;
+
   @override
   void initState() {
     super.initState();
-    // Set padding for floating bar (bar height + margin)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ConnectivityStatus.bottomPadding.value = 100.0; 
-    });
+    _activeInstances++;
+    // Set padding for floating bar (bar height + margin + shadow/buffer)
+    ConnectivityStatus.bottomPadding.value = 110.0; 
   }
 
   @override
   void dispose() {
-    ConnectivityStatus.bottomPadding.value = 0.0;
+    _activeInstances--;
+    // Only reset if no more active nav bars exist
+    if (_activeInstances <= 0) {
+      ConnectivityStatus.bottomPadding.value = 0.0;
+    }
     super.dispose();
   }
 

@@ -1034,7 +1034,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       const Divider(height: 1, indent: 70),
                       _buildInfoTile(
                         icon: Icons.business_outlined,
-                        title: 'Foxgeen',
+                        title: 'Iskom Sarana Nusantara',
                         trailing: '© 2026',
                       ),
                     ],

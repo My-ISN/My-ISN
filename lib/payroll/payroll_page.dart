@@ -683,7 +683,7 @@ class _PayrollPageState extends State<PayrollPage>
             return ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,
               builder: (context, padding, _) => SizedBox(
-                height: padding - 20,
+                height: (padding + 20).clamp(0.0, double.infinity),
               ),
             );
           }
@@ -797,7 +797,7 @@ class _PayrollPageState extends State<PayrollPage>
             ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,
               builder: (context, padding, _) => SizedBox(
-                height: padding - 20,
+                height: (padding + 20).clamp(0.0, double.infinity),
               ),
             ),
           ],

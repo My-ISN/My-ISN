@@ -993,5 +993,15 @@
         "months": "months",
         "year": "year",
         "years": "years"
+    },
+    "ai_bot": {
+        "title": "AI Assistant",
+        "welcome_msg": "Hello! I'm your smart assistant. How can I help you with laptop rentals today?",
+        "hint_text": "Ask something...",
+        "typing": "AI Assistant is typing...",
+        "error_msg": "Sorry, an error occurred. Please try again.",
+        "clear_chat": "Clear Chat",
+        "clear_chat_confirm": "Are you sure you want to clear the chat history on this screen?",
+        "disclaimer": "AI Assistant can make mistakes. Consider checking important info."
     }
 }

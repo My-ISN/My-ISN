@@ -10,6 +10,7 @@ import '../employees/employees_page.dart';
 import '../work_log/work_log_page.dart';
 import '../finance/finance_page.dart';
 import '../helpdesk/helpdesk_list_page.dart';
+import '../ai_bot/ai_bot_page.dart';
 import '../widgets/on_progress_page.dart';
 import '../localization/app_localizations.dart';
 import 'custom_app_bar.dart'; // For NotificationManager
@@ -222,9 +223,7 @@ class SideDrawer extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => OnProgressPage(
-                          title: 'dashboard.quick_menu_ai_bot'.tr(context),
-                        ),
+                        builder: (context) => AiBotPage(userData: userData),
                       ),
                     );
                   },
