@@ -8,7 +8,7 @@ class ShimmerLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Shimmer.fromColors(
       baseColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
       highlightColor: isDark ? Colors.grey[800]! : Colors.grey[100]!,
@@ -49,7 +49,7 @@ class ShimmerSkeleton extends StatelessWidget {
 class ShimmerCard extends StatelessWidget {
   final double height;
   final EdgeInsetsGeometry margin;
-  
+
   const ShimmerCard({
     super.key,
     this.height = 100,

@@ -40,19 +40,24 @@ class NotificationManager {
         latestTitle != null &&
         latestTitle.isNotEmpty) {
       _lastKnownId = latestId;
-      _showBanner(context, latestTitle, latestSummary ?? 'announcement.tap_to_view'.tr(context), () {
-        if (userData != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AnnouncementPage(
-                userData: userData,
-                initialAnnouncementId: latestId,
+      _showBanner(
+        context,
+        latestTitle,
+        latestSummary ?? 'announcement.tap_to_view'.tr(context),
+        () {
+          if (userData != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AnnouncementPage(
+                  userData: userData,
+                  initialAnnouncementId: latestId,
+                ),
               ),
-            ),
-          );
-        }
-      });
+            );
+          }
+        },
+      );
     }
 
     if (unreadCount.value != count) {
@@ -87,7 +92,12 @@ class NotificationManager {
     }
   }
 
-  void _showBanner(BuildContext context, String title, String message, VoidCallback onTap) {
+  void _showBanner(
+    BuildContext context,
+    String title,
+    String message,
+    VoidCallback onTap,
+  ) {
     Future.delayed(const Duration(milliseconds: 500), () {
       if (context.mounted) {
         TopNotification.show(
@@ -135,7 +145,8 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   State<CustomAppBar> createState() => _CustomAppBarState();
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0.0));
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0.0));
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
@@ -234,95 +245,104 @@ class _CustomAppBarState extends State<CustomAppBar> {
         ],
       ),
       bottom: widget.bottom,
-      actions: widget.showActions ? [
-        if (widget.extraActions != null) ...widget.extraActions!,
-        ValueListenableBuilder<int>(
-          valueListenable: _notifManager.unreadCount,
-          builder: (context, count, child) {
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.notifications_none,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            AnnouncementPage(userData: widget.userData),
-                      ),
-                    );
-                    // Removed _fetchUnreadCount() here because NotificationManager
-                    // already handles immediate updates locally.
-                  },
-                ),
-                if (count > 0)
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 12,
-                        minHeight: 12,
-                      ),
-                      child: Text(
-                        count > 9 ? '9+' : '$count',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
+      actions: widget.showActions
+          ? [
+              if (widget.extraActions != null) ...widget.extraActions!,
+              ValueListenableBuilder<int>(
+                valueListenable: _notifManager.unreadCount,
+                builder: (context, count, child) {
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.notifications_none,
+                          color: Colors.grey,
                         ),
-                        textAlign: TextAlign.center,
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  AnnouncementPage(userData: widget.userData),
+                            ),
+                          );
+                          // Removed _fetchUnreadCount() here because NotificationManager
+                          // already handles immediate updates locally.
+                        },
                       ),
-                    ),
+                      if (count > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 12,
+                              minHeight: 12,
+                            ),
+                            child: Text(
+                              count > 9 ? '9+' : '$count',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+              InkWell(
+                onTap: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+                child: ClipOval(
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    child:
+                        (widget.userData['profile_photo'] != null &&
+                            widget.userData['profile_photo']
+                                .toString()
+                                .isNotEmpty)
+                        ? Image.network(
+                            'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Icon(
+                                Icons.person,
+                                size: 20,
+                                color: Colors.white,
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                                  Icons.person,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                          )
+                        : const Icon(
+                            Icons.person,
+                            size: 20,
+                            color: Colors.white,
+                          ),
                   ),
-              ],
-            );
-          },
-        ),
-        InkWell(
-          onTap: () {
-            Scaffold.of(context).openEndDrawer();
-          },
-          child: ClipOval(
-            child: Container(
-              width: 36,
-              height: 36,
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child:
-                  (widget.userData['profile_photo'] != null &&
-                      widget.userData['profile_photo'].toString().isNotEmpty)
-                  ? Image.network(
-                      'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Icon(
-                          Icons.person,
-                          size: 20,
-                          color: Colors.white,
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.person,
-                        size: 20,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.person, size: 20, color: Colors.white),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-      ] : [],
+                ),
+              ),
+              const SizedBox(width: 16),
+            ]
+          : [],
     );
   }
 }

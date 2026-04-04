@@ -45,43 +45,71 @@ class ProfileContractPage extends StatelessWidget {
                 context,
                 'profile.contract_date'.tr(context),
                 data['date_of_joining'] ?? '-',
-                const Icon(Icons.calendar_today_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.calendar_today_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.department'.tr(context),
                 data['department_name'] ?? '-',
-                const Icon(Icons.business_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.business_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.designation'.tr(context),
                 data['designation_name'] ?? '-',
-                const Icon(Icons.work_outline_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.work_outline_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.basic_salary'.tr(context),
                 '$currency ${NumberFormat.decimalPattern(Localizations.localeOf(context).languageCode).format(double.tryParse(data['basic_salary']?.toString() ?? '0') ?? 0)}',
-                const Icon(Icons.payments_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.payments_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.hourly_rate'.tr(context),
                 '$currency ${data['hourly_rate'] ?? '0'}',
-                const Icon(Icons.timer_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.timer_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.office_shift'.tr(context),
                 data['shift_name'] ?? '-',
-                const Icon(Icons.schedule_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.schedule_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.contract_end'.tr(context),
                 data['date_of_leaving'] ?? '-',
-                const Icon(Icons.event_busy_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.event_busy_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
                 last: true,
               ),
             ]),
@@ -107,7 +135,9 @@ class ProfileContractPage extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+          color: isDark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.grey.withOpacity(0.1),
         ),
       ),
       child: Column(children: children),

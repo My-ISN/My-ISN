@@ -47,7 +47,9 @@ class OnProgressPage extends StatelessWidget {
                 'dashboard.under_development'.tr(context),
                 style: TextStyle(
                   fontSize: 16,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.6),
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,

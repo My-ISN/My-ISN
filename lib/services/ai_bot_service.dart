@@ -18,10 +18,7 @@ class AiBotService {
       final url = Uri.parse('$baseUrl/ai_bot');
       final response = await http.post(
         url,
-        body: {
-          'message': message,
-          'user_id': ?userId,
-        },
+        body: {'message': message, 'user_id': ?userId},
       );
 
       if (response.statusCode == 200) {

@@ -107,7 +107,8 @@ class _RentPlanPageState extends State<RentPlanPage>
             child: NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification scrollInfo) {
                 if (scrollInfo.depth == 0) {
-                  final bool isBottom = scrollInfo.metrics.maxScrollExtent > 0 &&
+                  final bool isBottom =
+                      scrollInfo.metrics.maxScrollExtent > 0 &&
                       scrollInfo.metrics.pixels >
                           scrollInfo.metrics.maxScrollExtent - 100;
                   if (_isNearBottom.value != isBottom) {
@@ -137,10 +138,13 @@ class _RentPlanPageState extends State<RentPlanPage>
                       return ValueListenableBuilder<double>(
                         valueListenable: ConnectivityStatus.bottomPadding,
                         builder: (context, padding, _) => Padding(
-                          padding: EdgeInsets.only(top: 8, bottom: padding.clamp(0.0, double.infinity)),
+                          padding: EdgeInsets.only(
+                            top: 8,
+                            bottom: padding.clamp(0.0, double.infinity),
+                          ),
                           child: _buildPagination(),
                         ),
-                       );
+                      );
                     } else {
                       return ValueListenableBuilder<double>(
                         valueListenable: ConnectivityStatus.bottomPadding,
@@ -194,14 +198,17 @@ class _RentPlanPageState extends State<RentPlanPage>
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutCubic,
             padding: EdgeInsets.only(
-              bottom: padding > 0 ? (isNearBottom ? padding + 100 : padding + 20) : 0,
+              bottom: padding > 0
+                  ? (isNearBottom ? padding + 100 : padding + 20)
+                  : 0,
             ),
             child: FloatingActionButton.extended(
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddRentPlanPage(userData: widget.userData),
+                    builder: (context) =>
+                        AddRentPlanPage(userData: widget.userData),
                   ),
                 );
                 if (result == true) {
@@ -209,7 +216,10 @@ class _RentPlanPageState extends State<RentPlanPage>
                 }
               },
               backgroundColor: _primaryColor,
-              icon: const Icon(Icons.add_shopping_cart_rounded, color: Colors.white),
+              icon: const Icon(
+                Icons.add_shopping_cart_rounded,
+                color: Colors.white,
+              ),
               label: Text(
                 'rent_plan.add_rental'.tr(context),
                 style: const TextStyle(

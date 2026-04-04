@@ -1,5 +1,6 @@
 {
     "main": {
+        "apply": "Apply",
         "dashboard": "Dashboard",
         "attendance": "Attendance",
         "payroll": "Payroll",
@@ -42,7 +43,8 @@
         "no_data": "No data",
         "select_item": "Select Item",
         "logout_confirm_title": "Logout Confirmation",
-        "logout_confirm_msg": "Are you sure you want to log out of your account?"
+        "logout_confirm_msg": "Are you sure you want to log out of your account?",
+        "apply": "Apply"
     },
     "dashboard": {
         "welcome": "Welcome,",
@@ -870,7 +872,16 @@
         "showing_x_of_y": "Showing {start} to {end} of {total}",
         "total": "{count} Total",
         "page_x_of_y": "Page {current} of {total}",
-        "no_todos": "No Todo List"
+        "no_todos": "No Todo List",
+        "personal": "Personal",
+        "team": "Team",
+        "select_employee": "Select Employee",
+        "move_task": "Move Task",
+        "move_to": "Move to",
+        "move_confirm_title": "Confirm Transfer",
+        "move_confirm_desc": "Are you sure you want to move this task to %s?",
+        "move_success": "Task moved successfully",
+        "move_failed": "Failed to move task"
     },
     "delete_account": {
         "section_title": "Danger Zone",
@@ -959,7 +970,15 @@
         "pm_stripe": "Stripe",
         "pm_paystack": "Paystack",
         "pm_cheque": "Cheque",
-        "choose_period": "Choose Period"
+        "choose_period": "Choose Period",
+        "budget": "Budget",
+        "budget_period": "Budget Period",
+        "budget_limit": "Budget Limit",
+        "actual_spending": "Actual Spending",
+        "remaining_budget": "Remaining Budget",
+        "used": "used",
+        "budget_details": "Budget Details",
+        "delete_budget": "Delete Budget"
     },
     "helpdesk": {
         "title": "Helpdesk",
@@ -1011,5 +1030,37 @@
         "clear_chat": "Clear Chat",
         "clear_chat_confirm": "Are you sure you want to clear the chat history on this screen?",
         "disclaimer": "AI Assistant can make mistakes. Consider checking important info."
-    }
+    },
+    "personal_finance": {
+        "title": "Personal Finance",
+        "my_wallet": "My Wallet",
+        "summary": "Summary",
+        "income": "Income",
+        "expense": "Expense",
+        "net_balance": "Net Balance",
+        "expense_ratio": "Expense Ratio",
+        "six_month_trend": "Last 6 Months Trend",
+        "expense_by_category": "Expense by Category",
+        "budget_vs_realization": "Budget vs Realization",
+        "total_income": "Total Income",
+        "total_expense": "Total Expense",
+        "from_income": "from income",
+        "on_progress_desc": "No transactions found for this period.",
+        "my_monthly_summary": "My personal finance summary this month",
+        "set_budget": "Set Budget",
+        "overview": "Overview",
+        "report": "Report"
+    },
+    "month_jan": "January",
+    "month_feb": "February",
+    "month_march": "March",
+    "month_april": "April",
+    "month_may": "May",
+    "month_june": "June",
+    "month_july": "July",
+    "month_aug": "August",
+    "month_sep": "September",
+    "month_oct": "October",
+    "month_nov": "November",
+    "month_dec": "December"
 }

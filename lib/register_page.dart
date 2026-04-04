@@ -177,23 +177,25 @@ class _RegisterPageState extends State<RegisterPage> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: SecondaryAppBar(
-          title: 'register.title'.tr(context),
-        ),
+        appBar: SecondaryAppBar(title: 'register.title'.tr(context)),
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Text(
-                        'register.subtitle'.tr(context),
-                        style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text(
+                  'register.subtitle'.tr(context),
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // Profile Photo Picker (Premium Design)
               Center(
@@ -201,53 +203,53 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     GestureDetector(
                       onTap: _pickImage,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFF7E57C2).withOpacity(0.2),
-                              const Color(0xFF7E57C2).withOpacity(0.05),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 86,
-                        height: 86,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Theme.of(context).cardColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 12,
-                              offset: const Offset(0, 6),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  const Color(0xFF7E57C2).withOpacity(0.2),
+                                  const Color(0xFF7E57C2).withOpacity(0.05),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                             ),
-                          ],
-                        ),
-                        child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: const Color(0xFFF8F9FE),
-                          backgroundImage: _image != null
-                              ? FileImage(_image!)
-                              : null,
-                          child: _image == null
-                              ? Icon(
-                                  Icons.person_outline_rounded,
-                                  size: 40,
-                                  color: Colors.grey.shade400,
-                                )
-                              : null,
-                        ),
-                      ),
+                          ),
+                          Container(
+                            width: 86,
+                            height: 86,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Theme.of(context).cardColor,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              radius: 40,
+                              backgroundColor: const Color(0xFFF8F9FE),
+                              backgroundImage: _image != null
+                                  ? FileImage(_image!)
+                                  : null,
+                              child: _image == null
+                                  ? Icon(
+                                      Icons.person_outline_rounded,
+                                      size: 40,
+                                      color: Colors.grey.shade400,
+                                    )
+                                  : null,
+                            ),
+                          ),
                           Positioned(
                             bottom: 4,
                             right: 4,
@@ -256,10 +258,15 @@ class _RegisterPageState extends State<RegisterPage> {
                               decoration: BoxDecoration(
                                 color: const Color(0xFF7E57C2),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 3),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 3,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF7E57C2).withOpacity(0.3),
+                                    color: const Color(
+                                      0xFF7E57C2,
+                                    ).withOpacity(0.3),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),
@@ -352,24 +359,27 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               Text(
                 'register.gender'.tr(context),
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
-                  color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.white 
-                    : const Color(0xFF4A4A4A),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : const Color(0xFF4A4A4A),
                 ),
               ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark 
-                    ? Colors.white.withOpacity(0.05) 
-                    : const Color(0xFFF8F9FE),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.05)
+                      : const Color(0xFFF8F9FE),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -383,7 +393,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: DropdownButton<String>(
                     value: _selectedGender,
                     isExpanded: true,
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF7E57C2)),
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: Color(0xFF7E57C2),
+                    ),
                     style: TextStyle(
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 16,
@@ -407,7 +420,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -449,7 +462,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     Text(
                       'register.have_account'.tr(context),
-                      style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     GestureDetector(
@@ -507,10 +523,7 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 24),
             Text(
               'login.enable_fingerprint'.tr(context),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -518,7 +531,9 @@ class _RegisterPageState extends State<RegisterPage> {
               'register.reg_success_fingerprint'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                 fontSize: 15,
               ),
             ),
@@ -653,19 +668,19 @@ class _RegisterPageState extends State<RegisterPage> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 14, 
+            fontSize: 14,
             fontWeight: FontWeight.w900,
-            color: Theme.of(context).brightness == Brightness.dark 
-              ? Colors.white 
-              : const Color(0xFF4A4A4A),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : const Color(0xFF4A4A4A),
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark 
-              ? Colors.white.withOpacity(0.05) 
-              : const Color(0xFFF8F9FE),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.05)
+                : const Color(0xFFF8F9FE),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -716,7 +731,10 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF7E57C2),
+                  width: 1.5,
+                ),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 18,

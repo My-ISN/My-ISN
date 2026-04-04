@@ -34,8 +34,10 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _hasPermission(String resource) {
     if (widget.userData['role_resources'] == 'all') return true;
     final String resources = widget.userData['role_resources'] ?? '';
-    final List<String> resourceList =
-        resources.split(',').map((e) => e.trim()).toList();
+    final List<String> resourceList = resources
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
     return resourceList.contains(resource);
   }
 
@@ -101,7 +103,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
-                        SizedBox(height: MediaQuery.of(context).padding.top + 20),
+                        SizedBox(
+                          height: MediaQuery.of(context).padding.top + 20,
+                        ),
                         _buildMainInfoCard(),
                         const SizedBox(height: 24),
                         _buildDetailInfoContainer(),
@@ -149,7 +153,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-
   Widget _buildMainInfoCard() {
     final basic = _profileData['basic_info'] ?? {};
     String fullName = '${basic['first_name'] ?? ''} ${basic['last_name'] ?? ''}'
@@ -191,20 +194,22 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: CircleAvatar(
                   radius: 50,
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  backgroundImage: (basic['profile_photo'] != null &&
+                  backgroundImage:
+                      (basic['profile_photo'] != null &&
                           basic['profile_photo'].toString().isNotEmpty)
                       ? NetworkImage(
                           'https://foxgeen.com/HRIS/public/uploads/users/thumb/${basic['profile_photo']}',
                         )
                       : (widget.userData['profile_photo'] != null &&
-                              widget.userData['profile_photo']
-                                  .toString()
-                                  .isNotEmpty)
-                          ? NetworkImage(
-                              'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
-                            )
-                          : null,
-                  child: (basic['profile_photo'] == null ||
+                            widget.userData['profile_photo']
+                                .toString()
+                                .isNotEmpty)
+                      ? NetworkImage(
+                          'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
+                        )
+                      : null,
+                  child:
+                      (basic['profile_photo'] == null ||
                               basic['profile_photo'].toString().isEmpty) &&
                           (widget.userData['profile_photo'] == null ||
                               widget.userData['profile_photo']
@@ -235,15 +240,21 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2ECC71).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(30),
-                  border:
-                      Border.all(color: const Color(0xFF2ECC71).withOpacity(0.2)),
+                  border: Border.all(
+                    color: const Color(0xFF2ECC71).withOpacity(0.2),
+                  ),
                 ),
                 child: Text(
-                  (basic['role_name'] ?? widget.userData['role_name'] ?? 'Staff')
+                  (basic['role_name'] ??
+                          widget.userData['role_name'] ??
+                          'Staff')
                       .toString()
                       .roleTr(context),
                   style: const TextStyle(
@@ -385,9 +396,8 @@ class _ProfilePageState extends State<ProfilePage> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProfileContractPage(
-                  data: _profileData['contract'] ?? {},
-                ),
+                builder: (context) =>
+                    ProfileContractPage(data: _profileData['contract'] ?? {}),
               ),
             ),
           ),
@@ -397,54 +407,57 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: Icons.account_circle_rounded,
           title: 'profile.basic_info'.tr(context),
           subtitle: 'profile.basic_info_desc'.tr(context),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProfileBasicPage(
-                data: _profileData['basic_info'] ?? {},
-                userData: widget.userData,
-                fullProfileData: _profileData,
-              ),
-            ),
-          ).then((value) {
-            if (value == true) _fetchProfileDetails();
-          }),
+          onTap: () =>
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileBasicPage(
+                    data: _profileData['basic_info'] ?? {},
+                    userData: widget.userData,
+                    fullProfileData: _profileData,
+                  ),
+                ),
+              ).then((value) {
+                if (value == true) _fetchProfileDetails();
+              }),
         ),
         const SizedBox(height: 12),
         _buildMenuTile(
           icon: Icons.contact_page_rounded,
           title: 'profile.personal_info'.tr(context),
           subtitle: 'profile.personal_info_desc'.tr(context),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProfilePersonalPage(
-                data: _profileData['personal_info'] ?? {},
-                userData: widget.userData,
-                fullProfileData: _profileData,
-              ),
-            ),
-          ).then((value) {
-            if (value == true) _fetchProfileDetails();
-          }),
+          onTap: () =>
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilePersonalPage(
+                    data: _profileData['personal_info'] ?? {},
+                    userData: widget.userData,
+                    fullProfileData: _profileData,
+                  ),
+                ),
+              ).then((value) {
+                if (value == true) _fetchProfileDetails();
+              }),
         ),
         const SizedBox(height: 12),
         _buildMenuTile(
           icon: Icons.account_balance_rounded,
           title: 'profile.bank_account'.tr(context),
           subtitle: 'profile.bank_account_desc'.tr(context),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ProfileBankPage(
-                data: _profileData['bank_info'] ?? {},
-                userData: widget.userData,
-                fullProfileData: _profileData,
-              ),
-            ),
-          ).then((value) {
-            if (value == true) _fetchProfileDetails();
-          }),
+          onTap: () =>
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileBankPage(
+                    data: _profileData['bank_info'] ?? {},
+                    userData: widget.userData,
+                    fullProfileData: _profileData,
+                  ),
+                ),
+              ).then((value) {
+                if (value == true) _fetchProfileDetails();
+              }),
         ),
       ],
     );
@@ -550,7 +563,11 @@ class _ProfilePageState extends State<ProfilePage> {
             color: Colors.grey.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 20),
+          child: const Icon(
+            Icons.chevron_right_rounded,
+            color: Colors.grey,
+            size: 20,
+          ),
         ),
         onTap: onTap,
       ),

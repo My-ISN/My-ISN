@@ -46,7 +46,6 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   DateTime _invoiceDate = DateTime.now();
   int _lamaSewa = 1;
 
-
   // Address KTP
   String? _selectedProvinceKtp;
   String? _selectedRegencyKtp;
@@ -84,7 +83,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
 
   // Items
   final List<Map<String, dynamic>> _itemRows = [
-    {'laptop_id': null, 'qty': 1, 'price': 0}
+    {'laptop_id': null, 'qty': 1, 'price': 0},
   ];
 
   // Shipping
@@ -98,7 +97,6 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     _fetchInitialData();
   }
 
-
   Future<void> _fetchInitialData() async {
     final response = await _rentPlanService.getRentFormData();
     if (response['status'] == true) {
@@ -109,22 +107,32 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         _laptops = List<dynamic>.from(data['laptops'] ?? []);
         // Filter out "KTP" from guarantees as it has its own field
         _jaminanPribadi = List<dynamic>.from(data['jaminan_pribadi'] ?? [])
-            .where((j) => j['category_name'].toString().toUpperCase() != 'KTP').toList();
-        _jaminanPerusahaan = List<dynamic>.from(data['jaminan_perusahaan'] ?? [])
-            .where((j) => j['category_name'].toString().toUpperCase() != 'KTP').toList();
+            .where((j) => j['category_name'].toString().toUpperCase() != 'KTP')
+            .toList();
+        _jaminanPerusahaan =
+            List<dynamic>.from(data['jaminan_perusahaan'] ?? [])
+                .where(
+                  (j) => j['category_name'].toString().toUpperCase() != 'KTP',
+                )
+                .toList();
         _shippingCosts = List<dynamic>.from(data['shipping_costs'] ?? []);
         _provinces = List<dynamic>.from(data['provinces'] ?? []);
         _pricingTiers = List<dynamic>.from(data['pricing_tiers'] ?? []);
         _agreements = List<dynamic>.from(data['agreements'] ?? []);
-        
+
         // Auto-select for client
         if (widget.userData['user_type'] != 'staff') {
-          _selectedCustomerId = (widget.userData['user_id'] ?? widget.userData['id'] ?? '').toString();
+          _selectedCustomerId =
+              (widget.userData['user_id'] ?? widget.userData['id'] ?? '')
+                  .toString();
           if (widget.userData['contact_number'] != null) {
-            _whatsappController.text = widget.userData['contact_number'].toString();
+            _whatsappController.text = widget.userData['contact_number']
+                .toString();
           }
           if (widget.userData['first_name'] != null) {
-            _namaLengkapController.text = '${widget.userData['first_name']} ${widget.userData['last_name'] ?? ''}'.trim();
+            _namaLengkapController.text =
+                '${widget.userData['first_name']} ${widget.userData['last_name'] ?? ''}'
+                    .trim();
           }
         }
 
@@ -133,7 +141,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'rent_plan.error.fetch_failed'.tr(context))),
+          SnackBar(
+            content: Text(
+              response['message'] ?? 'rent_plan.error.fetch_failed'.tr(context),
+            ),
+          ),
         );
         Navigator.pop(context);
       }
@@ -234,11 +246,16 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       setState(() {
         if (key == 0) {
           _fileKtp = File(result.files.single.path!);
-        } else if (key is int) _fileJaminan[key] = File(result.files.single.path!);
-        else if (key == 'npwp') _fileNpwp = File(result.files.single.path!);
-        else if (key == 'po') _filePo = File(result.files.single.path!);
-        else if (key == 'ktp_pimpinan') _fileKtpPimpinan = File(result.files.single.path!);
-        else if (key == 'domisili') _fileDomisiliPerusahaan = File(result.files.single.path!);
+        } else if (key is int)
+          _fileJaminan[key] = File(result.files.single.path!);
+        else if (key == 'npwp')
+          _fileNpwp = File(result.files.single.path!);
+        else if (key == 'po')
+          _filePo = File(result.files.single.path!);
+        else if (key == 'ktp_pimpinan')
+          _fileKtpPimpinan = File(result.files.single.path!);
+        else if (key == 'domisili')
+          _fileDomisiliPerusahaan = File(result.files.single.path!);
       });
     }
   }
@@ -250,7 +267,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     for (var tier in _pricingTiers) {
       int min = int.tryParse(tier['nama_harga'].toString()) ?? 0;
       int max = int.tryParse(tier['nama_harga2'].toString()) ?? 999999;
-      
+
       // If qty exceeds the current tier's max, but it's the last tier, use this price
       if (tier == _pricingTiers.last && qty >= min) {
         price = double.tryParse(tier['harga'].toString()) ?? 0;
@@ -271,7 +288,9 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   double get _totalPrice {
     double total = 0;
     for (var row in _itemRows) {
-      double price = (row['price'] is num) ? (row['price'] as num).toDouble() : 0.0;
+      double price = (row['price'] is num)
+          ? (row['price'] as num).toDouble()
+          : 0.0;
       int qty = row['qty'] ?? 1;
       total += (price * qty * _lamaSewa);
     }
@@ -281,16 +300,33 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     if (_jenisSewa == 'pribadi' && _fileKtp == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.validation.ktp_required'.tr(context))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('rent_plan.validation.ktp_required'.tr(context)),
+        ),
+      );
       return;
     }
 
     int minJaminan = _jenisSewa == 'pribadi' ? 3 : 2;
-    int jaminanCount = _selectedJaminanIds.entries.where((e) => e.key <= minJaminan && e.value != null).length;
-    int jaminanFileCount = _fileJaminan.entries.where((e) => e.key <= minJaminan && e.value != null).length;
+    int jaminanCount = _selectedJaminanIds.entries
+        .where((e) => e.key <= minJaminan && e.value != null)
+        .length;
+    int jaminanFileCount = _fileJaminan.entries
+        .where((e) => e.key <= minJaminan && e.value != null)
+        .length;
 
     if (jaminanCount < minJaminan || jaminanFileCount < minJaminan) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.validation.guarantee_min'.tr(context, args: {'min': minJaminan.toString()}))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'rent_plan.validation.guarantee_min'.tr(
+              context,
+              args: {'min': minJaminan.toString()},
+            ),
+          ),
+        ),
+      );
       return;
     }
 
@@ -309,15 +345,65 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         'nama_perusahaan': _namaPerusahaanController.text,
         'npwp': _npwpController.text,
         'notes': _notesController.text,
-        'province_ktp_name': _selectedProvinceKtp != null ? (_provinces.firstWhere((p) => p['id'].toString() == _selectedProvinceKtp, orElse: () => {'name': ''})['name'] ?? '') : '',
-        'regency_ktp_name': _selectedRegencyKtp != null ? (_regenciesKtp.firstWhere((r) => r['id'].toString() == _selectedRegencyKtp, orElse: () => {'name': ''})['name'] ?? '') : '',
-        'district_ktp_name': _selectedDistrictKtp != null ? (_districtsKtp.firstWhere((d) => d['id'].toString() == _selectedDistrictKtp, orElse: () => {'name': ''})['name'] ?? '') : '',
-        'village_ktp_name': _selectedVillageKtp != null ? (_villagesKtp.firstWhere((v) => v['id'].toString() == _selectedVillageKtp, orElse: () => {'name': ''})['name'] ?? '') : '',
-        'province_current_name': _selectedProvinceCur != null ? (_provinces.firstWhere((p) => p['id'].toString() == _selectedProvinceCur, orElse: () => {'name': ''})['name'] ?? '') : '',
-        'regency_current_name': _selectedRegencyCur != null ? (_regenciesCur.firstWhere((r) => r['id'].toString() == _selectedRegencyCur, orElse: () => {'name': ''})['name'] ?? '') : '',
-        'district_current_name': _selectedDistrictCur != null ? (_districtsCur.firstWhere((d) => d['id'].toString() == _selectedDistrictCur, orElse: () => {'name': ''})['name'] ?? '') : '',
-        'village_current_name': _selectedVillageCur != null ? (_villagesCur.firstWhere((v) => v['id'].toString() == _selectedVillageCur, orElse: () => {'name': ''})['name'] ?? '') : '',
-        'laptop_codes': json.encode(_itemRows.map((e) => e['laptop_id']).toList()),
+        'province_ktp_name': _selectedProvinceKtp != null
+            ? (_provinces.firstWhere(
+                    (p) => p['id'].toString() == _selectedProvinceKtp,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '',
+        'regency_ktp_name': _selectedRegencyKtp != null
+            ? (_regenciesKtp.firstWhere(
+                    (r) => r['id'].toString() == _selectedRegencyKtp,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '',
+        'district_ktp_name': _selectedDistrictKtp != null
+            ? (_districtsKtp.firstWhere(
+                    (d) => d['id'].toString() == _selectedDistrictKtp,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '',
+        'village_ktp_name': _selectedVillageKtp != null
+            ? (_villagesKtp.firstWhere(
+                    (v) => v['id'].toString() == _selectedVillageKtp,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '',
+        'province_current_name': _selectedProvinceCur != null
+            ? (_provinces.firstWhere(
+                    (p) => p['id'].toString() == _selectedProvinceCur,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '',
+        'regency_current_name': _selectedRegencyCur != null
+            ? (_regenciesCur.firstWhere(
+                    (r) => r['id'].toString() == _selectedRegencyCur,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '',
+        'district_current_name': _selectedDistrictCur != null
+            ? (_districtsCur.firstWhere(
+                    (d) => d['id'].toString() == _selectedDistrictCur,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '',
+        'village_current_name': _selectedVillageCur != null
+            ? (_villagesCur.firstWhere(
+                    (v) => v['id'].toString() == _selectedVillageCur,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '',
+        'laptop_codes': json.encode(
+          _itemRows.map((e) => e['laptop_id']).toList(),
+        ),
         'quantities': json.encode(_itemRows.map((e) => e['qty']).toList()),
         'unit_prices': json.encode(_itemRows.map((e) => e['price']).toList()),
         'jaminan_ids': json.encode(_selectedJaminanIds.values.toList()),
@@ -326,57 +412,86 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       };
 
       Map<String, String> files = {
-        if (_jenisSewa == 'pribadi' && _fileKtp != null) 'file_ktp': _fileKtp!.path,
+        if (_jenisSewa == 'pribadi' && _fileKtp != null)
+          'file_ktp': _fileKtp!.path,
         if (_fileJaminan[1] != null) 'file_jaminan_1': _fileJaminan[1]!.path,
         if (_fileJaminan[2] != null) 'file_jaminan_2': _fileJaminan[2]!.path,
         if (_fileJaminan[3] != null) 'file_jaminan_3': _fileJaminan[3]!.path,
-        
+
         if (_jenisSewa == 'perusahaan') ...{
           if (_fileNpwp != null) 'file_npwp': _fileNpwp!.path,
           if (_filePo != null) 'file_po': _filePo!.path,
-          if (_fileKtpPimpinan != null) 'file_ktp_pimpinan': _fileKtpPimpinan!.path,
-          if (_fileDomisiliPerusahaan != null) 'file_domisili_perusahaan': _fileDomisiliPerusahaan!.path,
-        }
+          if (_fileKtpPimpinan != null)
+            'file_ktp_pimpinan': _fileKtpPimpinan!.path,
+          if (_fileDomisiliPerusahaan != null)
+            'file_domisili_perusahaan': _fileDomisiliPerusahaan!.path,
+        },
       };
 
       final res = await _rentPlanService.storeRentPlan(body, files);
       setState(() => _isSubmitting = false);
 
       if (res['status'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('rent_plan.success_create'.tr(context)),
-          backgroundColor: Colors.green,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('rent_plan.success_create'.tr(context)),
+            backgroundColor: Colors.green,
+          ),
+        );
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(res['message'] ?? 'rent_plan.fail_save'.tr(context)),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message'] ?? 'rent_plan.fail_save'.tr(context)),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('rent_plan.error_occurred'.tr(context, args: {'error': e.toString()})),
-        backgroundColor: Colors.red,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'rent_plan.error_occurred'.tr(
+              context,
+              args: {'error': e.toString()},
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   void _showAgreementPopup() {
     if (!_formKey.currentState!.validate()) return;
-    
+
     // Check required files based on jenisSewa
     if (_jenisSewa == 'pribadi' && _fileKtp == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.validation.ktp_required'.tr(context)), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('rent_plan.validation.ktp_required'.tr(context)),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
-    
+
     // Jaminan validation
     int requiredGua = _jenisSewa == 'pribadi' ? 3 : 2;
     int providedGua = _selectedJaminanIds.values.where((v) => v != null).length;
     if (providedGua < requiredGua) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('rent_plan.validation.guarantee_min'.tr(context, args: {'min': requiredGua.toString()})), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'rent_plan.validation.guarantee_min'.tr(
+              context,
+              args: {'min': requiredGua.toString()},
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -408,7 +523,9 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               height: MediaQuery.of(context).size.height * 0.85,
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               child: Column(
                 children: [
@@ -430,16 +547,26 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.description_rounded, color: Theme.of(context).colorScheme.primary, size: 28),
+                          child: Icon(
+                            Icons.description_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 28,
+                          ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Text(
                             'rent_plan.agreement.title'.tr(context),
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
                         ),
                       ],
@@ -448,14 +575,25 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                   // Scroll hint
                   if (!hasScrolledToBottom)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 4,
+                      ),
                       child: Row(
                         children: [
-                          const Icon(Icons.arrow_downward, size: 14, color: Colors.orange),
+                          const Icon(
+                            Icons.arrow_downward,
+                            size: 14,
+                            color: Colors.orange,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             'rent_plan.agreement.scroll_to_bottom'.tr(context),
-                            style: const TextStyle(color: Colors.orange, fontSize: 12, fontStyle: FontStyle.italic),
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
                           ),
                         ],
                       ),
@@ -471,15 +609,22 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                           for (var agreement in _agreements) ...[
                             Text(
                               agreement['title'] ?? '',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              agreement['content'] ?? agreement['description'] ?? '',
+                              agreement['content'] ??
+                                  agreement['description'] ??
+                                  '',
                               style: TextStyle(
                                 fontSize: 14,
                                 height: 1.6,
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withOpacity(0.8),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -493,30 +638,41 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
-                      border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.15))),
+                      border: Border(
+                        top: BorderSide(color: Colors.grey.withOpacity(0.15)),
+                      ),
                     ),
                     child: Column(
                       children: [
                         InkWell(
                           onTap: hasScrolledToBottom
-                              ? () => setSheetState(() => hasAgreed = !hasAgreed)
+                              ? () =>
+                                    setSheetState(() => hasAgreed = !hasAgreed)
                               : null,
                           child: Row(
                             children: [
                               Checkbox(
                                 value: hasAgreed,
                                 onChanged: hasScrolledToBottom
-                                    ? (v) => setSheetState(() => hasAgreed = v ?? false)
+                                    ? (v) => setSheetState(
+                                        () => hasAgreed = v ?? false,
+                                      )
                                     : null,
-                                activeColor: Theme.of(context).colorScheme.primary,
+                                activeColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                               ),
                               Expanded(
                                 child: Text(
-                                  'rent_plan.agreement.agree_checkbox'.tr(context),
+                                  'rent_plan.agreement.agree_checkbox'.tr(
+                                    context,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: hasScrolledToBottom
-                                        ? Theme.of(context).colorScheme.onSurface
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface
                                         : Colors.grey,
                                   ),
                                 ),
@@ -535,12 +691,20 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                                   }
                                 : null,
                             icon: const Icon(Icons.check_circle_outline),
-                            label: Text('rent_plan.create_order_now'.tr(context)),
+                            label: Text(
+                              'rent_plan.create_order_now'.tr(context),
+                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: hasAgreed && hasScrolledToBottom ? Theme.of(context).colorScheme.primary : Colors.grey[300],
-                              foregroundColor: hasAgreed && hasScrolledToBottom ? Colors.white : Colors.grey,
+                              backgroundColor: hasAgreed && hasScrolledToBottom
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.grey[300],
+                              foregroundColor: hasAgreed && hasScrolledToBottom
+                                  ? Colors.white
+                                  : Colors.grey,
                               padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                               elevation: 0,
                             ),
                           ),
@@ -559,13 +723,12 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoadingData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (_isLoadingData)
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: SecondaryAppBar(
-        title: 'rent_plan.add_new_order'.tr(context),
-      ),
+      appBar: SecondaryAppBar(title: 'rent_plan.add_new_order'.tr(context)),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -581,21 +744,37 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                 if (widget.userData['user_type'] == 'staff') ...[
                   SearchableDropdown(
                     label: 'rent_plan.customer'.tr(context),
-                    value: _selectedCustomerId != null 
-                        ? _customers.firstWhere((c) => c['user_id'].toString() == _selectedCustomerId, orElse: () => {})['first_name'] != null 
-                          ? '${_customers.firstWhere((c) => c['user_id'].toString() == _selectedCustomerId)['first_name']} ${_customers.firstWhere((c) => c['user_id'].toString() == _selectedCustomerId)['last_name'] ?? ''}'
-                          : ''
+                    value: _selectedCustomerId != null
+                        ? _customers.firstWhere(
+                                    (c) =>
+                                        c['user_id'].toString() ==
+                                        _selectedCustomerId,
+                                    orElse: () => {},
+                                  )['first_name'] !=
+                                  null
+                              ? '${_customers.firstWhere((c) => c['user_id'].toString() == _selectedCustomerId)['first_name']} ${_customers.firstWhere((c) => c['user_id'].toString() == _selectedCustomerId)['last_name'] ?? ''}'
+                              : ''
                         : '',
-                    options: _customers.map((c) => {
-                      'id': c['user_id'].toString(),
-                      'name': '${c['first_name']} ${c['last_name'] ?? ''}'
-                    }).toList(),
+                    options: _customers
+                        .map(
+                          (c) => {
+                            'id': c['user_id'].toString(),
+                            'name':
+                                '${c['first_name']} ${c['last_name'] ?? ''}',
+                          },
+                        )
+                        .toList(),
                     onSelected: (val) {
                       setState(() {
                         _selectedCustomerId = val;
-                        final customer = _customers.firstWhere((c) => c['user_id'].toString() == val, orElse: () => null);
-                        if (customer != null && customer['contact_number'] != null) {
-                          _whatsappController.text = customer['contact_number'].toString();
+                        final customer = _customers.firstWhere(
+                          (c) => c['user_id'].toString() == val,
+                          orElse: () => null,
+                        );
+                        if (customer != null &&
+                            customer['contact_number'] != null) {
+                          _whatsappController.text = customer['contact_number']
+                              .toString();
                         }
                       });
                     },
@@ -603,7 +782,12 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                _buildTextField('rent_plan.whatsapp'.tr(context), controller: _whatsappController, icon: Icons.phone_rounded, keyboardType: TextInputType.phone),
+                _buildTextField(
+                  'rent_plan.whatsapp'.tr(context),
+                  controller: _whatsappController,
+                  icon: Icons.phone_rounded,
+                  keyboardType: TextInputType.phone,
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -628,34 +812,58 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               children: [
                 Row(
                   children: [
-                    Expanded(child: _buildDatePicker('rent_plan.rent_start'.tr(context))),
+                    Expanded(
+                      child: _buildDatePicker(
+                        'rent_plan.rent_start'.tr(context),
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildTextField('rent_plan.rent_duration'.tr(context), 
-                      suffix: 'rent_plan.days'.tr(context),
-                      initialValue: _lamaSewa.toString(), 
-                      keyboardType: TextInputType.number,
-                      onChanged: (val) {
-                        setState(() {
-                          _lamaSewa = int.tryParse(val) ?? 1;
-                          for (int i = 0; i < _itemRows.length; i++) {
-                            _calculatePriceForRow(i);
-                          }
-                        });
-                      }
-                    )),
+                    Expanded(
+                      child: _buildTextField(
+                        'rent_plan.rent_duration'.tr(context),
+                        suffix: 'rent_plan.days'.tr(context),
+                        initialValue: _lamaSewa.toString(),
+                        keyboardType: TextInputType.number,
+                        onChanged: (val) {
+                          setState(() {
+                            _lamaSewa = int.tryParse(val) ?? 1;
+                            for (int i = 0; i < _itemRows.length; i++) {
+                              _calculatePriceForRow(i);
+                            }
+                          });
+                        },
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 _buildTipePenyewaToggle(),
                 const SizedBox(height: 16),
                 if (_jenisSewa == 'pribadi') ...[
-                  _buildTextField('rent_plan.full_name'.tr(context), controller: _namaLengkapController, icon: Icons.badge_rounded),
+                  _buildTextField(
+                    'rent_plan.full_name'.tr(context),
+                    controller: _namaLengkapController,
+                    icon: Icons.badge_rounded,
+                  ),
                   const SizedBox(height: 16),
-                  _buildTextField('rent_plan.nik'.tr(context), controller: _nikController, icon: Icons.credit_card_rounded, keyboardType: TextInputType.number),
+                  _buildTextField(
+                    'rent_plan.nik'.tr(context),
+                    controller: _nikController,
+                    icon: Icons.credit_card_rounded,
+                    keyboardType: TextInputType.number,
+                  ),
                 ] else ...[
-                  _buildTextField('rent_plan.company_name'.tr(context), controller: _namaPerusahaanController, icon: Icons.business_rounded),
+                  _buildTextField(
+                    'rent_plan.company_name'.tr(context),
+                    controller: _namaPerusahaanController,
+                    icon: Icons.business_rounded,
+                  ),
                   const SizedBox(height: 16),
-                  _buildTextField('rent_plan.npwp_number'.tr(context), controller: _npwpController, icon: Icons.description_rounded),
+                  _buildTextField(
+                    'rent_plan.npwp_number'.tr(context),
+                    controller: _npwpController,
+                    icon: Icons.description_rounded,
+                  ),
                 ],
               ],
             ),
@@ -666,23 +874,60 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               color: Colors.deepPurple[700]!,
               children: [
                 if (_jenisSewa == 'pribadi') ...[
-                  _buildFileUploadTile('rent_plan.upload_ktp'.tr(context), _fileKtp, () => _pickFile(0), icon: Icons.camera_alt_rounded),
+                  _buildFileUploadTile(
+                    'rent_plan.upload_ktp'.tr(context),
+                    _fileKtp,
+                    () => _pickFile(0),
+                    icon: Icons.camera_alt_rounded,
+                  ),
                   const Divider(height: 32),
                 ] else ...[
-                  _buildFileUploadTile('rent_plan.upload_npwp'.tr(context), _fileNpwp, () => _pickFile('npwp'), icon: Icons.upload_file_rounded),
+                  _buildFileUploadTile(
+                    'rent_plan.upload_npwp'.tr(context),
+                    _fileNpwp,
+                    () => _pickFile('npwp'),
+                    icon: Icons.upload_file_rounded,
+                  ),
                   const SizedBox(height: 12),
-                  _buildFileUploadTile('rent_plan.upload_po'.tr(context), _filePo, () => _pickFile('po'), icon: Icons.upload_file_rounded),
+                  _buildFileUploadTile(
+                    'rent_plan.upload_po'.tr(context),
+                    _filePo,
+                    () => _pickFile('po'),
+                    icon: Icons.upload_file_rounded,
+                  ),
                   const SizedBox(height: 12),
-                  _buildFileUploadTile('rent_plan.upload_ktp_leader'.tr(context), _fileKtpPimpinan, () => _pickFile('ktp_pimpinan'), icon: Icons.upload_file_rounded),
+                  _buildFileUploadTile(
+                    'rent_plan.upload_ktp_leader'.tr(context),
+                    _fileKtpPimpinan,
+                    () => _pickFile('ktp_pimpinan'),
+                    icon: Icons.upload_file_rounded,
+                  ),
                   const SizedBox(height: 12),
-                  _buildFileUploadTile('rent_plan.company_domicile'.tr(context), _fileDomisiliPerusahaan, () => _pickFile('domisili'), icon: Icons.upload_file_rounded),
+                  _buildFileUploadTile(
+                    'rent_plan.company_domicile'.tr(context),
+                    _fileDomisiliPerusahaan,
+                    () => _pickFile('domisili'),
+                    icon: Icons.upload_file_rounded,
+                  ),
                   const Divider(height: 32),
                 ],
-                Text('${'rent_plan.guarantee'.tr(context)} (${'rent_plan.required_min'.tr(context, args: {'min': (_jenisSewa == 'pribadi' ? 3 : 2).toString()})})', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey[700])),
+                Text(
+                  '${'rent_plan.guarantee'.tr(context)} (${'rent_plan.required_min'.tr(context, args: {'min': (_jenisSewa == 'pribadi' ? 3 : 2).toString()})})',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[700],
+                  ),
+                ),
                 const SizedBox(height: 12),
-                for (int i = 1; i <= (_jenisSewa == 'pribadi' ? 3 : 2); i++) ...[
+                for (
+                  int i = 1;
+                  i <= (_jenisSewa == 'pribadi' ? 3 : 2);
+                  i++
+                ) ...[
                   _buildJaminanSelector(i),
-                  if (i < (_jenisSewa == 'pribadi' ? 3 : 2)) const SizedBox(height: 12),
+                  if (i < (_jenisSewa == 'pribadi' ? 3 : 2))
+                    const SizedBox(height: 12),
                 ],
               ],
             ),
@@ -701,7 +946,13 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               children: [
                 _buildShippingDropdown(),
                 const SizedBox(height: 16),
-                _buildTextField('rent_plan.additional_notes'.tr(context), controller: _notesController, maxLines: 3, icon: Icons.notes_rounded, isRequired: false),
+                _buildTextField(
+                  'rent_plan.additional_notes'.tr(context),
+                  controller: _notesController,
+                  maxLines: 3,
+                  icon: Icons.notes_rounded,
+                  isRequired: false,
+                ),
               ],
             ),
             const SizedBox(height: 100),
@@ -712,13 +963,29 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     );
   }
 
-  Widget _buildSection({required String title, required IconData icon, required Color color, required List<Widget> children}) {
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required List<Widget> children,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.white10 : color.withOpacity(0.1), width: 1.5),
-        boxShadow: [BoxShadow(color: color.withOpacity(0.06), blurRadius: 20, offset: const Offset(0, 10))],
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white10
+              : color.withOpacity(0.1),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -731,11 +998,21 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     child: Icon(icon, color: color, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.titleLarge?.color)),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -754,11 +1031,21 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.primary.withOpacity(0.8)], 
-          begin: Alignment.topLeft, end: Alignment.bottomRight
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -766,17 +1053,43 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('rent_plan.order_number'.tr(context), style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              Text(_orderNumber, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                'rent_plan.order_number'.tr(context),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+              Text(
+                _orderNumber,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
-          Icon(Icons.receipt_long_rounded, color: Colors.white.withOpacity(0.5), size: 30),
+          Icon(
+            Icons.receipt_long_rounded,
+            color: Colors.white.withOpacity(0.5),
+            size: 30,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String label, {Key? key, TextEditingController? controller, String? initialValue, bool enabled = true, TextInputType? keyboardType, Function(String)? onChanged, int maxLines = 1, IconData? icon, String? suffix, bool isRequired = true}) {
+  Widget _buildTextField(
+    String label, {
+    Key? key,
+    TextEditingController? controller,
+    String? initialValue,
+    bool enabled = true,
+    TextInputType? keyboardType,
+    Function(String)? onChanged,
+    int maxLines = 1,
+    IconData? icon,
+    String? suffix,
+    bool isRequired = true,
+  }) {
     return TextFormField(
       key: key,
       controller: controller,
@@ -786,22 +1099,49 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       maxLines: maxLines,
       onChanged: onChanged,
       style: const TextStyle(fontSize: 14),
-      validator: isRequired ? (val) => val == null || val.isEmpty ? 'rent_plan.validation.required'.tr(context) : null : null,
+      validator: isRequired
+          ? (val) => val == null || val.isEmpty
+                ? 'rent_plan.validation.required'.tr(context)
+                : null
+          : null,
       decoration: InputDecoration(
         labelText: isRequired ? '$label *' : label,
-        prefixIcon: icon != null ? Icon(icon, size: 18, color: Colors.grey[400]) : null,
+        prefixIcon: icon != null
+            ? Icon(icon, size: 18, color: Colors.grey[400])
+            : null,
         suffixText: suffix,
         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey[200]!)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200]!)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[200]!),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white12
+                : Colors.grey[200]!,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
+          ),
+        ),
         filled: true,
-        fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        fillColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.05)
+            : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 16,
+        ),
       ),
     );
   }
-  
+
   @override
   void dispose() {
     _namaLengkapController.dispose();
@@ -813,40 +1153,77 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     super.dispose();
   }
 
-
   Widget _buildRegionDropdowns(bool isKtp) {
-    final String? currentProvinceId = isKtp ? _selectedProvinceKtp : _selectedProvinceCur;
-    final String? currentRegencyId = isKtp ? _selectedRegencyKtp : _selectedRegencyCur;
-    final String? currentDistrictId = isKtp ? _selectedDistrictKtp : _selectedDistrictCur;
-    final String? currentVillageId = isKtp ? _selectedVillageKtp : _selectedVillageCur;
+    final String? currentProvinceId = isKtp
+        ? _selectedProvinceKtp
+        : _selectedProvinceCur;
+    final String? currentRegencyId = isKtp
+        ? _selectedRegencyKtp
+        : _selectedRegencyCur;
+    final String? currentDistrictId = isKtp
+        ? _selectedDistrictKtp
+        : _selectedDistrictCur;
+    final String? currentVillageId = isKtp
+        ? _selectedVillageKtp
+        : _selectedVillageCur;
 
-    final String selectedProvinceName = currentProvinceId != null 
-        ? _provinces.firstWhere((p) => p['id'].toString() == currentProvinceId, orElse: () => {})['name'] ?? '' : '';
-    
-    final List<dynamic> currentRegencies = isKtp ? _regenciesKtp : _regenciesCur;
-    final String selectedRegencyName = currentRegencyId != null 
-        ? currentRegencies.firstWhere((r) => r['id'].toString() == currentRegencyId, orElse: () => {})['name'] ?? '' : '';
+    final String selectedProvinceName = currentProvinceId != null
+        ? _provinces.firstWhere(
+                (p) => p['id'].toString() == currentProvinceId,
+                orElse: () => {},
+              )['name'] ??
+              ''
+        : '';
 
-    final List<dynamic> currentDistricts = isKtp ? _districtsKtp : _districtsCur;
-    final String selectedDistrictName = currentDistrictId != null 
-        ? currentDistricts.firstWhere((d) => d['id'].toString() == currentDistrictId, orElse: () => {})['name'] ?? '' : '';
+    final List<dynamic> currentRegencies = isKtp
+        ? _regenciesKtp
+        : _regenciesCur;
+    final String selectedRegencyName = currentRegencyId != null
+        ? currentRegencies.firstWhere(
+                (r) => r['id'].toString() == currentRegencyId,
+                orElse: () => {},
+              )['name'] ??
+              ''
+        : '';
+
+    final List<dynamic> currentDistricts = isKtp
+        ? _districtsKtp
+        : _districtsCur;
+    final String selectedDistrictName = currentDistrictId != null
+        ? currentDistricts.firstWhere(
+                (d) => d['id'].toString() == currentDistrictId,
+                orElse: () => {},
+              )['name'] ??
+              ''
+        : '';
 
     final List<dynamic> currentVillages = isKtp ? _villagesKtp : _villagesCur;
-    final String selectedVillageName = currentVillageId != null 
-        ? currentVillages.firstWhere((v) => v['id'].toString() == currentVillageId, orElse: () => {})['name'] ?? '' : '';
+    final String selectedVillageName = currentVillageId != null
+        ? currentVillages.firstWhere(
+                (v) => v['id'].toString() == currentVillageId,
+                orElse: () => {},
+              )['name'] ??
+              ''
+        : '';
 
     return Column(
       children: [
         SearchableDropdown(
           label: 'profile.state_province'.tr(context),
           value: selectedProvinceName,
-          options: _provinces.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          options: _provinces
+              .map(
+                (p) => {'id': p['id'].toString(), 'name': p['name'].toString()},
+              )
+              .toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) {
-              _selectedProvinceKtp = val;
-            } else {
-              _selectedProvinceCur = val;
-            } });
+            setState(() {
+              if (isKtp) {
+                _selectedProvinceKtp = val;
+              } else {
+                _selectedProvinceCur = val;
+              }
+            });
             _loadRegencies(val, isKtp);
           },
           placeholder: 'rent_plan.select_province'.tr(context),
@@ -855,45 +1232,69 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         SearchableDropdown(
           label: 'profile.city_regency'.tr(context),
           value: selectedRegencyName,
-          options: currentRegencies.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          options: currentRegencies
+              .map(
+                (p) => {'id': p['id'].toString(), 'name': p['name'].toString()},
+              )
+              .toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) {
-              _selectedRegencyKtp = val;
-            } else {
-              _selectedRegencyCur = val;
-            } });
+            setState(() {
+              if (isKtp) {
+                _selectedRegencyKtp = val;
+              } else {
+                _selectedRegencyCur = val;
+              }
+            });
             _loadDistricts(val, isKtp);
           },
-          placeholder: (isKtp ? _isLoadingRegKtp : _isLoadingRegCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_regency'.tr(context),
+          placeholder: (isKtp ? _isLoadingRegKtp : _isLoadingRegCur)
+              ? 'rent_plan.loading'.tr(context)
+              : 'rent_plan.select_regency'.tr(context),
         ),
         const SizedBox(height: 12),
         SearchableDropdown(
           label: 'rent_plan.district'.tr(context),
           value: selectedDistrictName,
-          options: currentDistricts.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          options: currentDistricts
+              .map(
+                (p) => {'id': p['id'].toString(), 'name': p['name'].toString()},
+              )
+              .toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) {
-              _selectedDistrictKtp = val;
-            } else {
-              _selectedDistrictCur = val;
-            } });
+            setState(() {
+              if (isKtp) {
+                _selectedDistrictKtp = val;
+              } else {
+                _selectedDistrictCur = val;
+              }
+            });
             _loadVillages(val, isKtp);
           },
-          placeholder: (isKtp ? _isLoadingDistKtp : _isLoadingDistCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_district'.tr(context),
+          placeholder: (isKtp ? _isLoadingDistKtp : _isLoadingDistCur)
+              ? 'rent_plan.loading'.tr(context)
+              : 'rent_plan.select_district'.tr(context),
         ),
         const SizedBox(height: 12),
         SearchableDropdown(
           label: 'rent_plan.village'.tr(context),
           value: selectedVillageName,
-          options: currentVillages.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          options: currentVillages
+              .map(
+                (p) => {'id': p['id'].toString(), 'name': p['name'].toString()},
+              )
+              .toList(),
           onSelected: (val) {
-            setState(() { if (isKtp) {
-              _selectedVillageKtp = val;
-            } else {
-              _selectedVillageCur = val;
-            } });
+            setState(() {
+              if (isKtp) {
+                _selectedVillageKtp = val;
+              } else {
+                _selectedVillageCur = val;
+              }
+            });
           },
-          placeholder: (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) ? 'rent_plan.loading'.tr(context) : 'rent_plan.select_village'.tr(context),
+          placeholder: (isKtp ? _isLoadingVillKtp : _isLoadingVillCur)
+              ? 'rent_plan.loading'.tr(context)
+              : 'rent_plan.select_village'.tr(context),
         ),
       ],
     );
@@ -902,27 +1303,47 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   Widget _buildDatePicker(String label) {
     return InkWell(
       onTap: () async {
-        final date = await showDatePicker(context: context, initialDate: _invoiceDate, firstDate: DateTime(2000), lastDate: DateTime(2100));
+        final date = await showDatePicker(
+          context: context,
+          initialDate: _invoiceDate,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
         if (date != null) setState(() => _invoiceDate = date);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         constraints: const BoxConstraints(minHeight: 64),
         decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.white,
-          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200]!),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.white,
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white12
+                : Colors.grey[200]!,
+          ),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+            Text(
+              label,
+              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+            ),
             const SizedBox(height: 4),
             Row(
               children: [
                 Icon(Icons.event_rounded, size: 16, color: Colors.blue[700]),
                 const SizedBox(width: 8),
-                Text(DateFormat('dd MMM yyyy').format(_invoiceDate), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                Text(
+                  DateFormat('dd MMM yyyy').format(_invoiceDate),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
           ],
@@ -934,19 +1355,30 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   Widget _buildTipePenyewaToggle() {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100], borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+      ),
       padding: const EdgeInsets.all(4),
       child: Row(
         children: [
-          _buildToggleItem('rent_plan.personal'.tr(context), _jenisSewa == 'pribadi', () => setState(() {
-            _jenisSewa = 'pribadi';
-          })),
-          _buildToggleItem('rent_plan.company'.tr(context), _jenisSewa == 'perusahaan', () => setState(() {
-            _jenisSewa = 'perusahaan';
-            // Clear 3rd jaminan if switching to perusahaan (which only needs 2)
-            _selectedJaminanIds[3] = null;
-            _fileJaminan[3] = null;
-          })),
+          _buildToggleItem(
+            'rent_plan.personal'.tr(context),
+            _jenisSewa == 'pribadi',
+            () => setState(() {
+              _jenisSewa = 'pribadi';
+            }),
+          ),
+          _buildToggleItem(
+            'rent_plan.company'.tr(context),
+            _jenisSewa == 'perusahaan',
+            () => setState(() {
+              _jenisSewa = 'perusahaan';
+              // Clear 3rd jaminan if switching to perusahaan (which only needs 2)
+              _selectedJaminanIds[3] = null;
+              _fileJaminan[3] = null;
+            }),
+          ),
         ],
       ),
     );
@@ -959,48 +1391,109 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? Theme.of(context).cardColor : Colors.transparent,
+            color: isSelected
+                ? Theme.of(context).cardColor
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)] : null,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 5,
+                    ),
+                  ]
+                : null,
           ),
           child: Center(
-            child: Text(label, style: TextStyle(fontSize: 13, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, color: isSelected ? Theme.of(context).colorScheme.primary : (Theme.of(context).brightness == Brightness.dark ? Colors.white60 : Colors.grey[600]))),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white60
+                          : Colors.grey[600]),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFileUploadTile(String label, File? file, VoidCallback onTap, {IconData? icon}) {
+  Widget _buildFileUploadTile(
+    String label,
+    File? file,
+    VoidCallback onTap, {
+    IconData? icon,
+  }) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: file == null ? (isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50]) : Colors.green.withOpacity(0.05),
+          color: file == null
+              ? (isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50])
+              : Colors.green.withOpacity(0.05),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: file == null ? (isDark ? Colors.white12 : Theme.of(context).dividerColor) : Colors.green[200]!),
+          border: Border.all(
+            color: file == null
+                ? (isDark ? Colors.white12 : Theme.of(context).dividerColor)
+                : Colors.green[200]!,
+          ),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: file == null ? Colors.blue.withOpacity(0.1) : Colors.green.withOpacity(0.1), shape: BoxShape.circle),
-              child: Icon(icon ?? Icons.attach_file_rounded, color: file == null ? Colors.blue : Colors.green, size: 20),
+              decoration: BoxDecoration(
+                color: file == null
+                    ? Colors.blue.withOpacity(0.1)
+                    : Colors.green.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon ?? Icons.attach_file_rounded,
+                color: file == null ? Colors.blue : Colors.green,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(file == null ? 'rent_plan.tap_to_pick'.tr(context) : file.path.split('/').last, style: TextStyle(fontSize: 12, color: file == null ? Colors.grey[500] : Colors.green[700])),
+                  Text(
+                    file == null
+                        ? 'rent_plan.tap_to_pick'.tr(context)
+                        : file.path.split('/').last,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: file == null
+                          ? Colors.grey[500]
+                          : Colors.green[700],
+                    ),
+                  ),
                 ],
               ),
             ),
-            if (file != null) const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20),
+            if (file != null)
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.green,
+                size: 20,
+              ),
           ],
         ),
       ),
@@ -1008,8 +1501,10 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   }
 
   Widget _buildJaminanSelector(int index) {
-    List<dynamic> baseOptions = _jenisSewa == 'pribadi' ? _jaminanPribadi : _jaminanPerusahaan;
-    
+    List<dynamic> baseOptions = _jenisSewa == 'pribadi'
+        ? _jaminanPribadi
+        : _jaminanPerusahaan;
+
     // Filter options to exclude those already selected in OTHER slots
     List<dynamic> availableOptions = baseOptions.where((j) {
       String id = j['constants_id'].toString();
@@ -1023,26 +1518,49 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(20), border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.1))),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        ),
+      ),
       child: Column(
         children: [
           SearchableDropdown(
             label: '${'rent_plan.guarantee'.tr(context)} $index',
-            value: _selectedJaminanIds[index] != null 
-                ? availableOptions.firstWhere((j) => j['constants_id'].toString() == _selectedJaminanIds[index], orElse: () => {})['category_name'] ?? '' 
+            value: _selectedJaminanIds[index] != null
+                ? availableOptions.firstWhere(
+                        (j) =>
+                            j['constants_id'].toString() ==
+                            _selectedJaminanIds[index],
+                        orElse: () => {},
+                      )['category_name'] ??
+                      ''
                 : '',
-            options: availableOptions.map((j) => {
-              'id': j['constants_id'].toString(),
-              'name': j['category_name'].toString()
-            }).toList(),
+            options: availableOptions
+                .map(
+                  (j) => {
+                    'id': j['constants_id'].toString(),
+                    'name': j['category_name'].toString(),
+                  },
+                )
+                .toList(),
             onSelected: (val) {
-              setState(() { _selectedJaminanIds[index] = val; });
+              setState(() {
+                _selectedJaminanIds[index] = val;
+              });
             },
             placeholder: '${'rent_plan.select_guarantee'.tr(context)} $index',
           ),
           if (_selectedJaminanIds[index] != null) ...[
             const SizedBox(height: 12),
-            _buildFileUploadTile('${'rent_plan.guarantee_file'.tr(context)} $index', _fileJaminan[index], () => _pickFile(index), icon: Icons.upload_file_rounded),
+            _buildFileUploadTile(
+              '${'rent_plan.guarantee_file'.tr(context)} $index',
+              _fileJaminan[index],
+              () => _pickFile(index),
+              icon: Icons.upload_file_rounded,
+            ),
           ],
         ],
       ),
@@ -1064,38 +1582,73 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50], borderRadius: BorderRadius.circular(16), border: Border.all(color: isDark ? Colors.white12 : Theme.of(context).dividerColor)),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? Colors.white12 : Theme.of(context).dividerColor,
+        ),
+      ),
       child: Column(
         children: [
           SearchableDropdown(
             label: 'rent_plan.laptop'.tr(context),
-            value: _itemRows[index]['laptop_id'] != null 
-                ? _laptops.firstWhere((l) => l['id'].toString() == _itemRows[index]['laptop_id'], orElse: () => {})['nama_laptop'] ?? '' 
+            value: _itemRows[index]['laptop_id'] != null
+                ? _laptops.firstWhere(
+                        (l) =>
+                            l['id'].toString() == _itemRows[index]['laptop_id'],
+                        orElse: () => {},
+                      )['nama_laptop'] ??
+                      ''
                 : '',
-            options: _laptops.map((l) => {
-              'id': l['id'].toString(),
-              'name': l['nama_laptop'].toString()
-            }).toList(),
+            options: _laptops
+                .map(
+                  (l) => {
+                    'id': l['id'].toString(),
+                    'name': l['nama_laptop'].toString(),
+                  },
+                )
+                .toList(),
             onSelected: (val) {
-              setState(() { _itemRows[index]['laptop_id'] = val; _calculatePriceForRow(index); });
+              setState(() {
+                _itemRows[index]['laptop_id'] = val;
+                _calculatePriceForRow(index);
+              });
             },
             placeholder: 'rent_plan.select_laptop'.tr(context),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              SizedBox(width: 80, child: _buildTextField('rent_plan.qty'.tr(context), initialValue: _itemRows[index]['qty'].toString(), keyboardType: TextInputType.number, onChanged: (val) {
-                setState(() { _itemRows[index]['qty'] = int.tryParse(val) ?? 1; _calculatePriceForRow(index); });
-              })),
+              SizedBox(
+                width: 80,
+                child: _buildTextField(
+                  'rent_plan.qty'.tr(context),
+                  initialValue: _itemRows[index]['qty'].toString(),
+                  keyboardType: TextInputType.number,
+                  onChanged: (val) {
+                    setState(() {
+                      _itemRows[index]['qty'] = int.tryParse(val) ?? 1;
+                      _calculatePriceForRow(index);
+                    });
+                  },
+                ),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: _buildTextField(
-                'rent_plan.unit_price'.tr(context), 
-                key: ValueKey('price_${index}_${_itemRows[index]['price']}'),
-                initialValue: NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(_itemRows[index]['price']), 
-                enabled: false,
-                isRequired: false,
-                suffix: 'IDR'
-              )),
+              Expanded(
+                child: _buildTextField(
+                  'rent_plan.unit_price'.tr(context),
+                  key: ValueKey('price_${index}_${_itemRows[index]['price']}'),
+                  initialValue: NumberFormat.currency(
+                    locale: 'id_ID',
+                    symbol: '',
+                    decimalDigits: 0,
+                  ).format(_itemRows[index]['price']),
+                  enabled: false,
+                  isRequired: false,
+                  suffix: 'IDR',
+                ),
+              ),
             ],
           ),
         ],
@@ -1104,21 +1657,32 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   }
 
   Widget _buildShippingDropdown() {
-    final String selectedName = _selectedShippingId != null 
-        ? _shippingCosts.firstWhere((s) => s['constants_id'].toString() == _selectedShippingId, orElse: () => {})['category_name'] != null 
-          ? '${_shippingCosts.firstWhere((s) => s['constants_id'].toString() == _selectedShippingId)['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(_shippingCosts.firstWhere((s) => s['constants_id'].toString() == _selectedShippingId)['field_one']))}'
-          : ''
+    final String selectedName = _selectedShippingId != null
+        ? _shippingCosts.firstWhere(
+                    (s) => s['constants_id'].toString() == _selectedShippingId,
+                    orElse: () => {},
+                  )['category_name'] !=
+                  null
+              ? '${_shippingCosts.firstWhere((s) => s['constants_id'].toString() == _selectedShippingId)['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(_shippingCosts.firstWhere((s) => s['constants_id'].toString() == _selectedShippingId)['field_one']))}'
+              : ''
         : '';
 
     return SearchableDropdown(
       label: 'rent_plan.shipping_service'.tr(context),
       value: selectedName,
-      options: _shippingCosts.map((s) => {
-        'id': s['constants_id'].toString(),
-        'name': '${s['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(s['field_one']))}'
-      }).toList(),
+      options: _shippingCosts
+          .map(
+            (s) => {
+              'id': s['constants_id'].toString(),
+              'name':
+                  '${s['category_name']} - Rp ${NumberFormat.compact(locale: 'id_ID').format(int.parse(s['field_one']))}',
+            },
+          )
+          .toList(),
       onSelected: (val) {
-        final ship = _shippingCosts.firstWhere((s) => s['constants_id'].toString() == val);
+        final ship = _shippingCosts.firstWhere(
+          (s) => s['constants_id'].toString() == val,
+        );
         setState(() {
           _selectedShippingId = val;
           _shippingCostAmount = int.parse(ship['field_one']);
@@ -1130,13 +1694,27 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   }
 
   Widget _buildBottomAction() {
-    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [BoxShadow(color: (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black).withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+        boxShadow: [
+          BoxShadow(
+            color:
+                (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black)
+                    .withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1144,8 +1722,21 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('rent_plan.estimated_total'.tr(context), style: TextStyle(color: Theme.of(context).hintColor, fontSize: 13)),
-              Text(currencyFormat.format(_totalPrice), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+              Text(
+                'rent_plan.estimated_total'.tr(context),
+                style: TextStyle(
+                  color: Theme.of(context).hintColor,
+                  fontSize: 13,
+                ),
+              ),
+              Text(
+                currencyFormat.format(_totalPrice),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -1156,12 +1747,28 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               onPressed: _isSubmitting ? null : _showAgreementPopup,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 0,
               ),
-              child: _isSubmitting 
-                ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3)) 
-                : Text('rent_plan.create_order_now'.tr(context), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 3,
+                      ),
+                    )
+                  : Text(
+                      'rent_plan.create_order_now'.tr(context),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
         ],

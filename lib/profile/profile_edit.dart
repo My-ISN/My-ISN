@@ -388,9 +388,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: SecondaryAppBar(
-        title: _getPageTitle(context),
-      ),
+      appBar: SecondaryAppBar(title: _getPageTitle(context)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -402,7 +400,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 12),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          16,
+          24,
+          MediaQuery.of(context).padding.bottom + 12,
+        ),
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.only(
@@ -439,19 +442,27 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           child: ElevatedButton(
             onPressed: _isSaving
                 ? null
-                : (widget.section == 'header' ? _saveHeaderSection : _saveProfile),
+                : (widget.section == 'header'
+                      ? _saveHeaderSection
+                      : _saveProfile),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF7E57C2),
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               elevation: 0,
             ),
             child: _isSaving
                 ? const SizedBox(
                     height: 24,
                     width: 24,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
                 : Text(
                     'profile.save'.tr(context).toUpperCase(),
                     style: const TextStyle(
@@ -553,7 +564,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.first_name'.tr(context),
           controller: _controllers['first_name']!,
-          prefixIcon: const Icon(Icons.person_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.person_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           required: true,
           validator: (v) => v!.isEmpty ? 'profile.required'.tr(context) : null,
           textCapitalization: TextCapitalization.characters,
@@ -562,14 +577,22 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.last_name'.tr(context),
           controller: _controllers['last_name']!,
-          prefixIcon: const Icon(Icons.person_outline_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.person_outline_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           textCapitalization: TextCapitalization.characters,
           inputFormatters: [UpperCaseTextFormatter()],
         ),
         _buildTextField(
           label: 'profile.email'.tr(context),
           controller: _controllers['email']!,
-          prefixIcon: const Icon(Icons.email_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.email_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           required: true,
           keyboardType: TextInputType.emailAddress,
           validator: (v) => v!.isEmpty ? 'profile.required'.tr(context) : null,
@@ -577,7 +600,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.phone'.tr(context),
           controller: _controllers['contact_number']!,
-          prefixIcon: const Icon(Icons.phone_android_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.phone_android_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           keyboardType: TextInputType.phone,
         ),
       ];
@@ -589,8 +616,16 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             child: _buildTextField(
               label: 'profile.dob'.tr(context),
               controller: _controllers['date_of_birth']!,
-              prefixIcon: const Icon(Icons.cake_rounded, size: 18, color: Color(0xFF7E57C2)),
-              suffixIcon: const Icon(Icons.calendar_today_rounded, size: 20, color: Color(0xFF7E57C2)),
+              prefixIcon: const Icon(
+                Icons.cake_rounded,
+                size: 18,
+                color: Color(0xFF7E57C2),
+              ),
+              suffixIcon: const Icon(
+                Icons.calendar_today_rounded,
+                size: 20,
+                color: Color(0xFF7E57C2),
+              ),
             ),
           ),
         ),
@@ -636,17 +671,29 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.blood_group'.tr(context),
           controller: _controllers['blood_group']!,
-          prefixIcon: const Icon(Icons.bloodtype_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.bloodtype_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.nationality'.tr(context),
           controller: _controllers['nationality']!,
-          prefixIcon: const Icon(Icons.flag_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.flag_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.address'.tr(context),
           controller: _controllers['address_1']!,
-          prefixIcon: const Icon(Icons.home_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.home_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           maxLines: 2,
         ),
         _buildLocationDropdown(
@@ -682,7 +729,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.zip_code'.tr(context),
           controller: _controllers['zipcode']!,
-          prefixIcon: const Icon(Icons.pin_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.pin_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           keyboardType: TextInputType.number,
         ),
       ];
@@ -691,24 +742,40 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.bio'.tr(context),
           controller: _controllers['bio']!,
-          prefixIcon: const Icon(Icons.info_outline_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.info_outline_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           maxLines: 3,
         ),
         _buildTextField(
           label: 'profile.experience'.tr(context),
           controller: _controllers['experience']!,
-          prefixIcon: const Icon(Icons.work_outline_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.work_outline_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           maxLines: 3,
         ),
         _buildTextField(
           label: 'profile.fb_url'.tr(context),
           controller: _controllers['fb_profile']!,
-          prefixIcon: const FaIcon(FontAwesomeIcons.facebook, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const FaIcon(
+            FontAwesomeIcons.facebook,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.linkedin_url'.tr(context),
           controller: _controllers['linkedin_profile']!,
-          prefixIcon: const FaIcon(FontAwesomeIcons.linkedin, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const FaIcon(
+            FontAwesomeIcons.linkedin,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
       ];
     } else if (widget.section == 'bank') {
@@ -716,33 +783,57 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.account_title'.tr(context),
           controller: _controllers['account_title']!,
-          prefixIcon: const Icon(Icons.person_pin_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.person_pin_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.account_number'.tr(context),
           controller: _controllers['account_number']!,
-          prefixIcon: const Icon(Icons.numbers_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.numbers_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
           keyboardType: TextInputType.number,
         ),
         _buildTextField(
           label: 'profile.bank_name'.tr(context),
           controller: _controllers['bank_name']!,
-          prefixIcon: const Icon(Icons.account_balance_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.account_balance_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.iban'.tr(context),
           controller: _controllers['iban']!,
-          prefixIcon: const Icon(Icons.public_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.public_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.swift_code'.tr(context),
           controller: _controllers['swift_code']!,
-          prefixIcon: const Icon(Icons.speed_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.speed_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.bank_branch'.tr(context),
           controller: _controllers['bank_branch']!,
-          prefixIcon: const Icon(Icons.location_on_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.location_on_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
       ];
     }
@@ -791,12 +882,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         decoration: InputDecoration(
           labelText: required ? '$label *' : label,
           labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
-          prefixIcon: prefixIcon != null 
-            ? Padding(
-                padding: const EdgeInsets.all(12),
-                child: prefixIcon,
-              )
-            : null,
+          prefixIcon: prefixIcon != null
+              ? Padding(padding: const EdgeInsets.all(12), child: prefixIcon)
+              : null,
           prefixIconConstraints: const BoxConstraints(
             minWidth: 48,
             minHeight: 48,
@@ -804,14 +892,21 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           suffixIcon: suffixIcon,
           filled: true,
           fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.grey[200]!),
+            borderSide: BorderSide(
+              color: isDark ? Colors.white12 : Colors.grey[200]!,
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.grey[200]!),
+            borderSide: BorderSide(
+              color: isDark ? Colors.white12 : Colors.grey[200]!,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
@@ -837,7 +932,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         label: label,
         value: selectedName,
         icon: icon,
-        options: items.entries.map((e) => {'id': e.key, 'name': e.value}).toList(),
+        options: items.entries
+            .map((e) => {'id': e.key, 'name': e.value})
+            .toList(),
         onSelected: (id) => onChanged(id),
       ),
     );
@@ -859,11 +956,13 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         label: label,
         value: currentValue,
         icon: icon,
-        placeholder: isLoading ? 'profile.loading'.tr(context) : (hint ?? 'profile.select_item'.tr(context, args: {'item': label})),
-        options: items.map((e) => {
-          'id': e['id'].toString(),
-          'name': e['name'] as String,
-        }).toList(),
+        placeholder: isLoading
+            ? 'profile.loading'.tr(context)
+            : (hint ??
+                  'profile.select_item'.tr(context, args: {'item': label})),
+        options: items
+            .map((e) => {'id': e['id'].toString(), 'name': e['name'] as String})
+            .toList(),
         onSelected: (id) {
           final item = items.firstWhere((e) => e['id'].toString() == id);
           onChanged(id, item['name'] as String);

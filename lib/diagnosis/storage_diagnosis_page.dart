@@ -93,7 +93,11 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const Icon(
+              Icons.delete_forever_rounded,
+              color: Colors.red,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
               'diagnosis.clear_confirm_title'.tr(context),
@@ -103,7 +107,9 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
             Text(
               'diagnosis.clear_confirm_desc'.tr(context),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 32),
             Row(
@@ -114,11 +120,15 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'diagnosis.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -130,7 +140,9 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: Text('diagnosis.clear_cache'.tr(context)),

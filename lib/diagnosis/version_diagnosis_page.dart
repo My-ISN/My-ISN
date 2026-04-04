@@ -83,8 +83,14 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
       String cleanCurrent = current.split('+')[0];
       String cleanLatest = latest.split('+')[0];
 
-      List<int> currentParts = cleanCurrent.split('.').map((s) => int.tryParse(s) ?? 0).toList();
-      List<int> latestParts = cleanLatest.split('.').map((s) => int.tryParse(s) ?? 0).toList();
+      List<int> currentParts = cleanCurrent
+          .split('.')
+          .map((s) => int.tryParse(s) ?? 0)
+          .toList();
+      List<int> latestParts = cleanLatest
+          .split('.')
+          .map((s) => int.tryParse(s) ?? 0)
+          .toList();
 
       for (int i = 0; i < latestParts.length; i++) {
         int currentPart = i < currentParts.length ? currentParts[i] : 0;
@@ -183,8 +189,8 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                 children: [
                   _buildStep(
                     'diagnosis.current_version'.tr(context),
-                    _localVersion != null 
-                        ? 'v${_localVersion!.split('+')[0]}' 
+                    _localVersion != null
+                        ? 'v${_localVersion!.split('+')[0]}'
                         : 'diagnosis.current_version_desc'.tr(context),
                     _currentStep >= 1,
                     _step1Success,
@@ -193,8 +199,8 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                   const Divider(height: 32),
                   _buildStep(
                     'diagnosis.latest_version'.tr(context),
-                    _serverVersion != null 
-                        ? 'v${_serverVersion!.split('+')[0]}' 
+                    _serverVersion != null
+                        ? 'v${_serverVersion!.split('+')[0]}'
                         : 'diagnosis.latest_version_desc'.tr(context),
                     _currentStep >= 2,
                     _step2Success,
@@ -203,11 +209,11 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                   const Divider(height: 32),
                   _buildStep(
                     'diagnosis.update_status'.tr(context),
-                    _currentStep < 3 
-                        ? '...' 
-                        : (_isUpdateNeeded 
-                            ? 'diagnosis.update_needed'.tr(context) 
-                            : 'diagnosis.up_to_date'.tr(context)),
+                    _currentStep < 3
+                        ? '...'
+                        : (_isUpdateNeeded
+                              ? 'diagnosis.update_needed'.tr(context)
+                              : 'diagnosis.up_to_date'.tr(context)),
                     _currentStep >= 3,
                     _step3Success,
                     _step3Error,
@@ -221,31 +227,33 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _isUpdateNeeded 
-                        ? Colors.orange.withOpacity(0.1) 
+                    color: _isUpdateNeeded
+                        ? Colors.orange.withOpacity(0.1)
                         : Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: _isUpdateNeeded 
-                          ? Colors.orange.withOpacity(0.3) 
-                          : Colors.green.withOpacity(0.3)
+                      color: _isUpdateNeeded
+                          ? Colors.orange.withOpacity(0.3)
+                          : Colors.green.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
-                        _isUpdateNeeded ? Icons.info_outline : Icons.check_circle, 
-                        color: _isUpdateNeeded ? Colors.orange : Colors.green
+                        _isUpdateNeeded
+                            ? Icons.info_outline
+                            : Icons.check_circle,
+                        color: _isUpdateNeeded ? Colors.orange : Colors.green,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          _isUpdateNeeded 
-                              ? 'diagnosis.update_needed'.tr(context) 
+                          _isUpdateNeeded
+                              ? 'diagnosis.update_needed'.tr(context)
                               : 'diagnosis.up_to_date'.tr(context),
                           style: TextStyle(
-                            color: _isUpdateNeeded 
-                                ? Colors.orange.shade800 
+                            color: _isUpdateNeeded
+                                ? Colors.orange.shade800
                                 : Colors.green.shade800,
                             fontWeight: FontWeight.w500,
                           ),
@@ -264,7 +272,10 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                       onPressed: () async {
                         final url = Uri.parse(_downloadLink!);
                         if (await canLaunchUrl(url)) {
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -335,7 +346,9 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                 style: TextStyle(
                   color: isStarted
                       ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.3),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),

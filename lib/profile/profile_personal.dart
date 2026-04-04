@@ -3,7 +3,6 @@ import 'profile_edit.dart';
 import '../localization/app_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-
 class ProfilePersonalPage extends StatelessWidget {
   final Map<String, dynamic> data;
   final Map<String, dynamic> userData;
@@ -53,7 +52,11 @@ class ProfilePersonalPage extends StatelessWidget {
                   color: const Color(0xFF7E57C2).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.edit_rounded, color: Color(0xFF7E57C2), size: 20),
+                child: const Icon(
+                  Icons.edit_rounded,
+                  color: Color(0xFF7E57C2),
+                  size: 20,
+                ),
               ),
               onPressed: () {
                 Navigator.push(
@@ -85,26 +88,42 @@ class ProfilePersonalPage extends StatelessWidget {
                   context,
                   'profile.bio'.tr(context),
                   data['bio'] ?? '-',
-                  const Icon(Icons.auto_awesome_rounded, size: 20, color: Color(0xFF7E57C2)),
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 20,
+                    color: Color(0xFF7E57C2),
+                  ),
                 ),
                 _buildInfoRow(
                   context,
                   'profile.experience'.tr(context),
                   _getExperienceLabel(data['experience'], context),
-                  const Icon(Icons.history_edu_rounded, size: 20, color: Color(0xFF7E57C2)),
+                  const Icon(
+                    Icons.history_edu_rounded,
+                    size: 20,
+                    color: Color(0xFF7E57C2),
+                  ),
                 ),
               ],
               _buildInfoRow(
                 context,
                 'LinkedIn',
                 data['linkedin_profile'] ?? '-',
-                const FaIcon(FontAwesomeIcons.linkedin, size: 20, color: Color(0xFF7E57C2)),
+                const FaIcon(
+                  FontAwesomeIcons.linkedin,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'Facebook',
                 data['fb_profile'] ?? '-',
-                const FaIcon(FontAwesomeIcons.facebook, size: 20, color: Color(0xFF7E57C2)),
+                const FaIcon(
+                  FontAwesomeIcons.facebook,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
                 last: true,
               ),
             ]),
@@ -148,7 +167,9 @@ class ProfilePersonalPage extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+          color: isDark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.grey.withOpacity(0.1),
         ),
       ),
       child: Column(children: children),

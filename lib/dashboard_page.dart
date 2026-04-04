@@ -25,6 +25,7 @@ import 'work_log/work_log_page.dart';
 import 'finance/finance_page.dart';
 import 'widgets/on_progress_page.dart';
 import 'ai_bot/ai_bot_page.dart';
+import 'personal_finance/personal_finance_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -1176,7 +1177,10 @@ class _DashboardPageState extends State<DashboardPage> {
                               decoration: BoxDecoration(
                                 color: Colors.redAccent,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Theme.of(context).cardColor, width: 1.5),
+                                border: Border.all(
+                                  color: Theme.of(context).cardColor,
+                                  width: 1.5,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.2),
@@ -1252,6 +1256,21 @@ class _DashboardPageState extends State<DashboardPage> {
                     );
                   },
                 ),
+              _buildQuickMenuCard(
+                'personal_finance.my_wallet'.tr(context),
+                Icons.savings_rounded,
+                const Color(0xFF7E57C2),
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PersonalFinancePage(
+                        userData: _dashboardData['user'] ?? widget.userData,
+                      ),
+                    ),
+                  );
+                },
+              ),
               if (_hasPermission('mobile_helpdesk_view'))
                 _buildQuickMenuCard(
                   'dashboard.quick_menu_helpdesk'.tr(context),
@@ -1299,9 +1318,8 @@ class _DashboardPageState extends State<DashboardPage> {
             ]),
             ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,
-              builder: (context, padding, _) => SizedBox(
-                height: padding.clamp(0.0, double.infinity),
-              ),
+              builder: (context, padding, _) =>
+                  SizedBox(height: padding.clamp(0.0, double.infinity)),
             ),
           ],
         ),
@@ -1565,9 +1583,8 @@ class _DashboardPageState extends State<DashboardPage> {
             _buildProductList(products),
             ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,
-              builder: (context, padding, _) => SizedBox(
-                height: padding.clamp(0.0, double.infinity),
-              ),
+              builder: (context, padding, _) =>
+                  SizedBox(height: padding.clamp(0.0, double.infinity)),
             ),
           ],
         ),
@@ -1775,75 +1792,72 @@ class _DashboardPageState extends State<DashboardPage> {
           Icons.laptop_windows_rounded,
         ),
         const SizedBox(height: 12),
-        ...products
-            .map(
-              (p) => InkWell(
-                onTap: () => _showProductSpecs(p),
+        ...products.map(
+          (p) => InkWell(
+            onTap: () => _showProductSpecs(p),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.withOpacity(0.1)),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.network(
-                          '$laptopBaseUrl${p['gambar']}',
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                width: 40,
-                                height: 40,
-                                color: Colors.grey.withOpacity(0.1),
-                                child: const Icon(
-                                  Icons.laptop,
-                                  size: 24,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              p['nama_laptop'] ?? 'Laptop',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              '${p['procesor'] ?? 'Core'} - ${p['ram'] ?? '8GB'}',
-                              style: TextStyle(
-                                color: Colors.grey[500],
-                                fontSize: 9,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 20,
-                        color: Colors.grey.withOpacity(0.5),
-                      ),
-                    ],
-                  ),
-                ),
+                border: Border.all(color: Colors.grey.withOpacity(0.1)),
               ),
-            )
-            ,
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      '$laptopBaseUrl${p['gambar']}',
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 40,
+                        height: 40,
+                        color: Colors.grey.withOpacity(0.1),
+                        child: const Icon(
+                          Icons.laptop,
+                          size: 24,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          p['nama_laptop'] ?? 'Laptop',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '${p['procesor'] ?? 'Core'} - ${p['ram'] ?? '8GB'}',
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 9,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

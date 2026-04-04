@@ -9,6 +9,10 @@
 - **Quick Action Pills**: Penambahan tombol aksi cepat di bagian atas keyboard Bot AI untuk pertanyaan umum (harga sewa, daftar laptop, cara sewa, dll) agar pengguna lebih mudah berinteraksi.
 - **Quick Menu — AI Bot & Creative Idea**: Penambahan akses cepat untuk menu **AI Bot** dan **Creative Idea** pada sidebar (status: *On Progress*).
 - **Worklog — Seleksi dari Todo List**: Fitur pembuatan laporan kerja (*Worklog*) kini mendukung pengambilan data langsung dari tugas yang sudah selesai pada hari tersebut melalui tombol **"Pilih dari Todo List"** (sebelumnya: "Pilih dari Jobdesk").
+- **Todo List — Mode Kolaborasi Tim**: Implementasi fitur peralihan antara tugas **Pribadi** dan **Tim** dengan efek animasi geser (*sliding animation*) yang modern.
+- **Todo List — Delegasi Tugas (Move Task)**: Fitur untuk memindahkan atau mendelegasikan tugas ke karyawan lain melalui menu aksi cepat, lengkap dengan antarmuka konfirmasi *Premium Bottom Sheet*.
+- **Todo List — Kontrol Izin Akses**: Integrasi sistem izin tingkat lanjut (`mobile_todo_team`) yang memungkinkan admin mengontrol akses fitur tim secara terpusat dari Dashboard ERP.
+- **Todo List — Background Pre-fetching**: Optimasi kecepatan pemuatan data karyawan sehingga dropdown pemilihan karyawan saat delegasi tugas terbuka secara instan.
 
 ### Changed
 

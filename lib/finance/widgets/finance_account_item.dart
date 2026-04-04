@@ -10,21 +10,24 @@ class FinanceAccountItem extends StatelessWidget {
   String _formatCurrency(dynamic amount) {
     if (amount == null) return "0";
     double val = double.tryParse(amount.toString()) ?? 0;
-    
+
     // If it's a whole number, don't show decimals
     if (val == val.toInt()) {
       String formatted = val.toInt().toString();
       RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
       return formatted.replaceAllMapped(reg, (Match match) => '${match[1]}.');
     }
-    
+
     // Otherwise show 2 decimals with comma
     String formatted = val.toStringAsFixed(2);
     List<String> parts = formatted.split('.');
     String integerPart = parts[0];
     String decimalPart = parts[1];
     RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    integerPart = integerPart.replaceAllMapped(reg, (Match match) => '${match[1]}.');
+    integerPart = integerPart.replaceAllMapped(
+      reg,
+      (Match match) => '${match[1]}.',
+    );
     return "$integerPart,$decimalPart";
   }
 
@@ -49,7 +52,9 @@ class FinanceAccountItem extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.05),
+                color: Colors.black.withOpacity(
+                  Theme.of(context).brightness == Brightness.dark ? 0.2 : 0.05,
+                ),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

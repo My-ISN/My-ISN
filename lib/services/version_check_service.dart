@@ -27,15 +27,15 @@ class AppUpdateInfo {
 
 class VersionCheckService {
   // Replace with actual API endpoint when available
-  static const String _updateUrl =
-      'https://foxgeen.com/HRIS/mobileapi/status';
+  static const String _updateUrl = 'https://foxgeen.com/HRIS/mobileapi/status';
 
   static Future<AppUpdateInfo?> checkForUpdate() async {
     final latestUpdate = await getLatestVersionInfo();
     if (latestUpdate == null) return null;
 
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    final String currentVersion = "${packageInfo.version}+${packageInfo.buildNumber}";
+    final String currentVersion =
+        "${packageInfo.version}+${packageInfo.buildNumber}";
 
     if (_isVersionNewer(currentVersion, latestUpdate.version)) {
       return latestUpdate;
@@ -72,8 +72,14 @@ class VersionCheckService {
       String cleanCurrent = current.split('+')[0];
       String cleanLatest = latest.split('+')[0];
 
-      List<int> currentParts = cleanCurrent.split('.').map((s) => int.tryParse(s) ?? 0).toList();
-      List<int> latestParts = cleanLatest.split('.').map((s) => int.tryParse(s) ?? 0).toList();
+      List<int> currentParts = cleanCurrent
+          .split('.')
+          .map((s) => int.tryParse(s) ?? 0)
+          .toList();
+      List<int> latestParts = cleanLatest
+          .split('.')
+          .map((s) => int.tryParse(s) ?? 0)
+          .toList();
 
       for (int i = 0; i < latestParts.length; i++) {
         int currentPart = i < currentParts.length ? currentParts[i] : 0;

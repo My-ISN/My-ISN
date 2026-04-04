@@ -9,7 +9,7 @@ import '../widgets/secondary_app_bar.dart';
 
 class EmployeeAddPage extends StatefulWidget {
   final Map<String, dynamic> userData;
-  
+
   const EmployeeAddPage({super.key, required this.userData});
 
   @override
@@ -41,7 +41,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
   void _initControllers() {
     _controllers['first_name'] = TextEditingController();
     _controllers['last_name'] = TextEditingController();
-    _controllers['employee_id'] = TextEditingController(); 
+    _controllers['employee_id'] = TextEditingController();
     _controllers['contact_number'] = TextEditingController();
     _controllers['gender'] = TextEditingController(text: '1');
     _controllers['email'] = TextEditingController();
@@ -54,7 +54,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
     _controllers['designation_id'] = TextEditingController();
     _controllers['basic_salary'] = TextEditingController(text: '0');
     _controllers['hourly_rate'] = TextEditingController(text: '0');
-    _controllers['salay_type'] = TextEditingController(text: '1'); 
+    _controllers['salay_type'] = TextEditingController(text: '1');
     _controllers['worklog'] = TextEditingController(text: '0');
     _controllers['worklog_active'] = TextEditingController(text: '0');
   }
@@ -71,15 +71,26 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
       final data = json.decode(response.body);
       if (data['status'] == true) {
         setState(() {
-          _controllers['employee_id']!.text = data['generated_employee_id']?.toString() ?? '';
+          _controllers['employee_id']!.text =
+              data['generated_employee_id']?.toString() ?? '';
           _roles = data['roles'] ?? [];
           _departments = data['departments'] ?? [];
           _designations = data['designations'] ?? [];
           _shifts = data['office_shifts'] ?? [];
-          if (_roles.isNotEmpty) _controllers['role']!.text = _roles.first['role_id'].toString();
-          if (_departments.isNotEmpty) _controllers['department_id']!.text = _departments.first['department_id'].toString();
-          if (_designations.isNotEmpty) _controllers['designation_id']!.text = _designations.first['designation_id'].toString();
-          if (_shifts.isNotEmpty) _controllers['office_shift_id']!.text = _shifts.first['office_shift_id'].toString();
+          if (_roles.isNotEmpty)
+            _controllers['role']!.text = _roles.first['role_id'].toString();
+          if (_departments.isNotEmpty)
+            _controllers['department_id']!.text = _departments
+                .first['department_id']
+                .toString();
+          if (_designations.isNotEmpty)
+            _controllers['designation_id']!.text = _designations
+                .first['designation_id']
+                .toString();
+          if (_shifts.isNotEmpty)
+            _controllers['office_shift_id']!.text = _shifts
+                .first['office_shift_id']
+                .toString();
         });
       }
     } catch (e) {
@@ -103,7 +114,13 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         request.fields[key] = controller.text;
       });
       if (_selectedProfileImage != null) {
-        request.files.add(await http.MultipartFile.fromPath('file', _selectedProfileImage!.path!, filename: _selectedProfileImage!.name));
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'file',
+            _selectedProfileImage!.path!,
+            filename: _selectedProfileImage!.name,
+          ),
+        );
       }
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
@@ -111,40 +128,58 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
       final data = json.decode(response.body);
       if (data['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('employees.save_success'.tr(context))));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('employees.save_success'.tr(context))),
+          );
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('main.error_with_msg'.tr(context, args: {'message': data['message']}))));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'main.error_with_msg'.tr(
+                  context,
+                  args: {'message': data['message']},
+                ),
+              ),
+            ),
+          );
         }
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SecondaryAppBar(
-        title: 'employees.add_employee'.tr(context),
-      ),
-      body: _isLoadingLookups 
-        ? const Center(child: CircularProgressIndicator())
-        : Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: _buildFormFields()),
+      appBar: SecondaryAppBar(title: 'employees.add_employee'.tr(context)),
+      body: _isLoadingLookups
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _buildFormFields(),
+                ),
+              ),
             ),
-          ),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 12),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          16,
+          24,
+          MediaQuery.of(context).padding.bottom + 12,
+        ),
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.only(
@@ -180,14 +215,20 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
               backgroundColor: _primaryColor,
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               elevation: 0,
             ),
             child: _isSaving
                 ? const SizedBox(
                     height: 24,
                     width: 24,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
                 : Text(
                     'employees.save'.tr(context).toUpperCase(),
                     style: const TextStyle(
@@ -212,25 +253,41 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         key: 'first_name',
         textCapitalization: TextCapitalization.words,
         requiredField: true,
-        prefixIcon: const Icon(Icons.person_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.person_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildTextField(
         label: 'employees.last_name'.tr(context),
         key: 'last_name',
         textCapitalization: TextCapitalization.words,
-        prefixIcon: const Icon(Icons.person_outline_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.person_outline_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildTextField(
         label: 'employees.employee_id'.tr(context),
         key: 'employee_id',
         readOnly: true,
-        prefixIcon: const Icon(Icons.badge_rounded, size: 18, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.badge_rounded,
+          size: 18,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildTextField(
         label: 'employees.contact_number'.tr(context),
         key: 'contact_number',
         keyboardType: TextInputType.phone,
-        prefixIcon: const Icon(Icons.phone_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.phone_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildDropdown(
         label: 'employees.gender'.tr(context),
@@ -244,19 +301,31 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         key: 'email',
         keyboardType: TextInputType.emailAddress,
         requiredField: true,
-        prefixIcon: const Icon(Icons.email_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.email_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildTextField(
         label: 'employees.username'.tr(context),
         key: 'username',
         requiredField: true,
-        prefixIcon: const Icon(Icons.alternate_email_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.alternate_email_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildTextField(
         label: 'employees.password'.tr(context),
         key: 'password',
         requiredField: true,
-        prefixIcon: const Icon(Icons.lock_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.lock_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildSectionTitle('employees.sections.work_details'.tr(context), isDark),
       _buildDropdown(
@@ -267,7 +336,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
           '2': 'employees.status_work_list.probation'.tr(context),
           '3': 'employees.status_work_list.trainee'.tr(context),
           '4': 'employees.status_work_list.permanent'.tr(context),
-          '5': 'employees.status_work_list.freelance'.tr(context)
+          '5': 'employees.status_work_list.freelance'.tr(context),
         },
         icon: Icons.work_history_rounded,
       ),
@@ -303,35 +372,56 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         nameKey: 'designation_name',
         icon: Icons.work_rounded,
       ),
-      _buildSectionTitle('employees.sections.salary_worklog'.tr(context), isDark),
+      _buildSectionTitle(
+        'employees.sections.salary_worklog'.tr(context),
+        isDark,
+      ),
       _buildTextField(
         label: 'employees.basic_salary'.tr(context),
         key: 'basic_salary',
         keyboardType: TextInputType.number,
-        prefixIcon: const Icon(Icons.payments_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.payments_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildTextField(
         label: 'employees.hourly_rate'.tr(context),
         key: 'hourly_rate',
         keyboardType: TextInputType.number,
-        prefixIcon: const Icon(Icons.timer_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.timer_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildDropdown(
         label: 'employees.payslip_type'.tr(context),
         key: 'salay_type',
-        items: {'1': 'employees.per_month'.tr(context), '0': 'employees.none'.tr(context)},
+        items: {
+          '1': 'employees.per_month'.tr(context),
+          '0': 'employees.none'.tr(context),
+        },
         icon: Icons.receipt_long_rounded,
       ),
       _buildTextField(
         label: 'employees.work_log_hours'.tr(context),
         key: 'worklog',
         keyboardType: TextInputType.number,
-        prefixIcon: const Icon(Icons.assignment_turned_in_rounded, size: 20, color: Color(0xFF7E57C2)),
+        prefixIcon: const Icon(
+          Icons.assignment_turned_in_rounded,
+          size: 20,
+          color: Color(0xFF7E57C2),
+        ),
       ),
       _buildDropdown(
         label: 'employees.status_target_worklog'.tr(context),
         key: 'worklog_active',
-        items: {'1': 'main.active'.tr(context), '0': 'main.inactive'.tr(context)},
+        items: {
+          '1': 'main.active'.tr(context),
+          '0': 'main.inactive'.tr(context),
+        },
         icon: Icons.toggle_on_rounded,
       ),
       const SizedBox(height: 50),
@@ -356,7 +446,11 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              Expanded(child: Divider(color: isDark ? Colors.grey[800] : Colors.grey[200])),
+              Expanded(
+                child: Divider(
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                ),
+              ),
             ],
           ),
         ],
@@ -366,24 +460,34 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
 
   Widget _buildProfilePicturePicker() {
     return Center(
-      child: Column(children: [
-        CircleAvatar(
-          radius: 50,
-          backgroundColor: _primaryColor.withOpacity(0.1),
-          backgroundImage: _selectedProfileImage != null && _selectedProfileImage!.path != null 
-              ? FileImage(File(_selectedProfileImage!.path!)) 
-              : const NetworkImage('https://foxgeen.com/HRIS/public/uploads/clients/default/default_formal.webp') as ImageProvider,
-        ),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: () async {
-            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
-            if (result != null) setState(() => _selectedProfileImage = result.files.single);
-          },
-          icon: const Icon(Icons.camera_alt),
-          label: Text('employees.form.select_file'.tr(context)),
-        ),
-      ]),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: _primaryColor.withOpacity(0.1),
+            backgroundImage:
+                _selectedProfileImage != null &&
+                    _selectedProfileImage!.path != null
+                ? FileImage(File(_selectedProfileImage!.path!))
+                : const NetworkImage(
+                        'https://foxgeen.com/HRIS/public/uploads/clients/default/default_formal.webp',
+                      )
+                      as ImageProvider,
+          ),
+          const SizedBox(height: 8),
+          TextButton.icon(
+            onPressed: () async {
+              FilePickerResult? result = await FilePicker.platform.pickFiles(
+                type: FileType.image,
+              );
+              if (result != null)
+                setState(() => _selectedProfileImage = result.files.single);
+            },
+            icon: const Icon(Icons.camera_alt),
+            label: Text('employees.form.select_file'.tr(context)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -409,14 +513,14 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
           labelText: requiredField ? '$label *' : label,
           labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
           prefixIcon: prefixIcon != null
-              ? Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: prefixIcon,
-                )
+              ? Padding(padding: const EdgeInsets.all(12), child: prefixIcon)
               : null,
           filled: true,
           fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: Colors.grey.withOpacity(0.1)),
@@ -430,7 +534,9 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
             borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
           ),
         ),
-        validator: requiredField ? (val) => (val == null || val.isEmpty) ? 'Required' : null : null,
+        validator: requiredField
+            ? (val) => (val == null || val.isEmpty) ? 'Required' : null
+            : null,
       ),
     );
   }
@@ -442,7 +548,8 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
     IconData? icon,
   }) {
     final String currentId = _controllers[key]!.text;
-    final String selectedName = items[currentId] ?? (items.isNotEmpty ? items.values.first : '');
+    final String selectedName =
+        items[currentId] ?? (items.isNotEmpty ? items.values.first : '');
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -450,7 +557,9 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         label: label,
         value: selectedName,
         icon: icon,
-        options: items.entries.map((e) => {'id': e.key, 'name': e.value}).toList(),
+        options: items.entries
+            .map((e) => {'id': e.key, 'name': e.value})
+            .toList(),
         onSelected: (id) => setState(() => _controllers[key]!.text = id),
       ),
     );
@@ -469,7 +578,9 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
       (e) => e[idKey].toString() == currentId,
       orElse: () => null,
     );
-    final String selectedName = selectedItem != null ? selectedItem[nameKey].toString() : '';
+    final String selectedName = selectedItem != null
+        ? selectedItem[nameKey].toString()
+        : '';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -478,10 +589,9 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         value: selectedName,
         icon: icon,
         options: items
-            .map((e) => {
-                  'id': e[idKey].toString(),
-                  'name': e[nameKey].toString(),
-                })
+            .map(
+              (e) => {'id': e[idKey].toString(), 'name': e[nameKey].toString()},
+            )
             .toList(),
         onSelected: (id) => setState(() => _controllers[key]!.text = id),
       ),

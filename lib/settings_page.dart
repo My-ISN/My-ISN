@@ -60,11 +60,13 @@ class _SettingsPageState extends State<SettingsPage> {
     // Fetch user_type from profile API (same as profile_page.dart)
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_profile_details?user_id=$userId';
+      final url =
+          'https://foxgeen.com/HRIS/mobileapi/get_profile_details?user_id=$userId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true) {
-        final fetchedUserType = (data['data']['basic_info']?['user_type'] ?? '').toString();
+        final fetchedUserType = (data['data']['basic_info']?['user_type'] ?? '')
+            .toString();
         if (mounted) setState(() => _userType = fetchedUserType);
       }
     } catch (e) {
@@ -172,7 +174,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const Icon(
+              Icons.delete_forever_rounded,
+              color: Colors.red,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
               'settings.delete_confirm_title'.tr(context),
@@ -182,7 +188,9 @@ class _SettingsPageState extends State<SettingsPage> {
             Text(
               'settings.delete_confirm_desc'.tr(context),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 32),
             Row(
@@ -193,11 +201,15 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'settings.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -209,7 +221,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: Text('settings.delete'.tr(context)),
@@ -310,10 +324,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 24),
             Text(
               'settings.register_title'.tr(context),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -321,7 +332,9 @@ class _SettingsPageState extends State<SettingsPage> {
               'settings.register_desc'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                 fontSize: 15,
               ),
             ),
@@ -454,7 +467,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<String?> _promptForPassword() async {
     final passwordController = TextEditingController();
     final primaryColor = Theme.of(context).colorScheme.primary;
-    
+
     return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -488,7 +501,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 obscureText: true,
                 autofocus: true,
                 focusNode: FocusNode()..requestFocus(),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
                 decoration: InputDecoration(
                   hintText: 'settings.enter_password'.tr(context),
                   hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
@@ -501,12 +517,17 @@ class _SettingsPageState extends State<SettingsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                   OutlinedButton(
+                  OutlinedButton(
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'settings.cancel'.tr(context),
@@ -521,8 +542,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'settings.confirm'.tr(context),
@@ -580,7 +606,10 @@ class _SettingsPageState extends State<SettingsPage> {
             Center(
               child: Text(
                 'settings.select_language'.tr(context),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -648,8 +677,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 currentMode == ThemeMode.system
                     ? Icons.brightness_4_rounded
                     : currentMode == ThemeMode.light
-                        ? Icons.light_mode_rounded
-                        : Icons.dark_mode_rounded,
+                    ? Icons.light_mode_rounded
+                    : Icons.dark_mode_rounded,
                 size: 48,
                 color: const Color(0xFF7E57C2),
               ),
@@ -658,13 +687,19 @@ class _SettingsPageState extends State<SettingsPage> {
             Center(
               child: Text(
                 'settings.theme'.tr(context),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(height: 24),
             RadioListTile<ThemeMode>(
               title: Text('settings.theme_system'.tr(context)),
-              secondary: const Icon(Icons.brightness_4_rounded, color: Color(0xFF7E57C2)),
+              secondary: const Icon(
+                Icons.brightness_4_rounded,
+                color: Color(0xFF7E57C2),
+              ),
               value: ThemeMode.system,
               groupValue: currentMode,
               activeColor: Theme.of(context).colorScheme.primary,
@@ -677,7 +712,10 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             RadioListTile<ThemeMode>(
               title: Text('settings.theme_light'.tr(context)),
-              secondary: const Icon(Icons.light_mode_rounded, color: Color(0xFF7E57C2)),
+              secondary: const Icon(
+                Icons.light_mode_rounded,
+                color: Color(0xFF7E57C2),
+              ),
               value: ThemeMode.light,
               groupValue: currentMode,
               activeColor: Theme.of(context).colorScheme.primary,
@@ -690,7 +728,10 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             RadioListTile<ThemeMode>(
               title: Text('settings.theme_dark'.tr(context)),
-              secondary: const Icon(Icons.dark_mode_rounded, color: Color(0xFF7E57C2)),
+              secondary: const Icon(
+                Icons.dark_mode_rounded,
+                color: Color(0xFF7E57C2),
+              ),
               value: ThemeMode.dark,
               groupValue: currentMode,
               activeColor: Theme.of(context).colorScheme.primary,
@@ -711,9 +752,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SecondaryAppBar(
-        title: 'main.xin_settings'.tr(context),
-      ),
+      appBar: SecondaryAppBar(title: 'main.xin_settings'.tr(context)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -801,11 +840,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Provider.of<ThemeProvider>(context).themeMode == ThemeMode.system
+                        Provider.of<ThemeProvider>(context).themeMode ==
+                                ThemeMode.system
                             ? Icons.brightness_4_rounded
-                            : Provider.of<ThemeProvider>(context).themeMode == ThemeMode.light
-                                ? Icons.light_mode_rounded
-                                : Icons.dark_mode_rounded,
+                            : Provider.of<ThemeProvider>(context).themeMode ==
+                                  ThemeMode.light
+                            ? Icons.light_mode_rounded
+                            : Icons.dark_mode_rounded,
                         color: const Color(0xFF7E57C2),
                       ),
                     ),
@@ -874,7 +915,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         trailing: Switch(
                           value: _isFingerprintEnabled,
                           onChanged: _toggleFingerprint,
-                          activeThumbColor: Theme.of(context).colorScheme.primary,
+                          activeThumbColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                         ),
                       ),
                       if (_hasToken) ...[
@@ -1085,7 +1128,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 32),
 
                 // ── Zona Berbahaya (Hanya untuk Customer) ──
-                if (_userType == 'customer') ...[  
+                if (_userType == 'customer') ...[
                   Text(
                     'delete_account.section_title'.tr(context),
                     style: const TextStyle(
@@ -1115,14 +1158,23 @@ class _SettingsPageState extends State<SettingsPage> {
                           color: Colors.red.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.delete_forever_outlined, color: Colors.red),
+                        child: const Icon(
+                          Icons.delete_forever_outlined,
+                          color: Colors.red,
+                        ),
                       ),
                       title: Text(
                         'delete_account.btn_label'.tr(context),
-                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       subtitle: Text('delete_account.btn_desc'.tr(context)),
-                      trailing: const Icon(Icons.chevron_right, color: Colors.red),
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                        color: Colors.red,
+                      ),
                       onTap: _showDeleteAccountSheet,
                     ),
                   ),
@@ -1203,7 +1255,9 @@ class _SettingsPageState extends State<SettingsPage> {
             height: MediaQuery.of(context).size.height * 0.85,
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
             child: Column(
               children: [
@@ -1228,13 +1282,21 @@ class _SettingsPageState extends State<SettingsPage> {
                           color: Colors.red.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                        child: const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.red,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
                           'delete_account.sheet_title'.tr(context),
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
                         ),
                       ),
                     ],
@@ -1243,14 +1305,25 @@ class _SettingsPageState extends State<SettingsPage> {
                 // Scroll hint
                 if (!hasScrolledToBottom)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 4,
+                    ),
                     child: Row(
                       children: [
-                        const Icon(Icons.arrow_downward, size: 14, color: Colors.orange),
+                        const Icon(
+                          Icons.arrow_downward,
+                          size: 14,
+                          color: Colors.orange,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           'delete_account.scroll_hint'.tr(context),
-                          style: const TextStyle(color: Colors.orange, fontSize: 12, fontStyle: FontStyle.italic),
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
                       ],
                     ),
@@ -1265,7 +1338,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.6,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.8),
                       ),
                     ),
                   ),
@@ -1275,7 +1350,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
-                    border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.15))),
+                    border: Border(
+                      top: BorderSide(color: Colors.grey.withOpacity(0.15)),
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -1288,7 +1365,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             Checkbox(
                               value: hasAgreed,
                               onChanged: hasScrolledToBottom
-                                  ? (v) => setSheetState(() => hasAgreed = v ?? false)
+                                  ? (v) => setSheetState(
+                                      () => hasAgreed = v ?? false,
+                                    )
                                   : null,
                               activeColor: Colors.red,
                             ),
@@ -1318,8 +1397,13 @@ class _SettingsPageState extends State<SettingsPage> {
                                     backgroundColor: Colors.transparent,
                                     builder: (ctx) => Container(
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).scaffoldBackgroundColor,
-                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                                        color: Theme.of(
+                                          context,
+                                        ).scaffoldBackgroundColor,
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              top: Radius.circular(24),
+                                            ),
                                       ),
                                       padding: const EdgeInsets.all(24),
                                       child: Column(
@@ -1328,52 +1412,98 @@ class _SettingsPageState extends State<SettingsPage> {
                                           Container(
                                             width: 40,
                                             height: 4,
-                                            margin: const EdgeInsets.only(bottom: 24),
+                                            margin: const EdgeInsets.only(
+                                              bottom: 24,
+                                            ),
                                             decoration: BoxDecoration(
-                                              color: Colors.grey.withOpacity(0.3),
-                                              borderRadius: BorderRadius.circular(2),
+                                              color: Colors.grey.withOpacity(
+                                                0.3,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
                                             ),
                                           ),
                                           Text(
-                                            'delete_account.confirm_title'.tr(context),
-                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                            'delete_account.confirm_title'.tr(
+                                              context,
+                                            ),
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                           const SizedBox(height: 12),
                                           Text(
-                                            'delete_account.confirm_desc'.tr(context),
+                                            'delete_account.confirm_desc'.tr(
+                                              context,
+                                            ),
                                             textAlign: TextAlign.center,
-                                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(0.7),
+                                            ),
                                           ),
                                           const SizedBox(height: 32),
                                           Row(
                                             children: [
                                               Expanded(
                                                 child: OutlinedButton(
-                                                  onPressed: () => Navigator.pop(ctx, false),
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx, false),
                                                   style: OutlinedButton.styleFrom(
-                                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                                    side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 14,
+                                                        ),
+                                                    side: BorderSide(
+                                                      color: Colors.grey
+                                                          .withOpacity(0.3),
+                                                    ),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                    ),
                                                   ),
                                                   child: Text(
-                                                    'settings.cancel'.tr(context),
-                                                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                                    'settings.cancel'.tr(
+                                                      context,
+                                                    ),
+                                                    style: TextStyle(
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).colorScheme.onSurface,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                               const SizedBox(width: 16),
                                               Expanded(
                                                 child: ElevatedButton(
-                                                  onPressed: () => Navigator.pop(ctx, true),
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx, true),
                                                   style: ElevatedButton.styleFrom(
                                                     backgroundColor: Colors.red,
-                                                    foregroundColor: Colors.white,
-                                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                    foregroundColor:
+                                                        Colors.white,
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 14,
+                                                        ),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                    ),
                                                     elevation: 0,
                                                   ),
                                                   child: Text(
-                                                    'delete_account.confirm_btn'.tr(context),
+                                                    'delete_account.confirm_btn'
+                                                        .tr(context),
                                                   ),
                                                 ),
                                               ),
@@ -1390,10 +1520,16 @@ class _SettingsPageState extends State<SettingsPage> {
                           icon: const Icon(Icons.delete_forever),
                           label: Text('delete_account.btn_label'.tr(context)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: hasAgreed && hasScrolledToBottom ? Colors.red : Colors.grey[300],
-                            foregroundColor: hasAgreed && hasScrolledToBottom ? Colors.white : Colors.grey,
+                            backgroundColor: hasAgreed && hasScrolledToBottom
+                                ? Colors.red
+                                : Colors.grey[300],
+                            foregroundColor: hasAgreed && hasScrolledToBottom
+                                ? Colors.white
+                                : Colors.grey,
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             elevation: 0,
                           ),
                         ),
@@ -1412,7 +1548,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _deleteAccount() async {
     setState(() => _isLoading = true);
     try {
-      final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
+      final userId = (widget.userData['id'] ?? widget.userData['user_id'])
+          .toString();
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_account'),
         body: {'user_id': userId},
@@ -1440,7 +1577,9 @@ class _SettingsPageState extends State<SettingsPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(data['message'] ?? 'delete_account.error'.tr(context)),
+              content: Text(
+                data['message'] ?? 'delete_account.error'.tr(context),
+              ),
               backgroundColor: Colors.red,
             ),
           );

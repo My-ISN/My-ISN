@@ -1,5 +1,6 @@
 {
     "main": {
+        "apply": "Terapkan",
         "dashboard": "Dashboard",
         "attendance": "Absensi",
         "payroll": "Payroll",
@@ -42,7 +43,8 @@
         "no_data": "Tidak ada data",
         "select_item": "Pilih Item",
         "logout_confirm_title": "Konfirmasi Logout",
-        "logout_confirm_msg": "Apakah Anda yakin ingin keluar dari akun Anda?"
+        "logout_confirm_msg": "Apakah Anda yakin ingin keluar dari akun Anda?",
+        "apply": "Terapkan"
     },
     "dashboard": {
         "welcome": "Selamat Datang,",
@@ -870,7 +872,16 @@
         "showing_x_of_y": "Menampilkan {start} sampai {end} dari {total}",
         "total": "{count} Total",
         "page_x_of_y": "Halaman {current} dari {total}",
-        "no_todos": "Tidak ada Todo List"
+        "no_todos": "Tidak ada Todo List",
+        "personal": "Pribadi",
+        "team": "Tim",
+        "select_employee": "Pilih Karyawan",
+        "move_task": "Pindahkan Tugas",
+        "move_to": "Pindahkan ke",
+        "move_confirm_title": "Konfirmasi Pemindahan",
+        "move_confirm_desc": "Apakah Anda yakin ingin memindahkan tugas ini ke %s?",
+        "move_success": "Tugas berhasil dipindahkan",
+        "move_failed": "Gagal memindahkan tugas"
     },
     "delete_account": {
         "section_title": "Zona Berbahaya",
@@ -959,7 +970,15 @@
         "pm_stripe": "Stripe",
         "pm_paystack": "Paystack",
         "pm_cheque": "Cek",
-        "choose_period": "Pilih Periode"
+        "choose_period": "Pilih Periode",
+        "budget": "Anggaran",
+        "budget_period": "Periode Anggaran",
+        "budget_limit": "Batas Anggaran",
+        "actual_spending": "Realisasi Pengeluaran",
+        "remaining_budget": "Sisa Anggaran",
+        "used": "terpakai",
+        "budget_details": "Detail Anggaran",
+        "delete_budget": "Hapus Anggaran"
     },
     "helpdesk": {
         "title": "Helpdesk",
@@ -1006,5 +1025,37 @@
         "clear_chat": "Bersihkan Percakapan",
         "clear_chat_confirm": "Apakah Anda yakin ingin menghapus riwayat chat di layar ini?",
         "disclaimer": "Asisten AI dapat membuat kesalahan. Pertimbangkan untuk memeriksa informasi penting."
-    }
+    },
+    "personal_finance": {
+        "title": "Keuangan Pribadi",
+        "my_wallet": "Dompet Saya",
+        "summary": "Ringkasan",
+        "income": "Pemasukan",
+        "expense": "Pengeluaran",
+        "net_balance": "Saldo Bersih",
+        "expense_ratio": "Rasio Pengeluaran",
+        "six_month_trend": "Tren 6 Bulan Terakhir",
+        "expense_by_category": "Pengeluaran per Kategori",
+        "budget_vs_realization": "Budget vs Realisasi",
+        "total_income": "Total Pemasukan",
+        "total_expense": "Total Pengeluaran",
+        "from_income": "dari pemasukan",
+        "on_progress_desc": "Belum ada transaksi di periode ini.",
+        "my_monthly_summary": "Ringkasan keuangan pribadi bulan ini",
+        "set_budget": "Atur Budget",
+        "overview": "Ikhtisar",
+        "report": "Laporan"
+    },
+    "month_jan": "Januari",
+    "month_feb": "Februari",
+    "month_march": "Maret",
+    "month_april": "April",
+    "month_may": "Mei",
+    "month_june": "Juni",
+    "month_july": "Juli",
+    "month_aug": "Agustus",
+    "month_sep": "September",
+    "month_oct": "Oktober",
+    "month_nov": "November",
+    "month_dec": "Desember"
 }

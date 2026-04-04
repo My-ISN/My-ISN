@@ -100,9 +100,7 @@ class MyApp extends StatelessWidget {
         ),
         cardColor: Colors.white,
         useMaterial3: true,
-        textTheme: GoogleFonts.poppinsTextTheme(
-          ThemeData.light().textTheme,
-        ),
+        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -119,9 +117,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
         useMaterial3: true,
-        textTheme: GoogleFonts.poppinsTextTheme(
-          ThemeData.dark().textTheme,
-        ),
+        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
       ),
       themeMode: themeProvider.themeMode,
       builder: (context, child) {

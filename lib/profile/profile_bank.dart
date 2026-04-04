@@ -51,7 +51,11 @@ class ProfileBankPage extends StatelessWidget {
                   color: const Color(0xFF7E57C2).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.edit_rounded, color: Color(0xFF7E57C2), size: 20),
+                child: const Icon(
+                  Icons.edit_rounded,
+                  color: Color(0xFF7E57C2),
+                  size: 20,
+                ),
               ),
               onPressed: () {
                 Navigator.push(
@@ -82,37 +86,61 @@ class ProfileBankPage extends StatelessWidget {
                 context,
                 'profile.account_title'.tr(context),
                 data['account_title'] ?? '-',
-                const Icon(Icons.person_outline_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.person_outline_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.account_number'.tr(context),
                 data['account_number'] ?? '-',
-                const Icon(Icons.numbers_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.numbers_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.bank_name'.tr(context),
                 data['bank_name'] ?? '-',
-                const Icon(Icons.account_balance_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.account_balance_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.iban'.tr(context),
                 data['iban'] ?? '-',
-                const Icon(Icons.public_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.public_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.swift_code'.tr(context),
                 data['swift_code'] ?? '-',
-                const Icon(Icons.speed_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.speed_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.bank_branch'.tr(context),
                 data['bank_branch'] ?? '-',
-                const Icon(Icons.location_on_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.location_on_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
                 last: true,
               ),
             ]),
@@ -138,7 +166,9 @@ class ProfileBankPage extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+          color: isDark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.grey.withOpacity(0.1),
         ),
       ),
       child: Column(children: children),

@@ -45,11 +45,13 @@ class _AiBotPageState extends State<AiBotPage> {
 
   void _addWelcomeMessage() {
     setState(() {
-      _messages.add(ChatMessage(
-        text: 'ai_bot.welcome_msg'.tr(context),
-        isUser: false,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(
+          text: 'ai_bot.welcome_msg'.tr(context),
+          isUser: false,
+          timestamp: DateTime.now(),
+        ),
+      );
     });
   }
 
@@ -58,13 +60,11 @@ class _AiBotPageState extends State<AiBotPage> {
     if (text.isEmpty || _isLoading) return;
 
     if (customText == null) _messageController.clear();
-    
+
     setState(() {
-      _messages.add(ChatMessage(
-        text: text,
-        isUser: true,
-        timestamp: DateTime.now(),
-      ));
+      _messages.add(
+        ChatMessage(text: text, isUser: true, timestamp: DateTime.now()),
+      );
       _isLoading = true;
     });
 
@@ -75,18 +75,22 @@ class _AiBotPageState extends State<AiBotPage> {
     setState(() {
       _isLoading = false;
       if (response['status'] == true) {
-        _messages.add(ChatMessage(
-          text: response['data']['reply'],
-          isUser: false,
-          timestamp: DateTime.now(),
-        ));
+        _messages.add(
+          ChatMessage(
+            text: response['data']['reply'],
+            isUser: false,
+            timestamp: DateTime.now(),
+          ),
+        );
       } else {
-        _messages.add(ChatMessage(
-          text: 'ai_bot.error_msg'.tr(context),
-          isUser: false,
-          isError: true,
-          timestamp: DateTime.now(),
-        ));
+        _messages.add(
+          ChatMessage(
+            text: 'ai_bot.error_msg'.tr(context),
+            isUser: false,
+            isError: true,
+            timestamp: DateTime.now(),
+          ),
+        );
       }
     });
 
@@ -128,7 +132,11 @@ class _AiBotPageState extends State<AiBotPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const Icon(
+              Icons.delete_forever_rounded,
+              color: Colors.red,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
               'ai_bot.clear_chat'.tr(context),
@@ -138,7 +146,9 @@ class _AiBotPageState extends State<AiBotPage> {
             Text(
               'ai_bot.clear_chat_confirm'.tr(context),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 32),
             Row(
@@ -149,11 +159,15 @@ class _AiBotPageState extends State<AiBotPage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'main.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -171,7 +185,9 @@ class _AiBotPageState extends State<AiBotPage> {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: Text('main.delete'.tr(context)),
@@ -193,9 +209,10 @@ class _AiBotPageState extends State<AiBotPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(
-        userData: (widget.userData['profile_photo'] != null && 
-                  widget.userData['profile_photo'].toString().isNotEmpty) 
-            ? widget.userData 
+        userData:
+            (widget.userData['profile_photo'] != null &&
+                widget.userData['profile_photo'].toString().isNotEmpty)
+            ? widget.userData
             : (_currentUserData ?? widget.userData),
         showBackButton: false,
         title: 'My ISN',
@@ -208,22 +225,28 @@ class _AiBotPageState extends State<AiBotPage> {
         ],
       ),
       endDrawer: SideDrawer(
-        userData: (widget.userData['profile_photo'] != null && 
-                  widget.userData['profile_photo'].toString().isNotEmpty) 
-            ? widget.userData 
-            : (_currentUserData ?? widget.userData), 
-        activePage: 'ai_bot'
+        userData:
+            (widget.userData['profile_photo'] != null &&
+                widget.userData['profile_photo'].toString().isNotEmpty)
+            ? widget.userData
+            : (_currentUserData ?? widget.userData),
+        activePage: 'ai_bot',
       ),
       body: Column(
         children: [
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF121212) : const Color(0xFFF8FAFF),
+                color: isDark
+                    ? const Color(0xFF121212)
+                    : const Color(0xFFF8FAFF),
               ),
               child: ListView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 20,
+                ),
                 itemCount: _messages.length + (_isLoading ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index == _messages.length) {
@@ -247,26 +270,37 @@ class _AiBotPageState extends State<AiBotPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
-        crossAxisAlignment: message.isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: message.isUser
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: message.isUser
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!message.isUser) ...[
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: colorScheme.primary.withOpacity(0.1),
-                  child: Icon(Icons.smart_toy_rounded, size: 20, color: colorScheme.primary),
+                  child: Icon(
+                    Icons.smart_toy_rounded,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(width: 8),
               ],
               Flexible(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: message.isUser 
-                        ? colorScheme.primary 
+                    color: message.isUser
+                        ? colorScheme.primary
                         : (isDark ? Colors.grey[900] : Colors.white),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(20),
@@ -285,8 +319,8 @@ class _AiBotPageState extends State<AiBotPage> {
                   child: Text(
                     message.text,
                     style: TextStyle(
-                      color: message.isUser 
-                          ? Colors.white 
+                      color: message.isUser
+                          ? Colors.white
                           : (isDark ? Colors.white : Colors.black87),
                       fontSize: 15,
                     ),
@@ -303,8 +337,11 @@ class _AiBotPageState extends State<AiBotPage> {
                     shape: BoxShape.circle,
                   ),
                   child: ClipOval(
-                    child: (widget.userData['profile_photo'] != null && 
-                            widget.userData['profile_photo'].toString().isNotEmpty)
+                    child:
+                        (widget.userData['profile_photo'] != null &&
+                            widget.userData['profile_photo']
+                                .toString()
+                                .isNotEmpty)
                         ? Image.network(
                             'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
                             fit: BoxFit.cover,
@@ -322,7 +359,11 @@ class _AiBotPageState extends State<AiBotPage> {
                               );
                             },
                           )
-                        : Icon(Icons.person, size: 20, color: colorScheme.secondary),
+                        : Icon(
+                            Icons.person,
+                            size: 20,
+                            color: colorScheme.secondary,
+                          ),
                   ),
                 ),
               ],
@@ -356,7 +397,11 @@ class _AiBotPageState extends State<AiBotPage> {
           CircleAvatar(
             radius: 16,
             backgroundColor: colorScheme.primary.withOpacity(0.1),
-            child: Icon(Icons.smart_toy_rounded, size: 20, color: colorScheme.primary),
+            child: Icon(
+              Icons.smart_toy_rounded,
+              size: 20,
+              color: colorScheme.primary,
+            ),
           ),
           const SizedBox(width: 8),
           Container(
@@ -397,7 +442,7 @@ class _AiBotPageState extends State<AiBotPage> {
   Widget _buildQuickActions() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     final List<String> questions = [
       'berapa harga sewa?',
       'Laptop apa saja?',
@@ -425,9 +470,13 @@ class _AiBotPageState extends State<AiBotPage> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              backgroundColor: isDark ? Colors.grey[800] : colorScheme.primary.withOpacity(0.05),
+              backgroundColor: isDark
+                  ? Colors.grey[800]
+                  : colorScheme.primary.withOpacity(0.05),
               side: BorderSide(
-                color: isDark ? Colors.white12 : colorScheme.primary.withOpacity(0.1),
+                color: isDark
+                    ? Colors.white12
+                    : colorScheme.primary.withOpacity(0.1),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -462,40 +511,45 @@ class _AiBotPageState extends State<AiBotPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[900] : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: TextField(
-                  controller: _messageController,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    hintText: 'ai_bot.hint_text'.tr(context),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.grey[900]
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: TextField(
+                        controller: _messageController,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: InputDecoration(
+                          hintText: 'ai_bot.hint_text'.tr(context),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        onSubmitted: (_) => _handleSendMessage(),
+                      ),
+                    ),
                   ),
-                  onSubmitted: (_) => _handleSendMessage(),
-                ),
+                  const SizedBox(width: 8),
+                  FloatingActionButton.small(
+                    onPressed: () => _handleSendMessage(),
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    child: const Icon(Icons.send),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 8),
-            FloatingActionButton.small(
-              onPressed: () => _handleSendMessage(),
-              backgroundColor: colorScheme.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              child: const Icon(Icons.send),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  ],
-),
     );
   }
 
@@ -517,4 +571,3 @@ class ChatMessage {
     required this.timestamp,
   });
 }
-

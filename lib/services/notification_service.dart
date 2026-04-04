@@ -113,9 +113,7 @@ class NotificationService {
       );
     } else if (data['type'] == 'todo' || data.containsKey('todo_id')) {
       navigatorKey?.currentState?.push(
-        MaterialPageRoute(
-          builder: (context) => const TodoListPage(),
-        ),
+        MaterialPageRoute(builder: (context) => const TodoListPage()),
       );
     }
   }

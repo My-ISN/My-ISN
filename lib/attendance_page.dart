@@ -303,40 +303,39 @@ class _AttendancePageState extends State<AttendancePage> {
           const SizedBox(height: 12),
           // Menggunakan Column & Row manual agar tinggi benar-benar pas (tidak ada sisa ruang)
           Column(
-            children: List.generate(
-              ((daysInMonth + firstDayOffset) / 7).ceil(),
-              (rowIndex) {
-                return Row(
-                  children: List.generate(7, (colIndex) {
-                    final index = rowIndex * 7 + colIndex;
-                    if (index < firstDayOffset ||
-                        index >= daysInMonth + firstDayOffset) {
-                      return const Expanded(child: SizedBox());
-                    }
+            children: List.generate(((daysInMonth + firstDayOffset) / 7).ceil(), (
+              rowIndex,
+            ) {
+              return Row(
+                children: List.generate(7, (colIndex) {
+                  final index = rowIndex * 7 + colIndex;
+                  if (index < firstDayOffset ||
+                      index >= daysInMonth + firstDayOffset) {
+                    return const Expanded(child: SizedBox());
+                  }
 
-                    final day = index - firstDayOffset + 1;
-                    final dateStr =
-                        '${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+                  final day = index - firstDayOffset + 1;
+                  final dateStr =
+                      '${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
 
-                    final record =
-                        (_attendanceData['records'] as List?)?.firstWhere(
-                          (r) => r['date'] == dateStr,
-                          orElse: () => null,
-                        );
+                  final record = (_attendanceData['records'] as List?)
+                      ?.firstWhere(
+                        (r) => r['date'] == dateStr,
+                        orElse: () => null,
+                      );
 
-                    return Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 1.5),
-                        child: AspectRatio(
-                          aspectRatio: 1.05,
-                          child: _buildDayCell(day, record),
-                        ),
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 1.5),
+                      child: AspectRatio(
+                        aspectRatio: 1.05,
+                        child: _buildDayCell(day, record),
                       ),
-                    );
-                  }),
-                );
-              },
-            ),
+                    ),
+                  );
+                }),
+              );
+            }),
           ),
         ],
       ),
@@ -485,8 +484,9 @@ class _AttendancePageState extends State<AttendancePage> {
                         child: Text(
                           holiday['name'],
                           style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onErrorContainer,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -533,12 +533,12 @@ class _AttendancePageState extends State<AttendancePage> {
                 SizedBox(
                   width: double.infinity,
                   child: _buildDetailItem(
-                  'attendance.notes'.tr(context),
-                  "${record?['is_late'] == true ? 'attendance.late_with_time'.tr(context, args: {'time': record?['late_time']}) : ''}"
-                  "${record?['is_late'] == true && record?['is_early'] == true ? ' & ' : ''}"
-                  "${record?['is_early'] == true ? 'attendance.early_with_time'.tr(context, args: {'time': record?['early_time']}) : ''}",
+                    'attendance.notes'.tr(context),
+                    "${record?['is_late'] == true ? 'attendance.late_with_time'.tr(context, args: {'time': record?['late_time']}) : ''}"
+                    "${record?['is_late'] == true && record?['is_early'] == true ? ' & ' : ''}"
+                    "${record?['is_early'] == true ? 'attendance.early_with_time'.tr(context, args: {'time': record?['early_time']}) : ''}",
+                  ),
                 ),
-              ),
               const SizedBox(height: 32),
             ],
           ),

@@ -84,7 +84,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           if (_announcements.isEmpty) {
             NotificationManager().unreadCount.value = 0;
           }
-          
+
           // Handle initialAnnouncementId for deep linking
           if (widget.initialAnnouncementId != null) {
             try {
@@ -189,7 +189,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             builder: (context, scrollController) => Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
               ),
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -328,7 +330,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: SecondaryAppBar(
@@ -345,7 +347,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                 builder: (context) => Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
                   ),
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -360,17 +364,28 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const Icon(Icons.done_all_rounded, color: Color(0xFF7E57C2), size: 48),
+                      const Icon(
+                        Icons.done_all_rounded,
+                        color: Color(0xFF7E57C2),
+                        size: 48,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'announcement.mark_all'.tr(context),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         'announcement.mark_all_desc'.tr(context),
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.7),
+                        ),
                       ),
                       const SizedBox(height: 32),
                       Row(
@@ -379,13 +394,23 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(context),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                side: BorderSide(
+                                  color: Colors.grey.withOpacity(0.3),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               child: Text(
                                 'announcement.cancel'.tr(context),
-                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
                               ),
                             ),
                           ),
@@ -399,8 +424,12 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF7E57C2),
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 elevation: 0,
                               ),
                               child: Text('announcement.yes'.tr(context)),
@@ -425,7 +454,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                 builder: (context) => Container(
                   decoration: BoxDecoration(
                     color: Theme.of(context).scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
                   ),
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -440,17 +471,28 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const Icon(Icons.delete_sweep_rounded, color: Colors.red, size: 48),
+                      const Icon(
+                        Icons.delete_sweep_rounded,
+                        color: Colors.red,
+                        size: 48,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'announcement.delete_seen'.tr(context),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         'announcement.delete_seen_desc'.tr(context),
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.7),
+                        ),
                       ),
                       const SizedBox(height: 32),
                       Row(
@@ -459,13 +501,23 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(context),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                side: BorderSide(
+                                  color: Colors.grey.withOpacity(0.3),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               child: Text(
                                 'announcement.cancel'.tr(context),
-                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
                               ),
                             ),
                           ),
@@ -479,8 +531,12 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 elevation: 0,
                               ),
                               child: Text('announcement.delete'.tr(context)),
@@ -513,7 +569,10 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   const SizedBox(height: 16),
                   Text(
                     'announcement.no_announcements'.tr(context),
-                    style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[500], fontSize: 16),
+                    style: TextStyle(
+                      color: isDark ? Colors.grey[400] : Colors.grey[500],
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -596,7 +655,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: isDark ? Colors.grey[400] : Colors.grey[600],
+                              color: isDark
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
                               fontSize: 13,
                             ),
                           ),
@@ -604,7 +665,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                           Text(
                             item['created_at'] ?? '',
                             style: TextStyle(
-                              color: isDark ? Colors.grey[500] : Colors.grey[400],
+                              color: isDark
+                                  ? Colors.grey[500]
+                                  : Colors.grey[400],
                               fontSize: 11,
                             ),
                           ),

@@ -8,7 +8,6 @@ import '../localization/app_localizations.dart';
 import 'employee_detail_page.dart';
 import 'employee_add_page.dart';
 
-
 class EmployeesPage extends StatefulWidget {
   final Map<String, dynamic> userData;
 
@@ -48,12 +47,13 @@ class _EmployeesPageState extends State<EmployeesPage> {
       if (mounted) setState(() => _isLoading = true);
       final companyId = widget.userData['company_id'] ?? 2;
       final offset = (_currentPage - 1) * _selectedLimit;
-      
+
       // If we want "Show All", we could send a very large limit, but let's stick to the requested values.
       // The user wants pagination to disappear if displaying everything.
-      
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_employees?company_id=$companyId&limit=$_selectedLimit&offset=$offset';
-      
+
+      final url =
+          'https://foxgeen.com/HRIS/mobileapi/get_employees?company_id=$companyId&limit=$_selectedLimit&offset=$offset';
+
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
 
@@ -79,12 +79,14 @@ class _EmployeesPageState extends State<EmployeesPage> {
     setState(() {
       _searchQuery = query;
       _filteredEmployees = _employees.where((employee) {
-        final name = (employee['first_name'] + ' ' + (employee['last_name'] ?? '')).toLowerCase();
+        final name =
+            (employee['first_name'] + ' ' + (employee['last_name'] ?? ''))
+                .toLowerCase();
         final role = (employee['role_name'] ?? '').toLowerCase();
         final dept = (employee['department_name'] ?? '').toLowerCase();
-        return name.contains(query.toLowerCase()) || 
-               role.contains(query.toLowerCase()) || 
-               dept.contains(query.toLowerCase());
+        return name.contains(query.toLowerCase()) ||
+            role.contains(query.toLowerCase()) ||
+            dept.contains(query.toLowerCase());
       }).toList();
     });
   }
@@ -136,22 +138,31 @@ class _EmployeesPageState extends State<EmployeesPage> {
           ),
         ),
       ),
-      floatingActionButton: _hasPermission('mobile_employees_add') 
-      ? FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => EmployeeAddPage(userData: widget.userData)),
-          );
-          if (result == true) {
-            _fetchEmployees();
-          }
-        },
-        backgroundColor: _primaryColor,
-        icon: const Icon(Icons.person_add_alt_1, color: Colors.white),
-        label: Text('employees.add_employee'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      )
-      : null,
+      floatingActionButton: _hasPermission('mobile_employees_add')
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        EmployeeAddPage(userData: widget.userData),
+                  ),
+                );
+                if (result == true) {
+                  _fetchEmployees();
+                }
+              },
+              backgroundColor: _primaryColor,
+              icon: const Icon(Icons.person_add_alt_1, color: Colors.white),
+              label: Text(
+                'employees.add_employee'.tr(context),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : null,
     );
   }
 
@@ -175,15 +186,15 @@ class _EmployeesPageState extends State<EmployeesPage> {
           hintText: 'employees.search_hint'.tr(context),
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           prefixIcon: Icon(Icons.search_rounded, color: _primaryColor),
-          suffixIcon: _searchQuery.isNotEmpty 
-            ? IconButton(
-                icon: const Icon(Icons.cancel_rounded, size: 20),
-                onPressed: () {
-                  _searchController.clear();
-                  _filterEmployees('');
-                },
-              )
-            : null,
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.cancel_rounded, size: 20),
+                  onPressed: () {
+                    _searchController.clear();
+                    _filterEmployees('');
+                  },
+                )
+              : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
@@ -202,7 +213,11 @@ class _EmployeesPageState extends State<EmployeesPage> {
           children: [
             Text(
               'employees.show'.tr(context),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
             ),
             const SizedBox(width: 8),
             _buildPremiumDropdown(),
@@ -215,7 +230,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            'employees.total'.tr(context, args: {'count': _totalCount.toString()}),
+            'employees.total'.tr(
+              context,
+              args: {'count': _totalCount.toString()},
+            ),
             style: TextStyle(
               color: _primaryColor,
               fontSize: 12,
@@ -239,8 +257,16 @@ class _EmployeesPageState extends State<EmployeesPage> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: _selectedLimit,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _primaryColor),
-          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: _primaryColor,
+          ),
+          style: TextStyle(
+            color: _primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
           onChanged: (int? newValue) {
             if (newValue != null) {
               setState(() {
@@ -274,7 +300,11 @@ class _EmployeesPageState extends State<EmployeesPage> {
           const SizedBox(height: 16),
           Text(
             'employees.no_employees'.tr(context),
-            style: TextStyle(color: Colors.grey[400], fontSize: 16, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -293,8 +323,15 @@ class _EmployeesPageState extends State<EmployeesPage> {
           child: _buildEmployeeCard(
             context,
             name: '${employee['first_name']} ${employee['last_name'] ?? ''}',
-            role: (employee['designation_name'] ?? employee['role_name'] ?? 'employees.default_role'.tr(context)).toString().roleTr(context),
-            dept: employee['department_name'] ?? 'employees.default_dept'.tr(context),
+            role:
+                (employee['designation_name'] ??
+                        employee['role_name'] ??
+                        'employees.default_role'.tr(context))
+                    .toString()
+                    .roleTr(context),
+            dept:
+                employee['department_name'] ??
+                'employees.default_dept'.tr(context),
             photo: employee['profile_photo'],
             email: employee['email'],
             onTap: () {
@@ -320,10 +357,12 @@ class _EmployeesPageState extends State<EmployeesPage> {
       children: [
         _buildPageButton(
           icon: Icons.chevron_left_rounded,
-          onPressed: _currentPage > 1 ? () {
-            setState(() => _currentPage--);
-            _fetchEmployees();
-          } : null,
+          onPressed: _currentPage > 1
+              ? () {
+                  setState(() => _currentPage--);
+                  _fetchEmployees();
+                }
+              : null,
         ),
         const SizedBox(width: 16),
         Container(
@@ -340,20 +379,29 @@ class _EmployeesPageState extends State<EmployeesPage> {
             ],
           ),
           child: Text(
-            'employees.page_x_of_y'.tr(context, args: {
-              'current': _currentPage.toString(),
-              'total': _totalPages.toString(),
-            }),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+            'employees.page_x_of_y'.tr(
+              context,
+              args: {
+                'current': _currentPage.toString(),
+                'total': _totalPages.toString(),
+              },
+            ),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
           ),
         ),
         const SizedBox(width: 16),
         _buildPageButton(
           icon: Icons.chevron_right_rounded,
-          onPressed: _currentPage < _totalPages ? () {
-            setState(() => _currentPage++);
-            _fetchEmployees();
-          } : null,
+          onPressed: _currentPage < _totalPages
+              ? () {
+                  setState(() => _currentPage++);
+                  _fetchEmployees();
+                }
+              : null,
         ),
       ],
     );
@@ -362,8 +410,8 @@ class _EmployeesPageState extends State<EmployeesPage> {
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null 
-          ? (isDark ? Colors.white12 : Colors.grey[200]) 
+      color: onPressed == null
+          ? (isDark ? Colors.white12 : Colors.grey[200])
           : Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -379,10 +427,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
             ),
           ),
           child: Icon(
-            icon, 
-            color: onPressed == null 
-                ? (isDark ? Colors.white24 : Colors.grey[400]) 
-                : _primaryColor, 
+            icon,
+            color: onPressed == null
+                ? (isDark ? Colors.white24 : Colors.grey[400])
+                : _primaryColor,
             size: 24,
           ),
         ),
@@ -420,17 +468,30 @@ class _EmployeesPageState extends State<EmployeesPage> {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: _primaryColor.withOpacity(0.2), width: 2),
+                border: Border.all(
+                  color: _primaryColor.withOpacity(0.2),
+                  width: 2,
+                ),
               ),
               child: CircleAvatar(
                 radius: 30,
                 backgroundColor: _primaryColor.withOpacity(0.05),
-                backgroundImage: (photo != null && photo.isNotEmpty && !photo.contains('default'))
-                    ? NetworkImage('https://foxgeen.com/HRIS/uploads/users/thumb/$photo')
+                backgroundImage:
+                    (photo != null &&
+                        photo.isNotEmpty &&
+                        !photo.contains('default'))
+                    ? NetworkImage(
+                        'https://foxgeen.com/HRIS/uploads/users/thumb/$photo',
+                      )
                     : null,
-                child: (photo == null || photo.isEmpty || photo.contains('default'))
+                child:
+                    (photo == null ||
+                        photo.isEmpty ||
+                        photo.contains('default'))
                     ? Text(
-                        name.isNotEmpty ? name.substring(0, 1).toUpperCase() : '?',
+                        name.isNotEmpty
+                            ? name.substring(0, 1).toUpperCase()
+                            : '?',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -466,7 +527,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: _primaryColor.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(8),
@@ -513,7 +577,3 @@ class _EmployeesPageState extends State<EmployeesPage> {
     );
   }
 }
-
-
-
-

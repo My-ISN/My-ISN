@@ -46,10 +46,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   }
 
   Future<void> _loadData() async {
-    await Future.wait([
-      _fetchTickets(),
-      _fetchStats(),
-    ]);
+    await Future.wait([_fetchTickets(), _fetchStats()]);
   }
 
   Future<void> _fetchTickets({int? page}) async {
@@ -59,7 +56,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final offset = (targetPage - 1) * _selectedLimit;
-      
+
       final url = 'https://foxgeen.com/HRIS/mobileapi/get_tickets';
       final response = await http.post(
         Uri.parse(url),
@@ -93,7 +90,8 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
     setState(() => _isStatsLoading = true);
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_helpdesk_stats?user_id=$userId';
+      final url =
+          'https://foxgeen.com/HRIS/mobileapi/get_helpdesk_stats?user_id=$userId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
 
@@ -188,24 +186,27 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_ticket'),
-        body: {
-          'ticket_id': ticketId,
-          'user_id': userId.toString(),
-        },
+        body: {'ticket_id': ticketId, 'user_id': userId.toString()},
       );
 
       final data = json.decode(response.body);
       if (data['status'] == true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Ticket deleted successfully'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('Ticket deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
           );
           _loadData();
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'Failed to delete ticket'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(data['message'] ?? 'Failed to delete ticket'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -238,17 +239,24 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const Icon(
+              Icons.delete_forever_rounded,
+              color: Colors.red,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
-              l10n?.translate('todo_list.delete_confirm_title') ?? 'Delete Confirmation',
+              l10n?.translate('todo_list.delete_confirm_title') ??
+                  'Delete Confirmation',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
               'Are you sure you want to delete ticket ${ticket['ticket_code']}?',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 32),
             Row(
@@ -259,11 +267,15 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       l10n?.translate('main.cancel') ?? 'Cancel',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -278,7 +290,9 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: Text(l10n?.translate('main.delete') ?? 'Delete'),
@@ -310,7 +324,8 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CreateTicketPage(userData: widget.userData),
+                    builder: (context) =>
+                        CreateTicketPage(userData: widget.userData),
                   ),
                 );
                 if (result == true) {
@@ -318,10 +333,16 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 }
               },
               backgroundColor: const Color(0xFF7E57C2),
-              icon: const Icon(Icons.support_agent_rounded, color: Colors.white),
+              icon: const Icon(
+                Icons.support_agent_rounded,
+                color: Colors.white,
+              ),
               label: const Text(
                 'add helpdesk',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           : null,
@@ -339,7 +360,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                   child: _buildStatsCard(),
                 ),
               ),
-              
+
               // Search Bar
               SliverToBoxAdapter(
                 child: Padding(
@@ -351,15 +372,16 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
               // Pagination Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: _buildPaginationHeader(),
                 ),
               ),
 
               if (_isLoading && _allTickets.isEmpty)
-                const SliverFillRemaining(
-                  child: ShimmerList(itemCount: 5),
-                )
+                const SliverFillRemaining(child: ShimmerList(itemCount: 5))
               else if (_allTickets.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -374,8 +396,12 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          l10n?.translate('helpdesk.no_tickets') ?? 'No tickets',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          l10n?.translate('helpdesk.no_tickets') ??
+                              'No tickets',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
@@ -388,11 +414,18 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off_rounded, size: 80, color: Colors.grey[300]),
+                        Icon(
+                          Icons.search_off_rounded,
+                          size: 80,
+                          color: Colors.grey[300],
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'No tickets found for "${_searchController.text}"',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
@@ -402,16 +435,13 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final ticket = _filteredTickets[index];
-                        return _buildTicketCard(ticket);
-                      },
-                      childCount: _filteredTickets.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final ticket = _filteredTickets[index];
+                      return _buildTicketCard(ticket);
+                    }, childCount: _filteredTickets.length),
                   ),
                 ),
-              
+
               if (_totalCount > _selectedLimit)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -444,9 +474,12 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
       String p = item['ticket_priority'].toString();
       if (p == '1') {
         low = count;
-      } else if (p == '2') med = count;
-      else if (p == '3') high = count;
-      else if (p == '4') crit = count;
+      } else if (p == '2')
+        med = count;
+      else if (p == '3')
+        high = count;
+      else if (p == '4')
+        crit = count;
     }
 
     return Container(
@@ -479,8 +512,8 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       Text(
                         'Ticket Summary',
                         style: TextStyle(
-                          fontWeight: FontWeight.bold, 
-                          fontSize: 18, 
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
                           letterSpacing: -0.5,
                           color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
@@ -488,7 +521,11 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       const SizedBox(height: 4),
                       Text(
                         'General accumulation',
-                        style: TextStyle(color: Color(0xFF7E57C2), fontWeight: FontWeight.bold, fontSize: 12),
+                        style: TextStyle(
+                          color: Color(0xFF7E57C2),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -499,7 +536,9 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      _isStatsExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                      _isStatsExpanded
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
                       color: Color(0xFF7E57C2),
                       size: 20,
                     ),
@@ -514,81 +553,108 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
             child: _isStatsExpanded
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    child: _isStatsLoading 
-                      ? ShimmerLoading(
-                          child: Column(
-                            children: List.generate(
-                              4,
-                              (index) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
-                                child: Container(
-                                  height: 16,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      : Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildStatMiniRow('Critical', crit.toString(), Colors.purple),
-                                  const SizedBox(height: 12),
-                                  _buildStatMiniRow('High', high.toString(), Colors.deepOrange),
-                                  const SizedBox(height: 12),
-                                  _buildStatMiniRow('Medium', med.toString(), Colors.orange),
-                                  const SizedBox(height: 12),
-                                  _buildStatMiniRow('Low', low.toString(), Colors.blue),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 20),
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 90,
-                                  height: 90,
-                                  child: CircularProgressIndicator(
-                                    value: progress,
-                                    strokeWidth: 10,
-                                    backgroundColor: Theme.of(context).dividerColor.withOpacity(0.1),
-                                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-                                    strokeCap: StrokeCap.round,
-                                  ),
-                                ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '${(progress * 100).toInt()}%',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold, 
-                                        fontSize: 18,
-                                        color: Theme.of(context).textTheme.titleLarge?.color,
-                                      ),
+                    child: _isStatsLoading
+                        ? ShimmerLoading(
+                            child: Column(
+                              children: List.generate(
+                                4,
+                                (index) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: Container(
+                                    height: 16,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).cardColor,
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
-                                    Text(
-                                      'CLOSED', 
-                                      style: TextStyle(
-                                        fontSize: 8, 
-                                        fontWeight: FontWeight.bold, 
-                                        color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
-                                      ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildStatMiniRow(
+                                      'Critical',
+                                      crit.toString(),
+                                      Colors.purple,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _buildStatMiniRow(
+                                      'High',
+                                      high.toString(),
+                                      Colors.deepOrange,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _buildStatMiniRow(
+                                      'Medium',
+                                      med.toString(),
+                                      Colors.orange,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _buildStatMiniRow(
+                                      'Low',
+                                      low.toString(),
+                                      Colors.blue,
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                              const SizedBox(width: 20),
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 90,
+                                    height: 90,
+                                    child: CircularProgressIndicator(
+                                      value: progress,
+                                      strokeWidth: 10,
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).dividerColor.withOpacity(0.1),
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                            Colors.green,
+                                          ),
+                                      strokeCap: StrokeCap.round,
+                                    ),
+                                  ),
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '${(progress * 100).toInt()}%',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: Theme.of(
+                                            context,
+                                          ).textTheme.titleLarge?.color,
+                                        ),
+                                      ),
+                                      Text(
+                                        'CLOSED',
+                                        style: TextStyle(
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.color
+                                              ?.withOpacity(0.6),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                   )
                 : const SizedBox.shrink(),
           ),
@@ -607,18 +673,20 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
         ),
         const SizedBox(width: 8),
         Text(
-          label, 
+          label,
           style: TextStyle(
-            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7), 
-            fontSize: 13, 
+            color: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+            fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
         ),
         const Spacer(),
         Text(
-          value, 
+          value,
           style: TextStyle(
-            fontWeight: FontWeight.bold, 
+            fontWeight: FontWeight.bold,
             fontSize: 14,
             color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
@@ -636,7 +704,11 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
           children: [
             Text(
               l10n?.translate('main.show') ?? 'Show',
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
             ),
             const SizedBox(width: 8),
             _buildPremiumDropdown(),
@@ -650,9 +722,11 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              l10n?.translate('todo_list.total', args: {
-                'count': _totalCount.toString(),
-              }) ?? 'Total: $_totalCount',
+              l10n?.translate(
+                    'todo_list.total',
+                    args: {'count': _totalCount.toString()},
+                  ) ??
+                  'Total: $_totalCount',
               style: const TextStyle(
                 color: Color(0xFF7E57C2),
                 fontSize: 11,
@@ -676,8 +750,16 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: _selectedLimit,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: Color(0xFF7E57C2)),
-          style: const TextStyle(color: Color(0xFF7E57C2), fontWeight: FontWeight.bold, fontSize: 13),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
+          style: const TextStyle(
+            color: Color(0xFF7E57C2),
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
           onChanged: (int? newValue) {
             if (newValue != null) {
               setState(() {
@@ -706,9 +788,11 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
       children: [
         _buildPageButton(
           icon: Icons.chevron_left_rounded,
-          onPressed: _currentPage > 1 ? () {
-            _fetchTickets(page: _currentPage - 1);
-          } : null,
+          onPressed: _currentPage > 1
+              ? () {
+                  _fetchTickets(page: _currentPage - 1);
+                }
+              : null,
         ),
         const SizedBox(width: 16),
         Container(
@@ -725,19 +809,29 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
             ],
           ),
           child: Text(
-            l10n?.translate('todo_list.page_x_of_y', args: {
-              'current': _currentPage.toString(),
-              'total': totalPages.toString(),
-            }) ?? 'Page $_currentPage of $totalPages',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+            l10n?.translate(
+                  'todo_list.page_x_of_y',
+                  args: {
+                    'current': _currentPage.toString(),
+                    'total': totalPages.toString(),
+                  },
+                ) ??
+                'Page $_currentPage of $totalPages',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
           ),
         ),
         const SizedBox(width: 16),
         _buildPageButton(
           icon: Icons.chevron_right_rounded,
-          onPressed: _currentPage < totalPages ? () {
-            _fetchTickets(page: _currentPage + 1);
-          } : null,
+          onPressed: _currentPage < totalPages
+              ? () {
+                  _fetchTickets(page: _currentPage + 1);
+                }
+              : null,
         ),
       ],
     );
@@ -745,8 +839,10 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
 
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
     return Material(
-      color: onPressed == null 
-          ? (Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200])
+      color: onPressed == null
+          ? (Theme.of(context).brightness == Brightness.dark
+                ? Colors.white12
+                : Colors.grey[200])
           : Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -757,15 +853,13 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
           height: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.grey.withOpacity(0.1),
-            ),
+            border: Border.all(color: Colors.grey.withOpacity(0.1)),
           ),
           child: Icon(
-            icon, 
-            color: onPressed == null 
+            icon,
+            color: onPressed == null
                 ? Colors.grey[400]
-                : const Color(0xFF7E57C2), 
+                : const Color(0xFF7E57C2),
             size: 24,
           ),
         ),
@@ -792,17 +886,27 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
         onChanged: _runFilter,
         decoration: InputDecoration(
           hintText: 'Search subject or ticket code...',
-          hintStyle: TextStyle(color: Theme.of(context).hintColor, fontSize: 14),
-          prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF7E57C2)),
-          suffixIcon: _searchController.text.isNotEmpty 
-            ? IconButton(
-                icon: const Icon(Icons.cancel_rounded, size: 20, color: Colors.grey),
-                onPressed: () {
-                  _searchController.clear();
-                  _runFilter('');
-                },
-              )
-            : null,
+          hintStyle: TextStyle(
+            color: Theme.of(context).hintColor,
+            fontSize: 14,
+          ),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: Color(0xFF7E57C2),
+          ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.cancel_rounded,
+                    size: 20,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    _searchController.clear();
+                    _runFilter('');
+                  },
+                )
+              : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
@@ -876,7 +980,9 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                   Text(
                     ticket['ticket_code'] ?? '',
                     style: TextStyle(
-                      color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.color?.withOpacity(0.6),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -887,16 +993,32 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       onSelected: (value) {
                         if (value == 'delete') _confirmDelete(ticket);
                       },
-                      icon: Icon(Icons.more_horiz_rounded, size: 20, color: Colors.grey[400]),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      icon: Icon(
+                        Icons.more_horiz_rounded,
+                        size: 20,
+                        color: Colors.grey[400],
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       itemBuilder: (context) => [
                         PopupMenuItem(
                           value: 'delete',
                           child: Row(
                             children: [
-                              const Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
+                              const Icon(
+                                Icons.delete_outline_rounded,
+                                size: 20,
+                                color: Colors.red,
+                              ),
                               const SizedBox(width: 12),
-                              Text(AppLocalizations.of(context)?.translate('main.delete') ?? 'Delete', style: const TextStyle(color: Colors.red)),
+                              Text(
+                                AppLocalizations.of(
+                                      context,
+                                    )?.translate('main.delete') ??
+                                    'Delete',
+                                style: const TextStyle(color: Colors.red),
+                              ),
                             ],
                           ),
                         ),
@@ -909,12 +1031,20 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 children: [
                   CircleAvatar(
                     radius: 12,
-                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    child: Icon(Icons.person, size: 14, color: Theme.of(context).colorScheme.primary),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.1),
+                    child: Icon(
+                      Icons.person,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${ticket['first_name'] ?? ''} ${ticket['last_name'] ?? ''}'.trim().toUpperCase(),
+                    '${ticket['first_name'] ?? ''} ${ticket['last_name'] ?? ''}'
+                        .trim()
+                        .toUpperCase(),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,

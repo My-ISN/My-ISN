@@ -51,7 +51,11 @@ class ProfileBasicPage extends StatelessWidget {
                   color: const Color(0xFF7E57C2).withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.edit_rounded, color: Color(0xFF7E57C2), size: 20),
+                child: const Icon(
+                  Icons.edit_rounded,
+                  color: Color(0xFF7E57C2),
+                  size: 20,
+                ),
               ),
               onPressed: () {
                 Navigator.push(
@@ -83,7 +87,11 @@ class ProfileBasicPage extends StatelessWidget {
                   context,
                   'profile.employee_id'.tr(context),
                   data['employee_id'] ?? '-',
-                  const Icon(Icons.badge_rounded, size: 20, color: Color(0xFF7E57C2)),
+                  const Icon(
+                    Icons.badge_rounded,
+                    size: 20,
+                    color: Color(0xFF7E57C2),
+                  ),
                 ),
               _buildInfoRow(
                 context,
@@ -91,49 +99,81 @@ class ProfileBasicPage extends StatelessWidget {
                 data['gender'] == '1'
                     ? 'profile.male'.tr(context)
                     : 'profile.female'.tr(context),
-                const Icon(Icons.people_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.people_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.dob'.tr(context),
                 data['date_of_birth'] ?? '-',
-                const Icon(Icons.cake_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.cake_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.marital_status'.tr(context),
                 _getMaritalStatus(data['marital_status'], context),
-                const Icon(Icons.favorite_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.favorite_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.religion'.tr(context),
                 data['religion_name'] ?? '-',
-                const Icon(Icons.mosque_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.mosque_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.blood_group'.tr(context),
                 data['blood_group'] ?? '-',
-                const Icon(Icons.bloodtype_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.bloodtype_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.nationality'.tr(context),
                 'Indonesia',
-                const Icon(Icons.flag_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.flag_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.address'.tr(context),
                 data['address_1'] ?? '-',
-                const Icon(Icons.home_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.home_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
               ),
               _buildInfoRow(
                 context,
                 'profile.city_state'.tr(context),
                 '${data['city'] ?? ''}, ${data['state'] ?? ''}',
-                const Icon(Icons.location_city_rounded, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(
+                  Icons.location_city_rounded,
+                  size: 20,
+                  color: Color(0xFF7E57C2),
+                ),
                 last: true,
               ),
             ]),
@@ -159,7 +199,9 @@ class ProfileBasicPage extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.1),
+          color: isDark
+              ? Colors.white.withOpacity(0.05)
+              : Colors.grey.withOpacity(0.1),
         ),
       ),
       child: Column(children: children),

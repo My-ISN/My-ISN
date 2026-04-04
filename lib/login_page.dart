@@ -189,10 +189,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 24),
             Text(
               'login.enable_fingerprint'.tr(context),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -200,7 +197,9 @@ class _LoginPageState extends State<LoginPage> {
               'login.enable_fingerprint_desc'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                 fontSize: 15,
               ),
             ),
@@ -572,9 +571,9 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w900,
-                          color: Theme.of(context).brightness == Brightness.dark 
-                            ? Colors.white 
-                            : colorScheme.onSurface.withOpacity(0.8),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : colorScheme.onSurface.withOpacity(0.8),
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -602,11 +601,9 @@ class _LoginPageState extends State<LoginPage> {
                         icon: Icons.lock_outline_rounded,
                         isPassword: true,
                         obscureText: _obscurePassword,
-                        onTogglePassword:
-                            () =>
-                                setState(
-                                  () => _obscurePassword = !_obscurePassword,
-                                ),
+                        onTogglePassword: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
 
                       const SizedBox(height: 8),
@@ -614,9 +611,8 @@ class _LoginPageState extends State<LoginPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           GestureDetector(
-                            onTap:
-                                () =>
-                                    setState(() => _rememberMe = !_rememberMe),
+                            onTap: () =>
+                                setState(() => _rememberMe = !_rememberMe),
                             child: Row(
                               children: [
                                 SizedBox(
@@ -624,10 +620,9 @@ class _LoginPageState extends State<LoginPage> {
                                   width: 20,
                                   child: Checkbox(
                                     value: _rememberMe,
-                                    onChanged:
-                                        (value) => setState(
-                                          () => _rememberMe = value ?? false,
-                                        ),
+                                    onChanged: (value) => setState(
+                                      () => _rememberMe = value ?? false,
+                                    ),
                                     activeColor: const Color(0xFF7E57C2),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(4),
@@ -682,24 +677,23 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          child:
-                              _isLoading
-                                  ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                  : Text(
-                                    'login.login'.tr(context),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                    ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
                                   ),
+                                )
+                              : Text(
+                                  'login.login'.tr(context),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
                         ),
                       ),
 
@@ -710,7 +704,10 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           Text(
                             'login.dont_have_account'.tr(context),
-                            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                            ),
                           ),
                           TextButton(
                             onPressed: () {
@@ -723,7 +720,9 @@ class _LoginPageState extends State<LoginPage> {
                             },
                             style: TextButton.styleFrom(
                               minimumSize: Size.zero,
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                             child: Text(
@@ -742,7 +741,14 @@ class _LoginPageState extends State<LoginPage> {
                       // Alternative Login Separator
                       Row(
                         children: [
-                          Expanded(child: Divider(color: Theme.of(context).dividerColor.withOpacity(0.1), thickness: 1)),
+                          Expanded(
+                            child: Divider(
+                              color: Theme.of(
+                                context,
+                              ).dividerColor.withOpacity(0.1),
+                              thickness: 1,
+                            ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
@@ -754,7 +760,14 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          Expanded(child: Divider(color: Theme.of(context).dividerColor.withOpacity(0.1), thickness: 1)),
+                          Expanded(
+                            child: Divider(
+                              color: Theme.of(
+                                context,
+                              ).dividerColor.withOpacity(0.1),
+                              thickness: 1,
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -785,14 +798,18 @@ class _LoginPageState extends State<LoginPage> {
                           label: Text(
                             'login.login_google'.tr(context),
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(
-                              color: Theme.of(context).dividerColor.withOpacity(0.1)
+                              color: Theme.of(
+                                context,
+                              ).dividerColor.withOpacity(0.1),
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -822,8 +839,8 @@ class _LoginPageState extends State<LoginPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark 
-            ? Colors.white.withOpacity(0.05) 
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.05)
             : const Color(0xFFF8F9FE),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -844,19 +861,18 @@ class _LoginPageState extends State<LoginPage> {
         ),
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: const Color(0xFF7E57C2), size: 22),
-          suffixIcon:
-              isPassword
-                  ? IconButton(
-                    icon: Icon(
-                      obscureText
-                          ? Icons.visibility_off_rounded
-                          : Icons.visibility_rounded,
-                      color: Colors.grey.shade400,
-                      size: 20,
-                    ),
-                    onPressed: onTogglePassword,
-                  )
-                  : null,
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    obscureText
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility_rounded,
+                    color: Colors.grey.shade400,
+                    size: 20,
+                  ),
+                  onPressed: onTogglePassword,
+                )
+              : null,
           hintText: hintText,
           hintStyle: TextStyle(
             color: Colors.grey.shade400,

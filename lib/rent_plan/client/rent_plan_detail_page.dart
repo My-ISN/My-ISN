@@ -57,7 +57,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response['message'] ?? 'rent_plan.failed_fetch_detail'.tr(context)),
+            content: Text(
+              response['message'] ??
+                  'rent_plan.failed_fetch_detail'.tr(context),
+            ),
           ),
         );
       }
@@ -188,7 +191,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildDateInfo('rent_plan.start'.tr(context), _rentalData!['invoice_date'] ?? '-'),
+              _buildDateInfo(
+                'rent_plan.start'.tr(context),
+                _rentalData!['invoice_date'] ?? '-',
+              ),
               _buildDateInfo(
                 'rent_plan.end'.tr(context),
                 _rentalData!['tanggal_berakhir'] ?? '-',
@@ -233,16 +239,19 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           String label = tab;
           if (tab == 'OVERVIEW') {
             label = 'rent_plan.overview'.tr(context);
-          } else if (tab == 'INVOICE') label = 'rent_plan.invoice'.tr(context);
-          else if (tab == 'VIEW_DOKUMEN') label = 'rent_plan.view_document'.tr(context);
-          else if (tab == 'PERJANJIAN_SEWA') label = 'rent_plan.rental_agreement'.tr(context);
+          } else if (tab == 'INVOICE')
+            label = 'rent_plan.invoice'.tr(context);
+          else if (tab == 'VIEW_DOKUMEN')
+            label = 'rent_plan.view_document'.tr(context);
+          else if (tab == 'PERJANJIAN_SEWA')
+            label = 'rent_plan.rental_agreement'.tr(context);
 
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: InkWell(
               onTap: () {
                 if (isActive && ['INVOICE', 'PERJANJIAN_SEWA'].contains(tab)) {
-                   _launchDocumentUrl(tab);
+                  _launchDocumentUrl(tab);
                 } else if (['INVOICE', 'PERJANJIAN_SEWA'].contains(tab)) {
                   _launchDocumentUrl(tab);
                 } else {
@@ -301,7 +310,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${'rent_plan.opening'.tr(context)} ${tab.toLowerCase()}')),
+          SnackBar(
+            content: Text(
+              '${'rent_plan.opening'.tr(context)} ${tab.toLowerCase()}',
+            ),
+          ),
         );
       }
     }
@@ -327,7 +340,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
     return Column(
       children: [
-        _buildSectionTitle(Icons.laptop_rounded, 'rent_plan.rental_detail'.tr(context).toUpperCase()),
+        _buildSectionTitle(
+          Icons.laptop_rounded,
+          'rent_plan.rental_detail'.tr(context).toUpperCase(),
+        ),
         _buildOverviewCard([
           _buildRowTwoFields(
             'LAPTOP',
@@ -351,7 +367,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
         const SizedBox(height: 20),
 
-        _buildSectionTitle(Icons.payments_rounded, 'rent_plan.price_status'.tr(context).toUpperCase()),
+        _buildSectionTitle(
+          Icons.payments_rounded,
+          'rent_plan.price_status'.tr(context).toUpperCase(),
+        ),
         _buildOverviewCard([
           Container(
             width: double.infinity,
@@ -522,12 +541,18 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
   String _getRentalStatusLabel(String status) {
     switch (status.toLowerCase()) {
-      case 'new': return 'rent_plan.status_new'.tr(context);
-      case 'pending': return 'rent_plan.status_pending'.tr(context);
-      case 'confirmed': return 'rent_plan.status_active'.tr(context);
-      case 'masalah': return 'rent_plan.status_problem'.tr(context);
-      case 'completed': return 'rent_plan.status_completed'.tr(context);
-      default: return status.toUpperCase();
+      case 'new':
+        return 'rent_plan.status_new'.tr(context);
+      case 'pending':
+        return 'rent_plan.status_pending'.tr(context);
+      case 'confirmed':
+        return 'rent_plan.status_active'.tr(context);
+      case 'masalah':
+        return 'rent_plan.status_problem'.tr(context);
+      case 'completed':
+        return 'rent_plan.status_completed'.tr(context);
+      default:
+        return status.toUpperCase();
     }
   }
 
@@ -553,7 +578,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(Icons.badge_rounded, 'rent_plan.document'.tr(context).toUpperCase()),
+        _buildSectionTitle(
+          Icons.badge_rounded,
+          'rent_plan.document'.tr(context).toUpperCase(),
+        ),
         _buildDocumentImageCard(
           title: 'rent_plan.customer_ktp'.tr(context).toUpperCase(),
           fileName: _rentalData!['file_ktp'],
@@ -628,4 +656,3 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     );
   }
 }
-

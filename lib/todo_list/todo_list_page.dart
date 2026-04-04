@@ -7,6 +7,7 @@ import '../widgets/shimmer_loading.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../widgets/searchable_dropdown.dart';
 
 class TodoListPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -22,7 +23,7 @@ class _TodoListPageState extends State<TodoListPage> {
   final Color _primaryColor = const Color(0xFF7E57C2);
   bool _isLoading = true;
   List<dynamic> _allTodos = []; // Master list for client-side pagination
-  List<dynamic> _todos = [];    // Current page slice
+  List<dynamic> _todos = []; // Current page slice
 
   // Pagination
   int _selectedLimit = 10;
@@ -45,6 +46,12 @@ class _TodoListPageState extends State<TodoListPage> {
   bool _isListening = false;
   StateSetter? _currentModalSetState;
 
+  // Team Mode State
+  String _viewMode = 'personal'; // 'personal' or 'team'
+  String? _selectedEmployeeId;
+  List<dynamic> _employees = [];
+  bool _isEmployeesLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,7 +66,9 @@ class _TodoListPageState extends State<TodoListPage> {
           if (val == 'done' || val == 'notListening') {
             _isListening = false;
             if (_currentModalSetState != null) {
-              try { _currentModalSetState!(() {}); } catch (e) {}
+              try {
+                _currentModalSetState!(() {});
+              } catch (e) {}
             }
           }
         },
@@ -74,6 +83,7 @@ class _TodoListPageState extends State<TodoListPage> {
     if (widget.userData != null) {
       _currentUserData = widget.userData;
       _fetchTodos();
+      _fetchEmployees(); // Pre-fetch in background
       _markAsSeen();
     } else {
       const storage = FlutterSecureStorage();
@@ -108,20 +118,30 @@ class _TodoListPageState extends State<TodoListPage> {
 
   bool _hasPermission(String resource) {
     if (_currentUserData == null) return false;
-    if (_currentUserData!['role_access'] == '1' || _currentUserData!['role_resources'] == 'all') return true;
+    if (_currentUserData!['role_access'] == '1' ||
+        _currentUserData!['role_resources'] == 'all')
+      return true;
     final String resources = _currentUserData!['role_resources'] ?? '';
     final List<String> resourceList = resources.split(',');
     return resourceList.contains(resource);
   }
 
-  Future<void> _fetchTodos({int? page}) async {
+  Future<void> _fetchTodos({int? page, String? targetUserId}) async {
     if (_currentUserData == null) return;
     final int targetPage = page ?? _currentPage;
     setState(() => _isLoading = true);
     try {
-      final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_todos?user_id=$userId';
-      
+      // Use selected employee ID if in team mode, otherwise use current user ID
+      final String userId =
+          targetUserId ??
+          ((_viewMode == 'team' && _selectedEmployeeId != null)
+              ? _selectedEmployeeId!
+              : (_currentUserData!['id'] ?? _currentUserData!['user_id'])
+                    .toString());
+
+      final url =
+          'https://foxgeen.com/HRIS/mobileapi/get_todos?user_id=$userId';
+
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
@@ -134,7 +154,7 @@ class _TodoListPageState extends State<TodoListPage> {
             _completedCount = result['completed_count'] ?? 0;
             _pendingCount = result['pending_count'] ?? 0;
             _completedTodayCount = result['completed_today_count'] ?? 0;
-            
+
             // Initial sort
             _sortTodos(_allTodos);
             // Apply pagination slice
@@ -158,11 +178,37 @@ class _TodoListPageState extends State<TodoListPage> {
     }
   }
 
+  Future<void> _fetchEmployees() async {
+    if (_employees.isNotEmpty) return; // Only fetch once
+    setState(() => _isEmployeesLoading = true);
+    try {
+      final companyId = _currentUserData?['company_id'] ?? 2;
+      final url =
+          'https://foxgeen.com/HRIS/mobileapi/get_employees?company_id=$companyId&limit=500';
+      final response = await http.get(Uri.parse(url));
+      final data = json.decode(response.body);
+
+      if (data['status'] == true) {
+        setState(() {
+          _employees = data['data'];
+          // Filter to remove current user from team list? No, keep it or auto-select.
+          if (_selectedEmployeeId == null && _employees.isNotEmpty) {
+            // Don't auto-select yet to avoid confusion
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching employees: $e');
+    } finally {
+      setState(() => _isEmployeesLoading = false);
+    }
+  }
+
   void _paginateLocal() {
     final start = (_currentPage - 1) * _selectedLimit;
     int end = start + _selectedLimit;
     if (end > _allTodos.length) end = _allTodos.length;
-    
+
     if (start >= _allTodos.length) {
       _todos = [];
     } else {
@@ -172,12 +218,14 @@ class _TodoListPageState extends State<TodoListPage> {
 
   void _sortTodos(List<dynamic> list) {
     list.sort((a, b) {
-      bool aDone = (a['is_done'] == '1' || a['is_done'] == 1 || a['is_done'] == true);
-      bool bDone = (b['is_done'] == '1' || b['is_done'] == 1 || b['is_done'] == true);
-      
+      bool aDone =
+          (a['is_done'] == '1' || a['is_done'] == 1 || a['is_done'] == true);
+      bool bDone =
+          (b['is_done'] == '1' || b['is_done'] == 1 || b['is_done'] == true);
+
       if (aDone && !bDone) return 1;
       if (!aDone && bDone) return -1;
-      
+
       // Secondary sort: newest first
       try {
         DateTime aDate = DateTime.parse(a['created_at']);
@@ -190,7 +238,7 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   void _highlightInitialTodo() {
-    // Current pagination only shows first N todos. 
+    // Current pagination only shows first N todos.
     // If we want to find the specific todo, we might need a separate API or different approach.
     // For now, if it exists in the current page, we can show a snackbar or scroll to it.
     final todo = _todos.firstWhere(
@@ -213,8 +261,9 @@ class _TodoListPageState extends State<TodoListPage> {
     final now = DateTime.now();
 
     // Throttling: Prevent clicks faster than 500ms
-    if (_lastToggleTimes.containsKey(todoId) && 
-        now.difference(_lastToggleTimes[todoId]!) < const Duration(milliseconds: 500)) {
+    if (_lastToggleTimes.containsKey(todoId) &&
+        now.difference(_lastToggleTimes[todoId]!) <
+            const Duration(milliseconds: 500)) {
       return;
     }
     _lastToggleTimes[todoId] = now;
@@ -223,7 +272,8 @@ class _TodoListPageState extends State<TodoListPage> {
     final int index = _todos.indexOf(todo);
     if (index == -1) return;
 
-    final bool originalStatus = (todo['is_done'] == '1' || todo['is_done'] == 1);
+    final bool originalStatus =
+        (todo['is_done'] == '1' || todo['is_done'] == 1);
     final bool newStatus = !originalStatus;
 
     setState(() {
@@ -275,15 +325,19 @@ class _TodoListPageState extends State<TodoListPage> {
         _paginateLocal();
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('todo_list.status_update_failed'.tr(context)), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('todo_list.status_update_failed'.tr(context)),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
   Future<void> _deleteTodo(dynamic todo) async {
     if (_currentUserData == null) return;
-    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
-    
+    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id'])
+        .toString();
+
     try {
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/delete_todo'),
@@ -307,7 +361,9 @@ class _TodoListPageState extends State<TodoListPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('${'todo_list.delete_failed'.tr(context)} (\${response.statusCode})'),
+              content: Text(
+                '${'todo_list.delete_failed'.tr(context)} (\${response.statusCode})',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -325,12 +381,15 @@ class _TodoListPageState extends State<TodoListPage> {
 
   Future<void> _addTodo(String description) async {
     try {
+      final String targetUserId =
+          (_viewMode == 'team' && _selectedEmployeeId != null)
+          ? _selectedEmployeeId!
+          : (_currentUserData!['id'] ?? _currentUserData!['user_id'])
+                .toString();
+
       final response = await http.post(
         Uri.parse('https://foxgeen.com/HRIS/mobileapi/add_todo'),
-        body: {
-          'user_id': (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString(),
-          'description': description,
-        },
+        body: {'user_id': targetUserId, 'description': description},
       );
 
       if (response.statusCode == 200) {
@@ -351,7 +410,8 @@ class _TodoListPageState extends State<TodoListPage> {
 
   Future<void> _updateTodo(dynamic todoId, String description) async {
     if (_currentUserData == null) return;
-    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
+    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id'])
+        .toString();
 
     try {
       final response = await http.post(
@@ -376,7 +436,10 @@ class _TodoListPageState extends State<TodoListPage> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${response.statusCode}'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Error: ${response.statusCode}'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -385,8 +448,257 @@ class _TodoListPageState extends State<TodoListPage> {
     }
   }
 
+  Future<void> _moveTodo(dynamic todo, String targetUserId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://foxgeen.com/HRIS/mobileapi/edit_todo'),
+        body: {
+          'todo_item_id': todo['todo_item_id'].toString(),
+          'user_id': targetUserId,
+          'description': todo['description'] ?? '',
+        },
+      );
+
+      debugPrint('Move Response: ${response.statusCode} - ${response.body}');
+
+      if (response.statusCode == 200) {
+        _fetchTodos();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('todo_list.move_success'.tr(context)),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${'todo_list.move_failed'.tr(context)} (${response.statusCode})',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error moving todo: $e');
+    }
+  }
+
+  void _showMoveTodoDialog(dynamic todo) {
+    String? localSelectedId;
+    String selectedName = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final List<Map<String, String>> employeeOptions = _employees.map((
+            emp,
+          ) {
+            return {
+              'id': emp['user_id'].toString(),
+              'name': '${emp['first_name']} ${emp['last_name'] ?? ''}'.trim(),
+            };
+          }).toList();
+
+          return Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(30),
+              ),
+            ),
+            padding: EdgeInsets.fromLTRB(
+              24,
+              20,
+              24,
+              MediaQuery.of(context).viewInsets.bottom + 32,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'todo_list.move_task'.tr(context),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'todo_list.move_to'.tr(context),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                SearchableDropdown(
+                  label: 'todo_list.select_employee'.tr(context),
+                  value: selectedName,
+                  options: employeeOptions,
+                  icon: Icons.person_add_alt_1_rounded,
+                  required: true,
+                  onSelected: (val) {
+                    final emp = _employees.firstWhere(
+                      (e) => e['user_id'].toString() == val,
+                    );
+                    setModalState(() {
+                      localSelectedId = val;
+                      selectedName =
+                          '${emp['first_name']} ${emp['last_name'] ?? ''}'
+                              .trim();
+                    });
+                  },
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: localSelectedId == null
+                        ? null
+                        : () {
+                            Navigator.pop(context);
+                            _confirmMove(todo, localSelectedId!, selectedName);
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'todo_list.move_task'.tr(context),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _confirmMove(dynamic todo, String targetUserId, String targetName) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Icon(Icons.unarchive_rounded, color: _primaryColor, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'todo_list.move_confirm_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'todo_list.move_confirm_desc'
+                    .tr(context)
+                    .replaceAll('%s', targetName),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.7),
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _moveTodo(todo, targetUserId);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text('main.xin_confirm'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showEditTodoDialog(dynamic todo) {
-    final TextEditingController controller = TextEditingController(text: todo['description']);
+    final TextEditingController controller = TextEditingController(
+      text: todo['description'],
+    );
     _isListening = false;
     showModalBottomSheet(
       context: context,
@@ -396,11 +708,15 @@ class _TodoListPageState extends State<TodoListPage> {
         builder: (BuildContext context, StateSetter setModalState) {
           _currentModalSetState = setModalState;
           return Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
               child: Column(
@@ -421,38 +737,54 @@ class _TodoListPageState extends State<TodoListPage> {
                     controller: controller,
                     autofocus: true,
                     maxLines: null,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'todo_list.task_desc'.tr(context),
-                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 16,
+                      ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
-                      suffixIcon: _isSpeechInitialized ? IconButton(
-                        icon: Icon(
-                          _isListening ? Icons.mic : Icons.mic_none,
-                          color: _isListening ? Colors.red : _primaryColor,
-                        ),
-                        onPressed: () async {
-                          if (!_isListening) {
-                            bool available = await _speech.initialize();
-                            if (available) {
-                              setModalState(() => _isListening = true);
-                              _speech.listen(
-                                localeId: 'id_ID',
-                                onResult: (val) {
-                                  setModalState(() {
-                                    controller.text = val.recognizedWords;
-                                    controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
-                                  });
-                                },
-                              );
-                            }
-                          } else {
-                            setModalState(() => _isListening = false);
-                            _speech.stop();
-                          }
-                        },
-                      ) : null,
+                      suffixIcon: _isSpeechInitialized
+                          ? IconButton(
+                              icon: Icon(
+                                _isListening ? Icons.mic : Icons.mic_none,
+                                color: _isListening
+                                    ? Colors.red
+                                    : _primaryColor,
+                              ),
+                              onPressed: () async {
+                                if (!_isListening) {
+                                  bool available = await _speech.initialize();
+                                  if (available) {
+                                    setModalState(() => _isListening = true);
+                                    _speech.listen(
+                                      localeId: 'id_ID',
+                                      onResult: (val) {
+                                        setModalState(() {
+                                          controller.text = val.recognizedWords;
+                                          controller.selection =
+                                              TextSelection.fromPosition(
+                                                TextPosition(
+                                                  offset:
+                                                      controller.text.length,
+                                                ),
+                                              );
+                                        });
+                                      },
+                                    );
+                                  }
+                                } else {
+                                  setModalState(() => _isListening = false);
+                                  _speech.stop();
+                                }
+                              },
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -474,7 +806,10 @@ class _TodoListPageState extends State<TodoListPage> {
                         onPressed: () {
                           if (controller.text.trim().isNotEmpty) {
                             _speech.stop();
-                            _updateTodo(todo['todo_item_id'], controller.text.trim());
+                            _updateTodo(
+                              todo['todo_item_id'],
+                              controller.text.trim(),
+                            );
                             Navigator.pop(context);
                           }
                         },
@@ -482,8 +817,13 @@ class _TodoListPageState extends State<TodoListPage> {
                           backgroundColor: _primaryColor,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: Text(
                           'main.save'.tr(context),
@@ -496,7 +836,7 @@ class _TodoListPageState extends State<TodoListPage> {
               ),
             ),
           );
-        }
+        },
       ),
     ).whenComplete(() => _speech.stop());
   }
@@ -512,11 +852,15 @@ class _TodoListPageState extends State<TodoListPage> {
         builder: (BuildContext context, StateSetter setModalState) {
           _currentModalSetState = setModalState;
           return Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
               ),
               padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
               child: Column(
@@ -537,38 +881,54 @@ class _TodoListPageState extends State<TodoListPage> {
                     controller: controller,
                     autofocus: true,
                     maxLines: null,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'todo_list.task_desc'.tr(context),
-                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 16,
+                      ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
-                      suffixIcon: _isSpeechInitialized ? IconButton(
-                        icon: Icon(
-                          _isListening ? Icons.mic : Icons.mic_none,
-                          color: _isListening ? Colors.red : _primaryColor,
-                        ),
-                        onPressed: () async {
-                          if (!_isListening) {
-                            bool available = await _speech.initialize();
-                            if (available) {
-                              setModalState(() => _isListening = true);
-                              _speech.listen(
-                                localeId: 'id_ID',
-                                onResult: (val) {
-                                  setModalState(() {
-                                    controller.text = val.recognizedWords;
-                                    controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
-                                  });
-                                },
-                              );
-                            }
-                          } else {
-                            setModalState(() => _isListening = false);
-                            _speech.stop();
-                          }
-                        },
-                      ) : null,
+                      suffixIcon: _isSpeechInitialized
+                          ? IconButton(
+                              icon: Icon(
+                                _isListening ? Icons.mic : Icons.mic_none,
+                                color: _isListening
+                                    ? Colors.red
+                                    : _primaryColor,
+                              ),
+                              onPressed: () async {
+                                if (!_isListening) {
+                                  bool available = await _speech.initialize();
+                                  if (available) {
+                                    setModalState(() => _isListening = true);
+                                    _speech.listen(
+                                      localeId: 'id_ID',
+                                      onResult: (val) {
+                                        setModalState(() {
+                                          controller.text = val.recognizedWords;
+                                          controller.selection =
+                                              TextSelection.fromPosition(
+                                                TextPosition(
+                                                  offset:
+                                                      controller.text.length,
+                                                ),
+                                              );
+                                        });
+                                      },
+                                    );
+                                  }
+                                } else {
+                                  setModalState(() => _isListening = false);
+                                  _speech.stop();
+                                }
+                              },
+                            )
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -598,8 +958,13 @@ class _TodoListPageState extends State<TodoListPage> {
                           backgroundColor: _primaryColor,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: Text(
                           'main.save'.tr(context),
@@ -612,7 +977,7 @@ class _TodoListPageState extends State<TodoListPage> {
               ),
             ),
           );
-        }
+        },
       ),
     ).whenComplete(() => _speech.stop());
   }
@@ -621,17 +986,45 @@ class _TodoListPageState extends State<TodoListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: CustomAppBar(userData: _currentUserData ?? {}, showBackButton: false),
-      endDrawer: SideDrawer(userData: _currentUserData ?? {}, activePage: 'todo_list'),
+      appBar: CustomAppBar(
+        userData: _currentUserData ?? {},
+        showBackButton: false,
+      ),
+      endDrawer: SideDrawer(
+        userData: _currentUserData ?? {},
+        activePage: 'todo_list',
+      ),
       body: RefreshIndicator(
-        onRefresh: () => _fetchTodos(),
+        onRefresh: () async {
+          _currentPage = 1;
+          await _fetchTodos();
+          if (_viewMode == 'team') {
+            await _fetchEmployees();
+          }
+        },
         color: _primaryColor,
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: _buildHeaderCard(context),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _buildHeaderCard(context),
+                    const SizedBox(height: 16),
+                    if (_hasPermission('mobile_todo_team')) ...[
+                      _buildViewModePills(),
+                      if (_viewMode == 'team') ...[
+                        const SizedBox(height: 16),
+                        _buildEmployeeDropdown(),
+                      ],
+                      const SizedBox(height: 24),
+                    ] else ...[
+                      // If no permission, ensure we are in personal mode
+                      const SizedBox(height: 8),
+                    ],
+                  ],
+                ),
               ),
             ),
             SliverToBoxAdapter(
@@ -643,7 +1036,10 @@ class _TodoListPageState extends State<TodoListPage> {
             if (_isLoading && _todos.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   child: Column(
                     children: [
                       const ShimmerCard(height: 120),
@@ -672,18 +1068,18 @@ class _TodoListPageState extends State<TodoListPage> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final todo = _todos[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildTodoItem(context, todo),
-                      );
-                    },
-                    childCount: _todos.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final todo = _todos[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildTodoItem(context, todo),
+                    );
+                  }, childCount: _todos.length),
                 ),
               ),
             if (_totalCount > _selectedLimit)
@@ -702,7 +1098,13 @@ class _TodoListPageState extends State<TodoListPage> {
               onPressed: _showAddTodoDialog,
               backgroundColor: _primaryColor,
               icon: const Icon(Icons.add_task, color: Colors.white),
-              label: Text('todo_list.add_task'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              label: Text(
+                'todo_list.add_task'.tr(context),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             )
           : null,
     );
@@ -716,7 +1118,11 @@ class _TodoListPageState extends State<TodoListPage> {
           children: [
             Text(
               'main.show'.tr(context),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
             ),
             const SizedBox(width: 8),
             _buildPremiumDropdown(),
@@ -730,9 +1136,10 @@ class _TodoListPageState extends State<TodoListPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              'todo_list.total'.tr(context, args: {
-                'count': _totalCount.toString(),
-              }),
+              'todo_list.total'.tr(
+                context,
+                args: {'count': _totalCount.toString()},
+              ),
               style: TextStyle(
                 color: _primaryColor,
                 fontSize: 11,
@@ -756,8 +1163,16 @@ class _TodoListPageState extends State<TodoListPage> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: _selectedLimit,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _primaryColor),
-          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: _primaryColor,
+          ),
+          style: TextStyle(
+            color: _primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
           onChanged: (int? newValue) {
             if (newValue != null) {
               setState(() {
@@ -785,9 +1200,11 @@ class _TodoListPageState extends State<TodoListPage> {
       children: [
         _buildPageButton(
           icon: Icons.chevron_left_rounded,
-          onPressed: _currentPage > 1 ? () {
-            _fetchTodos(page: _currentPage - 1);
-          } : null,
+          onPressed: _currentPage > 1
+              ? () {
+                  _fetchTodos(page: _currentPage - 1);
+                }
+              : null,
         ),
         const SizedBox(width: 16),
         Container(
@@ -804,19 +1221,28 @@ class _TodoListPageState extends State<TodoListPage> {
             ],
           ),
           child: Text(
-            'todo_list.page_x_of_y'.tr(context, args: {
-              'current': _currentPage.toString(),
-              'total': totalPages.toString(),
-            }),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+            'todo_list.page_x_of_y'.tr(
+              context,
+              args: {
+                'current': _currentPage.toString(),
+                'total': totalPages.toString(),
+              },
+            ),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
           ),
         ),
         const SizedBox(width: 16),
         _buildPageButton(
           icon: Icons.chevron_right_rounded,
-          onPressed: _currentPage < totalPages ? () {
-            _fetchTodos(page: _currentPage + 1);
-          } : null,
+          onPressed: _currentPage < totalPages
+              ? () {
+                  _fetchTodos(page: _currentPage + 1);
+                }
+              : null,
         ),
       ],
     );
@@ -825,8 +1251,8 @@ class _TodoListPageState extends State<TodoListPage> {
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null 
-          ? (isDark ? Colors.white12 : Colors.grey[200]) 
+      color: onPressed == null
+          ? (isDark ? Colors.white12 : Colors.grey[200])
           : Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -842,10 +1268,10 @@ class _TodoListPageState extends State<TodoListPage> {
             ),
           ),
           child: Icon(
-            icon, 
-            color: onPressed == null 
-                ? (isDark ? Colors.white24 : Colors.grey[400]) 
-                : _primaryColor, 
+            icon,
+            color: onPressed == null
+                ? (isDark ? Colors.white24 : Colors.grey[400])
+                : _primaryColor,
             size: 24,
           ),
         ),
@@ -886,12 +1312,20 @@ class _TodoListPageState extends State<TodoListPage> {
                     children: [
                       Text(
                         'todo_list.stats_title'.tr(context),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'todo_list.general_accumulation'.tr(context),
-                        style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 12),
+                        style: TextStyle(
+                          color: _primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -902,7 +1336,9 @@ class _TodoListPageState extends State<TodoListPage> {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      _isStatsExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                      _isStatsExpanded
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
                       color: _primaryColor,
                       size: 20,
                     ),
@@ -923,13 +1359,29 @@ class _TodoListPageState extends State<TodoListPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildStatMiniRow('main.total'.tr(context), _totalCount.toString(), Colors.blue),
+                              _buildStatMiniRow(
+                                'main.total'.tr(context),
+                                _totalCount.toString(),
+                                Colors.blue,
+                              ),
                               const SizedBox(height: 12),
-                              _buildStatMiniRow('todo_list.completed_today'.tr(context), _completedTodayCount.toString(), Colors.purple),
+                              _buildStatMiniRow(
+                                'todo_list.completed_today'.tr(context),
+                                _completedTodayCount.toString(),
+                                Colors.purple,
+                              ),
                               const SizedBox(height: 12),
-                              _buildStatMiniRow('todo_list.complete'.tr(context), _completedCount.toString(), Colors.green),
+                              _buildStatMiniRow(
+                                'todo_list.complete'.tr(context),
+                                _completedCount.toString(),
+                                Colors.green,
+                              ),
                               const SizedBox(height: 12),
-                              _buildStatMiniRow('todo_list.pending'.tr(context), _pendingCount.toString(), Colors.orange),
+                              _buildStatMiniRow(
+                                'todo_list.pending'.tr(context),
+                                _pendingCount.toString(),
+                                Colors.orange,
+                              ),
                             ],
                           ),
                         ),
@@ -943,8 +1395,12 @@ class _TodoListPageState extends State<TodoListPage> {
                               child: CircularProgressIndicator(
                                 value: progress,
                                 strokeWidth: 10,
-                                backgroundColor: Theme.of(context).dividerColor.withOpacity(0.1),
-                                valueColor: AlwaysStoppedAnimation<Color>(_primaryColor),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).dividerColor.withOpacity(0.1),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  _primaryColor,
+                                ),
                                 strokeCap: StrokeCap.round,
                               ),
                             ),
@@ -953,11 +1409,20 @@ class _TodoListPageState extends State<TodoListPage> {
                               children: [
                                 Text(
                                   '${(progress * 100).toInt()}%',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
                                 ),
                                 Text(
-                                  'todo_list.completed'.tr(context).toUpperCase(),
-                                  style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.grey),
+                                  'todo_list.completed'
+                                      .tr(context)
+                                      .toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ),
@@ -984,7 +1449,11 @@ class _TodoListPageState extends State<TodoListPage> {
         const SizedBox(width: 8),
         Text(
           label,
-          style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const Spacer(),
         Text(
@@ -1000,7 +1469,7 @@ class _TodoListPageState extends State<TodoListPage> {
       final createdDate = DateTime.parse(createdAt);
       final now = DateTime.now();
       final difference = now.difference(createdDate);
-      
+
       final int minutes = difference.inMinutes;
       final int hours = difference.inHours;
       final int days = difference.inDays;
@@ -1096,7 +1565,11 @@ class _TodoListPageState extends State<TodoListPage> {
                 _confirmDelete(todo);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Anda tidak memiliki izin untuk menghapus tugas')),
+                  const SnackBar(
+                    content: Text(
+                      'Anda tidak memiliki izin untuk menghapus tugas',
+                    ),
+                  ),
                 );
               }
             },
@@ -1135,19 +1608,30 @@ class _TodoListPageState extends State<TodoListPage> {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
-                            decoration: isCompleted ? TextDecoration.lineThrough : null,
-                            color: isCompleted ? Colors.grey : Theme.of(context).colorScheme.onSurface,
+                            decoration: isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                            color: isCompleted
+                                ? Colors.grey
+                                : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(Icons.calendar_today, size: 10, color: Colors.grey[500]),
+                            Icon(
+                              Icons.calendar_today,
+                              size: 10,
+                              color: Colors.grey[500],
+                            ),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
                                 date,
-                                style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 11,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
@@ -1164,38 +1648,81 @@ class _TodoListPageState extends State<TodoListPage> {
                       if (value == 'edit') _showEditTodoDialog(todo);
                       if (value == 'delete') _confirmDelete(todo);
                       if (value == 'toggle') _toggleTodo(todo);
+                      if (value == 'move') _showMoveTodoDialog(todo);
                     },
-                    icon: Icon(Icons.more_horiz_rounded, size: 20, color: Colors.grey[400]),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    icon: Icon(
+                      Icons.more_horiz_rounded,
+                      size: 20,
+                      color: Colors.grey[400],
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Icons.edit_outlined, size: 20, color: _primaryColor),
+                            Icon(
+                              Icons.edit_outlined,
+                              size: 20,
+                              color: _primaryColor,
+                            ),
                             const SizedBox(width: 12),
                             Text('todo_list.edit_task'.tr(context)),
                           ],
                         ),
                       ),
+                      if (_hasPermission('mobile_todo_team'))
+                        PopupMenuItem(
+                          value: 'move',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.unarchive_outlined,
+                                size: 20,
+                                color: _primaryColor,
+                              ),
+                              const SizedBox(width: 12),
+                              Text('todo_list.move_task'.tr(context)),
+                            ],
+                          ),
+                        ),
                       PopupMenuItem(
                         value: 'toggle',
                         child: Row(
                           children: [
-                            Icon(isCompleted ? Icons.undo_rounded : Icons.check_circle_rounded, size: 20, color: _primaryColor),
+                            Icon(
+                              isCompleted
+                                  ? Icons.undo_rounded
+                                  : Icons.check_circle_rounded,
+                              size: 20,
+                              color: _primaryColor,
+                            ),
                             const SizedBox(width: 12),
-                            Text(isCompleted ? 'todo_list.pending'.tr(context) : 'todo_list.completed'.tr(context)),
+                            Text(
+                              isCompleted
+                                  ? 'todo_list.pending'.tr(context)
+                                  : 'todo_list.completed'.tr(context),
+                            ),
                           ],
                         ),
                       ),
                       if (_hasPermission('mobile_todo_delete'))
-                         PopupMenuItem(
+                        PopupMenuItem(
                           value: 'delete',
                           child: Row(
                             children: [
-                              const Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red),
+                              const Icon(
+                                Icons.delete_outline_rounded,
+                                size: 20,
+                                color: Colors.red,
+                              ),
                               const SizedBox(width: 12),
-                              Text('main.delete'.tr(context), style: const TextStyle(color: Colors.red)),
+                              Text(
+                                'main.delete'.tr(context),
+                                style: const TextStyle(color: Colors.red),
+                              ),
                             ],
                           ),
                         ),
@@ -1233,7 +1760,11 @@ class _TodoListPageState extends State<TodoListPage> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
+            const Icon(
+              Icons.delete_forever_rounded,
+              color: Colors.red,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
               'todo_list.delete_confirm_title'.tr(context),
@@ -1243,7 +1774,9 @@ class _TodoListPageState extends State<TodoListPage> {
             Text(
               'todo_list.delete_confirm_desc'.tr(context),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 32),
             Row(
@@ -1254,11 +1787,15 @@ class _TodoListPageState extends State<TodoListPage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'main.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -1273,7 +1810,9 @@ class _TodoListPageState extends State<TodoListPage> {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: Text('main.delete'.tr(context)),
@@ -1284,6 +1823,164 @@ class _TodoListPageState extends State<TodoListPage> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildViewModePills() {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final int selectedIndex = _viewMode == 'personal' ? 0 : 1;
+
+    return Container(
+      height: 54,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Sliding Background
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutBack,
+            alignment: Alignment(selectedIndex == 0 ? -1 : 1, 0),
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _primaryColor,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Labels
+          Row(
+            children: [
+              Expanded(
+                child: _buildPillLabel(
+                  'personal',
+                  'todo_list.personal'.tr(context),
+                  _viewMode == 'personal',
+                ),
+              ),
+              Expanded(
+                child: _buildPillLabel(
+                  'team',
+                  'todo_list.team'.tr(context),
+                  _viewMode == 'team',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPillLabel(String mode, String label, bool isActive) {
+    return GestureDetector(
+      onTap: () {
+        if (_viewMode == mode) return;
+        setState(() {
+          _viewMode = mode;
+          _currentPage = 1;
+          _todos = [];
+          _allTodos = [];
+        });
+
+        if (mode == 'team') {
+          // Data is already being fetched in background since initState
+          if (_selectedEmployeeId != null) {
+            _fetchTodos();
+          } else {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+        } else {
+          _fetchTodos();
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedDefaultTextStyle(
+        duration: const Duration(milliseconds: 300),
+        style: TextStyle(
+          color: isActive ? Colors.white : Colors.grey[600],
+          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          fontSize: 15,
+        ),
+        child: Center(child: Text(label)),
+      ),
+    );
+  }
+
+  Widget _buildEmployeeDropdown() {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Find the current selected employee name for the dropdown value
+    String selectedName = '';
+    if (_selectedEmployeeId != null) {
+      final emp = _employees.firstWhere(
+        (e) => e['user_id'].toString() == _selectedEmployeeId,
+        orElse: () => null,
+      );
+      if (emp != null) {
+        selectedName = '${emp['first_name']} ${emp['last_name'] ?? ''}'.trim();
+      }
+    }
+
+    // Convert employees list to searchable options format
+    final List<Map<String, String>> employeeOptions = _employees.map((emp) {
+      return {
+        'id': emp['user_id'].toString(),
+        'name': '${emp['first_name']} ${emp['last_name'] ?? ''}'.trim(),
+      };
+    }).toList();
+
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: SearchableDropdown(
+        label: 'todo_list.select_employee'.tr(context),
+        value: selectedName,
+        options: employeeOptions,
+        icon: Icons.person_search_rounded,
+        placeholder: _isEmployeesLoading
+            ? 'profile.loading'.tr(context)
+            : 'employees.search_hint'.tr(context),
+        required: false,
+        onSelected: (val) {
+          if (val.isNotEmpty) {
+            setState(() {
+              _selectedEmployeeId = val;
+              _currentPage = 1;
+            });
+            _fetchTodos();
+          }
+        },
       ),
     );
   }

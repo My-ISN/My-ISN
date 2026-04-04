@@ -5,6 +5,7 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/shimmer_loading.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/period_filter_widget.dart';
 import 'create_work_log_page.dart';
 
 class WorkLogPage extends StatefulWidget {
@@ -21,11 +22,11 @@ class _WorkLogPageState extends State<WorkLogPage> {
   bool _isLoading = true;
   bool _isStatsLoading = true;
   List<dynamic> _logs = [];
-  
+
   // Stats
   int _completedItems = 0;
   int _targetItems = 0;
-  
+
   // Pagination (Standardized with Todo List/Employees)
   int _selectedLimit = 10;
   int _currentPage = 1;
@@ -36,7 +37,10 @@ class _WorkLogPageState extends State<WorkLogPage> {
   // Filters
   String? _selectedMonth;
   String? _selectedYear;
-  final List<String> _years = List.generate(5, (index) => (DateTime.now().year - index).toString());
+  final List<String> _years = List.generate(
+    5,
+    (index) => (DateTime.now().year - index).toString(),
+  );
   final List<Map<String, String>> _months = [
     {'id': '01', 'name': 'january'},
     {'id': '02', 'name': 'february'},
@@ -57,7 +61,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
     super.initState();
     _selectedMonth = DateTime.now().month.toString().padLeft(2, '0');
     _selectedYear = DateTime.now().year.toString();
-    
+
     _fetchStats();
     if (_hasPermission('mobile_worklog_view')) {
       _fetchLogs();
@@ -69,7 +73,10 @@ class _WorkLogPageState extends State<WorkLogPage> {
   bool _hasPermission(String resource) {
     if (widget.userData['role_resources'] == 'all') return true;
     final String resources = widget.userData['role_resources'] ?? '';
-    final List<String> resourceList = resources.split(',').map((e) => e.trim()).toList();
+    final List<String> resourceList = resources
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
     return resourceList.contains(resource);
   }
 
@@ -78,7 +85,9 @@ class _WorkLogPageState extends State<WorkLogPage> {
     setState(() => _isStatsLoading = true);
     try {
       final response = await http.get(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_worklog_stats?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&month=$_selectedMonth&year=$_selectedYear'),
+        Uri.parse(
+          'https://foxgeen.com/HRIS/mobileapi/get_worklog_stats?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&month=$_selectedMonth&year=$_selectedYear',
+        ),
       );
 
       if (response.statusCode == 200) {
@@ -104,7 +113,9 @@ class _WorkLogPageState extends State<WorkLogPage> {
     try {
       final offset = (targetPage - 1) * _selectedLimit;
       final response = await http.get(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_worklog_list?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&page=$targetPage&limit=$_selectedLimit&offset=$offset&month=$_selectedMonth&year=$_selectedYear'),
+        Uri.parse(
+          'https://foxgeen.com/HRIS/mobileapi/get_worklog_list?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&page=$targetPage&limit=$_selectedLimit&offset=$offset&month=$_selectedMonth&year=$_selectedYear',
+        ),
       );
 
       if (response.statusCode == 200) {
@@ -149,7 +160,10 @@ class _WorkLogPageState extends State<WorkLogPage> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 child: _buildPaginationHeader(),
               ),
             ),
@@ -160,7 +174,11 @@ class _WorkLogPageState extends State<WorkLogPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.lock_outline, size: 80, color: Colors.grey[300]),
+                      Icon(
+                        Icons.lock_outline,
+                        size: 80,
+                        color: Colors.grey[300],
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'main.xin_role_enable'.tr(context),
@@ -193,7 +211,11 @@ class _WorkLogPageState extends State<WorkLogPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.history_edu, size: 80, color: Colors.grey[300]),
+                      Icon(
+                        Icons.history_edu,
+                        size: 80,
+                        color: Colors.grey[300],
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'work_log.no_logs'.tr(context),
@@ -207,13 +229,10 @@ class _WorkLogPageState extends State<WorkLogPage> {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final log = _logs[index];
-                      return _buildLogItem(context, log);
-                    },
-                    childCount: _logs.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final log = _logs[index];
+                    return _buildLogItem(context, log);
+                  }, childCount: _logs.length),
                 ),
               ),
 
@@ -229,25 +248,32 @@ class _WorkLogPageState extends State<WorkLogPage> {
         ),
       ),
       floatingActionButton: _hasPermission('mobile_worklog_add')
-      ? FloatingActionButton.extended(
-          onPressed: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CreateWorkLogPage(userData: widget.userData),
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        CreateWorkLogPage(userData: widget.userData),
+                  ),
+                );
+                if (result == true) {
+                  _fetchStats();
+                  _fetchLogs(page: 1);
+                }
+              },
+              backgroundColor: _primaryColor,
+              elevation: 4,
+              icon: const Icon(Icons.edit_note_rounded, color: Colors.white),
+              label: Text(
+                'work_log.add_log'.tr(context),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            );
-            if (result == true) {
-              _fetchStats();
-              _fetchLogs(page: 1);
-            }
-          },
-          backgroundColor: _primaryColor,
-          elevation: 4,
-          icon: const Icon(Icons.edit_note_rounded, color: Colors.white),
-          label: Text('work_log.add_log'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        )
-      : null,
+            )
+          : null,
     );
   }
 
@@ -259,36 +285,41 @@ class _WorkLogPageState extends State<WorkLogPage> {
           children: [
             Text(
               'main.show'.tr(context),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
             ),
             const SizedBox(width: 8),
             _buildPremiumDropdown(),
             const SizedBox(width: 8),
             // DatePicker (Month-Year)
-            InkWell(
-              onTap: _showMonthYearPicker,
-              child: Container(
-                height: 38,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.grey.withOpacity(0.1)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.calendar_month_rounded, size: 14, color: _primaryColor),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${_months.firstWhere((m) => m['id'] == _selectedMonth)['name']!.tr(context).substring(0, 3)} $_selectedYear',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.keyboard_arrow_down_rounded, size: 14, color: Colors.grey),
-                  ],
-                ),
-              ),
+            PeriodFilterButton(
+              selectedMonth: _selectedMonth!,
+              selectedYear: _selectedYear!,
+              months: _months,
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => PeriodPickerSheet(
+                    initialMonth: _selectedMonth!,
+                    initialYear: _selectedYear!,
+                    months: _months,
+                    years: _years,
+                    onApply: (month, year) {
+                      setState(() {
+                        _selectedMonth = month;
+                        _selectedYear = year;
+                        _currentPage = 1;
+                      });
+                      _fetchStats();
+                      _fetchLogs(page: 1);
+                    },
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -300,9 +331,10 @@ class _WorkLogPageState extends State<WorkLogPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              'work_log.total'.tr(context, args: {
-                'count': _totalCount.toString(),
-              }),
+              'work_log.total'.tr(
+                context,
+                args: {'count': _totalCount.toString()},
+              ),
               style: TextStyle(
                 color: _primaryColor,
                 fontSize: 11,
@@ -326,8 +358,16 @@ class _WorkLogPageState extends State<WorkLogPage> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: _selectedLimit,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _primaryColor),
-          style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 18,
+            color: _primaryColor,
+          ),
+          style: TextStyle(
+            color: _primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
           onChanged: (int? newValue) {
             if (newValue != null) {
               setState(() {
@@ -354,7 +394,9 @@ class _WorkLogPageState extends State<WorkLogPage> {
       children: [
         _buildPageButton(
           icon: Icons.chevron_left_rounded,
-          onPressed: _currentPage > 1 ? () => _fetchLogs(page: _currentPage - 1) : null,
+          onPressed: _currentPage > 1
+              ? () => _fetchLogs(page: _currentPage - 1)
+              : null,
         ),
         const SizedBox(width: 16),
         Container(
@@ -371,17 +413,26 @@ class _WorkLogPageState extends State<WorkLogPage> {
             ],
           ),
           child: Text(
-            'work_log.page_x_of_y'.tr(context, args: {
-              'current': _currentPage.toString(),
-              'total': _totalPages.toString(),
-            }),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+            'work_log.page_x_of_y'.tr(
+              context,
+              args: {
+                'current': _currentPage.toString(),
+                'total': _totalPages.toString(),
+              },
+            ),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
           ),
         ),
         const SizedBox(width: 16),
         _buildPageButton(
           icon: Icons.chevron_right_rounded,
-          onPressed: _currentPage < _totalPages ? () => _fetchLogs(page: _currentPage + 1) : null,
+          onPressed: _currentPage < _totalPages
+              ? () => _fetchLogs(page: _currentPage + 1)
+              : null,
         ),
       ],
     );
@@ -390,8 +441,8 @@ class _WorkLogPageState extends State<WorkLogPage> {
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null 
-          ? (isDark ? Colors.white12 : Colors.grey[200]) 
+      color: onPressed == null
+          ? (isDark ? Colors.white12 : Colors.grey[200])
           : Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -407,10 +458,10 @@ class _WorkLogPageState extends State<WorkLogPage> {
             ),
           ),
           child: Icon(
-            icon, 
-            color: onPressed == null 
-                ? (isDark ? Colors.white24 : Colors.grey[400]) 
-                : _primaryColor, 
+            icon,
+            color: onPressed == null
+                ? (isDark ? Colors.white24 : Colors.grey[400])
+                : _primaryColor,
             size: 24,
           ),
         ),
@@ -450,12 +501,20 @@ class _WorkLogPageState extends State<WorkLogPage> {
                     children: [
                       Text(
                         'work_log.my_summary'.tr(context),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: -0.5),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${_months.firstWhere((m) => m['id'] == _selectedMonth)['name']!.tr(context)} $_selectedYear',
-                        style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold, fontSize: 12),
+                        style: TextStyle(
+                          color: _primaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -468,7 +527,9 @@ class _WorkLogPageState extends State<WorkLogPage> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          _isStatsExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                          _isStatsExpanded
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
                           color: _primaryColor,
                           size: 20,
                         ),
@@ -568,9 +629,23 @@ class _WorkLogPageState extends State<WorkLogPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[500],
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
       ],
     );
   }
@@ -604,7 +679,11 @@ class _WorkLogPageState extends State<WorkLogPage> {
                     color: _primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Icon(Icons.assignment_rounded, color: _primaryColor, size: 26),
+                  child: Icon(
+                    Icons.assignment_rounded,
+                    color: _primaryColor,
+                    size: 26,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -613,25 +692,39 @@ class _WorkLogPageState extends State<WorkLogPage> {
                     children: [
                       Text(
                         log['estimate_date'] ?? '-',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         log['estimate_number'] ?? '-',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '${log['item_count']} ${'main.items'.tr(context)}',
-                    style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 11),
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -663,135 +756,6 @@ class _WorkLogPageState extends State<WorkLogPage> {
     }
   }
 
-  void _showMonthYearPicker() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'finance.choose_period'.tr(context),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 45,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _years.length,
-                  itemBuilder: (context, index) {
-                    bool isSelected = _years[index] == _selectedYear;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: ChoiceChip(
-                        label: Text(_years[index]),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setModalState(() => _selectedYear = _years[index]);
-                            setState(() => _selectedYear = _years[index]);
-                          }
-                        },
-                        selectedColor: _primaryColor.withOpacity(0.2),
-                        labelStyle: TextStyle(
-                          color: isSelected ? _primaryColor : Colors.grey,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                        backgroundColor: Theme.of(context).cardColor,
-                        side: BorderSide(
-                          color: isSelected ? _primaryColor : Colors.grey.withOpacity(0.1),
-                        ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 2.2,
-                ),
-                itemCount: _months.length,
-                itemBuilder: (context, index) {
-                  final int monthId = int.parse(_months[index]['id']!);
-                  final int selectedYearInt = int.parse(_selectedYear!);
-                  final DateTime now = DateTime.now();
-                  
-                  // Disable if month is in the future
-                  bool isFuture = (selectedYearInt > now.year) || 
-                                 (selectedYearInt == now.year && monthId > now.month);
-                  
-                  bool isSelected = _months[index]['id'] == _selectedMonth;
-                  
-                  return InkWell(
-                    onTap: isFuture ? null : () {
-                      setModalState(() => _selectedMonth = _months[index]['id']!);
-                      setState(() {
-                        _selectedMonth = _months[index]['id']!;
-                        _currentPage = 1;
-                      });
-                      Navigator.pop(context);
-                      _fetchStats();
-                      _fetchLogs();
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: isSelected 
-                            ? _primaryColor 
-                            : (isFuture ? Colors.transparent : Theme.of(context).cardColor),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isSelected 
-                              ? _primaryColor 
-                              : (isFuture ? Colors.grey.withOpacity(0.05) : Colors.grey.withOpacity(0.1)),
-                        ),
-                      ),
-                      child: Text(
-                        _months[index]['name']!.tr(context),
-                        style: TextStyle(
-                          color: isSelected 
-                              ? Colors.white 
-                              : (isFuture ? Colors.grey[300] : Colors.grey[500]),
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _WorkLogDetailsSheet extends StatefulWidget {
@@ -817,7 +781,9 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
   Future<void> _fetchDetails() async {
     try {
       final response = await http.get(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_worklog_details?estimate_id=${widget.logId}'),
+        Uri.parse(
+          'https://foxgeen.com/HRIS/mobileapi/get_worklog_details?estimate_id=${widget.logId}',
+        ),
       );
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
@@ -835,78 +801,99 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
   }
 
   Future<void> _deleteLog() async {
-    final bool confirm = await showModalBottomSheet<bool>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 24),
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
+    final bool confirm =
+        await showModalBottomSheet<bool>(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (context) => Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
               ),
             ),
-            const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              'work_log.delete_confirm_title'.tr(context),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'work_log.delete_confirm_desc'.tr(context),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
-            ),
-            const SizedBox(height: 32),
-            Row(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text(
-                      'main.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-                    ),
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    child: Text('main.delete'.tr(context)),
+                const Icon(
+                  Icons.delete_forever_rounded,
+                  color: Colors.red,
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'work_log.delete_confirm_title'.tr(context),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(height: 12),
+                Text(
+                  'work_log.delete_confirm_desc'.tr(context),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'main.cancel'.tr(context),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text('main.delete'.tr(context)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
               ],
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    ) ?? false;
+          ),
+        ) ??
+        false;
 
     if (!confirm) return;
 
@@ -920,7 +907,7 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
         final result = json.decode(response.body);
         if (result['status'] == true) {
           if (mounted) {
-            Navigator.pop(context, true); 
+            Navigator.pop(context, true);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('work_log.delete_success'.tr(context))),
             );
@@ -945,21 +932,27 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
     );
 
     if (result == true && mounted) {
-      Navigator.pop(context, true); 
+      Navigator.pop(context, true);
     }
   }
 
   bool _hasPermission(String resource) {
     if (widget.userData['role_resources'] == 'all') return true;
     final String resources = widget.userData['role_resources'] ?? '';
-    final List<String> resourceList = resources.split(',').map((e) => e.trim()).toList();
+    final List<String> resourceList = resources
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
     return resourceList.contains(resource);
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const SizedBox(height: 300, child: Center(child: CircularProgressIndicator()));
+      return const SizedBox(
+        height: 300,
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (_details == null) {
@@ -988,58 +981,85 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'work_log.log_details'.tr(context),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Row(
-                children: [
-                  if (_hasPermission('mobile_worklog_edit') || _hasPermission('mobile_worklog_add'))
-                    IconButton(
-                      onPressed: _editLog,
-                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF7E57C2)),
-                    ),
-                   if (_hasPermission('mobile_worklog_delete'))
-                    IconButton(
-                      onPressed: _deleteLog,
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    ),
-                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-                ],
-              ),
-            ],
-          ),
-          const Divider(),
-          const SizedBox(height: 10),
-          _buildInfoRow('work_log.date'.tr(context), estimate['estimate_date']),
-          _buildInfoRow('work_log.number'.tr(context), estimate['estimate_number']),
-          const SizedBox(height: 20),
-          Text(
-            'work_log.items'.tr(context),
-            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
-          ),
-          const SizedBox(height: 10),
-          ...items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Icon(Icons.check_circle_outline, size: 18, color: Colors.green),
-                const SizedBox(width: 10),
-                Expanded(child: Text(item['item_name'] ?? '-')),
+                Text(
+                  'work_log.log_details'.tr(context),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Row(
+                  children: [
+                    if (_hasPermission('mobile_worklog_edit') ||
+                        _hasPermission('mobile_worklog_add'))
+                      IconButton(
+                        onPressed: _editLog,
+                        icon: const Icon(
+                          Icons.edit_outlined,
+                          color: Color(0xFF7E57C2),
+                        ),
+                      ),
+                    if (_hasPermission('mobile_worklog_delete'))
+                      IconButton(
+                        onPressed: _deleteLog,
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
+                      ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
               ],
             ),
-          )),
-          const SizedBox(height: 30),
-        ],
+            const Divider(),
+            const SizedBox(height: 10),
+            _buildInfoRow(
+              'work_log.date'.tr(context),
+              estimate['estimate_date'],
+            ),
+            _buildInfoRow(
+              'work_log.number'.tr(context),
+              estimate['estimate_number'],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'work_log.items'.tr(context),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.check_circle_outline,
+                      size: 18,
+                      color: Colors.green,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(item['item_name'] ?? '-')),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(

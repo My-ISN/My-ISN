@@ -47,44 +47,100 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     final personal = widget.employeeData['personal'] ?? {};
 
     if (widget.section == 'profil') {
-      _controllers['first_name'] = TextEditingController(text: info['first_name'] ?? '');
-      _controllers['last_name'] = TextEditingController(text: info['last_name'] ?? '');
+      _controllers['first_name'] = TextEditingController(
+        text: info['first_name'] ?? '',
+      );
+      _controllers['last_name'] = TextEditingController(
+        text: info['last_name'] ?? '',
+      );
       _controllers['email'] = TextEditingController(text: info['email'] ?? '');
-      _controllers['contact_number'] = TextEditingController(text: info['contact_number'] ?? '');
-      _controllers['address_1'] = TextEditingController(text: info['address_1'] ?? '');
+      _controllers['contact_number'] = TextEditingController(
+        text: info['contact_number'] ?? '',
+      );
+      _controllers['address_1'] = TextEditingController(
+        text: info['address_1'] ?? '',
+      );
       _controllers['city'] = TextEditingController(text: info['city'] ?? '');
       _controllers['state'] = TextEditingController(text: info['state'] ?? '');
-      _controllers['zipcode'] = TextEditingController(text: info['zipcode'] ?? '');
-      _controllers['nationality'] = TextEditingController(text: info['country'] ?? '');
+      _controllers['zipcode'] = TextEditingController(
+        text: info['zipcode'] ?? '',
+      );
+      _controllers['nationality'] = TextEditingController(
+        text: info['country'] ?? '',
+      );
     } else if (widget.section == 'kontrak') {
-      _controllers['basic_salary'] = TextEditingController(text: emp['basic_salary']?.toString() ?? '0');
-      _controllers['hourly_rate'] = TextEditingController(text: emp['hourly_rate']?.toString() ?? '0');
-      _controllers['salay_type'] = TextEditingController(text: emp['salay_type'] == 'Per Month' ? '1' : '0');
-      _controllers['worklog'] = TextEditingController(text: emp['worklog']?.toString() ?? '0');
-      _controllers['worklog_active'] = TextEditingController(text: emp['worklog_active']?.toString() ?? '0');
-      _controllers['date_of_joining'] = TextEditingController(text: emp['date_of_joining'] ?? '');
-      _controllers['date_of_leaving'] = TextEditingController(text: emp['contract_end'] ?? '');
-      _controllers['leave_categories'] = TextEditingController(text: emp['leave_categories'] ?? 'all');
+      _controllers['basic_salary'] = TextEditingController(
+        text: emp['basic_salary']?.toString() ?? '0',
+      );
+      _controllers['hourly_rate'] = TextEditingController(
+        text: emp['hourly_rate']?.toString() ?? '0',
+      );
+      _controllers['salay_type'] = TextEditingController(
+        text: emp['salay_type'] == 'Per Month' ? '1' : '0',
+      );
+      _controllers['worklog'] = TextEditingController(
+        text: emp['worklog']?.toString() ?? '0',
+      );
+      _controllers['worklog_active'] = TextEditingController(
+        text: emp['worklog_active']?.toString() ?? '0',
+      );
+      _controllers['date_of_joining'] = TextEditingController(
+        text: emp['date_of_joining'] ?? '',
+      );
+      _controllers['date_of_leaving'] = TextEditingController(
+        text: emp['contract_end'] ?? '',
+      );
+      _controllers['leave_categories'] = TextEditingController(
+        text: emp['leave_categories'] ?? 'all',
+      );
     } else if (widget.section == 'pekerjaan') {
-      _controllers['department_id'] = TextEditingController(text: emp['department_id']?.toString() ?? '');
-      _controllers['designation_id'] = TextEditingController(text: emp['designation_id']?.toString() ?? '');
-      _controllers['office_shift_id'] = TextEditingController(text: emp['office_shift_id']?.toString() ?? '');
-      _controllers['status_work'] = TextEditingController(text: emp['status_work']?.toString() ?? '');
+      _controllers['department_id'] = TextEditingController(
+        text: emp['department_id']?.toString() ?? '',
+      );
+      _controllers['designation_id'] = TextEditingController(
+        text: emp['designation_id']?.toString() ?? '',
+      );
+      _controllers['office_shift_id'] = TextEditingController(
+        text: emp['office_shift_id']?.toString() ?? '',
+      );
+      _controllers['status_work'] = TextEditingController(
+        text: emp['status_work']?.toString() ?? '',
+      );
     } else if (widget.section == 'pribadi') {
-      _controllers['date_of_birth'] = TextEditingController(text: personal['date_of_birth'] ?? '');
-      _controllers['marital_status'] = TextEditingController(text: personal['marital_status']?.toString() ?? '0');
-      _controllers['religion_id'] = TextEditingController(text: personal['religion_id']?.toString() ?? '');
-      _controllers['blood_group'] = TextEditingController(text: personal['blood_group'] ?? '');
-      _controllers['gender'] = TextEditingController(text: info['gender_raw']?.toString() ?? '1');
-      
+      _controllers['date_of_birth'] = TextEditingController(
+        text: personal['date_of_birth'] ?? '',
+      );
+      _controllers['marital_status'] = TextEditingController(
+        text: personal['marital_status']?.toString() ?? '0',
+      );
+      _controllers['religion_id'] = TextEditingController(
+        text: personal['religion_id']?.toString() ?? '',
+      );
+      _controllers['blood_group'] = TextEditingController(
+        text: personal['blood_group'] ?? '',
+      );
+      _controllers['gender'] = TextEditingController(
+        text: info['gender_raw']?.toString() ?? '1',
+      );
+
       // Bank fields
       final bank = widget.employeeData['bank_account'] ?? {};
-      _controllers['account_title'] = TextEditingController(text: bank['account_title'] ?? '');
-      _controllers['account_number'] = TextEditingController(text: bank['account_number'] ?? '');
-      _controllers['bank_name'] = TextEditingController(text: bank['bank_name'] ?? '');
+      _controllers['account_title'] = TextEditingController(
+        text: bank['account_title'] ?? '',
+      );
+      _controllers['account_number'] = TextEditingController(
+        text: bank['account_number'] ?? '',
+      );
+      _controllers['bank_name'] = TextEditingController(
+        text: bank['bank_name'] ?? '',
+      );
       _controllers['iban'] = TextEditingController(text: bank['iban'] ?? '');
-      _controllers['swift_code'] = TextEditingController(text: bank['swift_code'] ?? '');
-      _controllers['bank_branch'] = TextEditingController(text: bank['bank_branch'] ?? '');
+      _controllers['swift_code'] = TextEditingController(
+        text: bank['swift_code'] ?? '',
+      );
+      _controllers['bank_branch'] = TextEditingController(
+        text: bank['bank_branch'] ?? '',
+      );
     }
   }
 
@@ -92,8 +148,12 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     setState(() => _isLoadingLookups = true);
     try {
       final responses = await Future.wait([
-        http.get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_departments')),
-        http.get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_designations')),
+        http.get(
+          Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_departments'),
+        ),
+        http.get(
+          Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_designations'),
+        ),
         http.get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_shifts')),
         http.get(Uri.parse('https://foxgeen.com/HRIS/mobileapi/get_religions')),
       ]);
@@ -119,12 +179,15 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
 
     setState(() => _isSaving = true);
     try {
-      final url = Uri.parse('https://foxgeen.com/HRIS/mobileapi/update_employee');
+      final url = Uri.parse(
+        'https://foxgeen.com/HRIS/mobileapi/update_employee',
+      );
       final request = http.MultipartRequest('POST', url);
-      
-      request.fields['user_id'] = widget.employeeData['user_info']['user_id'].toString();
+
+      request.fields['user_id'] = widget.employeeData['user_info']['user_id']
+          .toString();
       request.fields['section'] = widget.section;
-      
+
       _controllers.forEach((key, controller) {
         request.fields[key] = controller.text;
       });
@@ -143,15 +206,22 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('main.error_with_msg'.tr(context, args: {'message': data['message']}))),
+            SnackBar(
+              content: Text(
+                'main.error_with_msg'.tr(
+                  context,
+                  args: {'message': data['message']},
+                ),
+              ),
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -182,11 +252,14 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     }
 
     return Scaffold(
-      appBar: SecondaryAppBar(
-        title: title,
-      ),
+      appBar: SecondaryAppBar(title: title),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 12),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          16,
+          24,
+          MediaQuery.of(context).padding.bottom + 12,
+        ),
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.only(
@@ -222,14 +295,20 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
               backgroundColor: _primaryColor,
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               elevation: 0,
             ),
             child: _isSaving
                 ? const SizedBox(
                     height: 24,
                     width: 24,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
                 : Text(
                     'employees.save'.tr(context).toUpperCase(),
                     style: const TextStyle(
@@ -241,18 +320,18 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           ),
         ),
       ),
-      body: _isLoadingLookups 
-        ? const Center(child: CircularProgressIndicator())
-        : Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _buildFormFields(),
+      body: _isLoadingLookups
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _buildFormFields(),
+                ),
               ),
             ),
-          ),
     );
   }
 
@@ -263,49 +342,85 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         _buildTextField(
           label: 'profile.first_name'.tr(context),
           key: 'first_name',
-          prefixIcon: const Icon(Icons.person_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.person_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.last_name'.tr(context),
           key: 'last_name',
-          prefixIcon: const Icon(Icons.person_outline_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.person_outline_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.email'.tr(context),
           key: 'email',
           keyboardType: TextInputType.emailAddress,
-          prefixIcon: const Icon(Icons.email_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.email_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.phone'.tr(context),
           key: 'contact_number',
           keyboardType: TextInputType.phone,
-          prefixIcon: const Icon(Icons.phone_android_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.phone_android_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.address'.tr(context),
           key: 'address_1',
-          prefixIcon: const Icon(Icons.home_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.home_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.city_regency'.tr(context),
           key: 'city',
-          prefixIcon: const Icon(Icons.location_city_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.location_city_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.state_province'.tr(context),
           key: 'state',
-          prefixIcon: const Icon(Icons.map_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.map_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.zip_code'.tr(context),
           key: 'zipcode',
-          prefixIcon: const Icon(Icons.pin_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.pin_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.nationality'.tr(context),
           key: 'nationality',
-          prefixIcon: const Icon(Icons.flag_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.flag_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
       ];
     } else if (widget.section == 'kontrak') {
@@ -314,46 +429,76 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           label: 'profile.basic_salary'.tr(context),
           key: 'basic_salary',
           keyboardType: TextInputType.number,
-          prefixIcon: const Icon(Icons.payments_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.payments_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.hourly_rate'.tr(context),
           key: 'hourly_rate',
           keyboardType: TextInputType.number,
-          prefixIcon: const Icon(Icons.timer_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.timer_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildDropdown(
           label: 'employees.payslip_type'.tr(context),
           key: 'salay_type',
-          items: {'1': 'employees.per_month'.tr(context), '0': 'employees.none'.tr(context)},
+          items: {
+            '1': 'employees.per_month'.tr(context),
+            '0': 'employees.none'.tr(context),
+          },
           icon: Icons.receipt_long_rounded,
         ),
         _buildTextField(
           label: 'employees.worklog_target'.tr(context),
           key: 'worklog',
           keyboardType: TextInputType.number,
-          prefixIcon: const Icon(Icons.assignment_turned_in_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.assignment_turned_in_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildDropdown(
           label: 'employees.status_target_worklog'.tr(context),
           key: 'worklog_active',
-          items: {'1': 'main.active'.tr(context), '0': 'main.inactive'.tr(context)},
+          items: {
+            '1': 'main.active'.tr(context),
+            '0': 'main.inactive'.tr(context),
+          },
           icon: Icons.toggle_on_rounded,
         ),
         _buildDateField(
           label: 'profile.contract_date'.tr(context),
           key: 'date_of_joining',
-          prefixIcon: const Icon(Icons.calendar_today_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.calendar_today_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildDateField(
           label: 'profile.contract_end'.tr(context),
           key: 'date_of_leaving',
-          prefixIcon: const Icon(Icons.event_busy_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.event_busy_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'employees.leave_categories'.tr(context),
           key: 'leave_categories',
-          prefixIcon: const Icon(Icons.beach_access_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.beach_access_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
       ];
     } else if (widget.section == 'pekerjaan') {
@@ -400,7 +545,11 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         _buildDateField(
           label: 'profile.dob'.tr(context),
           key: 'date_of_birth',
-          prefixIcon: const Icon(Icons.cake_rounded, size: 18, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.cake_rounded,
+            size: 18,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildDropdown(
           label: 'profile.gender'.tr(context),
@@ -415,7 +564,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
             '0': 'profile.single'.tr(context),
             '1': 'profile.married'.tr(context),
             '2': 'profile.widowed'.tr(context),
-            '3': 'profile.separated'.tr(context)
+            '3': 'profile.separated'.tr(context),
           },
           icon: Icons.favorite_rounded,
         ),
@@ -430,7 +579,11 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         _buildTextField(
           label: 'profile.blood_group'.tr(context),
           key: 'blood_group',
-          prefixIcon: const Icon(Icons.bloodtype_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.bloodtype_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
@@ -446,35 +599,59 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              Expanded(child: Divider(color: isDark ? Colors.grey[800] : Colors.grey[200])),
+              Expanded(
+                child: Divider(
+                  color: isDark ? Colors.grey[800] : Colors.grey[200],
+                ),
+              ),
             ],
           ),
         ),
         _buildTextField(
           label: 'profile.bank_name'.tr(context),
           key: 'bank_name',
-          prefixIcon: const Icon(Icons.account_balance_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.account_balance_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.account_title'.tr(context),
           key: 'account_title',
-          prefixIcon: const Icon(Icons.person_pin_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.person_pin_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.account_number'.tr(context),
           key: 'account_number',
           keyboardType: TextInputType.number,
-          prefixIcon: const Icon(Icons.numbers_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.numbers_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.swift_code'.tr(context),
           key: 'swift_code',
-          prefixIcon: const Icon(Icons.speed_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.speed_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
         _buildTextField(
           label: 'profile.bank_branch'.tr(context),
           key: 'bank_branch',
-          prefixIcon: const Icon(Icons.location_on_rounded, size: 20, color: Color(0xFF7E57C2)),
+          prefixIcon: const Icon(
+            Icons.location_on_rounded,
+            size: 20,
+            color: Color(0xFF7E57C2),
+          ),
         ),
       ];
     } else if (widget.section == 'riwayat') {
@@ -483,7 +660,8 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           title: 'employees.work_exp'.tr(context).toUpperCase(),
           items: widget.employeeData['experience'] as List? ?? [],
           onAdd: () => _showAddExperienceDialog(),
-          onDelete: (id) => _deleteListItem('delete_experience', {'experience_id': id}),
+          onDelete: (id) =>
+              _deleteListItem('delete_experience', {'experience_id': id}),
           subtitle: (item) => '${item['company_name']} - ${item['post']}',
           isDark: isDark,
         ),
@@ -492,8 +670,10 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           title: 'employees.education'.tr(context).toUpperCase(),
           items: widget.employeeData['education'] as List? ?? [],
           onAdd: () => _showAddEducationDialog(),
-          onDelete: (id) => _deleteListItem('delete_education', {'education_id': id}),
-          subtitle: (item) => '${item['school_university']} - ${item['education_level']}',
+          onDelete: (id) =>
+              _deleteListItem('delete_education', {'education_id': id}),
+          subtitle: (item) =>
+              '${item['school_university']} - ${item['education_level']}',
           isDark: isDark,
         ),
       ];
@@ -503,8 +683,10 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           title: 'employees.emp_docs'.tr(context).toUpperCase(),
           items: widget.employeeData['documents'] as List? ?? [],
           onAdd: () => _showAddDocumentDialog(),
-          onDelete: (id) => _deleteListItem('delete_user_document', {'document_id': id}),
-          subtitle: (item) => '${item['document_name']} (${item['document_type']})',
+          onDelete: (id) =>
+              _deleteListItem('delete_user_document', {'document_id': id}),
+          subtitle: (item) =>
+              '${item['document_name']} (${item['document_type']})',
           isDark: isDark,
         ),
       ];
@@ -536,15 +718,15 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           labelText: label,
           labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
           prefixIcon: prefixIcon != null
-              ? Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: prefixIcon,
-                )
+              ? Padding(padding: const EdgeInsets.all(12), child: prefixIcon)
               : null,
           suffixIcon: suffixIcon,
           filled: true,
           fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(color: Colors.grey.withOpacity(0.1)),
@@ -562,13 +744,21 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     );
   }
 
-  Widget _buildDateField({required String label, required String key, Widget? prefixIcon}) {
+  Widget _buildDateField({
+    required String label,
+    required String key,
+    Widget? prefixIcon,
+  }) {
     return _buildTextField(
       label: label,
       key: key,
       readOnly: true,
       prefixIcon: prefixIcon,
-      suffixIcon: const Icon(Icons.calendar_month_rounded, size: 20, color: Color(0xFF7E57C2)),
+      suffixIcon: const Icon(
+        Icons.calendar_month_rounded,
+        size: 20,
+        color: Color(0xFF7E57C2),
+      ),
       onTap: () async {
         DateTime initialDate = DateTime.now();
         if (_controllers[key]!.text.isNotEmpty) {
@@ -607,7 +797,9 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         label: label,
         value: selectedName,
         icon: icon,
-        options: items.entries.map((e) => {'id': e.key, 'name': e.value}).toList(),
+        options: items.entries
+            .map((e) => {'id': e.key, 'name': e.value})
+            .toList(),
         onSelected: (id) => setState(() => _controllers[key]!.text = id),
       ),
     );
@@ -626,7 +818,9 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
       (e) => e[idKey].toString() == currentId,
       orElse: () => null,
     );
-    final String selectedName = selectedItem != null ? selectedItem[nameKey].toString() : '';
+    final String selectedName = selectedItem != null
+        ? selectedItem[nameKey].toString()
+        : '';
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -635,10 +829,9 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         value: selectedName,
         icon: icon,
         options: items
-            .map((e) => {
-                  'id': e[idKey].toString(),
-                  'name': e[nameKey].toString(),
-                })
+            .map(
+              (e) => {'id': e[idKey].toString(), 'name': e[nameKey].toString()},
+            )
             .toList(),
         onSelected: (id) => setState(() => _controllers[key]!.text = id),
       ),
@@ -670,7 +863,11 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
             ),
             IconButton(
               onPressed: onAdd,
-              icon: Icon(Icons.add_circle_rounded, color: _primaryColor, size: 28),
+              icon: Icon(
+                Icons.add_circle_rounded,
+                color: _primaryColor,
+                size: 28,
+              ),
             ),
           ],
         ),
@@ -686,11 +883,18 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
             ),
             child: Column(
               children: [
-                Icon(Icons.inbox_rounded, color: Colors.grey.withOpacity(0.5), size: 40),
+                Icon(
+                  Icons.inbox_rounded,
+                  color: Colors.grey.withOpacity(0.5),
+                  size: 40,
+                ),
                 const SizedBox(height: 12),
                 Text(
                   'attendance.no_data'.tr(context),
-                  style: TextStyle(color: Colors.grey.withOpacity(0.7), fontSize: 13),
+                  style: TextStyle(
+                    color: Colors.grey.withOpacity(0.7),
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -706,10 +910,10 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
               final idKey = item.containsKey('experience_id')
                   ? 'experience_id'
                   : item.containsKey('education_id')
-                      ? 'education_id'
-                      : item.containsKey('id')
-                          ? 'id'
-                          : 'document_id';
+                  ? 'education_id'
+                  : item.containsKey('id')
+                  ? 'id'
+                  : 'document_id';
 
               return Container(
                 decoration: BoxDecoration(
@@ -725,7 +929,10 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
                   border: Border.all(color: Colors.grey.withOpacity(0.1)),
                 ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -736,18 +943,25 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
                       item.containsKey('experience_id')
                           ? Icons.work_outline_rounded
                           : item.containsKey('education_id')
-                              ? Icons.school_outlined
-                              : Icons.description_outlined,
+                          ? Icons.school_outlined
+                          : Icons.description_outlined,
                       color: _primaryColor,
                       size: 20,
                     ),
                   ),
                   title: Text(
                     subtitle(item),
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 22),
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.redAccent,
+                      size: 22,
+                    ),
                     onPressed: () => onDelete(item[idKey]),
                   ),
                 ),
@@ -758,15 +972,27 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     );
   }
 
-  Future<void> _deleteListItem(String endpoint, Map<String, String> body) async {
+  Future<void> _deleteListItem(
+    String endpoint,
+    Map<String, String> body,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('main.confirm'.tr(context)),
         content: Text('main.confirm_delete'.tr(context)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('main.cancel'.tr(context))),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('main.delete'.tr(context), style: const TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('main.cancel'.tr(context)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'main.delete'.tr(context),
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
         ],
       ),
     );
@@ -805,15 +1031,38 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: companyController, decoration: InputDecoration(labelText: 'employees.form.company'.tr(context))),
-              TextField(controller: postController, decoration: InputDecoration(labelText: 'employees.form.post'.tr(context))),
-              TextField(controller: fromController, decoration: InputDecoration(labelText: 'employees.form.from_year'.tr(context))),
-              TextField(controller: toController, decoration: InputDecoration(labelText: 'employees.form.to_year'.tr(context))),
+              TextField(
+                controller: companyController,
+                decoration: InputDecoration(
+                  labelText: 'employees.form.company'.tr(context),
+                ),
+              ),
+              TextField(
+                controller: postController,
+                decoration: InputDecoration(
+                  labelText: 'employees.form.post'.tr(context),
+                ),
+              ),
+              TextField(
+                controller: fromController,
+                decoration: InputDecoration(
+                  labelText: 'employees.form.from_year'.tr(context),
+                ),
+              ),
+              TextField(
+                controller: toController,
+                decoration: InputDecoration(
+                  labelText: 'employees.form.to_year'.tr(context),
+                ),
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('main.cancel'.tr(context))),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('main.cancel'.tr(context)),
+          ),
           TextButton(
             onPressed: () => _addListItem('add_experience', {
               'user_id': widget.employeeData['user_info']['user_id'].toString(),
@@ -844,15 +1093,38 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: schoolController, decoration: InputDecoration(labelText: 'employees.form.school_uni'.tr(context))),
-              TextField(controller: levelController, decoration: InputDecoration(labelText: 'employees.form.education_level'.tr(context))),
-              TextField(controller: fromController, decoration: InputDecoration(labelText: 'employees.form.from_year'.tr(context))),
-              TextField(controller: toController, decoration: InputDecoration(labelText: 'employees.form.to_year'.tr(context))),
+              TextField(
+                controller: schoolController,
+                decoration: InputDecoration(
+                  labelText: 'employees.form.school_uni'.tr(context),
+                ),
+              ),
+              TextField(
+                controller: levelController,
+                decoration: InputDecoration(
+                  labelText: 'employees.form.education_level'.tr(context),
+                ),
+              ),
+              TextField(
+                controller: fromController,
+                decoration: InputDecoration(
+                  labelText: 'employees.form.from_year'.tr(context),
+                ),
+              ),
+              TextField(
+                controller: toController,
+                decoration: InputDecoration(
+                  labelText: 'employees.form.to_year'.tr(context),
+                ),
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('main.cancel'.tr(context))),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('main.cancel'.tr(context)),
+          ),
           TextButton(
             onPressed: () => _addListItem('add_education', {
               'user_id': widget.employeeData['user_info']['user_id'].toString(),
@@ -882,15 +1154,33 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: titleController, decoration: InputDecoration(labelText: 'employees.form.doc_name'.tr(context))),
-                TextField(controller: typeController, decoration: InputDecoration(labelText: 'employees.form.doc_type'.tr(context))),
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'employees.form.doc_name'.tr(context),
+                  ),
+                ),
+                TextField(
+                  controller: typeController,
+                  decoration: InputDecoration(
+                    labelText: 'employees.form.doc_type'.tr(context),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: () async {
-                    FilePickerResult? result = await FilePicker.platform.pickFiles(
-                      type: FileType.custom,
-                      allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
-                    );
+                    FilePickerResult? result = await FilePicker.platform
+                        .pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: [
+                            'jpg',
+                            'jpeg',
+                            'png',
+                            'pdf',
+                            'doc',
+                            'docx',
+                          ],
+                        );
                     if (result != null) {
                       setDialogState(() {
                         selectedFile = result.files.single;
@@ -898,20 +1188,39 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
                     }
                   },
                   icon: const Icon(Icons.upload_file),
-                  label: Text(selectedFile != null ? selectedFile!.name : 'employees.form.select_file'.tr(context)),
+                  label: Text(
+                    selectedFile != null
+                        ? selectedFile!.name
+                        : 'employees.form.select_file'.tr(context),
+                  ),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text('main.cancel'.tr(context))),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('main.cancel'.tr(context)),
+            ),
             TextButton(
               onPressed: () {
-                if (titleController.text.isEmpty || typeController.text.isEmpty || selectedFile == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('employees.form.fill_all_fields'.tr(context))));
+                if (titleController.text.isEmpty ||
+                    typeController.text.isEmpty ||
+                    selectedFile == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'employees.form.fill_all_fields'.tr(context),
+                      ),
+                    ),
+                  );
                   return;
                 }
-                _uploadDocument(titleController.text, typeController.text, selectedFile!);
+                _uploadDocument(
+                  titleController.text,
+                  typeController.text,
+                  selectedFile!,
+                );
               },
               child: Text('main.save'.tr(context)),
             ),
@@ -921,36 +1230,51 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
     );
   }
 
-  Future<void> _uploadDocument(String name, String type, PlatformFile file) async {
+  Future<void> _uploadDocument(
+    String name,
+    String type,
+    PlatformFile file,
+  ) async {
     Navigator.pop(context); // Close dialog
     setState(() => _isSaving = true);
     try {
-      final url = Uri.parse('https://foxgeen.com/HRIS/mobileapi/add_user_document');
+      final url = Uri.parse(
+        'https://foxgeen.com/HRIS/mobileapi/add_user_document',
+      );
       var request = http.MultipartRequest('POST', url);
-      
-      request.fields['user_id'] = widget.employeeData['user_info']['user_id'].toString();
+
+      request.fields['user_id'] = widget.employeeData['user_info']['user_id']
+          .toString();
       request.fields['document_name'] = name;
       request.fields['document_type'] = type;
-      
-      request.files.add(await http.MultipartFile.fromPath(
-        'document_file',
-        file.path!,
-        filename: file.name,
-      ));
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'document_file',
+          file.path!,
+          filename: file.name,
+        ),
+      );
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);
       if (!mounted) return;
       var data = json.decode(response.body);
-      
+
       if (data['status'] == true) {
         if (mounted) Navigator.pop(context, true); // Refresh detail
       } else {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${data['message']}')));
+        if (mounted)
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${data['message']}')));
       }
     } catch (e) {
       debugPrint('Error uploading document: $e');
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -975,8 +1299,6 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
       if (mounted) setState(() => _isSaving = false);
     }
   }
-
-
 
   @override
   void dispose() {

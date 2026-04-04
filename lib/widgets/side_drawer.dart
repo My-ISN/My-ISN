@@ -11,10 +11,10 @@ import '../work_log/work_log_page.dart';
 import '../finance/finance_page.dart';
 import '../helpdesk/helpdesk_list_page.dart';
 import '../ai_bot/ai_bot_page.dart';
+import '../personal_finance/personal_finance_page.dart';
 import '../widgets/on_progress_page.dart';
 import '../localization/app_localizations.dart';
 import 'custom_app_bar.dart'; // For NotificationManager
-
 
 class SideDrawer extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -31,16 +31,20 @@ class SideDrawer extends StatelessWidget {
   bool _hasPermission(String resource) {
     if (userData['role_resources'] == 'all') return true;
     final String resources = userData['role_resources'] ?? '';
-    final List<String> resourceList = resources.split(',').map((e) => e.trim()).toList();
+    final List<String> resourceList = resources
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
     return resourceList.contains(resource);
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isCustomer = userData['user_type'] == 'customer' || 
-                           userData['user_role_id'] == 21 || 
-                           userData['user_role_id'] == '21';
-    
+    final bool isCustomer =
+        userData['user_type'] == 'customer' ||
+        userData['user_role_id'] == 21 ||
+        userData['user_role_id'] == '21';
+
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.75,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -63,7 +67,12 @@ class SideDrawer extends StatelessWidget {
                     } else if (activePage != 'dashboard') {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: 0)),
+                        MaterialPageRoute(
+                          builder: (context) => DashboardPage(
+                            userData: userData,
+                            initialIndex: 0,
+                          ),
+                        ),
                         (route) => false,
                       );
                     }
@@ -71,9 +80,15 @@ class SideDrawer extends StatelessWidget {
                 ),
                 _buildMenuItem(
                   context,
-                  icon: isCustomer ? Icons.house_outlined : Icons.calendar_today_outlined,
-                  title: isCustomer ? 'dashboard.rent_plan'.tr(context) : 'main.xin_attendance'.tr(context),
-                  isActive: isCustomer ? activePage == 'rent_plan' : activePage == 'attendance',
+                  icon: isCustomer
+                      ? Icons.house_outlined
+                      : Icons.calendar_today_outlined,
+                  title: isCustomer
+                      ? 'dashboard.rent_plan'.tr(context)
+                      : 'main.xin_attendance'.tr(context),
+                  isActive: isCustomer
+                      ? activePage == 'rent_plan'
+                      : activePage == 'attendance',
                   onTap: () {
                     Navigator.pop(context);
                     if (onTabSelected != null) {
@@ -82,7 +97,12 @@ class SideDrawer extends StatelessWidget {
                       if (activePage != 'rent_plan') {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: 1)),
+                          MaterialPageRoute(
+                            builder: (context) => DashboardPage(
+                              userData: userData,
+                              initialIndex: 1,
+                            ),
+                          ),
                           (route) => false,
                         );
                       }
@@ -90,7 +110,12 @@ class SideDrawer extends StatelessWidget {
                       if (activePage != 'attendance') {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: 1)),
+                          MaterialPageRoute(
+                            builder: (context) => DashboardPage(
+                              userData: userData,
+                              initialIndex: 1,
+                            ),
+                          ),
                           (route) => false,
                         );
                       }
@@ -110,7 +135,12 @@ class SideDrawer extends StatelessWidget {
                       } else if (activePage != 'payroll') {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: 2)),
+                          MaterialPageRoute(
+                            builder: (context) => DashboardPage(
+                              userData: userData,
+                              initialIndex: 2,
+                            ),
+                          ),
                           (route) => false,
                         );
                       }
@@ -123,15 +153,22 @@ class SideDrawer extends StatelessWidget {
                   isActive: activePage == 'profile',
                   onTap: () {
                     Navigator.pop(context);
-                    final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+                    final bool hasPayroll = _hasPermission(
+                      'mobile_payroll_enable',
+                    );
                     int profileIndex = isCustomer ? 2 : (hasPayroll ? 3 : 2);
-                    
+
                     if (onTabSelected != null) {
                       onTabSelected!(profileIndex);
                     } else if (activePage != 'profile') {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: profileIndex)),
+                        MaterialPageRoute(
+                          builder: (context) => DashboardPage(
+                            userData: userData,
+                            initialIndex: profileIndex,
+                          ),
+                        ),
                         (route) => false,
                       );
                     }
@@ -145,16 +182,17 @@ class SideDrawer extends StatelessWidget {
                     title: 'dashboard.rent_plan'.tr(context),
                     isActive: activePage == 'rent_plan',
                     onTap: () {
-                      final bool isCustomer = userData['user_type'] == 'customer' || 
-                                             userData['user_role_id'] == 21 || 
-                                             userData['user_role_id'] == '21';
+                      final bool isCustomer =
+                          userData['user_type'] == 'customer' ||
+                          userData['user_role_id'] == 21 ||
+                          userData['user_role_id'] == '21';
                       Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => isCustomer 
-                            ? client_rp.RentPlanPage(userData: userData)
-                            : staff_rp.RentPlanPage(userData: userData),
+                          builder: (context) => isCustomer
+                              ? client_rp.RentPlanPage(userData: userData)
+                              : staff_rp.RentPlanPage(userData: userData),
                         ),
                       );
                     },
@@ -174,7 +212,8 @@ class SideDrawer extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => TodoListPage(userData: userData),
+                              builder: (context) =>
+                                  TodoListPage(userData: userData),
                             ),
                           );
                         },
@@ -192,7 +231,8 @@ class SideDrawer extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => EmployeesPage(userData: userData),
+                          builder: (context) =>
+                              EmployeesPage(userData: userData),
                         ),
                       );
                     },
@@ -229,6 +269,22 @@ class SideDrawer extends StatelessWidget {
                       );
                     },
                   ),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.savings_outlined,
+                  title: 'personal_finance.my_wallet'.tr(context),
+                  isActive: activePage == 'my_wallet',
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PersonalFinancePage(userData: userData),
+                      ),
+                    );
+                  },
+                ),
                 if (_hasPermission('mobile_helpdesk_view'))
                   _buildMenuItem(
                     context,
@@ -240,7 +296,8 @@ class SideDrawer extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => HelpdeskListPage(userData: userData),
+                          builder: (context) =>
+                              HelpdeskListPage(userData: userData),
                         ),
                       );
                     },
@@ -271,7 +328,9 @@ class SideDrawer extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => OnProgressPage(
-                          title: 'dashboard.quick_menu_creative_idea'.tr(context),
+                          title: 'dashboard.quick_menu_creative_idea'.tr(
+                            context,
+                          ),
                         ),
                       ),
                     );
@@ -309,9 +368,10 @@ class SideDrawer extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
-        final bool isCustomer = userData['user_type'] == 'customer' || 
-                               userData['user_role_id'] == 21 || 
-                               userData['user_role_id'] == '21';
+        final bool isCustomer =
+            userData['user_type'] == 'customer' ||
+            userData['user_role_id'] == 21 ||
+            userData['user_role_id'] == '21';
         final bool hasPayroll = _hasPermission('mobile_payroll_enable');
         int profileIndex = isCustomer ? 2 : (hasPayroll ? 3 : 2);
 
@@ -320,7 +380,10 @@ class SideDrawer extends StatelessWidget {
         } else if (activePage != 'profile') {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => DashboardPage(userData: userData, initialIndex: profileIndex)),
+            MaterialPageRoute(
+              builder: (context) =>
+                  DashboardPage(userData: userData, initialIndex: profileIndex),
+            ),
             (route) => false,
           );
         }
@@ -398,7 +461,8 @@ class SideDrawer extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Padding(
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
@@ -457,7 +521,8 @@ class SideDrawer extends StatelessWidget {
 
   Widget _buildLogout(BuildContext context, {EdgeInsetsGeometry? padding}) {
     return Padding(
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
       child: InkWell(
         onTap: () => _showLogoutConfirmation(context),
         borderRadius: BorderRadius.circular(10),
@@ -515,7 +580,9 @@ class SideDrawer extends StatelessWidget {
             Text(
               'main.logout_confirm_msg'.tr(context),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 32),
             Row(
@@ -526,11 +593,15 @@ class SideDrawer extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'main.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -544,7 +615,9 @@ class SideDrawer extends StatelessWidget {
                       if (context.mounted) {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const LoginPage()),
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
                           (route) => false,
                         );
                       }
@@ -553,7 +626,9 @@ class SideDrawer extends StatelessWidget {
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: Text('main.xin_logout'.tr(context)),

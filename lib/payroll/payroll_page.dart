@@ -17,16 +17,20 @@ class PayrollPage extends StatefulWidget {
 class _PayrollPageState extends State<PayrollPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _hasPermission(String resource) => _hasPermissionIn(widget.userData, resource);
+  bool _hasPermission(String resource) =>
+      _hasPermissionIn(widget.userData, resource);
   bool get _canMakePayment => _hasPermission('mobile_payroll_add');
 
   bool _hasPermissionIn(Map<String, dynamic> data, String resource) {
     if (data['role_resources'] == 'all') return true;
     final String resources = data['role_resources'] ?? '';
-    final List<String> resourceList =
-        resources.split(',').map((e) => e.trim()).toList();
+    final List<String> resourceList = resources
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
     return resourceList.contains(resource);
   }
+
   Map<String, dynamic>? _payrollStats;
   bool _isLoading = true;
   List<dynamic> _history = [];
@@ -59,7 +63,10 @@ class _PayrollPageState extends State<PayrollPage>
   @override
   void didUpdateWidget(PayrollPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final bool oldCan = _hasPermissionIn(oldWidget.userData, 'mobile_payroll_add');
+    final bool oldCan = _hasPermissionIn(
+      oldWidget.userData,
+      'mobile_payroll_add',
+    );
     final bool newCan = _canMakePayment;
     if (oldCan != newCan) {
       final int newLength = newCan ? 2 : 1;
@@ -83,10 +90,7 @@ class _PayrollPageState extends State<PayrollPage>
     double val = double.tryParse(amount.toString()) ?? 0;
     String integerPart = val.toInt().toString();
     RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-    return integerPart.replaceAllMapped(
-      reg,
-      (Match match) => '${match[1]}.',
-    );
+    return integerPart.replaceAllMapped(reg, (Match match) => '${match[1]}.');
   }
 
   Future<void> _fetchStaffList() async {
@@ -100,19 +104,20 @@ class _PayrollPageState extends State<PayrollPage>
       if (userId == null) {
         setState(() {
           _isStaffLoading = false;
-          _staffErrorMessage = "Kesalahan: ID Pengguna tidak ditemukan (Silakan Logout & Login kembali)";
+          _staffErrorMessage =
+              "Kesalahan: ID Pengguna tidak ditemukan (Silakan Logout & Login kembali)";
         });
         return;
       }
       String? responseBody;
       try {
-        final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_staff_list?user_id=$userId';
+        final url =
+            'https://foxgeen.com/HRIS/mobileapi/get_payroll_staff_list?user_id=$userId';
         final response = await http.get(Uri.parse(url));
         responseBody = response.body;
-        debugPrint('Staff list response body: "$responseBody"');
-        
+
         if (responseBody.trim().isEmpty) {
-           throw Exception("Server memberikan respon kosong");
+          throw Exception("Server memberikan respon kosong");
         }
 
         final data = json.decode(responseBody);
@@ -124,7 +129,8 @@ class _PayrollPageState extends State<PayrollPage>
         } else {
           setState(() {
             _isStaffLoading = false;
-            _staffErrorMessage = data['message'] ?? "Gagal mengambil data staff";
+            _staffErrorMessage =
+                data['message'] ?? "Gagal mengambil data staff";
           });
         }
       } catch (e) {
@@ -132,8 +138,10 @@ class _PayrollPageState extends State<PayrollPage>
         if (mounted) {
           String errorMsg = "Kesalahan koneksi: $e";
           if (e is FormatException && responseBody != null) {
-             final snippet = responseBody.length > 100 ? responseBody.substring(0, 100) : responseBody;
-             errorMsg += "\nRespon Server: $snippet";
+            final snippet = responseBody.length > 100
+                ? responseBody.substring(0, 100)
+                : responseBody;
+            errorMsg += "\nRespon Server: $snippet";
           }
           setState(() {
             _isStaffLoading = false;
@@ -149,7 +157,8 @@ class _PayrollPageState extends State<PayrollPage>
   Future<void> _fetchAccounts() async {
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_accounts?user_id=$userId';
+      final url =
+          'https://foxgeen.com/HRIS/mobileapi/get_payroll_accounts?user_id=$userId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true && mounted) {
@@ -167,8 +176,10 @@ class _PayrollPageState extends State<PayrollPage>
     setState(() => _isActionLoading = true);
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      final monthStr = "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
-      final url = 'https://foxgeen.com/HRIS/mobileapi/get_payroll_preview?staff_id=$_selectedStaffId&salary_month=$monthStr&user_id=$userId';
+      final monthStr =
+          "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
+      final url =
+          'https://foxgeen.com/HRIS/mobileapi/get_payroll_preview?staff_id=$_selectedStaffId&salary_month=$monthStr&user_id=$userId';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
       if (data['status'] == true && mounted) {
@@ -178,17 +189,23 @@ class _PayrollPageState extends State<PayrollPage>
       } else {
         debugPrint('Preview failed: ${data['message']}');
         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             SnackBar(content: Text(data['message'] ?? 'Gagal memuat preview gaji'), backgroundColor: Colors.red),
-           );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Gagal memuat preview gaji'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       }
     } catch (e) {
       debugPrint('Error fetching preview: $e');
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('Kesalahan koneksi saat memuat preview'), backgroundColor: Colors.orange),
-         );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Kesalahan koneksi saat memuat preview'),
+            backgroundColor: Colors.orange,
+          ),
+        );
       }
     } finally {
       setState(() => _isActionLoading = false);
@@ -198,9 +215,18 @@ class _PayrollPageState extends State<PayrollPage>
   Future<void> _executePayment() async {
     if (_selectedStaffId == null || _selectedAccountId == null) return;
 
-    final selectedStaffName = _staffList.firstWhere((s) => s['user_id'].toString() == _selectedStaffId.toString())['full_name'] ?? '';
-    final selectedAccountName = _accounts.firstWhere((a) => a['account_id'].toString() == _selectedAccountId.toString())['account_name'] ?? '';
-    final monthStr = "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
+    final selectedStaffName =
+        _staffList.firstWhere(
+          (s) => s['user_id'].toString() == _selectedStaffId.toString(),
+        )['full_name'] ??
+        '';
+    final selectedAccountName =
+        _accounts.firstWhere(
+          (a) => a['account_id'].toString() == _selectedAccountId.toString(),
+        )['account_name'] ??
+        '';
+    final monthStr =
+        "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
     final netSalary = _previewData?['breakdown']['net_salary'] ?? 0;
 
     final confirm = await showModalBottomSheet<bool>(
@@ -225,7 +251,11 @@ class _PayrollPageState extends State<PayrollPage>
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF7E57C2), size: 48),
+            const Icon(
+              Icons.account_balance_wallet_rounded,
+              color: Color(0xFF7E57C2),
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
               'payroll.confirm_payment'.tr(context),
@@ -251,7 +281,11 @@ class _PayrollPageState extends State<PayrollPage>
                   const SizedBox(height: 8),
                   Text(
                     'payroll.net_salary'.tr(context),
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5)),
+                    style: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.5),
+                    ),
                   ),
                 ],
               ),
@@ -261,7 +295,11 @@ class _PayrollPageState extends State<PayrollPage>
             const SizedBox(height: 12),
             _buildDetailRow(Icons.calendar_today_outlined, 'Bulan', monthStr),
             const SizedBox(height: 12),
-            _buildDetailRow(Icons.account_balance_outlined, 'Sumber', selectedAccountName),
+            _buildDetailRow(
+              Icons.account_balance_outlined,
+              'Sumber',
+              selectedAccountName,
+            ),
             const SizedBox(height: 32),
             Row(
               children: [
@@ -271,11 +309,15 @@ class _PayrollPageState extends State<PayrollPage>
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     child: Text(
                       'main.cancel'.tr(context),
-                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -287,7 +329,9 @@ class _PayrollPageState extends State<PayrollPage>
                       backgroundColor: const Color(0xFF7E57C2),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: Text('main.save'.tr(context)),
@@ -306,17 +350,21 @@ class _PayrollPageState extends State<PayrollPage>
     setState(() => _isActionLoading = true);
     try {
       final userId = widget.userData['id'] ?? widget.userData['user_id'];
-      final monthStr = "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
-      
+      final monthStr =
+          "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}";
+
       final url = 'https://foxgeen.com/HRIS/mobileapi/execute_payroll_payment';
-      final response = await http.post(Uri.parse(url), body: {
-        'user_id': userId.toString(),
-        'staff_id': _selectedStaffId,
-        'salary_month': monthStr,
-        'account_id': _selectedAccountId,
-        'comments': _commentController.text,
-      });
-      
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          'user_id': userId.toString(),
+          'staff_id': _selectedStaffId,
+          'salary_month': monthStr,
+          'account_id': _selectedAccountId,
+          'comments': _commentController.text,
+        },
+      );
+
       final data = json.decode(response.body);
       if (data['status'] == true && mounted) {
         // Show success dialog for better feedback
@@ -326,7 +374,9 @@ class _PayrollPageState extends State<PayrollPage>
           builder: (context) => Container(
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -341,17 +391,28 @@ class _PayrollPageState extends State<PayrollPage>
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const Icon(Icons.check_circle_rounded, color: Colors.green, size: 64),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: Colors.green,
+                  size: 64,
+                ),
                 const SizedBox(height: 20),
                 Text(
                   'payroll.payment_success'.tr(context),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'payroll.payment_success_desc'.tr(context),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
+                  ),
                 ),
                 const SizedBox(height: 32),
                 SizedBox(
@@ -362,7 +423,9 @@ class _PayrollPageState extends State<PayrollPage>
                       backgroundColor: const Color(0xFF7E57C2),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       elevation: 0,
                     ),
                     child: const Text('OK'),
@@ -383,7 +446,10 @@ class _PayrollPageState extends State<PayrollPage>
         _fetchPayrollHistory();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? 'Error'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(data['message'] ?? 'Error'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
@@ -417,7 +483,6 @@ class _PayrollPageState extends State<PayrollPage>
       final url =
           'https://foxgeen.com/HRIS/mobileapi/get_payroll_history?user_id=$userId';
       final response = await http.get(Uri.parse(url));
-      debugPrint('Payroll history response: "${response.body}"');
       final data = json.decode(response.body);
 
       if (data['status'] == true) {
@@ -459,10 +524,11 @@ class _PayrollPageState extends State<PayrollPage>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                physics: const AlwaysScrollableScrollPhysics(), // Memungkinkan geser antar tab
+                physics:
+                    const AlwaysScrollableScrollPhysics(), // Memungkinkan geser antar tab
                 children: [
                   if (_tabController.length == 2) _buildMakePaymentTab(),
-                  _buildHistoryTab()
+                  _buildHistoryTab(),
                 ],
               ),
             ),
@@ -681,9 +747,8 @@ class _PayrollPageState extends State<PayrollPage>
           if (index == _history.length) {
             return ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,
-              builder: (context, padding, _) => SizedBox(
-                height: (padding + 20).clamp(0.0, double.infinity),
-              ),
+              builder: (context, padding, _) =>
+                  SizedBox(height: (padding + 20).clamp(0.0, double.infinity)),
             );
           }
           final item = _history[index];
@@ -795,9 +860,8 @@ class _PayrollPageState extends State<PayrollPage>
               ),
             ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,
-              builder: (context, padding, _) => SizedBox(
-                height: (padding + 20).clamp(0.0, double.infinity),
-              ),
+              builder: (context, padding, _) =>
+                  SizedBox(height: (padding + 20).clamp(0.0, double.infinity)),
             ),
           ],
         ),
@@ -811,7 +875,9 @@ class _PayrollPageState extends State<PayrollPage>
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -819,11 +885,21 @@ class _PayrollPageState extends State<PayrollPage>
           SearchableDropdown(
             label: 'payroll.select_staff'.tr(context),
             icon: Icons.person_search_rounded,
-            value: _selectedStaffId != null ? (_staffList.firstWhere((s) => s['user_id'].toString() == _selectedStaffId, orElse: () => {'full_name': ''})['full_name'] ?? '') : '',
-            options: _staffList.map((s) => {
-              'id': s['user_id'].toString(),
-              'name': s['full_name'].toString(),
-            }).toList(),
+            value: _selectedStaffId != null
+                ? (_staffList.firstWhere(
+                        (s) => s['user_id'].toString() == _selectedStaffId,
+                        orElse: () => {'full_name': ''},
+                      )['full_name'] ??
+                      '')
+                : '',
+            options: _staffList
+                .map(
+                  (s) => {
+                    'id': s['user_id'].toString(),
+                    'name': s['full_name'].toString(),
+                  },
+                )
+                .toList(),
             onSelected: (val) {
               setState(() {
                 _selectedStaffId = val;
@@ -853,28 +929,52 @@ class _PayrollPageState extends State<PayrollPage>
             child: IgnorePointer(
               child: TextFormField(
                 controller: TextEditingController(
-                  text: "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}"
+                  text:
+                      "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}",
                 ),
                 style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
                   labelText: 'payroll.select_month'.tr(context),
                   labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
-                  prefixIcon: const Icon(Icons.calendar_month_rounded, size: 18, color: Color(0xFF7E57C2)),
-                  suffixIcon: const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF7E57C2)),
+                  prefixIcon: const Icon(
+                    Icons.calendar_month_rounded,
+                    size: 18,
+                    color: Color(0xFF7E57C2),
+                  ),
+                  suffixIcon: const Icon(
+                    Icons.arrow_drop_down_rounded,
+                    color: Color(0xFF7E57C2),
+                  ),
                   filled: true,
-                  fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  fillColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200]!),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white12
+                          : Colors.grey[200]!,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200]!),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white12
+                          : Colors.grey[200]!,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 2),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF7E57C2),
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
@@ -892,14 +992,22 @@ class _PayrollPageState extends State<PayrollPage>
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('payroll.preview_salary'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(
+            'payroll.preview_salary'.tr(context),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
           const Divider(height: 32),
-          _buildAmountRow('payroll.basic_salary'.tr(context), breakdown['basic_salary']),
+          _buildAmountRow(
+            'payroll.basic_salary'.tr(context),
+            breakdown['basic_salary'],
+          ),
           ..._buildDynamicPreviewRows(breakdown['allowances'], false),
           ..._buildDynamicPreviewRows(breakdown['commissions'], false),
           ..._buildDynamicPreviewRows(breakdown['other_payments'], false),
@@ -907,18 +1015,38 @@ class _PayrollPageState extends State<PayrollPage>
           ..._buildDynamicPreviewRows(breakdown['statutory_deductions'], true),
           ..._buildDynamicPreviewRows(breakdown['optional_deductions'], true),
           if ((breakdown['advance_salary_deduct'] ?? 0) > 0)
-            _buildAmountRow('payroll.advance_salary'.tr(context), breakdown['advance_salary_deduct'], isNegative: true),
+            _buildAmountRow(
+              'payroll.advance_salary'.tr(context),
+              breakdown['advance_salary_deduct'],
+              isNegative: true,
+            ),
           if ((breakdown['loan_deduct'] ?? 0) > 0)
-            _buildAmountRow('payroll.loan'.tr(context), breakdown['loan_deduct'], isNegative: true),
+            _buildAmountRow(
+              'payroll.loan'.tr(context),
+              breakdown['loan_deduct'],
+              isNegative: true,
+            ),
           const Divider(height: 32),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: const Color(0xFF7E57C2).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7E57C2).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('payroll.net_salary'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text('IDR ${_formatCurrency(breakdown['net_salary'])}', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF7E57C2))),
+                Text(
+                  'payroll.net_salary'.tr(context),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'IDR ${_formatCurrency(breakdown['net_salary'])}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF7E57C2),
+                  ),
+                ),
               ],
             ),
           ),
@@ -928,7 +1056,12 @@ class _PayrollPageState extends State<PayrollPage>
   }
 
   List<Widget> _buildDynamicPreviewRows(List<dynamic> items, bool isNegative) {
-    return items.map((i) => _buildAmountRow(i['title'], i['amount'], isNegative: isNegative)).toList();
+    return items
+        .map(
+          (i) =>
+              _buildAmountRow(i['title'], i['amount'], isNegative: isNegative),
+        )
+        .toList();
   }
 
   Widget _buildAccountSelectionCard() {
@@ -937,7 +1070,9 @@ class _PayrollPageState extends State<PayrollPage>
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -945,11 +1080,22 @@ class _PayrollPageState extends State<PayrollPage>
           SearchableDropdown(
             label: 'payroll.source_account'.tr(context),
             icon: Icons.account_balance_wallet_rounded,
-            value: _selectedAccountId != null ? (_accounts.firstWhere((a) => a['account_id'].toString() == _selectedAccountId, orElse: () => {'account_name': ''})['account_name'] ?? '') : '',
-            options: _accounts.map((a) => {
-              'id': a['account_id'].toString(),
-              'name': "${a['account_name']} (IDR ${_formatCurrency(a['account_balance'])})",
-            }).toList(),
+            value: _selectedAccountId != null
+                ? (_accounts.firstWhere(
+                        (a) => a['account_id'].toString() == _selectedAccountId,
+                        orElse: () => {'account_name': ''},
+                      )['account_name'] ??
+                      '')
+                : '',
+            options: _accounts
+                .map(
+                  (a) => {
+                    'id': a['account_id'].toString(),
+                    'name':
+                        "${a['account_name']} (IDR ${_formatCurrency(a['account_balance'])})",
+                  },
+                )
+                .toList(),
             onSelected: (val) => setState(() => _selectedAccountId = val),
           ),
         ],
@@ -963,7 +1109,9 @@ class _PayrollPageState extends State<PayrollPage>
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+        ],
       ),
       child: Column(
         children: [
@@ -973,21 +1121,41 @@ class _PayrollPageState extends State<PayrollPage>
             decoration: InputDecoration(
               labelText: 'payroll.comments'.tr(context),
               labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
-              prefixIcon: const Icon(Icons.chat_rounded, size: 18, color: Color(0xFF7E57C2)),
+              prefixIcon: const Icon(
+                Icons.chat_rounded,
+                size: 18,
+                color: Color(0xFF7E57C2),
+              ),
               filled: true,
-              fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              fillColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200]!),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white12
+                      : Colors.grey[200]!,
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey[200]!),
+                borderSide: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white12
+                      : Colors.grey[200]!,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 2),
+                borderSide: const BorderSide(
+                  color: Color(0xFF7E57C2),
+                  width: 2,
+                ),
               ),
             ),
             maxLines: 2,
@@ -1000,11 +1168,19 @@ class _PayrollPageState extends State<PayrollPage>
               onPressed: _isActionLoading ? null : _executePayment,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF7E57C2),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: _isActionLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : Text('payroll.pay_now'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  : Text(
+                      'payroll.pay_now'.tr(context),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -1012,7 +1188,10 @@ class _PayrollPageState extends State<PayrollPage>
     );
   }
 
-  Widget _buildPayslipView(String payslipId, ScrollController scrollController) {
+  Widget _buildPayslipView(
+    String payslipId,
+    ScrollController scrollController,
+  ) {
     return FutureBuilder<Map<String, dynamic>>(
       future: _payslipFuture,
       builder: (context, snapshot) {
@@ -1020,9 +1199,7 @@ class _PayrollPageState extends State<PayrollPage>
           return const Padding(
             padding: EdgeInsets.all(80),
             child: Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF7E57C2),
-              ),
+              child: CircularProgressIndicator(color: Color(0xFF7E57C2)),
             ),
           );
         }
@@ -1092,7 +1269,7 @@ class _PayrollPageState extends State<PayrollPage>
                 ),
               ),
               const SizedBox(height: 40),
-              
+
               _buildSectionHeader('payroll.details'.tr(context)),
               _buildInfoRow(
                 'payroll.payment_method'.tr(context),
@@ -1117,7 +1294,8 @@ class _PayrollPageState extends State<PayrollPage>
               ),
               const SizedBox(height: 24),
 
-              if (data['statutory_deductions'] != null && data['statutory_deductions'].isNotEmpty) ...[
+              if (data['statutory_deductions'] != null &&
+                  data['statutory_deductions'].isNotEmpty) ...[
                 _buildSectionHeader('payroll.deductions'.tr(context)),
                 ..._buildDynamicRows(
                   data['statutory_deductions'],
@@ -1170,7 +1348,10 @@ class _PayrollPageState extends State<PayrollPage>
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -1230,9 +1411,7 @@ class _PayrollPageState extends State<PayrollPage>
                 ),
               ),
             ),
-            Expanded(
-              child: _buildPayslipView(payslipId, ScrollController()),
-            ),
+            Expanded(child: _buildPayslipView(payslipId, ScrollController())),
           ],
         ),
       ),
@@ -1311,7 +1490,10 @@ class _PayrollPageState extends State<PayrollPage>
               fontSize: 14,
               color: isNegative
                   ? Colors.red[400]
-                  : (isNegative == false && double.tryParse(value.toString()) != 0 ? Colors.green[600] : Theme.of(context).colorScheme.onSurface),
+                  : (isNegative == false &&
+                            double.tryParse(value.toString()) != 0
+                        ? Colors.green[600]
+                        : Theme.of(context).colorScheme.onSurface),
             ),
           ),
         ],

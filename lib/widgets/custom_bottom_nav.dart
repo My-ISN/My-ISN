@@ -46,8 +46,10 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
   bool _hasPermission(String resource) {
     if (widget.userData['role_resources'] == 'all') return true;
     final String resources = widget.userData['role_resources'] ?? '';
-    final List<String> resourceList =
-        resources.split(',').map((e) => e.trim()).toList();
+    final List<String> resourceList = resources
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
     return resourceList.contains(resource);
   }
 
@@ -55,47 +57,55 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final bool hasPayroll = _hasPermission('mobile_payroll_enable');
-    final bool isCustomer = widget.userData['user_type'] == 'customer' || 
-                           widget.userData['user_role_id'] == 21 || 
-                           widget.userData['user_role_id'] == '21';
-    
+    final bool isCustomer =
+        widget.userData['user_type'] == 'customer' ||
+        widget.userData['user_role_id'] == 21 ||
+        widget.userData['user_role_id'] == '21';
+
     final Color primaryColor = Theme.of(context).colorScheme.primary;
 
-    final List<Map<String, dynamic>> items = isCustomer ? [
-      {
-        'icon': Icons.home_rounded,
-        'label': 'main.xin_dashboard'.tr(context),
-      },
-      {
-        'icon': Icons.house_rounded,
-        'label': 'main.xin_rent_plan'.tr(context),
-      },
-      {
-        'icon': Icons.person_rounded,
-        'label': 'main.xin_profile'.tr(context),
-      },
-    ] : [
-      {
-        'icon': Icons.home_rounded,
-        'label': 'main.xin_dashboard'.tr(context),
-      },
-      {
-        'icon': Icons.calendar_month_rounded,
-        'label': 'main.xin_attendance'.tr(context),
-      },
-      if (hasPayroll)
-        {
-          'icon': Icons.receipt_long_rounded,
-          'label': 'main.xin_payroll'.tr(context),
-        },
-      {
-        'icon': Icons.person_rounded,
-        'label': 'main.xin_profile'.tr(context),
-      },
-    ];
+    final List<Map<String, dynamic>> items = isCustomer
+        ? [
+            {
+              'icon': Icons.home_rounded,
+              'label': 'main.xin_dashboard'.tr(context),
+            },
+            {
+              'icon': Icons.house_rounded,
+              'label': 'main.xin_rent_plan'.tr(context),
+            },
+            {
+              'icon': Icons.person_rounded,
+              'label': 'main.xin_profile'.tr(context),
+            },
+          ]
+        : [
+            {
+              'icon': Icons.home_rounded,
+              'label': 'main.xin_dashboard'.tr(context),
+            },
+            {
+              'icon': Icons.calendar_month_rounded,
+              'label': 'main.xin_attendance'.tr(context),
+            },
+            if (hasPayroll)
+              {
+                'icon': Icons.receipt_long_rounded,
+                'label': 'main.xin_payroll'.tr(context),
+              },
+            {
+              'icon': Icons.person_rounded,
+              'label': 'main.xin_profile'.tr(context),
+            },
+          ];
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20), // Bottom margin for floating look
+      padding: const EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        20,
+      ), // Bottom margin for floating look
       child: Container(
         height: 80, // Increased height
         padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -114,7 +124,8 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final int itemCount = items.length;
-            final double totalMargin = itemCount * 4; // Margin horizontal (2*2) per item
+            final double totalMargin =
+                itemCount * 4; // Margin horizontal (2*2) per item
             final double availableWidth = constraints.maxWidth - totalMargin;
 
             return Row(
@@ -122,10 +133,11 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
               children: List.generate(itemCount, (index) {
                 final bool isActive = widget.currentIndex == index;
                 final item = items[index];
-                
+
                 // Dynamic width calculation: Active item takes ~45%, others share the rest
                 final double activeWidth = availableWidth * 0.45;
-                final double inactiveWidth = (availableWidth - activeWidth) / (itemCount - 1);
+                final double inactiveWidth =
+                    (availableWidth - activeWidth) / (itemCount - 1);
                 final double itemWidth = isActive ? activeWidth : inactiveWidth;
 
                 return GestureDetector(
@@ -137,7 +149,9 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
                     width: itemWidth,
                     height: 56,
                     margin: const EdgeInsets.symmetric(horizontal: 2),
-                    padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 0),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isActive ? 16 : 0,
+                    ),
                     decoration: BoxDecoration(
                       color: isActive ? primaryColor : Colors.transparent,
                       borderRadius: BorderRadius.circular(28),
@@ -147,8 +161,8 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
                       children: [
                         Icon(
                           item['icon'],
-                          color: isActive 
-                              ? Colors.white 
+                          color: isActive
+                              ? Colors.white
                               : (isDark ? Colors.grey[400] : Colors.grey[600]),
                           size: 24,
                         ),
@@ -180,4 +194,3 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
     );
   }
 }
-

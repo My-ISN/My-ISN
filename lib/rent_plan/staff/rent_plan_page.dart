@@ -895,7 +895,9 @@ class _RentPlanPageState extends State<RentPlanPage>
                 if (index == _rentals.length + 1) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 8, bottom: 120),
-                    child: _totalCount > 0 ? _buildPagination() : const SizedBox.shrink(),
+                    child: _totalCount > 0
+                        ? _buildPagination()
+                        : const SizedBox.shrink(),
                   );
                 }
 

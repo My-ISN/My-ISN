@@ -6,16 +6,17 @@ class FinanceService {
   static const String baseUrl = 'https://foxgeen.com/HRIS/mobileapi';
   final storage = const FlutterSecureStorage();
 
-  Future<Map<String, dynamic>> getFinanceDashboard() async {
+  Future<Map<String, dynamic>> getFinanceDashboard({String? monthYear}) async {
     final userDataString = await storage.read(key: 'user_data');
     final userData = json.decode(userDataString ?? '{}');
     final userId = userData['id'];
 
     if (userId == null) throw Exception('User ID not found');
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/get_finance_dashboard?user_id=$userId'),
-    );
+    String url = '$baseUrl/get_finance_dashboard?user_id=$userId';
+    if (monthYear != null) url += '&month_year=$monthYear';
+
+    final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -24,7 +25,10 @@ class FinanceService {
     }
   }
 
-  Future<Map<String, dynamic>> getFinanceAccounts({int limit = 10, int offset = 0}) async {
+  Future<Map<String, dynamic>> getFinanceAccounts({
+    int limit = 10,
+    int offset = 0,
+  }) async {
     final userDataString = await storage.read(key: 'user_data');
     final userData = json.decode(userDataString ?? '{}');
     final userId = userData['id'] ?? userData['user_id'];
@@ -32,7 +36,9 @@ class FinanceService {
     if (userId == null) throw Exception('User ID not found');
 
     final response = await http.get(
-      Uri.parse('$baseUrl/get_finance_accounts?user_id=$userId&limit=$limit&offset=$offset'),
+      Uri.parse(
+        '$baseUrl/get_finance_accounts?user_id=$userId&limit=$limit&offset=$offset',
+      ),
     );
 
     if (response.statusCode == 200) {
@@ -42,7 +48,9 @@ class FinanceService {
     }
   }
 
-  Future<Map<String, dynamic>> storeFinanceAccount(Map<String, String> data) async {
+  Future<Map<String, dynamic>> storeFinanceAccount(
+    Map<String, String> data,
+  ) async {
     final userDataString = await storage.read(key: 'user_data');
     final userData = json.decode(userDataString ?? '{}');
     final userId = userData['id'] ?? userData['user_id'];
@@ -51,10 +59,7 @@ class FinanceService {
 
     final response = await http.post(
       Uri.parse('$baseUrl/store_finance_account'),
-      body: {
-        ...data,
-        'user_id': userId.toString(),
-      },
+      body: {...data, 'user_id': userId.toString()},
     );
 
     if (response.statusCode == 200) {
@@ -73,10 +78,7 @@ class FinanceService {
 
     final response = await http.post(
       Uri.parse('$baseUrl/delete_finance_account'),
-      body: {
-        'account_id': accountId,
-        'user_id': userId.toString(),
-      },
+      body: {'account_id': accountId, 'user_id': userId.toString()},
     );
 
     if (response.statusCode == 200) {
@@ -104,7 +106,10 @@ class FinanceService {
     }
   }
 
-  Future<Map<String, dynamic>> storeFinanceTransaction(Map<String, dynamic> data, {String? filePath}) async {
+  Future<Map<String, dynamic>> storeFinanceTransaction(
+    Map<String, dynamic> data, {
+    String? filePath,
+  }) async {
     final userDataString = await storage.read(key: 'user_data');
     final userData = json.decode(userDataString ?? '{}');
     final userId = userData['id'] ?? userData['user_id'];
@@ -124,7 +129,9 @@ class FinanceService {
 
     // Add file if exists
     if (filePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('attachment', filePath));
+      request.files.add(
+        await http.MultipartFile.fromPath('attachment', filePath),
+      );
     }
 
     final streamedResponse = await request.send();
@@ -149,7 +156,8 @@ class FinanceService {
 
     if (userId == null) throw Exception('User ID not found');
 
-    String url = '$baseUrl/get_finance_transactions?user_id=$userId&limit=$limit&offset=$offset';
+    String url =
+        '$baseUrl/get_finance_transactions?user_id=$userId&limit=$limit&offset=$offset';
     if (type != null && type != 'all') url += '&type=$type';
     if (monthYear != null) url += '&month_year=$monthYear';
 
@@ -162,7 +170,34 @@ class FinanceService {
     }
   }
 
-  Future<Map<String, dynamic>> deleteFinanceTransaction(String transactionId) async {
+  Future<Map<String, dynamic>> getPersonalFinanceTransactions({
+    required String type,
+    String? monthYear,
+    int limit = 10,
+    int offset = 0,
+  }) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    String url =
+        '$baseUrl/get_personal_finance_transactions?user_id=$userId&type=$type&limit=$limit&offset=$offset';
+    if (monthYear != null) url += '&month_year=$monthYear';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal memuat transaksi pribadi');
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteFinanceTransaction(
+    String transactionId,
+  ) async {
     final userDataString = await storage.read(key: 'user_data');
     final userData = json.decode(userDataString ?? '{}');
     final userId = userData['id'] ?? userData['user_id'];
@@ -171,10 +206,7 @@ class FinanceService {
 
     final response = await http.post(
       Uri.parse('$baseUrl/delete_finance_transaction'),
-      body: {
-        'user_id': userId.toString(),
-        'transaction_id': transactionId,
-      },
+      body: {'user_id': userId.toString(), 'transaction_id': transactionId},
     );
 
     if (response.statusCode == 200) {
@@ -184,7 +216,9 @@ class FinanceService {
     }
   }
 
-  Future<Map<String, dynamic>> updateFinanceAccount(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateFinanceAccount(
+    Map<String, dynamic> data,
+  ) async {
     final userDataString = await storage.read(key: 'user_data');
     final userData = json.decode(userDataString ?? '{}');
     final userId = userData['id'] ?? userData['user_id'];
@@ -205,7 +239,10 @@ class FinanceService {
     }
   }
 
-  Future<Map<String, dynamic>> updateFinanceTransaction(Map<String, dynamic> data, {String? filePath}) async {
+  Future<Map<String, dynamic>> updateFinanceTransaction(
+    Map<String, dynamic> data, {
+    String? filePath,
+  }) async {
     final userDataString = await storage.read(key: 'user_data');
     final userData = json.decode(userDataString ?? '{}');
     final userId = userData['id'] ?? userData['user_id'];
@@ -225,7 +262,9 @@ class FinanceService {
 
     // Add file if exists
     if (filePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('attachment', filePath));
+      request.files.add(
+        await http.MultipartFile.fromPath('attachment', filePath),
+      );
     }
 
     final streamedResponse = await request.send();
@@ -235,6 +274,121 @@ class FinanceService {
       return json.decode(response.body);
     } else {
       throw Exception('Failed to update transaction');
+    }
+  }
+
+  Future<Map<String, dynamic>> storePersonalFinanceTransaction(
+    Map<String, dynamic> data,
+  ) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/store_personal_finance_transaction'),
+      body: {...data, 'user_id': userId.toString()},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal menyimpan transaksi pribadi');
+    }
+  }
+
+  Future<Map<String, dynamic>> updatePersonalFinanceTransaction(
+    Map<String, dynamic> data,
+  ) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/update_personal_finance_transaction'),
+      body: {...data, 'user_id': userId.toString()},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal memperbarui transaksi pribadi');
+    }
+  }
+
+  Future<Map<String, dynamic>> deletePersonalFinanceTransaction(
+    String transactionId,
+    String type,
+  ) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/delete_personal_finance_transaction'),
+      body: {
+        'user_id': userId.toString(),
+        'id': transactionId,
+        'transaction_type': type,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal menghapus transaksi pribadi');
+    }
+  }
+
+  Future<Map<String, dynamic>> storePersonalBudget(
+    Map<String, dynamic> data,
+  ) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/store_personal_budget'),
+      body: {...data, 'user_id': userId.toString()},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal menyimpan anggaran');
+    }
+  }
+
+  Future<Map<String, dynamic>> deletePersonalBudget({
+    required String category,
+    required String budgetMonth,
+  }) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/delete_personal_budget'),
+      body: {
+        'user_id': userId.toString(),
+        'category': category,
+        'budget_month': budgetMonth,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal menghapus anggaran');
     }
   }
 }
