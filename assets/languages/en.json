@@ -44,7 +44,7 @@
         "select_item": "Select Item",
         "logout_confirm_title": "Logout Confirmation",
         "logout_confirm_msg": "Are you sure you want to log out of your account?",
-        "apply": "Apply"
+        "status": "Status"
     },
     "dashboard": {
         "welcome": "Welcome,",
@@ -1080,5 +1080,34 @@
     "month_sep": "September",
     "month_oct": "October",
     "month_nov": "November",
-    "month_dec": "December"
+    "month_dec": "December",
+    "side_drawer": {
+        "work": "Operational",
+        "financial": "Financial",
+        "support": "Support & AI"
+    },
+    "creative_idea": {
+        "title": "Creative Idea",
+        "leaderboard": "Leaderboard",
+        "all_ideas": "All Ideas",
+        "my_ideas": "My Ideas",
+        "add_idea": "Submit Your Idea",
+        "idea_title": "Idea Title",
+        "idea_description": "Describe your idea...",
+        "submit": "Submit Idea",
+        "rank": "Rank",
+        "approved": "Approved",
+        "pending": "Pending",
+        "rejected": "Rejected",
+        "success_msg": "Idea submitted successfully!",
+        "update_success": "Idea updated successfully!",
+        "delete_success": "Idea deleted successfully!",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirm_delete": "Delete Idea?",
+        "confirm_delete_msg": "Are you sure you want to permanently delete this idea?",
+        "empty_ideas": "No ideas found yet.",
+        "your_rank": "Your Rank",
+        "top_rank": "Top Rankings"
+    }
 }

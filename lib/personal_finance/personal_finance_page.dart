@@ -5,13 +5,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:fl_chart/fl_chart.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:intl/intl.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/period_filter_widget.dart';
+import '../widgets/shimmer_loading.dart';
 import 'add_personal_finance_page.dart';
+
 
 // ... (rest of imports)
 
@@ -106,6 +107,12 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   }
 
   Future<void> _fetchDashboardData({bool silent = false}) async {
+    if (!_hasPermission('mobile_personal_finance_view')) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
     if (!silent || dashboardData == null) {
       setState(() => isLoading = true);
     }
@@ -144,7 +151,17 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     }
   }
 
+  bool _hasPermission(String resource) {
+    if (widget.userData == null) return false;
+    if (widget.userData['role_access'] == '1' ||
+        widget.userData['role_resources'] == 'all') return true;
+    final String resources = widget.userData['role_resources'] ?? '';
+    final List<String> resourceList = resources.split(',');
+    return resourceList.contains(resource);
+  }
+
   Future<void> _fetchReportData() async {
+    if (!_hasPermission('mobile_personal_finance_view')) return;
     setState(() => _isReportLoading = true);
     try {
       final response = await _financeService.getPersonalFinanceReport(
@@ -391,37 +408,39 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                     }
                   },
                   itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.edit_outlined,
-                            size: 20,
-                            color: Color(0xFF7E57C2),
-                          ),
-                          const SizedBox(width: 12),
-                          Text('finance.edit_transaction'.tr(context)),
-                        ],
+                    if (_hasPermission('mobile_personal_finance_edit'))
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.edit_outlined,
+                              size: 20,
+                              color: Color(0xFF7E57C2),
+                            ),
+                            const SizedBox(width: 12),
+                            Text('finance.edit_transaction'.tr(context)),
+                          ],
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.delete_outline_rounded,
-                            size: 20,
-                            color: Colors.red,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'finance.delete_transaction'.tr(context),
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ],
+                    if (_hasPermission('mobile_personal_finance_delete'))
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete_outline_rounded,
+                              size: 20,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'finance.delete_transaction'.tr(context),
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],
@@ -540,26 +559,28 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
         title: "My ISN",
         showBackButton: false,
       ),
-      body: isLoading
-          ? _buildShimmerLoading()
-          : Column(
-              children: [
-                _buildSummaryCard(),
-                _buildTabBar(),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildOverviewTab(),
-                      _buildTransactionTab('income'),
-                      _buildTransactionTab('expense'),
-                      _buildReportTab(),
-                    ],
-                  ),
+      body: !_hasPermission('mobile_personal_finance_view')
+          ? _buildUnauthorizedView()
+          : isLoading
+              ? _buildShimmerLoading()
+              : Column(
+                  children: [
+                    _buildSummaryCard(),
+                    _buildTabBar(),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildOverviewTab(),
+                          _buildTransactionTab('income'),
+                          _buildTransactionTab('expense'),
+                          _buildReportTab(),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-      floatingActionButton: _tabController.index == 3
+      floatingActionButton: (!_hasPermission('mobile_personal_finance_add') || _tabController.index == 3)
           ? null
           : FloatingActionButton.extended(
               onPressed: () async {
@@ -644,11 +665,13 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
 
   Widget _buildOverviewTab() {
     if (dashboardData == null) return const SizedBox.shrink();
-    return RefreshIndicator(
-      onRefresh: _fetchDashboardData,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: RefreshIndicator(
+        onRefresh: _fetchDashboardData,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
           Row(
             children: [
               PeriodFilterButton(
@@ -665,11 +688,11 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           _buildCategoryChartSection(),
           const SizedBox(height: 24),
           _buildBudgetSection(),
-          const SizedBox(height: 80),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTransactionTab(String type) {
     final bool isIncome = type == 'income';
@@ -680,36 +703,41 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
 
     return RefreshIndicator(
       onRefresh: () => _fetchTransactions(type: type),
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: _buildTransactionFilters(type),
-            ),
-          ),
-          if (_isTransactionsLoading && transactions.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(color: _primaryColor),
-              ),
-            )
-          else if (transactions.isEmpty)
-            SliverFillRemaining(hasScrollBody: false, child: _buildEmptyState())
-          else
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final transaction = transactions[index];
-                  return FinanceTransactionItem(
-                    transaction: transaction,
-                    onTap: () => _showTransactionDetail(transaction, type),
-                  );
-                }, childCount: transactions.length),
+      child: Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            if (_isTransactionsLoading && (transactions.isEmpty || (isIncome ? _incomeCurrentPage : _expenseCurrentPage) == 1))
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _buildTransactionShimmer(),
+                ),
+              )
+            else ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: _buildTransactionFilters(type),
               ),
             ),
+            if (transactions.isEmpty)
+              SliverFillRemaining(hasScrollBody: false, child: _buildEmptyState())
+            else
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final transaction = transactions[index];
+                    return FinanceTransactionItem(
+                      transaction: transaction,
+                      onTap: () => _showTransactionDetail(transaction, type),
+                    );
+                  }, childCount: transactions.length),
+                ),
+              ),
+          ],
           if (totalCount > _selectedLimit && !_isTransactionsLoading)
             SliverToBoxAdapter(
               child: Padding(
@@ -720,8 +748,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Future<void> _fetchTransactions({String? type}) async {
     final String transactionType =
@@ -979,6 +1008,49 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     );
   }
 
+  Widget _buildUnauthorizedView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.lock_person_rounded,
+              size: 64,
+              color: Colors.red,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Akses Terbatas',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Anda tidak memiliki izin untuk melihat modul Personal Finance. Silakan hubungi admin untuk mendapatkan akses.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -1116,27 +1188,24 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                   ],
                 ),
                 const SizedBox(height: 16),
-                data == null
-                    ? Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(
+                data == null && !isReportTab
+                    ? const ShimmerLoading(
+                        child: ShimmerSkeleton(
                           height: 24,
                           width: 150,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          borderRadius: 4,
                         ),
                       )
-                    : Text(
-                        'IDR ${currencyFormat.format(balance).replaceAll('Rp', '').trim()}',
-                        style: TextStyle(
-                          fontSize: isSummaryExpanded ? 24 : 20,
-                          fontWeight: FontWeight.w900,
-                          color: _primaryColor,
-                        ),
-                      ),
+                    : data == null && isReportTab
+                        ? const SizedBox(height: 24) // Placeholder without shimmer
+                        : Text(
+                            'IDR ${currencyFormat.format(balance).replaceAll('Rp', '').trim()}',
+                            style: TextStyle(
+                              fontSize: isSummaryExpanded ? 24 : 20,
+                              fontWeight: FontWeight.w900,
+                              color: _primaryColor,
+                            ),
+                          ),
                 if (isSummaryExpanded) ...[
                   const SizedBox(height: 16),
                   const Divider(),
@@ -1740,40 +1809,42 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                     }
                   },
                   itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.edit_outlined,
-                            size: 20,
-                            color: Color(0xFF7E57C2),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'finance.edit_budget'.tr(context),
-                            style: const TextStyle(color: Color(0xFF7E57C2)),
-                          ),
-                        ],
+                    if (_hasPermission('mobile_personal_finance_edit'))
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.edit_outlined,
+                              size: 20,
+                              color: Color(0xFF7E57C2),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'finance.edit_budget'.tr(context),
+                              style: const TextStyle(color: Color(0xFF7E57C2)),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.delete_outline_rounded,
-                            size: 20,
-                            color: Colors.red,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'finance.delete_budget'.tr(context),
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ],
+                    if (_hasPermission('mobile_personal_finance_delete'))
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete_outline_rounded,
+                              size: 20,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'finance.delete_budget'.tr(context),
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ],
@@ -2108,46 +2179,54 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   }
 
   Widget _buildReportTab() {
-    if (_isReportLoading && reportData == null) {
-      return _buildReportShimmer();
+    if (_isReportLoading) {
+      return Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: _buildReportShimmer(),
+      );
     }
 
     if (reportData == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.analytics_outlined, size: 64, color: Colors.grey[300]),
-            const SizedBox(height: 16),
-            Text(
-              'Gagal memuat data laporan',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-            TextButton(
-              onPressed: _fetchReportData,
-              child: const Text('Coba Lagi'),
-            ),
-          ],
+      return Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.analytics_outlined, size: 64, color: Colors.grey[300]),
+              const SizedBox(height: 16),
+              Text(
+                'Gagal memuat data laporan',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              TextButton(
+                onPressed: _fetchReportData,
+                child: const Text('Coba Lagi'),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
       onRefresh: _fetchReportData,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Row(children: [_buildYearPicker()]),
-          const SizedBox(height: 16),
-          _buildAnnualTrendChart(),
-          const SizedBox(height: 24),
-          // Combined Breakdowns (1 box)
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.grey.withOpacity(0.05)),
+      child: Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Row(children: [_buildYearPicker()]),
+            const SizedBox(height: 16),
+            _buildAnnualTrendChart(),
+            const SizedBox(height: 24),
+            // Combined Breakdowns (1 box)
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.grey.withOpacity(0.05)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.02),
@@ -2178,8 +2257,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           const SizedBox(height: 100),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildYearPicker() {
     final int currentYear = DateTime.now().year;
@@ -2687,42 +2767,99 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   }
 
   Widget _buildReportShimmer() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+    return ShimmerLoading(
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Container(
-            height: 42,
-            width: 100,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
+          // Year Picker Shimmer
+          Row(
+            children: [
+              const ShimmerSkeleton(
+                height: 42,
+                width: 100,
+                borderRadius: 12,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
-          Container(
+          // Chart Shimmer
+          const ShimmerSkeleton(
             height: 250,
+            borderRadius: 24,
+          ),
+          const SizedBox(height: 24),
+          // Breakdown Box Shimmer
+          Container(
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
             ),
-          ),
-          const SizedBox(height: 24),
-          Container(
-            height: 400,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const ShimmerSkeleton(height: 20, width: 150, borderRadius: 4),
+                const SizedBox(height: 20),
+                ...List.generate(4, (index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Row(
+                    children: [
+                      const ShimmerSkeleton(height: 40, width: 40, borderRadius: 10),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const ShimmerSkeleton(height: 14, width: 120, borderRadius: 4),
+                            const SizedBox(height: 6),
+                            const ShimmerSkeleton(height: 10, width: 60, borderRadius: 4),
+                          ],
+                        ),
+                      ),
+                      const ShimmerSkeleton(height: 16, width: 80, borderRadius: 4),
+                    ],
+                  ),
+                )),
+              ],
             ),
           ),
           const SizedBox(height: 24),
-          Container(
-            height: 300,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return ShimmerLoading(
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Summary Card Shimmer
+          ShimmerSkeleton(
+            height: 160,
+            borderRadius: 24,
+            margin: const EdgeInsets.only(bottom: 24),
+          ),
+          // Tab Bar Shimmer
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(4, (index) => 
+              const ShimmerSkeleton(height: 35, width: 70, borderRadius: 20)
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Content Shimmer (e.g. Chart)
+          ShimmerSkeleton(
+            height: 220,
+            borderRadius: 24,
+            margin: const EdgeInsets.only(bottom: 24),
+          ),
+          // List item shimmers
+          ...List.generate(3, (index) => 
+            ShimmerSkeleton(
+              height: 80,
+              borderRadius: 16,
+              margin: const EdgeInsets.only(bottom: 16),
             ),
           ),
         ],
@@ -2730,28 +2867,55 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     );
   }
 
-  Widget _buildShimmerLoading() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
+  Widget _buildTransactionShimmer() {
+    return ShimmerLoading(
+      child: Column(
         children: [
-          Container(
-            height: 150,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
+          // Filters Shimmer
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const ShimmerSkeleton(height: 16, width: 40, borderRadius: 4),
+                  const SizedBox(width: 8),
+                  const ShimmerSkeleton(height: 38, width: 60, borderRadius: 10),
+                  const SizedBox(width: 8),
+                  const ShimmerSkeleton(height: 38, width: 120, borderRadius: 10),
+                ],
+              ),
+              const ShimmerSkeleton(height: 30, width: 90, borderRadius: 12),
+            ],
           ),
-          const SizedBox(height: 24),
-          Container(height: 20, width: 150, color: Colors.white),
           const SizedBox(height: 16),
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+          // List Shimmer
+          ...List.generate(
+            6,
+            (index) => Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  const ShimmerSkeleton(height: 48, width: 48, borderRadius: 15),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const ShimmerSkeleton(height: 16, width: 140, borderRadius: 4),
+                        const SizedBox(height: 8),
+                        const ShimmerSkeleton(height: 12, width: 80, borderRadius: 4),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const ShimmerSkeleton(height: 20, width: 90, borderRadius: 4),
+                ],
+              ),
             ),
           ),
         ],

@@ -6,6 +6,8 @@ import '../announcement_page.dart';
 import '../todo_list/todo_list_page.dart';
 import 'top_notification.dart';
 import '../localization/app_localizations.dart';
+import '../helpdesk/helpdesk_list_page.dart';
+import '../ai_bot/ai_bot_page.dart';
 
 // Global Manager for Notification State
 class NotificationManager {
@@ -172,6 +174,14 @@ class _CustomAppBarState extends State<CustomAppBar> {
     }
   }
 
+  bool _hasPermission(String resource) {
+    if (widget.userData['role_resources'] == 'all') return true;
+    final String resources = widget.userData['role_resources'] ?? '';
+    final List<String> resourceList =
+        resources.split(',').map((e) => e.trim()).toList();
+    return resourceList.contains(resource);
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -248,13 +258,52 @@ class _CustomAppBarState extends State<CustomAppBar> {
       actions: widget.showActions
           ? [
               if (widget.extraActions != null) ...widget.extraActions!,
-              ValueListenableBuilder<int>(
+                IconButton(
+                  padding: const EdgeInsets.all(8.0),
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(
+                    Icons.smart_toy_outlined,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AiBotPage(
+                          userData: widget.userData,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                if (_hasPermission('mobile_helpdesk_view'))
+                  IconButton(
+                    padding: const EdgeInsets.all(8.0),
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(
+                      Icons.support_agent_rounded,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HelpdeskListPage(
+                            userData: widget.userData,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ValueListenableBuilder<int>(
                 valueListenable: _notifManager.unreadCount,
                 builder: (context, count, child) {
                   return Stack(
                     alignment: Alignment.center,
                     children: [
                       IconButton(
+                        padding: const EdgeInsets.all(8.0),
+                        constraints: const BoxConstraints(),
                         icon: const Icon(
                           Icons.notifications_none,
                           color: Colors.grey,

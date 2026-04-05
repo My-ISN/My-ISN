@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
 import '../widgets/shimmer_loading.dart';
+import '../services/log_service.dart';
 import '../widgets/connectivity_wrapper.dart';
 
 class PayrollPage extends StatefulWidget {
@@ -100,7 +101,7 @@ class _PayrollPageState extends State<PayrollPage>
     });
     try {
       final userId = widget.userData['user_id'] ?? widget.userData['id'];
-      debugPrint('Fetching staff for user: $userId');
+      Log.i('Fetching staff for user: $userId');
       if (userId == null) {
         setState(() {
           _isStaffLoading = false;
@@ -134,7 +135,7 @@ class _PayrollPageState extends State<PayrollPage>
           });
         }
       } catch (e) {
-        debugPrint('Error fetching staff: $e');
+        Log.e('Error fetching staff: $e');
         if (mounted) {
           String errorMsg = "Kesalahan koneksi: $e";
           if (e is FormatException && responseBody != null) {
@@ -150,7 +151,7 @@ class _PayrollPageState extends State<PayrollPage>
         }
       }
     } catch (e) {
-      debugPrint('Global error fetching staff: $e');
+      Log.e('Global error fetching staff: $e');
     }
   }
 
@@ -167,7 +168,7 @@ class _PayrollPageState extends State<PayrollPage>
         });
       }
     } catch (e) {
-      debugPrint('Error fetching accounts: $e');
+      Log.e('Error fetching accounts: $e');
     }
   }
 
@@ -187,7 +188,7 @@ class _PayrollPageState extends State<PayrollPage>
           _previewData = data;
         });
       } else {
-        debugPrint('Preview failed: ${data['message']}');
+        Log.w('Preview failed: ${data['message']}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -198,7 +199,7 @@ class _PayrollPageState extends State<PayrollPage>
         }
       }
     } catch (e) {
-      debugPrint('Error fetching preview: $e');
+      Log.e('Error fetching preview: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -453,7 +454,7 @@ class _PayrollPageState extends State<PayrollPage>
         );
       }
     } catch (e) {
-      debugPrint('Error executing payment: $e');
+      Log.e('Error executing payment: $e');
     } finally {
       setState(() => _isActionLoading = false);
     }
@@ -472,7 +473,7 @@ class _PayrollPageState extends State<PayrollPage>
         });
       }
     } catch (e) {
-      debugPrint('Error fetching payroll stats: $e');
+      Log.e('Error fetching payroll stats: $e');
     }
   }
 
@@ -491,7 +492,7 @@ class _PayrollPageState extends State<PayrollPage>
         });
       }
     } catch (e) {
-      debugPrint('Error fetching payroll: $e');
+      Log.e('Error fetching payroll: $e');
     } finally {
       setState(() => _isLoading = false);
     }

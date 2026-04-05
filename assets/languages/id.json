@@ -43,7 +43,8 @@
         "no_data": "Tidak ada data",
         "select_item": "Pilih Item",
         "logout_confirm_title": "Konfirmasi Logout",
-        "logout_confirm_msg": "Apakah Anda yakin ingin keluar dari akun Anda?"
+        "logout_confirm_msg": "Apakah Anda yakin ingin keluar dari akun Anda?",
+        "status": "Status"
     },
     "dashboard": {
         "welcome": "Selamat Datang,",
@@ -1074,5 +1075,34 @@
     "month_sep": "September",
     "month_oct": "Oktober",
     "month_nov": "November",
-    "month_dec": "Desember"
+    "month_dec": "Desember",
+    "side_drawer": {
+        "work": "Operasional",
+        "financial": "Keuangan",
+        "support": "Bantuan & AI"
+    },
+    "creative_idea": {
+        "title": "Ide Kreatif",
+        "leaderboard": "Leaderboard",
+        "all_ideas": "Semua Ide",
+        "my_ideas": "Ide Saya",
+        "add_idea": "Ajukan Ide Anda",
+        "idea_title": "Judul Ide",
+        "idea_description": "Jelaskan ide Anda...",
+        "submit": "Kirim Ide",
+        "rank": "Peringkat",
+        "approved": "Disetujui",
+        "pending": "Menunggu",
+        "rejected": "Ditolak",
+        "success_msg": "Ide berhasil diajukan!",
+        "update_success": "Ide berhasil diperbarui!",
+        "delete_success": "Ide berhasil dihapus!",
+        "edit": "Edit",
+        "delete": "Hapus",
+        "confirm_delete": "Hapus Ide?",
+        "confirm_delete_msg": "Apakah Anda yakin ingin menghapus ide ini secara permanen?",
+        "empty_ideas": "Belum ada ide yang ditemukan.",
+        "your_rank": "Peringkat Anda",
+        "top_rank": "Papan Peringkat"
+    }
 }

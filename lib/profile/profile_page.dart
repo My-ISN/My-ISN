@@ -8,6 +8,7 @@ import 'profile_personal.dart';
 import 'profile_bank.dart';
 import 'profile_edit.dart';
 import '../widgets/connectivity_wrapper.dart';
+import '../services/log_service.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../widgets/side_drawer.dart';
@@ -51,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
       final data = json.decode(response.body);
 
       if (data['status'] == true) {
-        debugPrint('PROFILE DEBUG DATA: ${data['data']['debug_raw']}');
+        Log.d('PROFILE DEBUG DATA: ${data['data']['debug_raw']}');
         if (mounted) {
           setState(() {
             _profileData = data['data'];
@@ -59,7 +60,7 @@ class _ProfilePageState extends State<ProfilePage> {
           });
         }
       } else {
-        debugPrint('PROFILE API ERROR: ${data['message']}');
+        Log.w('PROFILE API ERROR: ${data['message']}');
         if (mounted) {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       }
     } catch (e) {
-      debugPrint('Error fetching profile details: $e');
+      Log.e('Error fetching profile details: $e');
       if (mounted && ConnectivityStatus.of(context)) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(

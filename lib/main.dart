@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'services/log_service.dart';
 import 'services/notification_service.dart';
 import 'login_page.dart';
 import 'dashboard_page.dart';
@@ -26,7 +27,7 @@ void main() async {
   try {
     await NotificationService().initialize(navigatorKey);
   } catch (e) {
-    debugPrint('Notification initialization failed: $e');
+    Log.e('Notification initialization failed: $e');
   }
 
   // Check login session
@@ -38,7 +39,7 @@ void main() async {
       userData = json.decode(userDataString);
     }
   } catch (e) {
-    debugPrint('Error reading stored user data: $e');
+    Log.e('Error reading stored user data: $e');
   }
 
   if (userData != null) {

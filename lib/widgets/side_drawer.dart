@@ -11,12 +11,12 @@ import '../work_log/work_log_page.dart';
 import '../finance/finance_page.dart';
 import '../helpdesk/helpdesk_list_page.dart';
 import '../ai_bot/ai_bot_page.dart';
+import '../creative_idea/creative_idea_page.dart';
 import '../personal_finance/personal_finance_page.dart';
-import '../widgets/on_progress_page.dart';
 import '../localization/app_localizations.dart';
 import 'custom_app_bar.dart'; // For NotificationManager
 
-class SideDrawer extends StatelessWidget {
+class SideDrawer extends StatefulWidget {
   final Map<String, dynamic> userData;
   final String activePage;
   final Function(int)? onTabSelected;
@@ -28,22 +28,56 @@ class SideDrawer extends StatelessWidget {
     this.onTabSelected,
   });
 
+  @override
+  State<SideDrawer> createState() => _SideDrawerState();
+}
+
+class _SideDrawerState extends State<SideDrawer> {
+  final Map<String, bool> _expandedSections = {
+    'work': false,
+    'financial': false,
+    'support': false,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-expand section if it contains the active page
+    if (['rent_plan', 'todo_list', 'employees', 'work_log'].contains(
+      widget.activePage,
+    )) {
+      _expandedSections['work'] = true;
+    } else if (['finance', 'my_wallet'].contains(widget.activePage)) {
+      _expandedSections['financial'] = true;
+    } else if (['helpdesk', 'ai_bot', 'creative_idea'].contains(
+      widget.activePage,
+    )) {
+      _expandedSections['support'] = true;
+    }
+  }
+
   bool _hasPermission(String resource) {
-    if (userData['role_resources'] == 'all') return true;
-    final String resources = userData['role_resources'] ?? '';
-    final List<String> resourceList = resources
-        .split(',')
-        .map((e) => e.trim())
-        .toList();
+    if (widget.userData['role_resources'] == 'all') return true;
+    final String resources = widget.userData['role_resources'] ?? '';
+    final List<String> resourceList =
+        resources.split(',').map((e) => e.trim()).toList();
     return resourceList.contains(resource);
+  }
+
+  bool _hasCategoryPermission(List<String> resources) {
+    if (widget.userData['role_resources'] == 'all') return true;
+    for (var res in resources) {
+      if (_hasPermission(res)) return true;
+    }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isCustomer =
-        userData['user_type'] == 'customer' ||
-        userData['user_role_id'] == 21 ||
-        userData['user_role_id'] == '21';
+        widget.userData['user_type'] == 'customer' ||
+        widget.userData['user_role_id'] == 21 ||
+        widget.userData['user_role_id'] == '21';
 
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.75,
@@ -59,17 +93,17 @@ class SideDrawer extends StatelessWidget {
                   context,
                   icon: Icons.dashboard_outlined,
                   title: 'main.xin_dashboard'.tr(context),
-                  isActive: activePage == 'dashboard',
+                  isActive: widget.activePage == 'dashboard',
                   onTap: () {
                     Navigator.pop(context);
-                    if (onTabSelected != null) {
-                      onTabSelected!(0);
-                    } else if (activePage != 'dashboard') {
+                    if (widget.onTabSelected != null) {
+                      widget.onTabSelected!(0);
+                    } else if (widget.activePage != 'dashboard') {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                           builder: (context) => DashboardPage(
-                            userData: userData,
+                            userData: widget.userData,
                             initialIndex: 0,
                           ),
                         ),
@@ -87,19 +121,19 @@ class SideDrawer extends StatelessWidget {
                       ? 'dashboard.rent_plan'.tr(context)
                       : 'main.xin_attendance'.tr(context),
                   isActive: isCustomer
-                      ? activePage == 'rent_plan'
-                      : activePage == 'attendance',
+                      ? widget.activePage == 'rent_plan'
+                      : widget.activePage == 'attendance',
                   onTap: () {
                     Navigator.pop(context);
-                    if (onTabSelected != null) {
-                      onTabSelected!(1);
+                    if (widget.onTabSelected != null) {
+                      widget.onTabSelected!(1);
                     } else if (isCustomer) {
-                      if (activePage != 'rent_plan') {
+                      if (widget.activePage != 'rent_plan') {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
                             builder: (context) => DashboardPage(
-                              userData: userData,
+                              userData: widget.userData,
                               initialIndex: 1,
                             ),
                           ),
@@ -107,12 +141,12 @@ class SideDrawer extends StatelessWidget {
                         );
                       }
                     } else {
-                      if (activePage != 'attendance') {
+                      if (widget.activePage != 'attendance') {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
                             builder: (context) => DashboardPage(
-                              userData: userData,
+                              userData: widget.userData,
                               initialIndex: 1,
                             ),
                           ),
@@ -127,17 +161,17 @@ class SideDrawer extends StatelessWidget {
                     context,
                     icon: Icons.receipt_long_outlined,
                     title: 'main.xin_payroll'.tr(context),
-                    isActive: activePage == 'payroll',
+                    isActive: widget.activePage == 'payroll',
                     onTap: () {
                       Navigator.pop(context);
-                      if (onTabSelected != null) {
-                        onTabSelected!(2);
-                      } else if (activePage != 'payroll') {
+                      if (widget.onTabSelected != null) {
+                        widget.onTabSelected!(2);
+                      } else if (widget.activePage != 'payroll') {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
                             builder: (context) => DashboardPage(
-                              userData: userData,
+                              userData: widget.userData,
                               initialIndex: 2,
                             ),
                           ),
@@ -150,7 +184,7 @@ class SideDrawer extends StatelessWidget {
                   context,
                   icon: Icons.person_outline,
                   title: 'main.xin_profile'.tr(context),
-                  isActive: activePage == 'profile',
+                  isActive: widget.activePage == 'profile',
                   onTap: () {
                     Navigator.pop(context);
                     final bool hasPayroll = _hasPermission(
@@ -158,14 +192,14 @@ class SideDrawer extends StatelessWidget {
                     );
                     int profileIndex = isCustomer ? 2 : (hasPayroll ? 3 : 2);
 
-                    if (onTabSelected != null) {
-                      onTabSelected!(profileIndex);
-                    } else if (activePage != 'profile') {
+                    if (widget.onTabSelected != null) {
+                      widget.onTabSelected!(profileIndex);
+                    } else if (widget.activePage != 'profile') {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                           builder: (context) => DashboardPage(
-                            userData: userData,
+                            userData: widget.userData,
                             initialIndex: profileIndex,
                           ),
                         ),
@@ -175,167 +209,243 @@ class SideDrawer extends StatelessWidget {
                   },
                 ),
                 const Divider(indent: 16, endIndent: 16),
-                if (!isCustomer && _hasPermission('mobile_rent_plan_enable'))
-                  _buildMenuItem(
+
+                // Group: Work / Operational
+                if (_hasCategoryPermission([
+                  'mobile_rent_plan_enable',
+                  'mobile_todo_enable',
+                  'mobile_employees_enable',
+                  'mobile_worklog_enable',
+                ]))
+                  _buildExpandableSection(
                     context,
-                    icon: Icons.house_outlined,
-                    title: 'dashboard.rent_plan'.tr(context),
-                    isActive: activePage == 'rent_plan',
-                    onTap: () {
-                      final bool isCustomer =
-                          userData['user_type'] == 'customer' ||
-                          userData['user_role_id'] == 21 ||
-                          userData['user_role_id'] == '21';
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => isCustomer
-                              ? client_rp.RentPlanPage(userData: userData)
-                              : staff_rp.RentPlanPage(userData: userData),
-                        ),
-                      );
+                    title: 'side_drawer.work'.tr(context),
+                    icon: Icons.work_outline_rounded,
+                    isExpanded: _expandedSections['work'] ?? false,
+                    onExpansionChanged: (expanded) {
+                      setState(() => _expandedSections['work'] = expanded);
                     },
+                    children: [
+                      if (!isCustomer &&
+                          _hasPermission('mobile_rent_plan_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.house_outlined,
+                          title: 'dashboard.rent_plan'.tr(context),
+                          isActive: widget.activePage == 'rent_plan',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => isCustomer
+                                    ? client_rp.RentPlanPage(
+                                      userData: widget.userData,
+                                    )
+                                    : staff_rp.RentPlanPage(
+                                      userData: widget.userData,
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (_hasPermission('mobile_todo_enable'))
+                        ValueListenableBuilder<int>(
+                          valueListenable: NotificationManager().unreadTodoCount,
+                          builder: (context, count, child) {
+                            return _buildMenuItem(
+                              context,
+                              icon: Icons.assignment_outlined,
+                              title: 'dashboard.todo_list'.tr(context),
+                              isActive: widget.activePage == 'todo_list',
+                              badgeCount: count,
+                              padding: const EdgeInsets.only(
+                                left: 32,
+                                right: 12,
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TodoListPage(
+                                      userData: widget.userData,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      if (_hasPermission('mobile_employees_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.people_outline,
+                          title: 'dashboard.employees'.tr(context),
+                          isActive: widget.activePage == 'employees',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EmployeesPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (_hasPermission('mobile_worklog_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.assignment_turned_in_outlined,
+                          title: 'work_log.title'.tr(context),
+                          isActive: widget.activePage == 'work_log',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => WorkLogPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ],
                   ),
-                if (_hasPermission('mobile_todo_enable'))
-                  ValueListenableBuilder<int>(
-                    valueListenable: NotificationManager().unreadTodoCount,
-                    builder: (context, count, child) {
-                      return _buildMenuItem(
+
+                // Group: Financial
+                if (_hasCategoryPermission([
+                  'mobile_finance_enable',
+                  'mobile_personal_finance_enable',
+                ]))
+                  _buildExpandableSection(
+                    context,
+                    title: 'side_drawer.financial'.tr(context),
+                    icon: Icons.account_balance_wallet_outlined,
+                    isExpanded: _expandedSections['financial'] ?? false,
+                    onExpansionChanged: (expanded) {
+                      setState(() => _expandedSections['financial'] = expanded);
+                    },
+                    children: [
+                      if (_hasPermission('mobile_finance_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.account_balance_wallet_outlined,
+                          title: 'dashboard.finance'.tr(context),
+                          isActive: widget.activePage == 'finance',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    FinancePage(userData: widget.userData),
+                              ),
+                            );
+                          },
+                        ),
+                      if (_hasPermission('mobile_personal_finance_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.savings_outlined,
+                          title: 'personal_finance.my_wallet'.tr(context),
+                          isActive: widget.activePage == 'my_wallet',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PersonalFinancePage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+
+                // Group: Support & AI
+                if (_hasCategoryPermission([
+                  'mobile_helpdesk_view',
+                  'creative_idea',
+                ]))
+                  _buildExpandableSection(
+                    context,
+                    title: 'side_drawer.support'.tr(context),
+                    icon: Icons.auto_awesome_outlined,
+                    isExpanded: _expandedSections['support'] ?? false,
+                    onExpansionChanged: (expanded) {
+                      setState(() => _expandedSections['support'] = expanded);
+                    },
+                  children: [
+                    if (_hasPermission('mobile_helpdesk_view'))
+                      _buildMenuItem(
                         context,
-                        icon: Icons.assignment_outlined,
-                        title: 'dashboard.todo_list'.tr(context),
-                        isActive: activePage == 'todo_list',
-                        badgeCount: count,
+                        icon: Icons.support_agent_outlined,
+                        title: 'dashboard.helpdesk'.tr(context),
+                        isActive: widget.activePage == 'helpdesk',
+                        padding: const EdgeInsets.only(left: 32, right: 12),
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  TodoListPage(userData: userData),
+                              builder: (context) => HelpdeskListPage(
+                                userData: widget.userData,
+                              ),
                             ),
                           );
                         },
-                      );
-                    },
-                  ),
-                if (_hasPermission('mobile_employees_enable'))
-                  _buildMenuItem(
-                    context,
-                    icon: Icons.people_outline,
-                    title: 'dashboard.employees'.tr(context),
-                    isActive: activePage == 'employees',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              EmployeesPage(userData: userData),
-                        ),
-                      );
-                    },
-                  ),
-                if (_hasPermission('mobile_worklog_enable'))
-                  _buildMenuItem(
-                    context,
-                    icon: Icons.assignment_turned_in_outlined,
-                    title: 'work_log.title'.tr(context),
-                    isActive: activePage == 'work_log',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WorkLogPage(userData: userData),
-                        ),
-                      );
-                    },
-                  ),
-                if (_hasPermission('mobile_finance_enable'))
-                  _buildMenuItem(
-                    context,
-                    icon: Icons.account_balance_wallet_outlined,
-                    title: 'dashboard.finance'.tr(context),
-                    isActive: activePage == 'finance',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FinancePage(userData: userData),
-                        ),
-                      );
-                    },
-                  ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.savings_outlined,
-                  title: 'personal_finance.my_wallet'.tr(context),
-                  isActive: activePage == 'my_wallet',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            PersonalFinancePage(userData: userData),
                       ),
-                    );
-                  },
-                ),
-                if (_hasPermission('mobile_helpdesk_view'))
-                  _buildMenuItem(
-                    context,
-                    icon: Icons.support_agent_outlined,
-                    title: 'dashboard.helpdesk'.tr(context),
-                    isActive: activePage == 'helpdesk',
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              HelpdeskListPage(userData: userData),
-                        ),
-                      );
-                    },
-                  ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.smart_toy_outlined,
-                  title: 'dashboard.quick_menu_ai_bot'.tr(context),
-                  isActive: activePage == 'ai_bot',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
+                    _buildMenuItem(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => AiBotPage(userData: userData),
-                      ),
-                    );
-                  },
-                ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.lightbulb_outline,
-                  title: 'dashboard.quick_menu_creative_idea'.tr(context),
-                  isActive: activePage == 'creative_idea',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => OnProgressPage(
-                          title: 'dashboard.quick_menu_creative_idea'.tr(
-                            context,
+                      icon: Icons.smart_toy_outlined,
+                      title: 'dashboard.quick_menu_ai_bot'.tr(context),
+                      isActive: widget.activePage == 'ai_bot',
+                      padding: const EdgeInsets.only(left: 32, right: 12),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AiBotPage(
+                              userData: widget.userData,
+                            ),
                           ),
-                        ),
+                        );
+                      },
+                    ),
+                    if (_hasPermission('creative_idea'))
+                      _buildMenuItem(
+                        context,
+                        icon: Icons.lightbulb_outline,
+                        title: 'dashboard.quick_menu_creative_idea'.tr(context),
+                        isActive: widget.activePage == 'creative_idea',
+                        padding: const EdgeInsets.only(left: 32, right: 12),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreativeIdeaPage(
+                                userData: widget.userData,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                  ],
                 ),
+
               ],
             ),
           ),
@@ -344,14 +454,14 @@ class SideDrawer extends StatelessWidget {
             context,
             icon: Icons.settings_outlined,
             title: 'main.xin_settings'.tr(context),
-            isActive: activePage == 'settings',
+            isActive: widget.activePage == 'settings',
             onTap: () {
               Navigator.pop(context);
-              if (activePage != 'settings') {
+              if (widget.activePage != 'settings') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SettingsPage(userData: userData),
+                    builder: (context) => SettingsPage(userData: widget.userData),
                   ),
                 );
               }
@@ -364,25 +474,82 @@ class SideDrawer extends StatelessWidget {
     );
   }
 
+  Widget _buildExpandableSection(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required bool isExpanded,
+    required ValueChanged<bool> onExpansionChanged,
+    required List<Widget> children,
+  }) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: InkWell(
+            onTap: () => onExpansionChanged(!isExpanded),
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    icon,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(
+                      0.6,
+                    ),
+                    size: 24,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(
+                      Icons.expand_more_rounded,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.4),
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (isExpanded) ...children,
+      ],
+    );
+  }
+
   Widget _buildHeader(BuildContext context) {
     return InkWell(
       onTap: () {
         Navigator.pop(context);
         final bool isCustomer =
-            userData['user_type'] == 'customer' ||
-            userData['user_role_id'] == 21 ||
-            userData['user_role_id'] == '21';
+            widget.userData['user_type'] == 'customer' ||
+            widget.userData['user_role_id'] == 21 ||
+            widget.userData['user_role_id'] == '21';
         final bool hasPayroll = _hasPermission('mobile_payroll_enable');
         int profileIndex = isCustomer ? 2 : (hasPayroll ? 3 : 2);
 
-        if (onTabSelected != null) {
-          onTabSelected!(profileIndex);
-        } else if (activePage != 'profile') {
+        if (widget.onTabSelected != null) {
+          widget.onTabSelected!(profileIndex);
+        } else if (widget.activePage != 'profile') {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  DashboardPage(userData: userData, initialIndex: profileIndex),
+                  DashboardPage(userData: widget.userData, initialIndex: profileIndex),
             ),
             (route) => false,
           );
@@ -413,15 +580,15 @@ class SideDrawer extends StatelessWidget {
                 context,
               ).colorScheme.primary.withOpacity(0.1),
               backgroundImage:
-                  (userData['profile_photo'] != null &&
-                      userData['profile_photo'].toString().isNotEmpty)
+                  (widget.userData['profile_photo'] != null &&
+                      widget.userData['profile_photo'].toString().isNotEmpty)
                   ? NetworkImage(
-                      'https://foxgeen.com/HRIS/public/uploads/users/thumb/${userData['profile_photo']}',
+                      'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
                     )
                   : null,
               child:
-                  (userData['profile_photo'] == null ||
-                      userData['profile_photo'].toString().isEmpty)
+                  (widget.userData['profile_photo'] == null ||
+                      widget.userData['profile_photo'].toString().isEmpty)
                   ? Icon(
                       Icons.person,
                       size: 40,
@@ -431,7 +598,7 @@ class SideDrawer extends StatelessWidget {
             ),
             const SizedBox(height: 15),
             Text(
-              userData['nama'] ?? 'User',
+              widget.userData['nama'] ?? 'User',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 18,
@@ -439,7 +606,7 @@ class SideDrawer extends StatelessWidget {
               ),
             ),
             Text(
-              '@${userData['username'] ?? 'username'}',
+              '@${widget.userData['username'] ?? 'username'}',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 fontSize: 14,

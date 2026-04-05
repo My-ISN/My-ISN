@@ -26,6 +26,7 @@ import 'finance/finance_page.dart';
 import 'widgets/on_progress_page.dart';
 import 'ai_bot/ai_bot_page.dart';
 import 'personal_finance/personal_finance_page.dart';
+import 'creative_idea/creative_idea_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -1256,21 +1257,22 @@ class _DashboardPageState extends State<DashboardPage> {
                     );
                   },
                 ),
-              _buildQuickMenuCard(
-                'personal_finance.my_wallet'.tr(context),
-                Icons.savings_rounded,
-                const Color(0xFF7E57C2),
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PersonalFinancePage(
-                        userData: _dashboardData['user'] ?? widget.userData,
+              if (_hasPermission('mobile_personal_finance_enable'))
+                _buildQuickMenuCard(
+                  'personal_finance.my_wallet'.tr(context),
+                  Icons.savings_rounded,
+                  const Color(0xFF7E57C2),
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PersonalFinancePage(
+                          userData: _dashboardData['user'] ?? widget.userData,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
               if (_hasPermission('mobile_helpdesk_view'))
                 _buildQuickMenuCard(
                   'dashboard.quick_menu_helpdesk'.tr(context),
@@ -1300,21 +1302,20 @@ class _DashboardPageState extends State<DashboardPage> {
                   );
                 },
               ),
-              _buildQuickMenuCard(
-                'dashboard.quick_menu_creative_idea'.tr(context),
-                Icons.lightbulb_rounded,
-                const Color(0xFF7E57C2),
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OnProgressPage(
-                        title: 'dashboard.quick_menu_creative_idea'.tr(context),
+              if (_hasPermission('creative_idea'))
+                _buildQuickMenuCard(
+                  'dashboard.quick_menu_creative_idea'.tr(context),
+                  Icons.lightbulb_rounded,
+                  const Color(0xFF7E57C2),
+                  () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreativeIdeaPage(userData: user),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
             ]),
             ValueListenableBuilder<double>(
               valueListenable: ConnectivityStatus.bottomPadding,

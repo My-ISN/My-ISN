@@ -6,12 +6,13 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'log_service.dart';
 import '../announcement_page.dart';
 import '../todo_list/todo_list_page.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint("Handling a background message: ${message.messageId}");
+  Log.i("Handling a background message: ${message.messageId}");
 }
 
 class NotificationService {
@@ -54,7 +55,7 @@ class NotificationService {
         },
       );
     } catch (e) {
-      debugPrint("Error initializing local notifications: $e");
+      Log.e("Error initializing local notifications: $e");
     }
 
     // 4. Create a High Importance Channel for Android
@@ -74,8 +75,8 @@ class NotificationService {
 
     // 5. Listen for Foreground Messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint("Foreground message received: ${message.notification?.title}");
-      debugPrint("Message data: ${message.data}");
+      Log.i("Foreground message received: ${message.notification?.title}");
+      Log.d("Message data: ${message.data}");
       _showLocalNotification(message, channel);
     });
 
@@ -92,7 +93,7 @@ class NotificationService {
 
     // 8. Listen for token refresh
     _fcm.onTokenRefresh.listen((newToken) async {
-      debugPrint("FCM Token Refreshed: $newToken");
+      Log.i("FCM Token Refreshed: $newToken");
       const storage = FlutterSecureStorage();
       String? userDataString = await storage.read(key: 'user_data');
       if (userDataString != null) {
@@ -103,7 +104,7 @@ class NotificationService {
   }
 
   void _handleNotificationClick(Map<String, dynamic> data) {
-    debugPrint("Notification Clicked Data: $data");
+    Log.i("Notification Clicked Data: $data");
     if (data.containsKey('announcement_id')) {
       final id = int.tryParse(data['announcement_id'].toString());
       navigatorKey?.currentState?.push(
@@ -180,9 +181,9 @@ class NotificationService {
         },
       );
 
-      debugPrint("FCM Token update response: ${response.body}");
+      Log.i("FCM Token update response: ${response.body}");
     } catch (e) {
-      debugPrint("Error updating FCM token: $e");
+      Log.e("Error updating FCM token: $e");
     }
   }
 }

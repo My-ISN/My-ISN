@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'log_service.dart';
 
 class AppUpdateInfo {
   final String version;
@@ -58,10 +59,10 @@ class VersionCheckService {
         // Fallback for direct app_version endpoint or matching structure
         return AppUpdateInfo.fromJson(data);
       } else {
-        print('VersionCheckService: Server returned ${response.statusCode}');
+        Log.w('VersionCheckService: Server returned ${response.statusCode}');
       }
     } catch (e) {
-      print('VersionCheckService: Error fetching info: $e');
+      Log.e('VersionCheckService: Error fetching info: $e');
     }
     return null;
   }
