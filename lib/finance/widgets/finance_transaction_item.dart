@@ -73,8 +73,8 @@ class FinanceTransactionItem extends StatelessWidget {
                 ),
                 child: Icon(
                   isIncome
-                      ? Icons.north_east_rounded
-                      : Icons.south_west_rounded,
+                      ? Icons.trending_up_rounded
+                      : Icons.trending_down_rounded,
                   color: primaryColor,
                   size: 24,
                 ),
@@ -96,7 +96,7 @@ class FinanceTransactionItem extends StatelessWidget {
                             transaction['category_name'] ??
                             (isIncome ? 'Income' : 'Expense');
                         final String displayText = fullName.isEmpty
-                            ? '- $category'
+                            ? category
                             : '$fullName - $category';
 
                         return Text(

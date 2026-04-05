@@ -29,7 +29,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   late TabController _tabController;
   final Color _primaryColor = const Color(0xFF7E57C2);
   bool isLoading = true;
-  bool isSummaryExpanded = true;
+  bool isSummaryExpanded = false;
   Map<String, dynamic>? dashboardData;
   final NumberFormat currencyFormat = NumberFormat.currency(
     locale: 'id_ID',
@@ -40,13 +40,22 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   final FinanceService _financeService = FinanceService();
 
   // Transaction State
-  List<Map<String, dynamic>> _transactions = [];
+  List<Map<String, dynamic>> _incomeTransactions = [];
+  List<Map<String, dynamic>> _expenseTransactions = [];
   bool _isTransactionsLoading = false;
-  int _currentPage = 1;
-  int _totalCount = 0;
+  bool _hasLoadedIncome = false;
+  bool _hasLoadedExpense = false;
+  int _incomeCurrentPage = 1;
+  int _expenseCurrentPage = 1;
+  int _incomeTotalCount = 0;
+  int _expenseTotalCount = 0;
   int _selectedLimit = 10;
   String? _selectedMonth;
   String? _selectedYear;
+  String? _selectedReportYear;
+  Map<String, dynamic>? reportData;
+  bool _isReportLoading = false;
+  bool _hasLoadedReport = false;
 
   final List<int> _limitOptions = [10, 20, 50, 100];
   final List<Map<String, String>> _months = [
@@ -69,16 +78,21 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     super.initState();
     _selectedMonth = DateFormat('MM').format(DateTime.now());
     _selectedYear = DateFormat('yyyy').format(DateTime.now());
+    _selectedReportYear = _selectedYear;
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(_handleTabSelection);
     _fetchDashboardData();
   }
 
   void _handleTabSelection() {
+    setState(() {}); // Trigger rebuild to update FAB label
     if (_tabController.indexIsChanging) {
-      if (_tabController.index == 1 || _tabController.index == 2) {
-        _currentPage = 1;
-        _fetchTransactions();
+      if (_tabController.index == 1 && !_hasLoadedIncome) {
+        _fetchTransactions(type: 'income');
+      } else if (_tabController.index == 2 && !_hasLoadedExpense) {
+        _fetchTransactions(type: 'expense');
+      } else if (_tabController.index == 3 && !_hasLoadedReport) {
+        _fetchReportData();
       } else if (_tabController.index == 0) {
         _fetchDashboardData(silent: true);
       }
@@ -127,6 +141,28 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     } catch (e) {
       debugPrint('Error fetching finance dashboard: $e');
       setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _fetchReportData() async {
+    setState(() => _isReportLoading = true);
+    try {
+      final response = await _financeService.getPersonalFinanceReport(
+        year: _selectedReportYear,
+      );
+
+      if (response['status']) {
+        setState(() {
+          reportData = response['data'];
+          _isReportLoading = false;
+          _hasLoadedReport = true;
+        });
+      } else {
+        setState(() => _isReportLoading = false);
+      }
+    } catch (e) {
+      debugPrint('Error fetching report: $e');
+      setState(() => _isReportLoading = false);
     }
   }
 
@@ -235,7 +271,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
               backgroundColor: Colors.green,
             ),
           );
-          _fetchTransactions();
+          _fetchTransactions(type: type);
           _fetchDashboardData();
         }
       } else {
@@ -267,7 +303,27 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       ),
     );
     if (result == true) {
-      _fetchTransactions();
+      _fetchTransactions(type: type);
+      _fetchDashboardData();
+    }
+  }
+
+  Future<void> _openEditBudgetPage(Map<String, dynamic> budget) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddPersonalFinancePage(
+          initialData: {
+            ...budget,
+            'type': 3, // Budget type
+            'amount': budget['budget_amount'],
+            'category': budget['category_name'],
+          },
+          userData: widget.userData,
+        ),
+      ),
+    );
+    if (result == true) {
       _fetchDashboardData();
     }
   }
@@ -280,7 +336,8 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       symbol: '',
       decimalDigits: 0,
     );
-    final amount = double.tryParse(transaction['amount']?.toString() ?? '0') ?? 0.0;
+    final amount =
+        double.tryParse(transaction['amount']?.toString() ?? '0') ?? 0.0;
 
     showModalBottomSheet(
       context: context,
@@ -449,8 +506,12 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value,
-      {Color? valueColor}) {
+  Widget _buildDetailRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color? valueColor,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 20, color: const Color(0xFF7E57C2).withOpacity(0.7)),
@@ -498,43 +559,87 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (_tabController.index == 0) {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddPersonalFinancePage(
-                  initialType: 3,
-                  userData: widget.userData,
+      floatingActionButton: _tabController.index == 3
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () async {
+                if (_tabController.index == 0) {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AddPersonalFinancePage(
+                        initialType: 3,
+                        userData: widget.userData,
+                      ),
+                    ),
+                  );
+                  if (result == true) _fetchDashboardData();
+                  return;
+                }
+
+                if (_tabController.index == 3) return;
+
+                final int type = _tabController.index == 2 ? 2 : 1;
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddPersonalFinancePage(
+                      initialType: type,
+                      userData: widget.userData,
+                    ),
+                  ),
+                );
+                if (result == true) {
+                  _fetchDashboardData();
+                  if (_tabController.index == 1) {
+                    _fetchTransactions(type: 'income');
+                  } else if (_tabController.index == 2) {
+                    _fetchTransactions(type: 'expense');
+                  }
+                }
+              },
+              backgroundColor: _primaryColor,
+              icon: Icon(_getFabIcon(), color: Colors.white, size: 24),
+              label: Text(
+                _getFabLabel(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
                 ),
               ),
-            );
-            if (result == true) _fetchDashboardData();
-            return;
-          }
-
-          final int type = _tabController.index == 2 ? 2 : 1;
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddPersonalFinancePage(
-                initialType: type,
-                userData: widget.userData,
-              ),
             ),
-          );
-          if (result == true) {
-            _fetchDashboardData();
-            if (_tabController.index == 1 || _tabController.index == 2) {
-              _fetchTransactions();
-            }
-          }
-        },
-        backgroundColor: _primaryColor,
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
-      ),
     );
+  }
+
+  String _getFabLabel() {
+    switch (_tabController.index) {
+      case 0:
+        return 'personal_finance.add_budget'.tr(context);
+      case 1:
+        return 'personal_finance.add_income'.tr(context);
+      case 2:
+        return 'personal_finance.add_expense'.tr(context);
+      case 3:
+        return '';
+      default:
+        return 'personal_finance.add_income'.tr(context);
+    }
+  }
+
+  IconData _getFabIcon() {
+    switch (_tabController.index) {
+      case 0:
+        return Icons.track_changes_rounded; // Budget/Goal
+      case 1:
+        return Icons.trending_up_rounded; // Income
+      case 2:
+        return Icons.trending_down_rounded; // Expense
+      case 3:
+        return Icons.assessment_rounded; // Report
+      default:
+        return Icons.account_balance_wallet_rounded;
+    }
   }
 
   Widget _buildOverviewTab() {
@@ -567,43 +672,49 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   }
 
   Widget _buildTransactionTab(String type) {
+    final bool isIncome = type == 'income';
+    final List<Map<String, dynamic>> transactions = isIncome
+        ? _incomeTransactions
+        : _expenseTransactions;
+    final int totalCount = isIncome ? _incomeTotalCount : _expenseTotalCount;
+
     return RefreshIndicator(
-      onRefresh: _fetchTransactions,
+      onRefresh: () => _fetchTransactions(type: type),
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: _buildTransactionFilters(),
+              child: _buildTransactionFilters(type),
             ),
           ),
-          if (_isTransactionsLoading && _transactions.isEmpty)
+          if (_isTransactionsLoading && transactions.isEmpty)
             SliverFillRemaining(
               child: Center(
                 child: CircularProgressIndicator(color: _primaryColor),
               ),
             )
-          else if (_transactions.isEmpty)
+          else if (transactions.isEmpty)
             SliverFillRemaining(hasScrollBody: false, child: _buildEmptyState())
           else
             SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  final transaction = _transactions[index];
+                  final transaction = transactions[index];
                   return FinanceTransactionItem(
                     transaction: transaction,
                     onTap: () => _showTransactionDetail(transaction, type),
                   );
-                }, childCount: _transactions.length),
+                }, childCount: transactions.length),
               ),
             ),
-          if (_totalCount > _selectedLimit && !_isTransactionsLoading)
+          if (totalCount > _selectedLimit && !_isTransactionsLoading)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 32),
-                child: _buildPagination(),
+                child: _buildPagination(type),
               ),
             ),
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
@@ -612,43 +723,52 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     );
   }
 
-  Widget _buildReportTab() {
-    return const Center(
-      child: Text(
-        'Laporan akan segera hadir',
-        style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
-      ),
-    );
-  }
+  Future<void> _fetchTransactions({String? type}) async {
+    final String transactionType =
+        type ?? (_tabController.index == 1 ? 'income' : 'expense');
+    final isIncome = transactionType == 'income';
+    final int currentPage = isIncome ? _incomeCurrentPage : _expenseCurrentPage;
 
-  Future<void> _fetchTransactions() async {
     setState(() => _isTransactionsLoading = true);
     try {
-      final type = _tabController.index == 1 ? 'income' : 'expense';
       final response = await _financeService.getPersonalFinanceTransactions(
-        type: type,
+        type: transactionType,
         limit: _selectedLimit,
-        offset: (_currentPage - 1) * _selectedLimit,
+        offset: (currentPage - 1) * _selectedLimit,
         monthYear: _selectedMonth != null && _selectedYear != null
             ? '$_selectedYear-$_selectedMonth'
             : null,
       );
 
       if (response['status']) {
+        final List<Map<String, dynamic>> results = (response['data'] as List)
+            .map((t) {
+              final Map<String, dynamic> transactionMap =
+                  Map<String, dynamic>.from(t);
+              return {
+                ...transactionMap,
+                'id': isIncome
+                    ? transactionMap['income_id']
+                    : transactionMap['expense_id'],
+                'transaction_type': transactionType,
+                'transaction_date': isIncome
+                    ? transactionMap['income_date']
+                    : transactionMap['expense_date'],
+                'category_name': transactionMap['category'],
+              };
+            })
+            .toList();
+
         setState(() {
-          _transactions = (response['data'] as List).map((t) {
-            final Map<String, dynamic> transactionMap =
-                Map<String, dynamic>.from(t);
-            return {
-              ...transactionMap,
-              'transaction_type': type,
-              'transaction_date': type == 'income'
-                  ? transactionMap['income_date']
-                  : transactionMap['expense_date'],
-              'category_name': transactionMap['category'],
-            };
-          }).toList();
-          _totalCount = response['total'] ?? 0;
+          if (isIncome) {
+            _incomeTransactions = results;
+            _incomeTotalCount = response['total'] ?? 0;
+            _hasLoadedIncome = true;
+          } else {
+            _expenseTransactions = results;
+            _expenseTotalCount = response['total'] ?? 0;
+            _hasLoadedExpense = true;
+          }
         });
       }
     } catch (e) {
@@ -658,7 +778,10 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     }
   }
 
-  Widget _buildTransactionFilters() {
+  Widget _buildTransactionFilters(String type) {
+    final bool isIncome = type == 'income';
+    final int totalCount = isIncome ? _incomeTotalCount : _expenseTotalCount;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -673,7 +796,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
               ),
             ),
             const SizedBox(width: 8),
-            _buildLimitDropdown(),
+            _buildLimitDropdown(type),
             const SizedBox(width: 8),
             PeriodFilterButton(
               selectedMonth: _selectedMonth ?? '01',
@@ -692,7 +815,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           child: Text(
             'rent_plan.total_count'.tr(
               context,
-              args: {'count': _totalCount.toString()},
+              args: {'count': totalCount.toString()},
             ),
             style: TextStyle(
               color: _primaryColor,
@@ -705,7 +828,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     );
   }
 
-  Widget _buildLimitDropdown() {
+  Widget _buildLimitDropdown(String type) {
     return Container(
       height: 38,
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -731,9 +854,13 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
             if (newValue != null) {
               setState(() {
                 _selectedLimit = newValue;
-                _currentPage = 1;
+                if (type == 'income') {
+                  _incomeCurrentPage = 1;
+                } else {
+                  _expenseCurrentPage = 1;
+                }
               });
-              _fetchTransactions();
+              _fetchTransactions(type: type);
             }
           },
           items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
@@ -747,18 +874,28 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     );
   }
 
-  Widget _buildPagination() {
-    int totalPages = (_totalCount / _selectedLimit).ceil();
+  Widget _buildPagination(String type) {
+    final bool isIncome = type == 'income';
+    final int totalCount = isIncome ? _incomeTotalCount : _expenseTotalCount;
+    final int currentPage = isIncome ? _incomeCurrentPage : _expenseCurrentPage;
+
+    int totalPages = (totalCount / _selectedLimit).ceil();
     if (totalPages <= 0) totalPages = 1;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildPageButton(
           icon: Icons.chevron_left_rounded,
-          onPressed: _currentPage > 1
+          onPressed: currentPage > 1
               ? () {
-                  setState(() => _currentPage--);
-                  _fetchTransactions();
+                  setState(() {
+                    if (isIncome) {
+                      _incomeCurrentPage--;
+                    } else {
+                      _expenseCurrentPage--;
+                    }
+                  });
+                  _fetchTransactions(type: type);
                 }
               : null,
         ),
@@ -780,7 +917,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
             'rent_plan.page_x_of_y'.tr(
               context,
               args: {
-                'current': _currentPage.toString(),
+                'current': currentPage.toString(),
                 'total': totalPages.toString(),
               },
             ),
@@ -794,10 +931,16 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
         const SizedBox(width: 16),
         _buildPageButton(
           icon: Icons.chevron_right_rounded,
-          onPressed: _currentPage < totalPages
+          onPressed: currentPage < totalPages
               ? () {
-                  setState(() => _currentPage++);
-                  _fetchTransactions();
+                  setState(() {
+                    if (isIncome) {
+                      _incomeCurrentPage++;
+                    } else {
+                      _expenseCurrentPage++;
+                    }
+                  });
+                  _fetchTransactions(type: type);
                 }
               : null,
         ),
@@ -883,24 +1026,39 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
         setState(() {
           _selectedMonth = month;
           _selectedYear = year;
-          _currentPage = 1;
-          _transactions = [];
+          _incomeCurrentPage = 1;
+          _expenseCurrentPage = 1;
+          _incomeTransactions = [];
+          _expenseTransactions = [];
+          _hasLoadedIncome = false;
+          _hasLoadedExpense = false;
         });
-        _fetchTransactions();
+        // Reload based on current tab
+        if (_tabController.index == 1) {
+          _fetchTransactions(type: 'income');
+        } else if (_tabController.index == 2) {
+          _fetchTransactions(type: 'expense');
+        }
         _fetchDashboardData();
       },
     );
   }
 
   Widget _buildSummaryCard() {
-    final summary = dashboardData!['summary'];
-    final double income =
-        double.tryParse(summary['total_income'].toString()) ?? 0;
-    final double expense =
-        double.tryParse(summary['total_expense'].toString()) ?? 0;
-    final double balance =
-        double.tryParse(summary['net_balance'].toString()) ?? 0;
-    final String ratio = summary['expense_ratio'] ?? '0%';
+    final bool isReportTab = _tabController.index == 3;
+    final data = isReportTab ? reportData : dashboardData;
+
+    final summary = data?['summary'];
+    final double income = summary != null
+        ? (double.tryParse(summary['total_income'].toString()) ?? 0)
+        : 0;
+    final double expense = summary != null
+        ? (double.tryParse(summary['total_expense'].toString()) ?? 0)
+        : 0;
+    final double balance = summary != null
+        ? (double.tryParse(summary['net_balance'].toString()) ?? 0)
+        : 0;
+    final String ratio = summary?['expense_ratio'] ?? '0%';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 10),
@@ -933,7 +1091,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'personal_finance.net_balance'.tr(context),
+                      isReportTab
+                          ? 'personal_finance.annual_balance'.tr(context)
+                          : 'personal_finance.net_balance'.tr(context),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -956,14 +1116,27 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                   ],
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'IDR ${currencyFormat.format(balance).replaceAll('Rp', '').trim()}',
-                  style: TextStyle(
-                    fontSize: isSummaryExpanded ? 24 : 20,
-                    fontWeight: FontWeight.w900,
-                    color: _primaryColor,
-                  ),
-                ),
+                data == null
+                    ? Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          height: 24,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      )
+                    : Text(
+                        'IDR ${currencyFormat.format(balance).replaceAll('Rp', '').trim()}',
+                        style: TextStyle(
+                          fontSize: isSummaryExpanded ? 24 : 20,
+                          fontWeight: FontWeight.w900,
+                          color: _primaryColor,
+                        ),
+                      ),
                 if (isSummaryExpanded) ...[
                   const SizedBox(height: 16),
                   const Divider(),
@@ -990,45 +1163,49 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _primaryColor.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _primaryColor.withOpacity(0.1)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.pie_chart_outline_rounded,
-                          size: 18,
-                          color: _primaryColor,
+                  if (!isReportTab) ...[
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _primaryColor.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _primaryColor.withOpacity(0.1),
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'personal_finance.expense_ratio'.tr(context),
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          ratio,
-                          style: TextStyle(
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.pie_chart_outline_rounded,
+                            size: 18,
                             color: _primaryColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          Text(
+                            'personal_finance.expense_ratio'.tr(context),
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            ratio,
+                            style: TextStyle(
+                              color: _primaryColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ],
             ),
@@ -1043,6 +1220,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     String label, {
     bool isIncome = true,
   }) {
+    final bool isReportTab = _tabController.index == 3;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1069,7 +1247,10 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                'finance.this_month'.tr(context).toUpperCase(),
+                (isReportTab
+                        ? 'finance.this_year'.tr(context)
+                        : 'finance.this_month'.tr(context))
+                    .toUpperCase(),
                 style: const TextStyle(
                   color: Color(0xFF7E57C2),
                   fontSize: 7.5,
@@ -1126,120 +1307,122 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   }
 
   Widget _buildTrendChartSection() {
-    final List trendData = dashboardData!['trends'];
+    final List trendData = dashboardData?['trends'] ?? [];
     if (trendData.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('personal_finance.six_month_trend'.tr(context)),
-        const SizedBox(height: 16),
-        Container(
-          height: 250,
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: LineChart(
-            LineChartData(
-              gridData: const FlGridData(show: false),
-              titlesData: FlTitlesData(
-                rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                leftTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 1,
-                    getTitlesWidget: (value, meta) {
-                      int index = value.toInt();
-                      if (index >= 0 && index < trendData.length) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            trendData[index]['month_short'],
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Theme.of(context).hintColor,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.withOpacity(0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('personal_finance.six_month_trend'.tr(context)),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 180,
+            child: LineChart(
+              LineChartData(
+                gridData: const FlGridData(show: false),
+                titlesData: FlTitlesData(
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        int index = value.toInt();
+                        if (index >= 0 && index < trendData.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              trendData[index]['month_short'],
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(context).hintColor,
+                              ),
                             ),
-                          ),
-                        );
-                      }
-                      return const Text('');
-                    },
+                          );
+                        }
+                        return const Text('');
+                      },
+                    ),
                   ),
                 ),
+                minX: 0,
+                maxX: (trendData.length - 1).toDouble(),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: trendData.asMap().entries.map((e) {
+                      return FlSpot(
+                        e.key.toDouble(),
+                        (double.tryParse(e.value['income'].toString()) ?? 0) /
+                            1000000,
+                      );
+                    }).toList(),
+                    isCurved: true,
+                    color: Colors.greenAccent,
+                    barWidth: 3,
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: Colors.greenAccent.withOpacity(0.1),
+                    ),
+                  ),
+                  LineChartBarData(
+                    spots: trendData.asMap().entries.map((e) {
+                      return FlSpot(
+                        e.key.toDouble(),
+                        (double.tryParse(e.value['expense'].toString()) ?? 0) /
+                            1000000,
+                      );
+                    }).toList(),
+                    isCurved: true,
+                    color: Colors.orangeAccent,
+                    barWidth: 3,
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: Colors.orangeAccent.withOpacity(0.1),
+                    ),
+                  ),
+                ],
               ),
-              minX: 0,
-              maxX: (trendData.length - 1).toDouble(),
-              borderData: FlBorderData(show: false),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: trendData.asMap().entries.map((e) {
-                    return FlSpot(
-                      e.key.toDouble(),
-                      double.parse(e.value['income'].toString()) / 1000000,
-                    );
-                  }).toList(),
-                  isCurved: true,
-                  color: Colors.greenAccent,
-                  barWidth: 3,
-                  dotData: const FlDotData(show: false),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    color: Colors.greenAccent.withOpacity(0.1),
-                  ),
-                ),
-                LineChartBarData(
-                  spots: trendData.asMap().entries.map((e) {
-                    return FlSpot(
-                      e.key.toDouble(),
-                      double.parse(e.value['expense'].toString()) / 1000000,
-                    );
-                  }).toList(),
-                  isCurved: true,
-                  color: Colors.orangeAccent,
-                  barWidth: 3,
-                  dotData: const FlDotData(show: false),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    color: Colors.orangeAccent.withOpacity(0.1),
-                  ),
-                ),
-              ],
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildChartLegend('Income', Colors.greenAccent),
-            const SizedBox(width: 16),
-            _buildChartLegend('Expense', Colors.orangeAccent),
-            const SizedBox(width: 16),
-          ],
-        ),
-      ],
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildChartLegend('Income', Colors.greenAccent),
+              const SizedBox(width: 16),
+              _buildChartLegend('Expense', Colors.orangeAccent),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildCategoryChartSection() {
-    final List categories = dashboardData!['categories'];
+    final List categories = dashboardData?['categories'] ?? [];
     if (categories.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('personal_finance.expense_by_category'.tr(context)),
-        const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -1247,100 +1430,110 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.grey.withOpacity(0.05)),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Legend di Kiri
-              Expanded(
-                flex: 4,
-                child: Column(
-                  children: categories.asMap().entries.map((e) {
-                    final data = e.value;
-                    final categoryName = data['category'] ?? 'General';
-                    final amount =
-                        double.tryParse(data['amount'].toString()) ?? 0;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: _buildCategoryStatRow(
-                        categoryName,
-                        NumberFormat.currency(
-                          locale: 'id',
-                          symbol: 'Rp ',
-                          decimalDigits: 0,
-                        ).format(amount),
-                        _getCategoryColor(categoryName),
-                        isCompact: true,
-                      ),
-                    );
-                  }).toList(),
-                ),
+              _buildSectionHeader(
+                'personal_finance.expense_by_category'.tr(context),
               ),
-              const SizedBox(width: 12),
-              // Chart di Kanan
-              Expanded(
-                flex: 3,
-                child: SizedBox(
-                  height: 120,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      PieChart(
-                        PieChartData(
-                          sectionsSpace: 2,
-                          centerSpaceRadius: 38,
-                          sections: categories.asMap().entries.map((e) {
-                            final data = e.value;
-                            final categoryName = data['category'] ?? 'General';
-                            final val =
-                                double.tryParse(
-                                  data['percentage'].toString(),
-                                ) ??
-                                0;
-                            return PieChartSectionData(
-                              value: val > 0 ? val : 1, // Fallback visual
-                              showTitle: false,
-                              radius: 12,
-                              color: _getCategoryColor(categoryName),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  // Legend di Kiri
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      children: categories.asMap().entries.map((e) {
+                        final data = e.value;
+                        final categoryName = data['category'] ?? 'General';
+                        final amount =
+                            double.tryParse(data['amount'].toString()) ?? 0;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: _buildCategoryStatRow(
+                            categoryName,
+                            NumberFormat.currency(
+                              locale: 'id',
+                              symbol: 'Rp ',
+                              decimalDigits: 0,
+                            ).format(amount),
+                            _getCategoryColor(categoryName),
+                            isCompact: true,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Chart di Kanan
+                  Expanded(
+                    flex: 3,
+                    child: SizedBox(
+                      height: 120,
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          Text(
-                            'TOTAL',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(
-                                context,
-                              ).hintColor.withOpacity(0.5),
+                          PieChart(
+                            PieChartData(
+                              sectionsSpace: 2,
+                              centerSpaceRadius: 38,
+                              sections: categories.asMap().entries.map((e) {
+                                final data = e.value;
+                                final categoryName =
+                                    data['category'] ?? 'General';
+                                final val =
+                                    double.tryParse(
+                                      data['percentage'].toString(),
+                                    ) ??
+                                    0;
+                                return PieChartSectionData(
+                                  value: val > 0 ? val : 1, // Fallback visual
+                                  showTitle: false,
+                                  radius: 12,
+                                  color: _getCategoryColor(categoryName),
+                                );
+                              }).toList(),
                             ),
                           ),
-                          FittedBox(
-                            child: Text(
-                              NumberFormat.compactCurrency(
-                                locale: 'id',
-                                symbol: 'Rp',
-                                decimalDigits: 0,
-                              ).format(
-                                double.tryParse(
-                                      dashboardData!['summary']['total_expense']
-                                          .toString(),
-                                    ) ??
-                                    0,
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'TOTAL',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(
+                                    context,
+                                  ).hintColor.withOpacity(0.5),
+                                ),
                               ),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                              FittedBox(
+                                child: Text(
+                                  NumberFormat.compactCurrency(
+                                    locale: 'id',
+                                    symbol: 'Rp',
+                                    decimalDigits: 0,
+                                  ).format(
+                                    double.tryParse(
+                                          dashboardData!['summary']['total_expense']
+                                              .toString(),
+                                        ) ??
+                                        0,
+                                  ),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -1427,13 +1620,18 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            budget['category_name'] ?? 'General',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Text(
+                              budget['category_name'] ?? 'General',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Text(
                             '${currencyFormat.format(actual)} / ${currencyFormat.format(limit)} ($percent%)',
                             style: TextStyle(
@@ -1450,8 +1648,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                         child: LinearProgressIndicator(
                           value: progress.clamp(0, 1),
                           backgroundColor: Colors.grey.withOpacity(0.1),
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(progressColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            progressColor,
+                          ),
                           minHeight: 8,
                         ),
                       ),
@@ -1494,7 +1693,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
               color: Colors.black.withOpacity(0.2),
               blurRadius: 15,
               offset: const Offset(0, -5),
-            )
+            ),
           ],
         ),
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
@@ -1532,12 +1731,32 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                     borderRadius: BorderRadius.circular(16),
                   ),
                   onSelected: (value) {
-                    if (value == 'delete') {
+                    if (value == 'edit') {
+                      Navigator.pop(context);
+                      _openEditBudgetPage(budget);
+                    } else if (value == 'delete') {
                       Navigator.pop(context);
                       _deleteBudget(budget['category_name']);
                     }
                   },
                   itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.edit_outlined,
+                            size: 20,
+                            color: Color(0xFF7E57C2),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'finance.edit_budget'.tr(context),
+                            style: const TextStyle(color: Color(0xFF7E57C2)),
+                          ),
+                        ],
+                      ),
+                    ),
                     PopupMenuItem(
                       value: 'delete',
                       child: Row(
@@ -1638,7 +1857,8 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                     value: progress.clamp(0, 1),
                     backgroundColor: Colors.grey.withOpacity(0.1),
                     valueColor: AlwaysStoppedAnimation<Color>(
-                        progress >= 1.0 ? Colors.red : Colors.green),
+                      progress >= 1.0 ? Colors.red : Colors.green,
+                    ),
                     minHeight: 12,
                   ),
                 ),
@@ -1657,11 +1877,10 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                   ),
                 ),
                 Text(
-                  currencyFormat.format(actual) + ' / ' + currencyFormat.format(limit),
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 11,
-                  ),
+                  currencyFormat.format(actual) +
+                      ' / ' +
+                      currencyFormat.format(limit),
+                  style: TextStyle(color: Colors.grey[500], fontSize: 11),
                 ),
               ],
             ),
@@ -1671,45 +1890,129 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     );
   }
 
-
   void _deleteBudget(String category) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hapus Anggaran?'),
-        content: Text('Apakah Anda yakin ingin menghapus anggaran untuk kategori $category?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                final response = await _financeService.deletePersonalBudget(
-                  category: category,
-                  budgetMonth: '$_selectedYear-$_selectedMonth',
-                );
-                if (response['status'] == 'success') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Anggaran berhasil dihapus')),
-                  );
-                  _fetchDashboardData();
-                }
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
-                );
-              }
-            },
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Icon(
+              Icons.delete_forever_rounded,
+              color: Colors.red,
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'finance.delete_budget'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'finance.delete_budget_confirm_msg'.tr(
+                context,
+                args: {'category': category},
+              ),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await _performActualDeleteBudget(category);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text('main.delete'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
 
+  Future<void> _performActualDeleteBudget(String category) async {
+    try {
+      final response = await _financeService.deletePersonalBudget(
+        category: category,
+        budgetMonth: '$_selectedYear-$_selectedMonth',
+      );
+      if (response['status'] == 'success') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('finance.budget_deleted_success'.tr(context)),
+              backgroundColor: Colors.green,
+            ),
+          );
+          _fetchDashboardData();
+        }
+      } else {
+        throw Exception(response['message'] ?? 'Gagal menghapus anggaran');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menghapus: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   Widget _buildSectionHeader(String title) {
     return Text(
@@ -1801,6 +2104,629 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildReportTab() {
+    if (_isReportLoading && reportData == null) {
+      return _buildReportShimmer();
+    }
+
+    if (reportData == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.analytics_outlined, size: 64, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            Text(
+              'Gagal memuat data laporan',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            TextButton(
+              onPressed: _fetchReportData,
+              child: const Text('Coba Lagi'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _fetchReportData,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Row(children: [_buildYearPicker()]),
+          const SizedBox(height: 16),
+          _buildAnnualTrendChart(),
+          const SizedBox(height: 24),
+          // Combined Breakdowns (1 box)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.grey.withOpacity(0.05)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildYearlyCategorySegment(
+                  'personal_finance.income_by_category'.tr(context),
+                  reportData?['income_by_cat'] ?? [],
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Divider(height: 1, thickness: 0.5),
+                ),
+                _buildYearlyCategorySegment(
+                  'personal_finance.expense_by_category'.tr(context),
+                  reportData?['expense_by_cat'] ?? [],
+                ),
+              ],
+            ),
+          ),
+          _buildAnnualSummaryTable(),
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildYearPicker() {
+    final int currentYear = DateTime.now().year;
+    final List<String> years = List.generate(
+      5,
+      (index) => (currentYear - index).toString(),
+    );
+
+    return Container(
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.calendar_today_rounded, size: 16, color: _primaryColor),
+          const SizedBox(width: 10),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedReportYear,
+              icon: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 18,
+                color: _primaryColor,
+              ),
+              items: years.map((String year) {
+                return DropdownMenuItem<String>(
+                  value: year,
+                  child: Text(
+                    year,
+                    style: TextStyle(
+                      color: _primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _selectedReportYear = newValue;
+                    _hasLoadedReport = false;
+                  });
+                  _fetchReportData();
+                  if (_selectedReportYear == _selectedYear) {
+                    _fetchDashboardData(silent: true);
+                  }
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnnualTrendChart() {
+    final List trendData = reportData?['monthly'] ?? [];
+    if (trendData.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.withOpacity(0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('personal_finance.monthly_trend'.tr(context)),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 180,
+            child: LineChart(
+              LineChartData(
+                gridData: const FlGridData(show: false),
+                titlesData: FlTitlesData(
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        int index = value.toInt();
+                        if (index >= 0 && index < trendData.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              trendData[index]['month_short'],
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(context).hintColor,
+                              ),
+                            ),
+                          );
+                        }
+                        return const Text('');
+                      },
+                    ),
+                  ),
+                ),
+                minX: 0,
+                maxX: (trendData.length - 1).toDouble(),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: trendData.asMap().entries.map((e) {
+                      return FlSpot(
+                        e.key.toDouble(),
+                        (double.tryParse(e.value['income'].toString()) ?? 0) /
+                            1000000,
+                      );
+                    }).toList(),
+                    isCurved: true,
+                    color: Colors.greenAccent,
+                    barWidth: 3,
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: Colors.greenAccent.withOpacity(0.1),
+                    ),
+                  ),
+                  LineChartBarData(
+                    spots: trendData.asMap().entries.map((e) {
+                      return FlSpot(
+                        e.key.toDouble(),
+                        (double.tryParse(e.value['expense'].toString()) ?? 0) /
+                            1000000,
+                      );
+                    }).toList(),
+                    isCurved: true,
+                    color: Colors.orangeAccent,
+                    barWidth: 3,
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: Colors.orangeAccent.withOpacity(0.1),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildChartLegend('Income', Colors.greenAccent),
+              const SizedBox(width: 16),
+              _buildChartLegend('Expense', Colors.orangeAccent),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildYearlyCategorySegment(String title, List categories) {
+    if (categories.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(title),
+          const SizedBox(height: 12),
+          Text(
+            'personal_finance.on_progress_desc'.tr(context),
+            style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 13,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(title),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              flex: 4,
+              child: Column(
+                children: categories.take(5).map((cat) {
+                  final String categoryName = cat['category'] ?? 'General';
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: _buildCategoryStatRow(
+                      categoryName,
+                      currencyFormat.format(
+                        double.tryParse(cat['total']?.toString() ?? '0') ?? 0,
+                      ),
+                      _getCategoryColor(categoryName),
+                      isCompact: true,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 3,
+              child: SizedBox(
+                height: 120,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PieChart(
+                      PieChartData(
+                        sectionsSpace: 2,
+                        centerSpaceRadius: 38,
+                        sections: categories.map((cat) {
+                          final String categoryName =
+                              cat['category'] ?? 'General';
+                          return PieChartSectionData(
+                            color: _getCategoryColor(categoryName),
+                            value:
+                                double.tryParse(
+                                  cat['total']?.toString() ?? '0',
+                                ) ??
+                                0,
+                            showTitle: false,
+                            radius: 12,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'TOTAL',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).hintColor.withOpacity(0.5),
+                          ),
+                        ),
+                        FittedBox(
+                          child: Text(
+                            NumberFormat.compactCurrency(
+                              locale: 'id',
+                              symbol: 'Rp',
+                              decimalDigits: 0,
+                            ).format(
+                              categories.fold<double>(
+                                0,
+                                (sum, cat) =>
+                                    sum +
+                                    (double.tryParse(
+                                          cat['total']?.toString() ?? '0',
+                                        ) ??
+                                        0),
+                              ),
+                            ),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnnualSummaryTable() {
+    final List trendData = reportData?['monthly'] ?? [];
+    if (trendData.isEmpty) return const SizedBox.shrink();
+
+    double totalIncome = 0;
+    double totalExpense = 0;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 24),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.withOpacity(0.05)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: _buildSectionHeader(
+              'personal_finance.monthly_summary'.tr(context),
+            ),
+          ),
+          const SizedBox(height: 16),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columnSpacing: 24,
+              horizontalMargin: 20,
+              headingRowColor: WidgetStateProperty.all(
+                Colors.grey.withOpacity(0.05),
+              ),
+              headingRowHeight: 48,
+              columns: [
+                DataColumn(
+                  label: Text(
+                    'personal_finance.month'.tr(context).toUpperCase(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  numeric: true,
+                  label: Text(
+                    'personal_finance.income'.tr(context).toUpperCase(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  numeric: true,
+                  label: Text(
+                    'personal_finance.expense'.tr(context).toUpperCase(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  numeric: true,
+                  label: Text(
+                    'personal_finance.net'.tr(context).toUpperCase(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'personal_finance.status'.tr(context).toUpperCase(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+              rows: [
+                ...trendData.map((item) {
+                  final double income =
+                      double.tryParse(item['income']?.toString() ?? '0') ?? 0;
+                  final double expense =
+                      double.tryParse(item['expense']?.toString() ?? '0') ?? 0;
+                  final double net = income - expense;
+
+                  totalIncome += income;
+                  totalExpense += expense;
+
+                  return DataRow(
+                    cells: [
+                      DataCell(Text(item['month_short'] ?? '-')),
+                      DataCell(
+                        Text(
+                          'IDR ${currencyFormat.format(income).replaceAll('Rp', '').trim()}',
+                          style: const TextStyle(
+                            color: Colors.greenAccent,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          'IDR ${currencyFormat.format(expense).replaceAll('Rp', '').trim()}',
+                          style: const TextStyle(
+                            color: Colors.orangeAccent,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Text(
+                          'IDR ${currencyFormat.format(net).replaceAll('Rp', '').trim()}',
+                          style: TextStyle(
+                            color: net >= 0
+                                ? Colors.greenAccent
+                                : Colors.redAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                (net >= 0
+                                        ? Colors.greenAccent
+                                        : Colors.redAccent)
+                                    .withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            (net >= 0
+                                    ? 'personal_finance.surplus'
+                                    : 'personal_finance.deficit')
+                                .tr(context),
+                            style: TextStyle(
+                              color: net >= 0
+                                  ? Colors.greenAccent
+                                  : Colors.redAccent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+                // Total Row
+                DataRow(
+                  color: WidgetStateProperty.all(Colors.grey.withOpacity(0.02)),
+                  cells: [
+                    const DataCell(
+                      Text(
+                        'Total',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        'IDR ${currencyFormat.format(totalIncome).replaceAll('Rp', '').trim()}',
+                        style: const TextStyle(
+                          color: Colors.greenAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        'IDR ${currencyFormat.format(totalExpense).replaceAll('Rp', '').trim()}',
+                        style: const TextStyle(
+                          color: Colors.orangeAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        'IDR ${currencyFormat.format(totalIncome - totalExpense).replaceAll('Rp', '').trim()}',
+                        style: TextStyle(
+                          color: (totalIncome - totalExpense) >= 0
+                              ? Colors.greenAccent
+                              : Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const DataCell(Text('-')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Container(
+            height: 42,
+            width: 100,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            height: 250,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            height: 400,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            height: 300,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -366,6 +366,27 @@ class FinanceService {
     }
   }
 
+  Future<Map<String, dynamic>> updatePersonalBudget(
+    Map<String, dynamic> data,
+  ) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/update_personal_budget'),
+      body: {...data, 'user_id': userId.toString()},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal memperbarui anggaran');
+    }
+  }
+
   Future<Map<String, dynamic>> deletePersonalBudget({
     required String category,
     required String budgetMonth,
@@ -389,6 +410,27 @@ class FinanceService {
       return json.decode(response.body);
     } else {
       throw Exception('Gagal menghapus anggaran');
+    }
+  }
+
+  Future<Map<String, dynamic>> getPersonalFinanceReport({
+    String? year,
+  }) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    String url = '$baseUrl/get_personal_finance_report?user_id=$userId';
+    if (year != null) url += '&year=$year';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal memuat laporan keuangan');
     }
   }
 }

@@ -1243,8 +1243,8 @@ class _FinancePageState extends State<FinancePage>
                     : (_availableTabs[_tabController.index]['index'] == 0
                           ? Icons.account_balance_wallet_rounded
                           : (_availableTabs[_tabController.index]['index'] == 1
-                                ? Icons.add_chart_rounded
-                                : Icons.shopping_cart_checkout_rounded)),
+                                ? Icons.trending_up_rounded
+                                : Icons.trending_down_rounded)),
                 color: Colors.white,
               ),
               label: Text(

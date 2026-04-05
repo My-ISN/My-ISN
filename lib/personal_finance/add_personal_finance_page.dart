@@ -76,9 +76,21 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
 
     if (widget.initialData != null) {
       final d = widget.initialData!;
-      _selectedType = d['transaction_type'] == 'income' ? 1 : 2;
+      final bool isBudget = d['type'] == 3;
+      
+      _selectedType = isBudget 
+          ? 3 
+          : (d['transaction_type'] == 'income' ? 1 : 2);
+          
       _descController.text = (d['description'] ?? '').toString();
-      _selectedDate = DateTime.tryParse(d['transaction_date']?.toString() ?? '') ?? DateTime.now();
+      
+      // Handle Date/Month
+      if (isBudget && d['budget_month'] != null) {
+        _selectedDate = DateTime.tryParse("${d['budget_month']}-01") ?? DateTime.now();
+      } else {
+        _selectedDate = DateTime.tryParse(d['transaction_date']?.toString() ?? '') ?? DateTime.now();
+      }
+      
       _selectedCategory = d['category']?.toString();
       _selectedPaymentMethod = d['payment_method']?.toString();
       
@@ -183,7 +195,12 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
           'amount': amountRaw,
           'budget_month': DateFormat('yyyy-MM').format(_selectedDate),
         };
-        await _financeService.storePersonalBudget(budgetData);
+        
+        if (isEdit) {
+          await _financeService.updatePersonalBudget(budgetData);
+        } else {
+          await _financeService.storePersonalBudget(budgetData);
+        }
       } else {
         // Handle Transaction
         final data = {
@@ -341,7 +358,7 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
   }
 
   Widget _buildCategoryDropdown() {
-    final categories = (_selectedType == 1 || _selectedType == 3) ? _incomeCategories : _expenseCategories;
+    final categories = (_selectedType == 1) ? _incomeCategories : _expenseCategories;
     return SearchableDropdown(
       label: 'finance.category'.tr(context),
       value: _selectedCategory ?? '',
