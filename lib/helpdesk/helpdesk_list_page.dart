@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/shimmer_loading.dart';
+
 import '../widgets/side_drawer.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
@@ -381,7 +381,11 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
               ),
 
               if (_isLoading && _allTickets.isEmpty)
-                const SliverFillRemaining(child: ShimmerList(itemCount: 5))
+                const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                )
               else if (_allTickets.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -554,22 +558,10 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     child: _isStatsLoading
-                        ? ShimmerLoading(
-                            child: Column(
-                              children: List.generate(
-                                4,
-                                (index) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12.0),
-                                  child: Container(
-                                    height: 16,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).cardColor,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                        ? const SizedBox(
+                            height: 100,
+                            child: Center(
+                              child: CircularProgressIndicator(),
                             ),
                           )
                         : Row(

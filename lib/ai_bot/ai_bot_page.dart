@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../localization/app_localizations.dart';
 import '../services/ai_bot_service.dart';
 import 'dart:async';
@@ -342,22 +343,19 @@ class _AiBotPageState extends State<AiBotPage> {
                             widget.userData['profile_photo']
                                 .toString()
                                 .isNotEmpty)
-                        ? Image.network(
-                            'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
+                        ? CachedNetworkImage(
+                            imageUrl: 'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Icon(
+                            placeholder: (context, url) => Icon(
                               Icons.person,
                               size: 20,
                               color: colorScheme.secondary,
                             ),
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Icon(
-                                Icons.person,
-                                size: 20,
-                                color: colorScheme.secondary,
-                              );
-                            },
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.person,
+                              size: 20,
+                              color: colorScheme.secondary,
+                            ),
                           )
                         : Icon(
                             Icons.person,

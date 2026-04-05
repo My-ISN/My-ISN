@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../localization/app_localizations.dart';
@@ -198,14 +199,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   backgroundImage:
                       (basic['profile_photo'] != null &&
                           basic['profile_photo'].toString().isNotEmpty)
-                      ? NetworkImage(
+                      ? CachedNetworkImageProvider(
                           'https://foxgeen.com/HRIS/public/uploads/users/thumb/${basic['profile_photo']}',
                         )
                       : (widget.userData['profile_photo'] != null &&
                             widget.userData['profile_photo']
                                 .toString()
                                 .isNotEmpty)
-                      ? NetworkImage(
+                      ? CachedNetworkImageProvider(
                           'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
                         )
                       : null,

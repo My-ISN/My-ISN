@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
@@ -469,7 +470,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
                 _selectedProfileImage != null &&
                     _selectedProfileImage!.path != null
                 ? FileImage(File(_selectedProfileImage!.path!))
-                : const NetworkImage(
+                : const CachedNetworkImageProvider(
                         'https://foxgeen.com/HRIS/public/uploads/clients/default/default_formal.webp',
                       )
                       as ImageProvider,

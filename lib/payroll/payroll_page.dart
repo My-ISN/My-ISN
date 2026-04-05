@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
-import '../widgets/shimmer_loading.dart';
+
 import '../services/log_service.dart';
 import '../widgets/connectivity_wrapper.dart';
 
@@ -668,27 +668,10 @@ class _PayrollPageState extends State<PayrollPage>
             ),
             const SizedBox(height: 16),
             if (_payrollStats == null)
-              ShimmerLoading(
-                child: Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const ShimmerSkeleton(height: 18, width: 120),
-                        const SizedBox(height: 6),
-                        const ShimmerSkeleton(height: 12, width: 80),
-                      ],
-                    ),
-                    const SizedBox(width: 32),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const ShimmerSkeleton(height: 18, width: 120),
-                        const SizedBox(height: 6),
-                        const ShimmerSkeleton(height: 12, width: 80),
-                      ],
-                    ),
-                  ],
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: CircularProgressIndicator(),
                 ),
               )
             else
@@ -729,7 +712,9 @@ class _PayrollPageState extends State<PayrollPage>
   }
 
   Widget _buildHistoryTab() {
-    if (_isLoading) return const ShimmerList(padding: EdgeInsets.all(20));
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     if (_history.isEmpty) {
       return _buildEmptyState(
         icon: Icons.history_rounded,

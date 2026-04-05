@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'dashboard_page.dart';
+import 'dashboard/dashboard_page.dart';
 import 'register_page.dart';
 import 'services/notification_service.dart';
 import 'widgets/connectivity_wrapper.dart';
@@ -791,8 +792,8 @@ class _LoginPageState extends State<LoginPage> {
                         height: 52,
                         child: OutlinedButton.icon(
                           onPressed: _isLoading ? null : _handleGoogleSignIn,
-                          icon: Image.asset(
-                            'assets/images/google.webp',
+                          icon: SvgPicture.asset(
+                            'assets/images/google.svg',
                             height: 24,
                           ),
                           label: Text(

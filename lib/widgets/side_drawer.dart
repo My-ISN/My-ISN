@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../login_page.dart';
 import '../settings_page.dart';
-import '../dashboard_page.dart';
+import '../dashboard/dashboard_page.dart';
 import '../rent_plan/staff/rent_plan_page.dart' as staff_rp;
 import '../rent_plan/client/rent_plan_page.dart' as client_rp;
 import '../todo_list/todo_list_page.dart';
@@ -582,7 +583,7 @@ class _SideDrawerState extends State<SideDrawer> {
               backgroundImage:
                   (widget.userData['profile_photo'] != null &&
                       widget.userData['profile_photo'].toString().isNotEmpty)
-                  ? NetworkImage(
+                  ? CachedNetworkImageProvider(
                       'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
                     )
                   : null,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../services/rent_plan_service.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -2882,10 +2883,22 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 child: hasImage
                     ? Hero(
                         tag: imageUrl,
-                        child: Image.network(
-                          imageUrl,
+                        child: CachedNetworkImage(
+                          imageUrl: imageUrl,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Icon(
+                          placeholder: (context, url) => Container(
+                            color: Colors.black.withOpacity(0.05),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Icon(
                             Icons.broken_image_outlined,
                             color: Colors.grey[400],
                             size: 24,
@@ -2966,16 +2979,13 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   maxScale: 5.0,
                   child: Hero(
                     tag: imageUrl,
-                    child: Image.network(
-                      imageUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                      errorWidget: (context, url, error) {
                         return const Center(
                           child: Icon(
                             Icons.broken_image_outlined,

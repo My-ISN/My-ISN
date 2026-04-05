@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
 import '../widgets/secondary_app_bar.dart';
@@ -509,7 +510,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                                           .profileData['basic_info']['profile_photo']
                                           .toString()
                                           .isNotEmpty
-                                  ? NetworkImage(
+                                  ? CachedNetworkImageProvider(
                                       'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.profileData['basic_info']['profile_photo']}',
                                     )
                                   : null),
@@ -762,19 +763,27 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         _buildTextField(
           label: 'profile.fb_url'.tr(context),
           controller: _controllers['fb_profile']!,
-          prefixIcon: const FaIcon(
-            FontAwesomeIcons.facebook,
-            size: 18,
-            color: Color(0xFF7E57C2),
+          prefixIcon: SvgPicture.asset(
+            'assets/images/facebook.svg',
+            width: 18,
+            height: 18,
+            colorFilter: const ColorFilter.mode(
+              Color(0xFF7E57C2),
+              BlendMode.srcIn,
+            ),
           ),
         ),
         _buildTextField(
           label: 'profile.linkedin_url'.tr(context),
           controller: _controllers['linkedin_profile']!,
-          prefixIcon: const FaIcon(
-            FontAwesomeIcons.linkedin,
-            size: 18,
-            color: Color(0xFF7E57C2),
+          prefixIcon: SvgPicture.asset(
+            'assets/images/linkedin.svg',
+            width: 18,
+            height: 18,
+            colorFilter: const ColorFilter.mode(
+              Color(0xFF7E57C2),
+              BlendMode.srcIn,
+            ),
           ),
         ),
       ];

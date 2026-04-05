@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'services/log_service.dart';
 import 'services/notification_service.dart';
 import 'login_page.dart';
-import 'dashboard_page.dart';
+import 'dashboard/dashboard_page.dart';
 import 'widgets/connectivity_wrapper.dart';
 
 import 'package:flutter_localizations/flutter_localizations.dart';

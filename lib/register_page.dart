@@ -3,10 +3,11 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
-import 'dashboard_page.dart';
+import 'dashboard/dashboard_page.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'localization/app_localizations.dart';
 import 'widgets/secondary_app_bar.dart';
@@ -56,8 +57,50 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      _cropImage(pickedFile.path);
+    }
+  }
+
+  Future<void> _cropImage(String filePath) async {
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: filePath,
+      maxHeight: 1024,
+      maxWidth: 1024,
+      compressQuality: 70,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'profile.edit_photo'.tr(context),
+          toolbarColor: const Color(0xFF7E57C2),
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: false,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        IOSUiSettings(
+          title: 'profile.edit_photo'.tr(context),
+          cancelButtonTitle: 'main.cancel'.tr(context),
+          doneButtonTitle: 'main.save'.tr(context),
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+      ],
+    );
+
+    if (croppedFile != null) {
+      if (!mounted) return;
       setState(() {
-        _image = File(pickedFile.path);
+        _image = File(croppedFile.path);
       });
     }
   }

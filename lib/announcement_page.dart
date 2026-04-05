@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'widgets/connectivity_wrapper.dart';
 import 'widgets/custom_app_bar.dart';
-import 'widgets/shimmer_loading.dart';
+
 import 'widgets/secondary_app_bar.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -555,7 +555,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         ],
       ),
       body: _isLoading
-          ? const ShimmerList()
+          ? const Center(child: CircularProgressIndicator())
           : _announcements.isEmpty
           ? Center(
               child: Column(

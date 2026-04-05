@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/shimmer_loading.dart';
+
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -1033,20 +1033,10 @@ class _TodoListPageState extends State<TodoListPage> {
                 child: _buildPaginationHeader(),
               ),
             ),
-            if (_isLoading && _todos.isEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  child: Column(
-                    children: [
-                      const ShimmerCard(height: 120),
-                      const SizedBox(height: 20),
-                      const ShimmerList(itemCount: 5),
-                    ],
-                  ),
+             if (_isLoading && _todos.isEmpty)
+              const SliverFillRemaining(
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
               )
             else if (_todos.isEmpty && !_isLoading)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
@@ -363,23 +364,20 @@ class _CustomAppBarState extends State<CustomAppBar> {
                             widget.userData['profile_photo']
                                 .toString()
                                 .isNotEmpty)
-                        ? Image.network(
-                            'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
+                        ? CachedNetworkImage(
+                            imageUrl:
+                                'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
                             fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return const Icon(
-                                Icons.person,
-                                size: 20,
-                                color: Colors.white,
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.person,
-                                  size: 20,
-                                  color: Colors.white,
-                                ),
+                            placeholder: (context, url) => const Icon(
+                              Icons.person,
+                              size: 20,
+                              color: Colors.white,
+                            ),
+                            errorWidget: (context, url, error) => const Icon(
+                              Icons.person,
+                              size: 20,
+                              color: Colors.white,
+                            ),
                           )
                         : const Icon(
                             Icons.person,

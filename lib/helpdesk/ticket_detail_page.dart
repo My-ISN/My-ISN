@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/secondary_app_bar.dart';
@@ -396,7 +397,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     backgroundImage:
                         reply['profile_photo'] != null &&
                             reply['profile_photo'] != ''
-                        ? NetworkImage(
+                        ? CachedNetworkImageProvider(
                             'https://foxgeen.com/HRIS/uploads/users/thumb/${reply['profile_photo']}',
                           )
                         : const AssetImage('assets/images/user_placeholder.png')

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shimmer/shimmer.dart';
 import '../services/creative_idea_service.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/custom_app_bar.dart';
@@ -234,7 +234,7 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                 radius: size / 2,
                 backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
                 backgroundImage: user != null && user['profile_photo'] != null && user['profile_photo'].toString().isNotEmpty
-                    ? NetworkImage('https://foxgeen.com/HRIS/uploads/users/thumb/${user['profile_photo']}')
+                    ? CachedNetworkImageProvider('https://foxgeen.com/HRIS/uploads/users/thumb/${user['profile_photo']}')
                     : null,
                 onBackgroundImageError: (exception, stackTrace) {},
                 child: (user == null || user['profile_photo'] == null || user['profile_photo'].toString().isEmpty)
@@ -285,7 +285,7 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
           radius: 20,
           backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
           backgroundImage: user['profile_photo'] != null && user['profile_photo'].toString().isNotEmpty
-              ? NetworkImage('https://foxgeen.com/HRIS/uploads/users/thumb/${user['profile_photo']}')
+              ? CachedNetworkImageProvider('https://foxgeen.com/HRIS/uploads/users/thumb/${user['profile_photo']}')
               : null,
           onBackgroundImageError: (e, s) {},
           child: (user['profile_photo'] == null || user['profile_photo'].toString().isEmpty)
@@ -336,7 +336,7 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
             radius: 20,
             backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
             backgroundImage: widget.userData['profile_photo'] != null && widget.userData['profile_photo'].toString().isNotEmpty
-                ? NetworkImage('https://foxgeen.com/HRIS/uploads/users/thumb/${widget.userData['profile_photo']}')
+                ? CachedNetworkImageProvider('https://foxgeen.com/HRIS/uploads/users/thumb/${widget.userData['profile_photo']}')
                 : null,
             onBackgroundImageError: (e, s) {},
             child: (widget.userData['profile_photo'] == null || widget.userData['profile_photo'].toString().isEmpty)
@@ -1306,7 +1306,7 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                     radius: 12,
                     backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
                     backgroundImage: idea['profile_photo'] != null && idea['profile_photo'].toString().isNotEmpty
-                        ? NetworkImage('https://foxgeen.com/HRIS/uploads/users/thumb/${idea['profile_photo']}')
+                        ? CachedNetworkImageProvider('https://foxgeen.com/HRIS/uploads/users/thumb/${idea['profile_photo']}')
                         : null,
                     onBackgroundImageError: (e, s) {},
                     child: (idea['profile_photo'] == null || idea['profile_photo'].toString().isEmpty)
@@ -1328,90 +1328,21 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
   }
 
   Widget _buildLeaderboardShimmer() {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const SizedBox(height: 10),
-          // Podium Shimmer
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _buildPodiumShimmerCircle(70), // Rank 2
-              _buildPodiumShimmerCircle(90), // Rank 1
-              _buildPodiumShimmerCircle(60), // Rank 3
-            ],
-          ),
-          const SizedBox(height: 48),
-          // List Shimmer
-          for (int i = 0; i < 5; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Container(
-                height: 80,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-            ),
-        ],
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32.0),
+        child: CircularProgressIndicator(),
       ),
     );
   }
 
-  Widget _buildPodiumShimmerCircle(double size) {
-    return Column(
-      children: [
-        Container(
-          width: size + 10,
-          height: size + 10,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: 60,
-          height: 14,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(7),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          width: 40,
-          height: 10,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(5),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildIdeasShimmer() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: 5,
-        itemBuilder: (_, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Container(height: 150, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15))),
-        ),
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32.0),
+        child: CircularProgressIndicator(),
       ),
     );
   }

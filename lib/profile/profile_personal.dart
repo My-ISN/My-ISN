@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'profile_edit.dart';
 import '../localization/app_localizations.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfilePersonalPage extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -109,20 +109,28 @@ class ProfilePersonalPage extends StatelessWidget {
                 context,
                 'LinkedIn',
                 data['linkedin_profile'] ?? '-',
-                const FaIcon(
-                  FontAwesomeIcons.linkedin,
-                  size: 20,
-                  color: Color(0xFF7E57C2),
+                SvgPicture.asset(
+                  'assets/images/linkedin.svg',
+                  width: 20,
+                  height: 20,
+                  colorFilter: const ColorFilter.mode(
+                    Color(0xFF7E57C2),
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
               _buildInfoRow(
                 context,
                 'Facebook',
                 data['fb_profile'] ?? '-',
-                const FaIcon(
-                  FontAwesomeIcons.facebook,
-                  size: 20,
-                  color: Color(0xFF7E57C2),
+                SvgPicture.asset(
+                  'assets/images/facebook.svg',
+                  width: 20,
+                  height: 20,
+                  colorFilter: const ColorFilter.mode(
+                    Color(0xFF7E57C2),
+                    BlendMode.srcIn,
+                  ),
                 ),
                 last: true,
               ),

@@ -14,6 +14,7 @@ import 'diagnosis/diagnosis_hub_page.dart';
 import 'helpdesk/helpdesk_list_page.dart';
 import 'login_page.dart';
 import 'widgets/secondary_app_bar.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class SettingsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -983,7 +984,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               widget.userData['profile_photo']
                                   .toString()
                                   .isNotEmpty)
-                          ? NetworkImage(
+                          ? CachedNetworkImageProvider(
                               'https://foxgeen.com/HRIS/public/uploads/users/thumb/${widget.userData['profile_photo']}',
                             )
                           : null,

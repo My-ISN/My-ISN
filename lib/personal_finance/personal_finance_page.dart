@@ -10,7 +10,7 @@ import '../localization/app_localizations.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/period_filter_widget.dart';
-import '../widgets/shimmer_loading.dart';
+
 import 'add_personal_finance_page.dart';
 
 
@@ -1189,12 +1189,10 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                 ),
                 const SizedBox(height: 16),
                 data == null && !isReportTab
-                    ? const ShimmerLoading(
-                        child: ShimmerSkeleton(
-                          height: 24,
-                          width: 150,
-                          borderRadius: 4,
-                        ),
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : data == null && isReportTab
                         ? const SizedBox(height: 24) // Placeholder without shimmer
@@ -2180,9 +2178,8 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
 
   Widget _buildReportTab() {
     if (_isReportLoading) {
-      return Container(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: _buildReportShimmer(),
+      return const Center(
+        child: CircularProgressIndicator(),
       );
     }
 
@@ -2766,160 +2763,13 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     );
   }
 
-  Widget _buildReportShimmer() {
-    return ShimmerLoading(
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Year Picker Shimmer
-          Row(
-            children: [
-              const ShimmerSkeleton(
-                height: 42,
-                width: 100,
-                borderRadius: 12,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Chart Shimmer
-          const ShimmerSkeleton(
-            height: 250,
-            borderRadius: 24,
-          ),
-          const SizedBox(height: 24),
-          // Breakdown Box Shimmer
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const ShimmerSkeleton(height: 20, width: 150, borderRadius: 4),
-                const SizedBox(height: 20),
-                ...List.generate(4, (index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: Row(
-                    children: [
-                      const ShimmerSkeleton(height: 40, width: 40, borderRadius: 10),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const ShimmerSkeleton(height: 14, width: 120, borderRadius: 4),
-                            const SizedBox(height: 6),
-                            const ShimmerSkeleton(height: 10, width: 60, borderRadius: 4),
-                          ],
-                        ),
-                      ),
-                      const ShimmerSkeleton(height: 16, width: 80, borderRadius: 4),
-                    ],
-                  ),
-                )),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildShimmerLoading() {
-    return ShimmerLoading(
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Summary Card Shimmer
-          ShimmerSkeleton(
-            height: 160,
-            borderRadius: 24,
-            margin: const EdgeInsets.only(bottom: 24),
-          ),
-          // Tab Bar Shimmer
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(4, (index) => 
-              const ShimmerSkeleton(height: 35, width: 70, borderRadius: 20)
-            ),
-          ),
-          const SizedBox(height: 24),
-          // Content Shimmer (e.g. Chart)
-          ShimmerSkeleton(
-            height: 220,
-            borderRadius: 24,
-            margin: const EdgeInsets.only(bottom: 24),
-          ),
-          // List item shimmers
-          ...List.generate(3, (index) => 
-            ShimmerSkeleton(
-              height: 80,
-              borderRadius: 16,
-              margin: const EdgeInsets.only(bottom: 16),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 
   Widget _buildTransactionShimmer() {
-    return ShimmerLoading(
-      child: Column(
-        children: [
-          // Filters Shimmer
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const ShimmerSkeleton(height: 16, width: 40, borderRadius: 4),
-                  const SizedBox(width: 8),
-                  const ShimmerSkeleton(height: 38, width: 60, borderRadius: 10),
-                  const SizedBox(width: 8),
-                  const ShimmerSkeleton(height: 38, width: 120, borderRadius: 10),
-                ],
-              ),
-              const ShimmerSkeleton(height: 30, width: 90, borderRadius: 12),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // List Shimmer
-          ...List.generate(
-            6,
-            (index) => Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  const ShimmerSkeleton(height: 48, width: 48, borderRadius: 15),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const ShimmerSkeleton(height: 16, width: 140, borderRadius: 4),
-                        const SizedBox(height: 8),
-                        const ShimmerSkeleton(height: 12, width: 80, borderRadius: 4),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const ShimmerSkeleton(height: 20, width: 90, borderRadius: 4),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 }

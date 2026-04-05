@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'localization/app_localizations.dart';
 import 'widgets/connectivity_wrapper.dart';
-import 'widgets/shimmer_loading.dart';
+
 
 class AttendancePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -111,49 +111,8 @@ class _AttendancePageState extends State<AttendancePage> {
         children: [
           Expanded(
             child: _isLoading
-                ? SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        ShimmerLoading(
-                          child: Container(
-                            height: 60,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ShimmerLoading(
-                          child: Container(
-                            height: 300,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        ShimmerLoading(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Container(
-                              height: 24,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const ShimmerCard(height: 140),
-                      ],
-                    ),
+                ? const Center(
+                    child: CircularProgressIndicator(),
                   )
                 : RefreshIndicator(
                     onRefresh: _fetchAttendance,

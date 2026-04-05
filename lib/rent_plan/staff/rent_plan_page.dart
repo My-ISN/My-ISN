@@ -5,7 +5,7 @@ import 'rent_plan_detail_page.dart';
 import 'add_rent_plan_page.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
-import '../../widgets/shimmer_loading.dart';
+
 import '../../widgets/side_drawer.dart';
 import '../../localization/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -872,7 +872,7 @@ class _RentPlanPageState extends State<RentPlanPage>
 
   Widget _buildRentalList() {
     return _isLoading
-        ? const ShimmerList()
+        ? const Center(child: CircularProgressIndicator())
         : RefreshIndicator(
             onRefresh: _fetchRentPlans,
             color: _primaryColor,
@@ -910,24 +910,9 @@ class _RentPlanPageState extends State<RentPlanPage>
 
   Widget _buildHeaderStats() {
     if (_isLoading) {
-      return Container(
+      return const SizedBox(
         height: 100,
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: ShimmerLoading(
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: 4,
-            itemBuilder: (context, index) => Container(
-              width: 140,
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ),
-        ),
+        child: Center(child: CircularProgressIndicator()),
       );
     }
 

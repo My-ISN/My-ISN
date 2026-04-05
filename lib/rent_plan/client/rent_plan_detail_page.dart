@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../services/rent_plan_service.dart';
 import '../../localization/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -635,19 +636,23 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             child: InteractiveViewer(
               minScale: 1.0,
               maxScale: 3.0,
-              child: Image.network(
-                imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.contain,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    height: 200,
-                    color: Colors.grey[50],
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
-                },
+                placeholder: (context, url) => Container(
+                  height: 200,
+                  color: Colors.grey[50],
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  height: 200,
+                  color: Colors.grey[50],
+                  child: const Center(
+                    child: Icon(Icons.broken_image, color: Colors.grey),
+                  ),
+                ),
               ),
             ),
           ),

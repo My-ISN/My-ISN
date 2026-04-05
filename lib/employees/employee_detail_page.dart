@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../localization/app_localizations.dart';
@@ -377,7 +378,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage>
               backgroundImage:
                   (info['profile_photo'] != null &&
                       !info['profile_photo'].contains('default_profile'))
-                  ? NetworkImage(info['profile_photo'])
+                  ? CachedNetworkImageProvider(info['profile_photo'])
                   : null,
               child:
                   (info['profile_photo'] == null ||

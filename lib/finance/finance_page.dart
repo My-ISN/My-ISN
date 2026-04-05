@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
@@ -6,7 +7,7 @@ import '../localization/app_localizations.dart';
 import '../services/finance_service.dart';
 
 import '../widgets/custom_app_bar.dart';
-import '../widgets/shimmer_loading.dart';
+
 import '../widgets/side_drawer.dart';
 import '../widgets/period_filter_widget.dart';
 import 'widgets/finance_account_item.dart';
@@ -706,19 +707,16 @@ class _FinancePageState extends State<FinancePage>
                           ),
                         ),
                       )
-                    : Image.network(
-                        transaction['attachment_url'],
+                    : CachedNetworkImage(
+                        imageUrl: transaction['attachment_url'],
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: 200,
-                            alignment: Alignment.center,
-                            child: const CircularProgressIndicator(),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) => Container(
+                        placeholder: (context, url) => Container(
+                          height: 200,
+                          alignment: Alignment.center,
+                          child: const CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) => Container(
                           padding: const EdgeInsets.all(20),
                           color: Colors.grey.withOpacity(0.1),
                           child: Row(
@@ -1146,38 +1144,7 @@ class _FinancePageState extends State<FinancePage>
       appBar: CustomAppBar(userData: widget.userData, title: 'My ISN'),
       endDrawer: SideDrawer(userData: widget.userData, activePage: 'finance'),
       body: _isLoading
-          ? SingleChildScrollView(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                    child: ShimmerLoading(
-                      child: Container(
-                        height: 140,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: ShimmerLoading(
-                      child: Column(
-                        children: List.generate(
-                          5,
-                          (index) => const ShimmerCard(
-                            margin: EdgeInsets.only(bottom: 16),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage.isNotEmpty
           ? Center(child: Text(_errorMessage))
           : Column(
@@ -1501,7 +1468,7 @@ class _FinancePageState extends State<FinancePage>
           child: RefreshIndicator(
             onRefresh: _fetchAccounts,
             child: _isAccountsLoading && _accounts.isEmpty
-                ? const ShimmerList(itemCount: 5)
+                ? const Center(child: CircularProgressIndicator())
                 : _accounts.isEmpty
                 ? _buildEmptyState()
                 : ListView.builder(
@@ -1638,7 +1605,8 @@ class _FinancePageState extends State<FinancePage>
             ),
           ),
           if (_isTransactionsLoading && _transactions.isEmpty)
-            const SliverFillRemaining(child: ShimmerList(itemCount: 6))
+            const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()))
           else if (_transactions.isEmpty)
             SliverFillRemaining(hasScrollBody: false, child: _buildEmptyState())
           else

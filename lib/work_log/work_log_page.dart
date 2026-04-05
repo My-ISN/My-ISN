@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/shimmer_loading.dart';
+
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/period_filter_widget.dart';
@@ -189,19 +189,9 @@ class _WorkLogPageState extends State<WorkLogPage> {
                 ),
               )
             else if (_isLoading && _logs.isEmpty)
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverToBoxAdapter(
-                  child: ShimmerLoading(
-                    child: Column(
-                      children: List.generate(
-                        5,
-                        (index) => const ShimmerCard(
-                          margin: EdgeInsets.only(bottom: 16),
-                        ),
-                      ),
-                    ),
-                  ),
+              const SliverFillRemaining(
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
               )
             else if (_logs.isEmpty && !_isLoading)
@@ -553,10 +543,12 @@ class _WorkLogPageState extends State<WorkLogPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _isStatsLoading
-                                  ? const ShimmerLoading(
-                                      child: ShimmerSkeleton(
-                                        height: 36,
-                                        width: 140,
+                                  ? const SizedBox(
+                                      height: 36,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       ),
                                     )
                                   : _buildStatRow(
@@ -566,10 +558,12 @@ class _WorkLogPageState extends State<WorkLogPage> {
                                     ),
                               const SizedBox(height: 16),
                               _isStatsLoading
-                                  ? const ShimmerLoading(
-                                      child: ShimmerSkeleton(
-                                        height: 36,
-                                        width: 140,
+                                  ? const SizedBox(
+                                      height: 36,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       ),
                                     )
                                   : _buildStatRow(
@@ -588,12 +582,8 @@ class _WorkLogPageState extends State<WorkLogPage> {
                               width: 85,
                               height: 85,
                               child: _isStatsLoading
-                                  ? const ShimmerLoading(
-                                      child: ShimmerSkeleton(
-                                        height: 85,
-                                        width: 85,
-                                        borderRadius: 50,
-                                      ),
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
                                     )
                                   : CircularProgressIndicator(
                                       value: progress,
