@@ -44,8 +44,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
   Future<void> _fetchTicketDetails() async {
     try {
-      final userId = (widget.userData['id'] ?? widget.userData['user_id'])
-          .toString();
+      final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
       final url =
           'https://foxgeen.com/HRIS/mobileapi/get_ticket_details?ticket_id=${widget.ticketId}&user_id=$userId';
       final response = await http.get(Uri.parse(url));
@@ -74,22 +73,21 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     if (!_hasPermission('mobile_helpdesk_answer')) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Anda tidak memiliki izin untuk membalas tiket ini'),
+          SnackBar(
+            content: Text('helpdesk.no_permission'.tr(context)),
           ),
         );
       }
       return;
     }
 
-    final userId = (widget.userData['id'] ?? widget.userData['user_id'])
-        .toString();
+    final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
 
     // Create optimistic reply for immediate feedback
     final optimisticReply = {
       'sent_by': userId,
       'reply_text': message,
-      'created_at': 'Sending...',
+      'created_at': 'helpdesk.sending'.tr(context),
       'profile_photo': widget.userData['profile_photo'],
       'is_optimistic': true,
     };
@@ -105,7 +103,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     _scrollToBottom();
 
     try {
-      final url = 'https://foxgeen.com/HRIS/mobileapi/add_ticket_reply';
+      const url = 'https://foxgeen.com/HRIS/mobileapi/add_ticket_reply';
       final response = await http.post(
         Uri.parse(url),
         body: {
@@ -128,7 +126,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(data['message'] ?? 'Failed to send reply'),
+              content: Text(data['message'] ?? 'helpdesk.failed_reply'.tr(context)),
               backgroundColor: Colors.red,
             ),
           );
@@ -142,10 +140,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Failed to send reply. Please check your connection.',
-            ),
+          SnackBar(
+            content: Text('helpdesk.failed_reply'.tr(context)),
             backgroundColor: Colors.red,
           ),
         );
@@ -174,29 +170,21 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
   }
 
   String _getStatusText(BuildContext context, String status) {
-    if (status == '1')
-      return AppLocalizations.of(context)!.translate('helpdesk.open');
-    if (status == '2')
-      return AppLocalizations.of(context)!.translate('helpdesk.closed');
+    if (status == '1') return 'helpdesk.open'.tr(context);
+    if (status == '2') return 'helpdesk.closed'.tr(context);
     return status;
   }
 
   String _getPriorityText(BuildContext context, String priority) {
     switch (priority) {
       case '1':
-        return AppLocalizations.of(context)!.translate('helpdesk.priority_low');
+        return 'helpdesk.priority_low'.tr(context);
       case '2':
-        return AppLocalizations.of(
-          context,
-        )!.translate('helpdesk.priority_medium');
+        return 'helpdesk.priority_medium'.tr(context);
       case '3':
-        return AppLocalizations.of(
-          context,
-        )!.translate('helpdesk.priority_high');
+        return 'helpdesk.priority_high'.tr(context);
       case '4':
-        return AppLocalizations.of(
-          context,
-        )!.translate('helpdesk.priority_critical');
+        return 'helpdesk.priority_critical'.tr(context);
       default:
         return priority;
     }
@@ -204,11 +192,9 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Scaffold(
       appBar: SecondaryAppBar(
-        title: _ticketData['ticket_code'] ?? l10n!.translate('helpdesk.title'),
+        title: _ticketData['ticket_code'] ?? 'helpdesk.title'.tr(context),
       ),
       body: ConnectivityWrapper(
         child: _isLoading
@@ -219,18 +205,12 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   Expanded(
                     child: ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       itemCount: _replies.length,
                       itemBuilder: (context, index) {
                         final reply = _replies[index];
-                        final isMe =
-                            reply['sent_by'].toString() ==
-                            (widget.userData['id'] ??
-                                    widget.userData['user_id'])
-                                .toString();
+                        final isMe = reply['sent_by'].toString() ==
+                            (widget.userData['id'] ?? widget.userData['user_id']).toString();
                         return _buildChatBubble(reply, isMe);
                       },
                     ),
@@ -244,9 +224,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
   }
 
   Widget _buildTicketHeader() {
-    final statusColor = _getStatusColor(
-      _ticketData['ticket_status'].toString(),
-    );
+    final statusColor = _getStatusColor(_ticketData['ticket_status'].toString());
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -265,9 +243,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
             children: [
               CircleAvatar(
                 radius: 12,
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.primary.withOpacity(0.1),
+                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                 child: Icon(
                   Icons.person,
                   size: 14,
@@ -289,9 +265,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               Text(
                 _ticketData['ticket_code'] ?? '',
                 style: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.color?.withOpacity(0.6),
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
@@ -305,10 +279,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
               Expanded(
                 child: Text(
                   _ticketData['subject'] ?? '',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
               const SizedBox(width: 8),
@@ -320,10 +291,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   border: Border.all(color: statusColor),
                 ),
                 child: Text(
-                  _getStatusText(
-                    context,
-                    _ticketData['ticket_status'].toString(),
-                  ),
+                  _getStatusText(context, _ticketData['ticket_status'].toString()),
                   style: TextStyle(
                     color: statusColor,
                     fontSize: 11,
@@ -336,35 +304,18 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(
-                Icons.calendar_today_outlined,
-                size: 14,
-                color: Theme.of(context).hintColor,
-              ),
+              Icon(Icons.calendar_today_outlined, size: 14, color: Theme.of(context).hintColor),
               const SizedBox(width: 4),
               Text(
                 _ticketData['created_at'] ?? '',
-                style: TextStyle(
-                  color: Theme.of(context).hintColor,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Theme.of(context).hintColor, fontSize: 12),
               ),
               const SizedBox(width: 16),
-              Icon(
-                Icons.flag_outlined,
-                size: 14,
-                color: Theme.of(context).hintColor,
-              ),
+              Icon(Icons.flag_outlined, size: 14, color: Theme.of(context).hintColor),
               const SizedBox(width: 4),
               Text(
-                _getPriorityText(
-                  context,
-                  _ticketData['ticket_priority'].toString(),
-                ),
-                style: TextStyle(
-                  color: Theme.of(context).hintColor,
-                  fontSize: 12,
-                ),
+                _getPriorityText(context, _ticketData['ticket_priority'].toString()),
+                style: TextStyle(color: Theme.of(context).hintColor, fontSize: 12),
               ),
             ],
           ),
@@ -381,27 +332,20 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
-          crossAxisAlignment: isMe
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
+          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: isMe
-                  ? MainAxisAlignment.end
-                  : MainAxisAlignment.start,
+              mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (!isMe) ...[
                   CircleAvatar(
                     radius: 14,
-                    backgroundImage:
-                        reply['profile_photo'] != null &&
-                            reply['profile_photo'] != ''
+                    backgroundImage: reply['profile_photo'] != null && reply['profile_photo'] != ''
                         ? CachedNetworkImageProvider(
                             'https://foxgeen.com/HRIS/uploads/users/thumb/${reply['profile_photo']}',
                           )
-                        : const AssetImage('assets/images/user_placeholder.png')
-                              as ImageProvider,
+                        : const AssetImage('assets/images/user_placeholder.png') as ImageProvider,
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -412,8 +356,8 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                       color: isMe
                           ? const Color(0xFF7E57C2)
                           : (Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white10
-                                : Colors.grey[200]),
+                              ? Colors.white10
+                              : Colors.grey[200]),
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(16),
                         topRight: const Radius.circular(16),
@@ -424,9 +368,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     child: Text(
                       reply['reply_text'] ?? '',
                       style: TextStyle(
-                        color: isMe
-                            ? Colors.white
-                            : Theme.of(context).textTheme.bodyLarge?.color,
+                        color: isMe ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                   ),
@@ -457,10 +399,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     ),
                   Text(
                     reply['created_at'] ?? '',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Theme.of(context).hintColor,
-                    ),
+                    style: TextStyle(fontSize: 10, color: Theme.of(context).hintColor),
                   ),
                 ],
               ),
@@ -486,10 +425,10 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
             ),
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
-            'Anda tidak memiliki izin untuk membalas tiket ini.',
-            style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+            'helpdesk.no_permission'.tr(context),
+            style: const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
           ),
         ),
       );
@@ -507,21 +446,14 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          24,
-        ), // Extra bottom padding for safety
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         child: SafeArea(
           child: Row(
             children: [
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF1E1E1E)
-                        : const Color(0xFFF1F5F9),
+                    color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: TextField(
@@ -529,14 +461,9 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     textCapitalization: TextCapitalization.sentences,
                     maxLines: null,
                     decoration: InputDecoration(
-                      hintText: AppLocalizations.of(
-                        context,
-                      )!.translate('helpdesk.reply'),
+                      hintText: 'helpdesk.reply'.tr(context),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                   ),
                 ),

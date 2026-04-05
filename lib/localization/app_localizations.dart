@@ -17,10 +17,38 @@ class AppLocalizations {
   late Map<String, dynamic> _localizedStrings;
 
   Future<bool> load() async {
-    String jsonString = await rootBundle.loadString(
-      'assets/languages/${locale.languageCode}.json',
-    );
-    _localizedStrings = json.decode(jsonString);
+    final List<String> modules = [
+      'main',
+      'auth',
+      'dashboard',
+      'attendance',
+      'announcement',
+      'profile',
+      'settings',
+      'diagnosis',
+      'payroll',
+      'employees',
+      'work_log',
+      'rent_plan',
+      'todo_list',
+      'finance',
+      'helpdesk',
+    ];
+
+    _localizedStrings = {};
+
+    for (String module in modules) {
+      try {
+        String jsonString = await rootBundle.loadString(
+          'assets/languages/${locale.languageCode}/$module.json',
+        );
+        Map<String, dynamic> jsonMap = json.decode(jsonString);
+        _localizedStrings.addAll(jsonMap);
+      } catch (e) {
+        // ignore: avoid_print
+        print('Error loading localization module $module: $e');
+      }
+    }
     return true;
   }
 

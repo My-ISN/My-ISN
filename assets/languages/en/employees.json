@@ -1,0 +1,129 @@
+{
+    "employees": {
+        "title": "Employees",
+        "detail_title": "Employee Details",
+        "edit_profile": "Edit Profile",
+        "edit_contract": "Edit Contract",
+        "edit_employment": "Edit Employment",
+        "edit_personal": "Edit Personal",
+        "edit_history": "Edit History",
+        "edit_documents": "Edit Documents",
+        "search_hint": "Search name, position, department...",
+        "show": "Show",
+        "total": "{count} Total",
+        "no_employees": "No employees found",
+        "add_employee": "Add Employee",
+        "sections": {
+            "profile": "Basic Profile",
+            "account": "Account Information",
+            "work_details": "Work Details",
+            "salary_worklog": "Salary & Work Log"
+        },
+        "page_x_of_y": "Page {current} of {total}",
+        "showing_x_of_y": "Showing {current} of {total} entries",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "employee_id": "Employee ID",
+        "contact_number": "Contact Number",
+        "gender": "Gender",
+        "email": "Email",
+        "username": "Username",
+        "password": "Password",
+        "start_contract": "Start Contract",
+        "leave_categories": "Leave Categories",
+        "office_shift": "Office Shift",
+        "role": "Role",
+        "department": "Department",
+        "designation": "Designation",
+        "basic_salary": "Basic Salary",
+        "hourly_rate": "Hourly Rate",
+        "work_log_hours": "Work Log Target Hours",
+        "all": "All",
+        "none": "None",
+        "per_month": "Per Month",
+        "status_work_label": "Work Status",
+        "work_log": "Work Log",
+        "status_target_worklog": "Worklog Target Status",
+        "payslip_type": "Payslip Type",
+        "overview": {
+            "contact_info": "Contact Information",
+            "profile_data_not_available": "Profile data not available"
+        },
+        "contract_data": {
+            "title": "Contract Data",
+            "not_available": "Contract data not available"
+        },
+        "salary_shift": {
+            "title": "Salary & Shift"
+        },
+        "period_leave": {
+            "title": "Period & Leave"
+        },
+        "employment_detail": {
+            "detail_title": "Employment Details",
+            "not_available": "Employment data not available"
+        },
+        "role_desc": "Role Description",
+        "personal_info": "Personal Information",
+        "personal_info_not_available": "Personal information not available",
+        "bank_info": "Bank Information",
+        "work_exp": "Work Experience",
+        "education": "Education",
+        "emp_docs": "Employee Documents",
+        "delete_title": "Delete Employee",
+        "delete_confirm": "Are you sure you want to delete this employee?",
+        "delete_success": "Employee deleted successfully",
+        "delete_error": "Failed to delete employee",
+        "delete_conn_error": "Failed to delete: Connection error",
+        "save": "SAVE",
+        "save_success": "Data saved successfully",
+        "edit_upcoming": "Edit functionality for this section is coming soon",
+        "try_again": "Try Again",
+        "fetch_error": "Failed to Load Data",
+        "status_work": {
+            "contract": "Contract Employee",
+            "probation": "Probation",
+            "trainee": "Trainee",
+            "permanent": "Permanent",
+            "freelance": "Freelance"
+        },
+        "status_work_list": {
+            "contract": "Contract",
+            "probation": "Probation",
+            "trainee": "Trainee",
+            "permanent": "Permanent",
+            "freelance": "Freelance"
+        },
+        "tabs": {
+            "profile": "Profile",
+            "contract": "Contract",
+            "employment": "Employment",
+            "personal": "Personal",
+            "history": "History",
+            "documents": "Documents"
+        },
+        "edit_sections": {
+            "profil": "profile",
+            "kontrak": "contract",
+            "pekerjaan": "employment",
+            "pribadi": "personal",
+            "riwayat": "history",
+            "dokumen": "documents"
+        },
+        "form": {
+            "company": "Company",
+            "post": "Post/Position",
+            "from_year": "From Year",
+            "to_year": "To Year",
+            "school_uni": "School/University",
+            "education_level": "Education Level",
+            "doc_name": "Document Name",
+            "doc_type": "Document Type (e.g. ID, Certificate)",
+            "select_file": "Select File",
+            "fill_all_fields": "Please fill all fields and select a file",
+            "no_fields": "No fields available"
+        },
+        "default_role": "Employee",
+        "default_dept": "General"
+    }
+}

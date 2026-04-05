@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../widgets/secondary_app_bar.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
-import '../widgets/searchable_dropdown.dart';
-import '../widgets/secondary_app_bar.dart';
 
 class CreateTicketPage extends StatefulWidget {
   final Map<String, dynamic> userData;
+
   const CreateTicketPage({super.key, required this.userData});
 
   @override
@@ -16,56 +16,58 @@ class CreateTicketPage extends StatefulWidget {
 
 class _CreateTicketPageState extends State<CreateTicketPage> {
   final _formKey = GlobalKey<FormState>();
-  final _subjectController = TextEditingController();
-  final _descriptionController = TextEditingController();
-
+  final TextEditingController _subjectController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   String? _selectedPriority;
-  bool _isLoading = false;
+  bool _isSubmitting = false;
+
+  final List<Map<String, String>> _priorities = [
+    {'id': '1', 'name': 'helpdesk.priority_low'},
+    {'id': '2', 'name': 'helpdesk.priority_medium'},
+    {'id': '3', 'name': 'helpdesk.priority_high'},
+    {'id': '4', 'name': 'helpdesk.priority_critical'},
+  ];
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _subjectController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   Future<void> _submitTicket() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_selectedPriority == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.translate('helpdesk.select_priority'),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (!_formKey.currentState!.validate() || _selectedPriority == null) {
+      if (_selectedPriority == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('helpdesk.select_priority'.tr(context))),
+        );
+      }
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() => _isSubmitting = true);
+
     try {
-      final userId = widget.userData['id'] ?? widget.userData['user_id'];
+      final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
       final url = 'https://foxgeen.com/HRIS/mobileapi/create_ticket';
+
       final response = await http.post(
         Uri.parse(url),
         body: {
-          'user_id': userId.toString(),
+          'user_id': userId,
           'subject': _subjectController.text,
-          'priority': _selectedPriority!,
-          'department_id': '1', // Default to 1 (Support)
+          'priority': _selectedPriority,
           'description': _descriptionController.text,
         },
       );
 
       final data = json.decode(response.body);
+
       if (data['status'] == true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                AppLocalizations.of(
-                  context,
-                )!.translate('helpdesk.success_create'),
-              ),
+              content: Text('helpdesk.success_create'.tr(context)),
               backgroundColor: Colors.green,
             ),
           );
@@ -75,12 +77,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                data['message'] ??
-                    AppLocalizations.of(
-                      context,
-                    )!.translate('helpdesk.failed_create'),
-              ),
+              content: Text(data['message'] ?? 'helpdesk.failed_create'.tr(context)),
               backgroundColor: Colors.red,
             ),
           );
@@ -88,144 +85,97 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
       }
     } catch (e) {
       debugPrint('Helpdesk: Error creating ticket: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('helpdesk.failed_create'.tr(context)),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Scaffold(
-      appBar: SecondaryAppBar(title: l10n!.translate('helpdesk.create_ticket')),
+      appBar: SecondaryAppBar(title: 'helpdesk.create_ticket'.tr(context)),
       body: ConnectivityWrapper(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.translate('helpdesk.subject'),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 8),
+                _buildLabel('helpdesk.subject'.tr(context)),
                 TextFormField(
                   controller: _subjectController,
                   decoration: InputDecoration(
-                    hintText: l10n.translate('helpdesk.hint_subject'),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: Theme.of(context).cardColor,
+                    hintText: 'helpdesk.hint_subject'.tr(context),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
-                  validator: (value) => (value == null || value.isEmpty)
-                      ? l10n.translate('main.required')
-                      : null,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'main.required_field'.tr(context);
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
-
-                const SizedBox(height: 8),
-                SearchableDropdown(
-                  label: l10n.translate('helpdesk.priority'),
-                  value: _selectedPriority == null
-                      ? ''
-                      : [
-                          {
-                            'id': '1',
-                            'name': l10n.translate('helpdesk.priority_low'),
-                          },
-                          {
-                            'id': '2',
-                            'name': l10n.translate('helpdesk.priority_medium'),
-                          },
-                          {
-                            'id': '3',
-                            'name': l10n.translate('helpdesk.priority_high'),
-                          },
-                          {
-                            'id': '4',
-                            'name': l10n.translate(
-                              'helpdesk.priority_critical',
-                            ),
-                          },
-                        ].firstWhere(
-                          (item) => item['id'] == _selectedPriority,
-                        )['name']!,
-                  options: [
-                    {
-                      'id': '1',
-                      'name': l10n.translate('helpdesk.priority_low'),
-                    },
-                    {
-                      'id': '2',
-                      'name': l10n.translate('helpdesk.priority_medium'),
-                    },
-                    {
-                      'id': '3',
-                      'name': l10n.translate('helpdesk.priority_high'),
-                    },
-                    {
-                      'id': '4',
-                      'name': l10n.translate('helpdesk.priority_critical'),
-                    },
-                  ],
-                  onSelected: (id) => setState(() => _selectedPriority = id),
-                  placeholder: l10n.translate('helpdesk.select_priority'),
+                _buildLabel('helpdesk.priority'.tr(context)),
+                DropdownButtonFormField<String>(
+                  value: _selectedPriority,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                  items: _priorities.map((priority) {
+                    return DropdownMenuItem(
+                      value: priority['id'],
+                      child: Text(priority['name']!.tr(context)),
+                    );
+                  }).toList(),
+                  onChanged: (value) => setState(() => _selectedPriority = value),
+                  validator: (value) => value == null ? 'main.required_field'.tr(context) : null,
                 ),
                 const SizedBox(height: 20),
-
-                Text(
-                  l10n.translate('helpdesk.description'),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 8),
+                _buildLabel('helpdesk.description'.tr(context)),
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    hintText: l10n.translate('helpdesk.hint_description'),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: Theme.of(context).cardColor,
+                    hintText: 'helpdesk.hint_description'.tr(context),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
-                  validator: (value) => (value == null || value.isEmpty)
-                      ? l10n.translate('main.required')
-                      : null,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'main.required_field'.tr(context);
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 32),
-
+                const SizedBox(height: 40),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _submitTicket,
+                    onPressed: _isSubmitting ? null : _submitTicket,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF7E57C2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
                     ),
-                    child: _isLoading
+                    child: _isSubmitting
                         ? const CircularProgressIndicator(color: Colors.white)
                         : Text(
-                            l10n.translate('helpdesk.send'),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            'helpdesk.send'.tr(context),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),
                 ),
@@ -233,6 +183,16 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        label,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
       ),
     );
   }

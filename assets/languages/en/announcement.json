@@ -1,0 +1,20 @@
+{
+    "announcement": {
+        "title": "Announcement",
+        "fetch_error": "Failed to load announcement. Check your internet connection.",
+        "no_description": "No additional description.",
+        "tap_to_view": "Tap to view details of new announcement.",
+        "mark_all": "Mark all?",
+        "mark_all_tooltip": "View all",
+        "clear_seen_tooltip": "Delete seen",
+        "mark_all_desc": "Are you sure you want to mark all announcements as seen?",
+        "cancel": "Cancel",
+        "yes": "Yes",
+        "delete_seen": "Delete seen?",
+        "delete_seen_desc": "This will delete all announcements you have already read from the list.",
+        "delete": "Delete",
+        "no_announcements": "No new announcements",
+        "whats_new": "What's New:",
+        "no_description_available": "No description available"
+    }
+}

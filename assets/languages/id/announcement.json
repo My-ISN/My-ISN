@@ -1,0 +1,20 @@
+{
+    "announcement": {
+        "title": "Pengumuman",
+        "fetch_error": "Gagal memuat pengumuman. Periksa koneksi internet Anda.",
+        "no_description": "Tidak ada deskripsi tambahan.",
+        "tap_to_view": "Ketuk untuk melihat detail pengumuman baru.",
+        "mark_all": "Tandai semua?",
+        "mark_all_tooltip": "Lihat semua",
+        "clear_seen_tooltip": "Hapus yang sudah dibaca",
+        "mark_all_desc": "Apakah Anda ingin menandai semua pengumuman sebagai sudah dibaca?",
+        "cancel": "Batal",
+        "yes": "Ya",
+        "delete_seen": "Hapus yang sudah dibaca?",
+        "delete_seen_desc": "Ini akan menghapus semua pengumuman yang sudah Anda baca dari daftar.",
+        "delete": "Hapus",
+        "no_announcements": "Tidak ada pengumuman baru",
+        "whats_new": "Apa saja yang baru:",
+        "no_description_available": "Tidak ada deskripsi tersedia"
+    }
+}

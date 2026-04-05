@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
-
 import '../widgets/side_drawer.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
@@ -144,9 +143,8 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   }
 
   String _getStatusText(BuildContext context, String status) {
-    final l10n = AppLocalizations.of(context);
-    if (status == '1') return l10n?.translate('helpdesk.open') ?? 'Open';
-    if (status == '2') return l10n?.translate('helpdesk.closed') ?? 'Closed';
+    if (status == '1') return 'helpdesk.open'.tr(context);
+    if (status == '2') return 'helpdesk.closed'.tr(context);
     return status;
   }
 
@@ -166,16 +164,15 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   }
 
   String _getPriorityText(BuildContext context, String priority) {
-    final l10n = AppLocalizations.of(context);
     switch (priority) {
       case '1':
-        return l10n?.translate('helpdesk.priority_low') ?? 'Low';
+        return 'helpdesk.priority_low'.tr(context);
       case '2':
-        return l10n?.translate('helpdesk.priority_medium') ?? 'Medium';
+        return 'helpdesk.priority_medium'.tr(context);
       case '3':
-        return l10n?.translate('helpdesk.priority_high') ?? 'High';
+        return 'helpdesk.priority_high'.tr(context);
       case '4':
-        return l10n?.translate('helpdesk.priority_critical') ?? 'Critical';
+        return 'helpdesk.priority_critical'.tr(context);
       default:
         return priority;
     }
@@ -193,8 +190,8 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
       if (data['status'] == true) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Ticket deleted successfully'),
+            SnackBar(
+              content: Text('helpdesk.success_delete'.tr(context)),
               backgroundColor: Colors.green,
             ),
           );
@@ -204,7 +201,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(data['message'] ?? 'Failed to delete ticket'),
+              content: Text(data['message'] ?? 'helpdesk.failed_delete'.tr(context)),
               backgroundColor: Colors.red,
             ),
           );
@@ -216,7 +213,6 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   }
 
   void _confirmDelete(Map<String, dynamic> ticket) {
-    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -246,13 +242,12 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              l10n?.translate('todo_list.delete_confirm_title') ??
-                  'Delete Confirmation',
+              'helpdesk.confirm_delete_title'.tr(context),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
-              'Are you sure you want to delete ticket ${ticket['ticket_code']}?',
+              'helpdesk.confirm_delete_msg'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
@@ -272,7 +267,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       ),
                     ),
                     child: Text(
-                      l10n?.translate('main.cancel') ?? 'Cancel',
+                      'main.cancel'.tr(context),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
@@ -295,7 +290,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       ),
                       elevation: 0,
                     ),
-                    child: Text(l10n?.translate('main.delete') ?? 'Delete'),
+                    child: Text('main.delete'.tr(context)),
                   ),
                 ),
               ],
@@ -309,11 +304,9 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'My ISN',
+        title: 'main.app_name'.tr(context),
         showBackButton: false,
         userData: widget.userData,
       ),
@@ -337,9 +330,9 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 Icons.support_agent_rounded,
                 color: Colors.white,
               ),
-              label: const Text(
-                'add helpdesk',
-                style: TextStyle(
+              label: Text(
+                'helpdesk.create_ticket'.tr(context),
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -400,8 +393,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          l10n?.translate('helpdesk.no_tickets') ??
-                              'No tickets',
+                          'helpdesk.no_tickets'.tr(context),
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 16,
@@ -514,7 +506,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Ticket Summary',
+                        'helpdesk.ticket_list'.tr(context),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -524,8 +516,8 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'General accumulation',
-                        style: TextStyle(
+                        'todo_list.general_accumulation'.tr(context),
+                        style: const TextStyle(
                           color: Color(0xFF7E57C2),
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
@@ -536,14 +528,14 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Color(0xFF7E57C2).withOpacity(0.1),
+                      color: const Color(0xFF7E57C2).withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       _isStatsExpanded
                           ? Icons.expand_less_rounded
                           : Icons.expand_more_rounded,
-                      color: Color(0xFF7E57C2),
+                      color: const Color(0xFF7E57C2),
                       size: 20,
                     ),
                   ),
@@ -571,25 +563,25 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _buildStatMiniRow(
-                                      'Critical',
+                                      'helpdesk.priority_critical'.tr(context),
                                       crit.toString(),
                                       Colors.purple,
                                     ),
                                     const SizedBox(height: 12),
                                     _buildStatMiniRow(
-                                      'High',
+                                      'helpdesk.priority_high'.tr(context),
                                       high.toString(),
                                       Colors.deepOrange,
                                     ),
                                     const SizedBox(height: 12),
                                     _buildStatMiniRow(
-                                      'Medium',
+                                      'helpdesk.priority_medium'.tr(context),
                                       med.toString(),
                                       Colors.orange,
                                     ),
                                     const SizedBox(height: 12),
                                     _buildStatMiniRow(
-                                      'Low',
+                                      'helpdesk.priority_low'.tr(context),
                                       low.toString(),
                                       Colors.blue,
                                     ),
@@ -611,8 +603,8 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                                       ).dividerColor.withOpacity(0.1),
                                       valueColor:
                                           const AlwaysStoppedAnimation<Color>(
-                                            Colors.green,
-                                          ),
+                                        Colors.green,
+                                      ),
                                       strokeCap: StrokeCap.round,
                                     ),
                                   ),
@@ -630,7 +622,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                                         ),
                                       ),
                                       Text(
-                                        'CLOSED',
+                                        'helpdesk.closed'.tr(context).toUpperCase(),
                                         style: TextStyle(
                                           fontSize: 8,
                                           fontWeight: FontWeight.bold,
@@ -687,15 +679,32 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
     );
   }
 
+  Widget _buildSearchBar() {
+    return TextField(
+      controller: _searchController,
+      onChanged: _runFilter,
+      decoration: InputDecoration(
+        hintText: 'todo_list.search_hint'.tr(context),
+        prefixIcon: const Icon(Icons.search),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        filled: true,
+        fillColor: Theme.of(context).cardColor,
+        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+      ),
+    );
+  }
+
   Widget _buildPaginationHeader() {
-    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
             Text(
-              l10n?.translate('main.show') ?? 'Show',
+              'main.show'.tr(context),
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -714,11 +723,10 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              l10n?.translate(
-                    'todo_list.total',
-                    args: {'count': _totalCount.toString()},
-                  ) ??
-                  'Total: $_totalCount',
+              'todo_list.total'.tr(
+                context,
+                args: {'count': _totalCount.toString()},
+              ),
               style: const TextStyle(
                 color: Color(0xFF7E57C2),
                 fontSize: 11,
@@ -772,9 +780,128 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
     );
   }
 
+  Widget _buildTicketCard(Map<String, dynamic> ticket) {
+    final status = ticket['ticket_status'].toString();
+    final priority = ticket['ticket_priority'].toString();
+    final statusColor = _getStatusColor(status);
+    final priorityColor = _getPriorityColor(priority);
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+      ),
+      child: InkWell(
+        onTap: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TicketDetailPage(
+                userData: widget.userData,
+                ticketId: ticket['ticket_id'].toString(),
+              ),
+            ),
+          );
+          if (result == true) _loadData();
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      ticket['ticket_code'] ?? '',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      _buildChip(_getStatusText(context, status), statusColor),
+                      const SizedBox(width: 8),
+                      _buildChip(_getPriorityText(context, priority), priorityColor),
+                      if (_hasPermission('mobile_helpdesk_delete')) ...[
+                        const SizedBox(width: 4),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                          onPressed: () => _confirmDelete(ticket),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                ticket['subject'] ?? '',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.calendar_today, size: 14, color: Theme.of(context).hintColor),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      ticket['created_at'] ?? '',
+                      style: TextStyle(color: Theme.of(context).hintColor, fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.person_outline, size: 14, color: Theme.of(context).hintColor),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      '${ticket['first_name'] ?? ''} ${ticket['last_name'] ?? ''}'.trim(),
+                      style: TextStyle(color: Theme.of(context).hintColor, fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
   Widget _buildPaginationFooter() {
-    final l10n = AppLocalizations.of(context);
-    final totalPages = (_totalCount / _selectedLimit).ceil();
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -801,25 +928,24 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
             ],
           ),
           child: Text(
-            l10n?.translate(
-                  'todo_list.page_x_of_y',
-                  args: {
-                    'current': _currentPage.toString(),
-                    'total': totalPages.toString(),
-                  },
-                ) ??
-                'Page $_currentPage of $totalPages',
+            'todo_list.page_x_of_y'.tr(
+              context,
+              args: {
+                'current': _currentPage.toString(),
+                'total': ((_totalCount / _selectedLimit).ceil()).toString(),
+              },
+            ),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 13,
+              fontSize: 14,
             ),
           ),
         ),
         const SizedBox(width: 16),
         _buildPageButton(
           icon: Icons.chevron_right_rounded,
-          onPressed: _currentPage < totalPages
+          onPressed: _currentPage < (_totalCount / _selectedLimit).ceil()
               ? () {
                   _fetchTickets(page: _currentPage + 1);
                 }
@@ -831,274 +957,20 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
 
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
     return Material(
-      color: onPressed == null
-          ? (Theme.of(context).brightness == Brightness.dark
-                ? Colors.white12
-                : Colors.grey[200])
-          : Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(12),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 40,
-          height: 40,
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.1)),
           ),
           child: Icon(
             icon,
-            color: onPressed == null
-                ? Colors.grey[400]
-                : const Color(0xFF7E57C2),
-            size: 24,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-      ),
-      child: TextField(
-        controller: _searchController,
-        onChanged: _runFilter,
-        decoration: InputDecoration(
-          hintText: 'Search subject or ticket code...',
-          hintStyle: TextStyle(
-            color: Theme.of(context).hintColor,
-            fontSize: 14,
-          ),
-          prefixIcon: const Icon(
-            Icons.search_rounded,
-            color: Color(0xFF7E57C2),
-          ),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(
-                    Icons.cancel_rounded,
-                    size: 20,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () {
-                    _searchController.clear();
-                    _runFilter('');
-                  },
-                )
-              : null,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 18),
-        ),
-        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-      ),
-    );
-  }
-
-  Widget _buildTicketCard(Map<String, dynamic> ticket) {
-    final statusColor = _getStatusColor(ticket['ticket_status'].toString());
-    final priorityColor = _getPriorityColor(
-      ticket['ticket_priority'].toString(),
-    );
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.1),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TicketDetailPage(
-                userData: widget.userData,
-                ticketId: ticket['ticket_id'].toString(),
-              ),
-            ),
-          ).then((_) => _fetchTickets());
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.withOpacity(0.1)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      _getStatusText(
-                        context,
-                        ticket['ticket_status'].toString(),
-                      ),
-                      style: TextStyle(
-                        color: statusColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    ticket['ticket_code'] ?? '',
-                    style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.color?.withOpacity(0.6),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (_hasPermission('mobile_helpdesk_delete'))
-                    PopupMenuButton<String>(
-                      onSelected: (value) {
-                        if (value == 'delete') _confirmDelete(ticket);
-                      },
-                      icon: Icon(
-                        Icons.more_horiz_rounded,
-                        size: 20,
-                        color: Colors.grey[400],
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.delete_outline_rounded,
-                                size: 20,
-                                color: Colors.red,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                AppLocalizations.of(
-                                      context,
-                                    )?.translate('main.delete') ??
-                                    'Delete',
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.1),
-                    child: Icon(
-                      Icons.person,
-                      size: 14,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${ticket['first_name'] ?? ''} ${ticket['last_name'] ?? ''}'
-                        .trim()
-                        .toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                ticket['subject'] ?? '',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.flag_outlined, size: 14, color: priorityColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    _getPriorityText(
-                      context,
-                      ticket['ticket_priority'].toString(),
-                    ),
-                    style: TextStyle(
-                      color: priorityColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              const Divider(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 14,
-                        color: Colors.grey[500],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        ticket['created_at'] ?? '',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 14,
-                    color: Colors.grey,
-                  ),
-                ],
-              ),
-            ],
+            size: 20,
+            color: onPressed != null ? const Color(0xFF7E57C2) : Colors.grey,
           ),
         ),
       ),
