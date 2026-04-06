@@ -12,6 +12,7 @@ import '../../personal_finance/personal_finance_page.dart';
 import '../../helpdesk/helpdesk_list_page.dart';
 import '../../ai_bot/ai_bot_page.dart';
 import '../../creative_idea/creative_idea_page.dart';
+import '../../intercom/intercom_page.dart';
 
 class DashboardQuickMenu extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -213,7 +214,7 @@ class DashboardQuickMenu extends StatelessWidget {
                 ),
               );
             },
-          ),
+            ),
           if (hasPermission('creative_idea'))
             _buildQuickMenuCard(
               context,
@@ -225,6 +226,21 @@ class DashboardQuickMenu extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => CreativeIdeaPage(userData: user),
+                  ),
+                );
+              },
+            ),
+          if (hasPermission('mobile_intercom_view'))
+            _buildQuickMenuCard(
+              context,
+              'dashboard.quick_menu_intercom'.tr(context),
+              Icons.volume_up_rounded,
+              const Color(0xFF7E57C2),
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const IntercomPage(),
                   ),
                 );
               },

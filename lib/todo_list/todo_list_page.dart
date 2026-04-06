@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../widgets/custom_app_bar.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
+import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../widgets/searchable_dropdown.dart';
+import 'widgets/todo_stats_card.dart';
+import 'widgets/todo_item_tile.dart';
+import 'widgets/todo_filter_bar.dart';
+import 'widgets/todo_pagination_footer.dart';
+
 
 class TodoListPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -249,7 +254,7 @@ class _TodoListPageState extends State<TodoListPage> {
     if (todo != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Tugas yang Anda cari: "${todo['description']}"'),
+          content: Text('todo_list.search_result_msg'.tr(context, args: {'%s': todo['description'] ?? ''})),
           backgroundColor: _primaryColor,
         ),
       );
@@ -1010,17 +1015,54 @@ class _TodoListPageState extends State<TodoListPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    _buildHeaderCard(context),
+                    TodoStatsCard(
+                      totalCount: _totalCount,
+                      completedCount: _completedCount,
+                      pendingCount: _pendingCount,
+                      completedTodayCount: _completedTodayCount,
+                      isExpanded: _isStatsExpanded,
+                      onToggleExpand: () => setState(() => _isStatsExpanded = !_isStatsExpanded),
+                      primaryColor: _primaryColor,
+                    ),
                     const SizedBox(height: 16),
                     if (_hasPermission('mobile_todo_team')) ...[
-                      _buildViewModePills(),
-                      if (_viewMode == 'team') ...[
-                        const SizedBox(height: 16),
-                        _buildEmployeeDropdown(),
-                      ],
+                      TodoFilterBar(
+                        viewMode: _viewMode,
+                        onViewModeChanged: (mode) {
+                          if (_viewMode == mode) return;
+                          setState(() {
+                            _viewMode = mode;
+                            _currentPage = 1;
+                            _todos = [];
+                            _allTodos = [];
+                          });
+
+                          if (mode == 'team') {
+                            if (_selectedEmployeeId != null) {
+                              _fetchTodos();
+                            } else {
+                              setState(() => _isLoading = false);
+                            }
+                          } else {
+                            _fetchTodos();
+                          }
+                        },
+                        employees: _employees,
+                        selectedEmployeeId: _selectedEmployeeId,
+                        onEmployeeSelected: (val) {
+                          if (val.isNotEmpty) {
+                            setState(() {
+                              _selectedEmployeeId = val;
+                              _currentPage = 1;
+                            });
+                            _fetchTodos();
+                          }
+                        },
+                        isEmployeesLoading: _isEmployeesLoading,
+                        primaryColor: _primaryColor,
+                      ),
                       const SizedBox(height: 24),
                     ] else ...[
-                      // If no permission, ensure we are in personal mode
                       const SizedBox(height: 8),
                     ],
                   ],
@@ -1067,18 +1109,33 @@ class _TodoListPageState extends State<TodoListPage> {
                     final todo = _todos[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildTodoItem(context, todo),
+                      child: TodoItemTile(
+                        todo: todo,
+                        isCompleted: (todo['is_done'] == '1' || todo['is_done'] == 1 || todo['is_done'] == true),
+                        onToggle: () => _toggleTodo(todo),
+                        onEdit: () => _showEditTodoDialog(todo),
+                        onDelete: () => _confirmDelete(todo),
+                        onMove: () => _showMoveTodoDialog(todo),
+                        hasPermissionDelete: _hasPermission('mobile_todo_delete'),
+                        hasPermissionTeam: _hasPermission('mobile_todo_team'),
+                        primaryColor: _primaryColor,
+                      ),
                     );
                   }, childCount: _todos.length),
                 ),
               ),
-            if (_totalCount > _selectedLimit)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildPaginationFooter(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: TodoPaginationFooter(
+                  currentPage: _currentPage,
+                  totalCount: _totalCount,
+                  selectedLimit: _selectedLimit,
+                  onPageChanged: (page) => _fetchTodos(page: page),
+                  primaryColor: _primaryColor,
                 ),
               ),
+            ),
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
@@ -1183,550 +1240,6 @@ class _TodoListPageState extends State<TodoListPage> {
     );
   }
 
-  Widget _buildPaginationFooter() {
-    final totalPages = (_totalCount / _selectedLimit).ceil();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildPageButton(
-          icon: Icons.chevron_left_rounded,
-          onPressed: _currentPage > 1
-              ? () {
-                  _fetchTodos(page: _currentPage - 1);
-                }
-              : null,
-        ),
-        const SizedBox(width: 16),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: _primaryColor,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: _primaryColor.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text(
-            'todo_list.page_x_of_y'.tr(
-              context,
-              args: {
-                'current': _currentPage.toString(),
-                'total': totalPages.toString(),
-              },
-            ),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        _buildPageButton(
-          icon: Icons.chevron_right_rounded,
-          onPressed: _currentPage < totalPages
-              ? () {
-                  _fetchTodos(page: _currentPage + 1);
-                }
-              : null,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return Material(
-      color: onPressed == null
-          ? (isDark ? Colors.white12 : Colors.grey[200])
-          : Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.1),
-            ),
-          ),
-          child: Icon(
-            icon,
-            color: onPressed == null
-                ? (isDark ? Colors.white24 : Colors.grey[400])
-                : _primaryColor,
-            size: 24,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderCard(BuildContext context) {
-    double progress = _totalCount > 0 ? (_completedCount / _totalCount) : 0;
-    if (progress > 1.0) progress = 1.0;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: _primaryColor.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: () => setState(() => _isStatsExpanded = !_isStatsExpanded),
-            borderRadius: BorderRadius.circular(24),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'todo_list.stats_title'.tr(context),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'todo_list.general_accumulation'.tr(context),
-                        style: TextStyle(
-                          color: _primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: _primaryColor.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _isStatsExpanded
-                          ? Icons.expand_less_rounded
-                          : Icons.expand_more_rounded,
-                      color: _primaryColor,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            child: _isStatsExpanded
-                ? Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildStatMiniRow(
-                                'main.total'.tr(context),
-                                _totalCount.toString(),
-                                Colors.blue,
-                              ),
-                              const SizedBox(height: 12),
-                              _buildStatMiniRow(
-                                'todo_list.completed_today'.tr(context),
-                                _completedTodayCount.toString(),
-                                Colors.purple,
-                              ),
-                              const SizedBox(height: 12),
-                              _buildStatMiniRow(
-                                'todo_list.complete'.tr(context),
-                                _completedCount.toString(),
-                                Colors.green,
-                              ),
-                              const SizedBox(height: 12),
-                              _buildStatMiniRow(
-                                'todo_list.pending'.tr(context),
-                                _pendingCount.toString(),
-                                Colors.orange,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 90,
-                              height: 90,
-                              child: CircularProgressIndicator(
-                                value: progress,
-                                strokeWidth: 10,
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).dividerColor.withOpacity(0.1),
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  _primaryColor,
-                                ),
-                                strokeCap: StrokeCap.round,
-                              ),
-                            ),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '${(progress * 100).toInt()}%',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                Text(
-                                  'todo_list.completed'
-                                      .tr(context)
-                                      .toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatMiniRow(String label, String value, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAgeBadge(String createdAt, bool isCompleted) {
-    try {
-      final createdDate = DateTime.parse(createdAt);
-      final now = DateTime.now();
-      final difference = now.difference(createdDate);
-
-      final int minutes = difference.inMinutes;
-      final int hours = difference.inHours;
-      final int days = difference.inDays;
-
-      Color badgeColor;
-      String label;
-
-      if (isCompleted) {
-        badgeColor = Colors.grey;
-      } else {
-        if (days < 1) {
-          badgeColor = Colors.green;
-        } else if (days < 3) {
-          badgeColor = Colors.orange;
-        } else {
-          badgeColor = Colors.red;
-        }
-      }
-
-      if (difference.inSeconds < 60) {
-        label = 'time.just_now'.tr(context);
-      } else if (minutes < 60) {
-        String unitKey = minutes == 1 ? 'time.minute' : 'time.minutes';
-        String unit = unitKey.tr(context);
-        if (unit == unitKey) unit = 'time.minute'.tr(context);
-        label = '$minutes $unit ${'time.ago'.tr(context)}';
-      } else if (hours < 24) {
-        String unitKey = hours == 1 ? 'time.hour' : 'time.hours';
-        String unit = unitKey.tr(context);
-        if (unit == unitKey) unit = 'time.hour'.tr(context);
-        label = '$hours $unit ${'time.ago'.tr(context)}';
-      } else if (days < 30) {
-        String unitKey = days == 1 ? 'time.day' : 'time.days';
-        String unit = unitKey.tr(context);
-        if (unit == unitKey) unit = 'time.day'.tr(context);
-        label = '$days $unit ${'time.ago'.tr(context)}';
-      } else {
-        final months = (days / 30).floor();
-        String unitKey = months == 1 ? 'time.month' : 'time.months';
-        String unit = unitKey.tr(context);
-        if (unit == unitKey) unit = 'time.month'.tr(context);
-        label = '$months $unit ${'time.ago'.tr(context)}';
-      }
-
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-        decoration: BoxDecoration(
-          color: badgeColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: badgeColor.withOpacity(0.2)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: badgeColor,
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    } catch (e) {
-      return const SizedBox.shrink();
-    }
-  }
-
-  Widget _buildTodoItem(BuildContext context, dynamic todo) {
-    final bool isCompleted = (todo['is_done'] == '1' || todo['is_done'] == 1);
-    final String description = todo['description'] ?? '-';
-    final String date = todo['created_at'] ?? '-';
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Theme.of(context).brightness == Brightness.dark
-            ? Border.all(color: Colors.white24)
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onLongPress: () {
-              if (_hasPermission('mobile_todo_delete')) {
-                _confirmDelete(todo);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Anda tidak memiliki izin untuk menghapus tugas',
-                    ),
-                  ),
-                );
-              }
-            },
-            onTap: () => _toggleTodo(todo),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => _toggleTodo(todo),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted ? Colors.green : Colors.transparent,
-                        border: Border.all(
-                          color: isCompleted ? Colors.green : Colors.grey[400]!,
-                          width: 2,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.check,
-                        size: 16,
-                        color: isCompleted ? Colors.white : Colors.transparent,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          description,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            decoration: isCompleted
-                                ? TextDecoration.lineThrough
-                                : null,
-                            color: isCompleted
-                                ? Colors.grey
-                                : Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today,
-                              size: 10,
-                              color: Colors.grey[500],
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                date,
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 11,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            _buildAgeBadge(date, isCompleted),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') _showEditTodoDialog(todo);
-                      if (value == 'delete') _confirmDelete(todo);
-                      if (value == 'toggle') _toggleTodo(todo);
-                      if (value == 'move') _showMoveTodoDialog(todo);
-                    },
-                    icon: Icon(
-                      Icons.more_horiz_rounded,
-                      size: 20,
-                      color: Colors.grey[400],
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.edit_outlined,
-                              size: 20,
-                              color: _primaryColor,
-                            ),
-                            const SizedBox(width: 12),
-                            Text('todo_list.edit_task'.tr(context)),
-                          ],
-                        ),
-                      ),
-                      if (_hasPermission('mobile_todo_team'))
-                        PopupMenuItem(
-                          value: 'move',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.unarchive_outlined,
-                                size: 20,
-                                color: _primaryColor,
-                              ),
-                              const SizedBox(width: 12),
-                              Text('todo_list.move_task'.tr(context)),
-                            ],
-                          ),
-                        ),
-                      PopupMenuItem(
-                        value: 'toggle',
-                        child: Row(
-                          children: [
-                            Icon(
-                              isCompleted
-                                  ? Icons.undo_rounded
-                                  : Icons.check_circle_rounded,
-                              size: 20,
-                              color: _primaryColor,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              isCompleted
-                                  ? 'todo_list.pending'.tr(context)
-                                  : 'todo_list.completed'.tr(context),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (_hasPermission('mobile_todo_delete'))
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.delete_outline_rounded,
-                                size: 20,
-                                color: Colors.red,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'main.delete'.tr(context),
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _confirmDelete(dynamic todo) {
     showModalBottomSheet(
       context: context,
@@ -1813,164 +1326,6 @@ class _TodoListPageState extends State<TodoListPage> {
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildViewModePills() {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final int selectedIndex = _viewMode == 'personal' ? 0 : 1;
-
-    return Container(
-      height: 54,
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Sliding Background
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOutBack,
-            alignment: Alignment(selectedIndex == 0 ? -1 : 1, 0),
-            child: FractionallySizedBox(
-              widthFactor: 0.5,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: _primaryColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _primaryColor.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Labels
-          Row(
-            children: [
-              Expanded(
-                child: _buildPillLabel(
-                  'personal',
-                  'todo_list.personal'.tr(context),
-                  _viewMode == 'personal',
-                ),
-              ),
-              Expanded(
-                child: _buildPillLabel(
-                  'team',
-                  'todo_list.team'.tr(context),
-                  _viewMode == 'team',
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPillLabel(String mode, String label, bool isActive) {
-    return GestureDetector(
-      onTap: () {
-        if (_viewMode == mode) return;
-        setState(() {
-          _viewMode = mode;
-          _currentPage = 1;
-          _todos = [];
-          _allTodos = [];
-        });
-
-        if (mode == 'team') {
-          // Data is already being fetched in background since initState
-          if (_selectedEmployeeId != null) {
-            _fetchTodos();
-          } else {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        } else {
-          _fetchTodos();
-        }
-      },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedDefaultTextStyle(
-        duration: const Duration(milliseconds: 300),
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.grey[600],
-          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          fontSize: 15,
-        ),
-        child: Center(child: Text(label)),
-      ),
-    );
-  }
-
-  Widget _buildEmployeeDropdown() {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Find the current selected employee name for the dropdown value
-    String selectedName = '';
-    if (_selectedEmployeeId != null) {
-      final emp = _employees.firstWhere(
-        (e) => e['user_id'].toString() == _selectedEmployeeId,
-        orElse: () => null,
-      );
-      if (emp != null) {
-        selectedName = '${emp['first_name']} ${emp['last_name'] ?? ''}'.trim();
-      }
-    }
-
-    // Convert employees list to searchable options format
-    final List<Map<String, String>> employeeOptions = _employees.map((emp) {
-      return {
-        'id': emp['user_id'].toString(),
-        'name': '${emp['first_name']} ${emp['last_name'] ?? ''}'.trim(),
-      };
-    }).toList();
-
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: SearchableDropdown(
-        label: 'todo_list.select_employee'.tr(context),
-        value: selectedName,
-        options: employeeOptions,
-        icon: Icons.person_search_rounded,
-        placeholder: _isEmployeesLoading
-            ? 'profile.loading'.tr(context)
-            : 'employees.search_hint'.tr(context),
-        required: false,
-        onSelected: (val) {
-          if (val.isNotEmpty) {
-            setState(() {
-              _selectedEmployeeId = val;
-              _currentPage = 1;
-            });
-            _fetchTodos();
-          }
-        },
       ),
     );
   }

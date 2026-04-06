@@ -50,10 +50,15 @@
         "ago": "lalu",
         "just_now": "baru saja",
         "minute": "menit",
+        "minutes": "menit",
         "hour": "jam",
+        "hours": "jam",
         "day": "hari",
+        "days": "hari",
         "month": "bulan",
-        "year": "tahun"
+        "months": "bulan",
+        "year": "tahun",
+        "years": "tahun"
     },
     "side_drawer": {
         "work": "Operasional",

@@ -33,6 +33,7 @@ class AppLocalizations {
       'todo_list',
       'finance',
       'helpdesk',
+      'intercom',
     ];
 
     _localizedStrings = {};

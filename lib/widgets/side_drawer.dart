@@ -14,6 +14,7 @@ import '../helpdesk/helpdesk_list_page.dart';
 import '../ai_bot/ai_bot_page.dart';
 import '../creative_idea/creative_idea_page.dart';
 import '../personal_finance/personal_finance_page.dart';
+import '../intercom/intercom_page.dart';
 import '../localization/app_localizations.dart';
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -378,6 +379,7 @@ class _SideDrawerState extends State<SideDrawer> {
                 if (_hasCategoryPermission([
                   'mobile_helpdesk_view',
                   'creative_idea',
+                  'mobile_intercom_view',
                 ]))
                   _buildExpandableSection(
                     context,
@@ -440,6 +442,23 @@ class _SideDrawerState extends State<SideDrawer> {
                               builder: (context) => CreativeIdeaPage(
                                 userData: widget.userData,
                               ),
+                            ),
+                          );
+                        },
+                      ),
+                    if (_hasPermission('mobile_intercom_view'))
+                      _buildMenuItem(
+                        context,
+                        icon: Icons.volume_up_outlined,
+                        title: 'dashboard.quick_menu_intercom'.tr(context),
+                        isActive: widget.activePage == 'intercom',
+                        padding: const EdgeInsets.only(left: 32, right: 12),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const IntercomPage(),
                             ),
                           );
                         },

@@ -13,7 +13,6 @@ import '../widgets/period_filter_widget.dart';
 
 import 'add_personal_finance_page.dart';
 
-
 // ... (rest of imports)
 
 class PersonalFinancePage extends StatefulWidget {
@@ -154,7 +153,8 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   bool _hasPermission(String resource) {
     if (widget.userData == null) return false;
     if (widget.userData['role_access'] == '1' ||
-        widget.userData['role_resources'] == 'all') return true;
+        widget.userData['role_resources'] == 'all')
+      return true;
     final String resources = widget.userData['role_resources'] ?? '';
     final List<String> resourceList = resources.split(',');
     return resourceList.contains(resource);
@@ -562,25 +562,27 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       body: !_hasPermission('mobile_personal_finance_view')
           ? _buildUnauthorizedView()
           : isLoading
-              ? _buildShimmerLoading()
-              : Column(
-                  children: [
-                    _buildSummaryCard(),
-                    _buildTabBar(),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          _buildOverviewTab(),
-                          _buildTransactionTab('income'),
-                          _buildTransactionTab('expense'),
-                          _buildReportTab(),
-                        ],
-                      ),
-                    ),
-                  ],
+          ? _buildShimmerLoading()
+          : Column(
+              children: [
+                _buildSummaryCard(),
+                _buildTabBar(),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildOverviewTab(),
+                      _buildTransactionTab('income'),
+                      _buildTransactionTab('expense'),
+                      _buildReportTab(),
+                    ],
+                  ),
                 ),
-      floatingActionButton: (!_hasPermission('mobile_personal_finance_add') || _tabController.index == 3)
+              ],
+            ),
+      floatingActionButton:
+          (!_hasPermission('mobile_personal_finance_add') ||
+              _tabController.index == 3)
           ? null
           : FloatingActionButton.extended(
               onPressed: () async {
@@ -672,27 +674,27 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-          Row(
-            children: [
-              PeriodFilterButton(
-                selectedMonth: _selectedMonth ?? '01',
-                selectedYear: _selectedYear ?? DateTime.now().year.toString(),
-                months: _months,
-                onTap: _showMonthYearPicker,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildTrendChartSection(),
-          const SizedBox(height: 24),
-          _buildCategoryChartSection(),
-          const SizedBox(height: 24),
-          _buildBudgetSection(),
-        ],
+            Row(
+              children: [
+                PeriodFilterButton(
+                  selectedMonth: _selectedMonth ?? '01',
+                  selectedYear: _selectedYear ?? DateTime.now().year.toString(),
+                  months: _months,
+                  onTap: _showMonthYearPicker,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildTrendChartSection(),
+            const SizedBox(height: 24),
+            _buildCategoryChartSection(),
+            const SizedBox(height: 24),
+            _buildBudgetSection(),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildTransactionTab(String type) {
     final bool isIncome = type == 'income';
@@ -708,7 +710,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            if (_isTransactionsLoading && (transactions.isEmpty || (isIncome ? _incomeCurrentPage : _expenseCurrentPage) == 1))
+            if (_isTransactionsLoading &&
+                (transactions.isEmpty ||
+                    (isIncome ? _incomeCurrentPage : _expenseCurrentPage) == 1))
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -716,41 +720,44 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                 ),
               )
             else ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: _buildTransactionFilters(type),
-              ),
-            ),
-            if (transactions.isEmpty)
-              SliverFillRemaining(hasScrollBody: false, child: _buildEmptyState())
-            else
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final transaction = transactions[index];
-                    return FinanceTransactionItem(
-                      transaction: transaction,
-                      onTap: () => _showTransactionDetail(transaction, type),
-                    );
-                  }, childCount: transactions.length),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: _buildTransactionFilters(type),
                 ),
               ),
-          ],
-          if (totalCount > _selectedLimit && !_isTransactionsLoading)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 32),
-                child: _buildPagination(type),
+              if (transactions.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _buildEmptyState(),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final transaction = transactions[index];
+                      return FinanceTransactionItem(
+                        transaction: transaction,
+                        onTap: () => _showTransactionDetail(transaction, type),
+                      );
+                    }, childCount: transactions.length),
+                  ),
+                ),
+            ],
+            if (totalCount > _selectedLimit && !_isTransactionsLoading)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 32),
+                  child: _buildPagination(type),
+                ),
               ),
-            ),
-          const SliverToBoxAdapter(child: SizedBox(height: 80)),
-        ],
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<void> _fetchTransactions({String? type}) async {
     final String transactionType =
@@ -1028,10 +1035,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           const SizedBox(height: 24),
           const Text(
             'Akses Terbatas',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Padding(
@@ -1195,15 +1199,15 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : data == null && isReportTab
-                        ? const SizedBox(height: 24) // Placeholder without shimmer
-                        : Text(
-                            'IDR ${currencyFormat.format(balance).replaceAll('Rp', '').trim()}',
-                            style: TextStyle(
-                              fontSize: isSummaryExpanded ? 24 : 20,
-                              fontWeight: FontWeight.w900,
-                              color: _primaryColor,
-                            ),
-                          ),
+                    ? const SizedBox(height: 24) // Placeholder without shimmer
+                    : Text(
+                        'IDR ${currencyFormat.format(balance).replaceAll('Rp', '').trim()}',
+                        style: TextStyle(
+                          fontSize: isSummaryExpanded ? 24 : 20,
+                          fontWeight: FontWeight.w900,
+                          color: _primaryColor,
+                        ),
+                      ),
                 if (isSummaryExpanded) ...[
                   const SizedBox(height: 16),
                   const Divider(),
@@ -1387,7 +1391,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('personal_finance.six_month_trend'.tr(context)),
+          _buildSectionHeader(
+            '${'personal_finance.six_month_trend'.tr(context)}',
+          ),
           const SizedBox(height: 24),
           SizedBox(
             height: 180,
@@ -1436,7 +1442,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                       return FlSpot(
                         e.key.toDouble(),
                         (double.tryParse(e.value['income'].toString()) ?? 0) /
-                            1000000,
+                            1000,
                       );
                     }).toList(),
                     isCurved: true,
@@ -1453,7 +1459,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                       return FlSpot(
                         e.key.toDouble(),
                         (double.tryParse(e.value['expense'].toString()) ?? 0) /
-                            1000000,
+                            1000,
                       );
                     }).toList(),
                     isCurved: true,
@@ -2178,9 +2184,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
 
   Widget _buildReportTab() {
     if (_isReportLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (reportData == null) {
@@ -2224,39 +2228,39 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: Colors.grey.withOpacity(0.05)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildYearlyCategorySegment(
+                    'personal_finance.income_by_category'.tr(context),
+                    reportData?['income_by_cat'] ?? [],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Divider(height: 1, thickness: 0.5),
+                  ),
+                  _buildYearlyCategorySegment(
+                    'personal_finance.expense_by_category'.tr(context),
+                    reportData?['expense_by_cat'] ?? [],
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildYearlyCategorySegment(
-                  'personal_finance.income_by_category'.tr(context),
-                  reportData?['income_by_cat'] ?? [],
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Divider(height: 1, thickness: 0.5),
-                ),
-                _buildYearlyCategorySegment(
-                  'personal_finance.expense_by_category'.tr(context),
-                  reportData?['expense_by_cat'] ?? [],
-                ),
-              ],
-            ),
-          ),
-          _buildAnnualSummaryTable(),
-          const SizedBox(height: 100),
-        ],
+            _buildAnnualSummaryTable(),
+            const SizedBox(height: 100),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildYearPicker() {
     final int currentYear = DateTime.now().year;
@@ -2332,7 +2336,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('personal_finance.monthly_trend'.tr(context)),
+          _buildSectionHeader(
+            '${'personal_finance.monthly_trend'.tr(context)} (Ribu)',
+          ),
           const SizedBox(height: 24),
           SizedBox(
             height: 180,
@@ -2381,7 +2387,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                       return FlSpot(
                         e.key.toDouble(),
                         (double.tryParse(e.value['income'].toString()) ?? 0) /
-                            1000000,
+                            1000,
                       );
                     }).toList(),
                     isCurved: true,
@@ -2398,7 +2404,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                       return FlSpot(
                         e.key.toDouble(),
                         (double.tryParse(e.value['expense'].toString()) ?? 0) /
-                            1000000,
+                            1000,
                       );
                     }).toList(),
                     isCurved: true,
@@ -2762,8 +2768,6 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       ),
     );
   }
-
-
 
   Widget _buildShimmerLoading() {
     return const Center(child: CircularProgressIndicator());

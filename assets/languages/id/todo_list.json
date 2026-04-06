@@ -42,6 +42,9 @@
         "move_confirm_title": "Konfirmasi Pemindahan",
         "move_confirm_desc": "Apakah Anda yakin ingin memindahkan tugas ini ke %s?",
         "move_success": "Tugas berhasil dipindahkan",
-        "move_failed": "Gagal memindahkan tugas"
+        "move_failed": "Gagal memindahkan tugas",
+        "search_result_msg": "Tugas yang Anda cari: \"%s\"",
+        "no_permission_delete": "Anda tidak memiliki izin untuk menghapus tugas",
+        "no_permission_add": "Anda tidak memiliki izin untuk menambah tugas"
     }
 }

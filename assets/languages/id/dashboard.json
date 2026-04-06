@@ -71,6 +71,7 @@
         "helpdesk": "Helpdesk",
         "quick_menu_helpdesk": "Helpdesk",
         "quick_menu_ai_bot": "Bot AI",
-        "quick_menu_creative_idea": "Ide Kreatif"
+        "quick_menu_creative_idea": "Ide Kreatif",
+        "quick_menu_intercom": "Intercom Rumah"
     }
 }

@@ -71,6 +71,7 @@
         "helpdesk": "Helpdesk",
         "quick_menu_helpdesk": "Helpdesk",
         "quick_menu_ai_bot": "AI Bot",
-        "quick_menu_creative_idea": "Creative Idea"
+        "quick_menu_creative_idea": "Creative Idea",
+        "quick_menu_intercom": "Home Intercom"
     }
 }

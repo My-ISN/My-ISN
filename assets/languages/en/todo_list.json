@@ -42,6 +42,9 @@
         "move_confirm_title": "Confirm Transfer",
         "move_confirm_desc": "Are you sure you want to move this task to %s?",
         "move_success": "Task moved successfully",
-        "move_failed": "Failed to move task"
+        "move_failed": "Failed to move task",
+        "search_result_msg": "Task you are looking for: \"%s\"",
+        "no_permission_delete": "You do not have permission to delete tasks",
+        "no_permission_add": "You do not have permission to add tasks"
     }
 }

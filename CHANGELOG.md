@@ -1,14 +1,15 @@
 # Changelog
 
-## [1.1.0] - 2026-04-03
+## [1.1.0] - 2026-04-06
 
 ### Added
 
+- **Modul Personal Finance**: Implementasi penuh manajemen keuangan pribadi dengan standardisasi desain premium, pendataan saldo, pemasukan, dan pengeluaran yang ter-lokalisasi (ID/EN) secara komprehensif.
+- **Modul Creative Idea**: Fitur penampung ide kreatif karyawan dengan antarmuka modern yang mendukung kolaborasi internal.
 - **Helpdesk — Modul Tiket Pengaduan**: Implementasi menu Helpdesk (`Icons.support_agent_outlined`) untuk pelaporan kendala teknis dan administrasi langsung dari aplikasi mobile.
-- **Asisten AI Cerdas (FoxBot)**: Implementasi asisten AI interaktif menggunakan **Google Gemini 1.5 Flash** untuk membantu menjawab pertanyaan seputar penyewaan laptop, stok, dan prosedur sewa secara real-time.
+- **Asisten AI Cerdas**: Implementasi asisten AI interaktif menggunakan **Google Gemini 1.5 Flash** untuk membantu menjawab pertanyaan seputar penyewaan laptop, stok, dan prosedur sewa secara real-time.
 - **Quick Action Pills**: Penambahan tombol aksi cepat di bagian atas keyboard Bot AI untuk pertanyaan umum (harga sewa, daftar laptop, cara sewa, dll) agar pengguna lebih mudah berinteraksi.
-- **Quick Menu — AI Bot & Creative Idea**: Penambahan akses cepat untuk menu **AI Bot** dan **Creative Idea** pada sidebar (status: *On Progress*).
-- **Worklog — Seleksi dari Todo List**: Fitur pembuatan laporan kerja (*Worklog*) kini mendukung pengambilan data langsung dari tugas yang sudah selesai pada hari tersebut melalui tombol **"Pilih dari Todo List"** (sebelumnya: "Pilih dari Jobdesk").
+- **Worklog — Seleksi dari Todo List**: Fitur pembuatan laporan kerja (*Worklog*) kini mendukung pengambilan data langsung dari tugas yang sudah selesai pada hari tersebut melalui tombol **"Pilih dari Todo List"**.
 - **Todo List — Mode Kolaborasi Tim**: Implementasi fitur peralihan antara tugas **Pribadi** dan **Tim** dengan efek animasi geser (*sliding animation*) yang modern.
 - **Todo List — Delegasi Tugas (Move Task)**: Fitur untuk memindahkan atau mendelegasikan tugas ke karyawan lain melalui menu aksi cepat, lengkap dengan antarmuka konfirmasi *Premium Bottom Sheet*.
 - **Todo List — Kontrol Izin Akses**: Integrasi sistem izin tingkat lanjut (`mobile_todo_team`) yang memungkinkan admin mengontrol akses fitur tim secara terpusat dari Dashboard ERP.
@@ -16,6 +17,8 @@
 
 ### Changed
 
+- **Optimisasi — Modularisasi Todo List**: Refaktorisasi masif file monolitik `todo_list_page.dart` menjadi komponen widget modular (`Stats`, `Tile`, `Filter`, `Pagination`) guna meningkatkan performa pemuatan data dan kemudahan pemeliharaan kode.
+- **Optimisasi — UI Responsiveness**: Perbaikan simulasi layout pada bar filter dan navigasi menggunakan `Flexible` dan `Expanded` untuk mencegah *RenderFlex overflow* pada layar perangkat yang lebih kecil.
 - **UI — Modernisasi Masif (Visi 2026)**: Desain ulang lebih dari 50% antarmuka aplikasi dengan standar premium untuk pengalaman pengguna yang lebih intuitif dan elit.
 - **UI — Full Theme Integration (Login & Register)**: Integrasi penuh sistem tema (*Light/Dark Mode*) pada halaman modul otentikasi. Menghapus seluruh warna *hardcoded* guna memastikan kenyamanan visual yang konsisten.
 - **UI — Helpdesk Interaction Redesign**: Area input balasan tiket kini menggunakan desain premium yang identik dengan antarmuka Chat Bot AI, lengkap dengan *floating action buttons* dan *rounded containers*.
@@ -34,7 +37,7 @@
 - **UI — CustomBottomNav Stability**: Perbaikan fatal error `setState() called when widget tree was locked` saat transisi navigasi antar halaman utama.
 - **UI — LoginPage Syntax Fix**: Perbaikan kesalahan struktur *widget tree* (kurung tutup) pada modul branding yang menyebabkan kegagalan build.
 - **UI — Layout Overflow Fix**: Perbaikan error `RenderFlex overflow` pada bar navigasi menggunakan `LayoutBuilder` untuk kalkulasi lebar yang presisi.
-- **Payroll Navigation**: Perbaikan tautan menu Payroll di sidebar yang sebelumnya tidak merespon saat diklik.g sebelumnya tidak merespon saat diklik.
+- **Payroll Navigation**: Perbaikan tautan menu Payroll di sidebar yang sebelumnya tidak merespon saat diklik.
 
 ---
 
