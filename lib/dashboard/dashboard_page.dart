@@ -18,11 +18,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../rent_plan/client/rent_plan_page.dart' as client_rp;
-import 'widgets/dashboard_profile_header.dart';
-import 'widgets/dashboard_welcome_card.dart';
-import 'widgets/dashboard_stats_grid.dart';
-import 'widgets/dashboard_quick_menu.dart';
-import 'widgets/customer_dashboard_content.dart';
+import 'staff/widgets/staff_dashboard_content.dart';
+import 'client/widgets/customer_dashboard_content.dart';
 import '../services/heartbeat_service.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -628,37 +625,12 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       return _buildCustomerContent();
     }
 
-    final attendance = _dashboardData['attendance'];
-
-    return RefreshIndicator(
+    return StaffDashboardContent(
+      userData: widget.userData,
+      dashboardData: _dashboardData,
       onRefresh: _fetchDashboardData,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            DashboardProfileHeader(
-              user: user,
-              onTap: () => setState(() => _currentIndex = (hasPayroll ? 3 : 2)),
-            ),
-            const SizedBox(height: 24),
-            DashboardWelcomeCard(
-              user: user,
-              stats: _dashboardData['stats'],
-              attendance: attendance,
-            ),
-            const SizedBox(height: 24),
-            DashboardStatsGrid(stats: _dashboardData['stats']),
-            const SizedBox(height: 32),
-            DashboardQuickMenu(
-              userData: widget.userData,
-              dashboardData: _dashboardData,
-              hasPermission: _hasPermission,
-            ),
-          ],
-        ),
-      ),
+      onProfileTap: () => setState(() => _currentIndex = (hasPayroll ? 3 : 2)),
+      hasPermission: _hasPermission,
     );
   }
 

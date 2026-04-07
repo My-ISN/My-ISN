@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../constants.dart';
+import '../../../constants.dart';
 
-import '../../localization/app_localizations.dart';
-import '../../widgets/connectivity_wrapper.dart';
+import '../../../localization/app_localizations.dart';
+import '../../../widgets/connectivity_wrapper.dart';
 import 'package:intl/intl.dart';
 
 class CustomerDashboardContent extends StatelessWidget {

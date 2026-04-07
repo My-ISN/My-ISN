@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../constants.dart';
+import '../../../constants.dart';
 
-import '../../localization/app_localizations.dart';
+import '../../../localization/app_localizations.dart';
 
 class DashboardProfileHeader extends StatelessWidget {
   final Map<String, dynamic> user;

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import '../../localization/app_localizations.dart';
-import '../../widgets/custom_app_bar.dart'; // For NotificationManager
-import '../../widgets/connectivity_wrapper.dart';
-import '../../rent_plan/staff/rent_plan_page.dart' as staff_rp;
-import '../../rent_plan/client/rent_plan_page.dart' as client_rp;
-import '../../todo_list/todo_list_page.dart';
-import '../../employees/employees_page.dart';
-import '../../work_log/work_log_page.dart';
-import '../../finance/finance_page.dart';
-import '../../personal_finance/personal_finance_page.dart';
-import '../../helpdesk/helpdesk_list_page.dart';
-import '../../ai_bot/ai_bot_page.dart';
-import '../../creative_idea/creative_idea_page.dart';
-import '../../intercom/intercom_page.dart';
+import '../../../localization/app_localizations.dart';
+import '../../../widgets/custom_app_bar.dart'; // For NotificationManager
+import '../../../widgets/connectivity_wrapper.dart';
+import '../../../rent_plan/staff/rent_plan_page.dart' as staff_rp;
+import '../../../rent_plan/client/rent_plan_page.dart' as client_rp;
+import '../../../todo_list/todo_list_page.dart';
+import '../../../employees/employees_page.dart';
+import '../../../work_log/work_log_page.dart';
+import '../../../finance/finance_page.dart';
+import '../../../personal_finance/personal_finance_page.dart';
+import '../../../helpdesk/helpdesk_list_page.dart';
+import '../../../ai_bot/ai_bot_page.dart';
+import '../../../creative_idea/creative_idea_page.dart';
+import '../../../intercom/intercom_page.dart';
 
 class DashboardQuickMenu extends StatelessWidget {
   final Map<String, dynamic> userData;
