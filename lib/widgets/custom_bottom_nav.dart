@@ -99,13 +99,14 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
             },
           ];
 
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         16,
         0,
         16,
-        20,
-      ), // Bottom margin for floating look
+        bottomPadding > 0 ? bottomPadding : 12,
+      ), // Dynamic bottom margin for floating look
       child: Container(
         height: 80, // Increased height
         padding: const EdgeInsets.symmetric(horizontal: 12),

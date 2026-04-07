@@ -498,38 +498,50 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                           width: 4,
                         ),
                       ),
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFFF3F6FF)
-                            : Theme.of(context).cardColor,
-                        backgroundImage: _image != null
-                            ? FileImage(_image!)
-                            : (widget.profileData['basic_info']?['profile_photo'] !=
+                      child: SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: ClipOval(
+                          child: _image != null
+                              ? Image.file(_image!, fit: BoxFit.cover)
+                              : (widget.profileData['basic_info']
+                                              ?['profile_photo'] !=
                                           null &&
-                                      widget
-                                          .profileData['basic_info']['profile_photo']
+                                      widget.profileData['basic_info']
+                                              ['profile_photo']
                                           .toString()
                                           .isNotEmpty
-                                  ? CachedNetworkImageProvider(
-                                      '${AppConstants.serverRoot}/public/uploads/users/thumb/${widget.profileData['basic_info']['profile_photo']}',
+                                  ? CachedNetworkImage(
+                                      imageUrl:
+                                          '${AppConstants.serverRoot}/uploads/users/thumb/${widget.profileData['basic_info']['profile_photo']}',
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Container(
+                                        color: Theme.of(context).brightness ==
+                                                Brightness.light
+                                            ? const Color(0xFFF3F6FF)
+                                            : Theme.of(context).cardColor,
+                                        child: const Icon(Icons.person_outline,
+                                            size: 40, color: Colors.grey),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Container(
+                                        color: Theme.of(context).brightness ==
+                                                Brightness.light
+                                            ? const Color(0xFFF3F6FF)
+                                            : Theme.of(context).cardColor,
+                                        child: const Icon(Icons.person_outline,
+                                            size: 40, color: Colors.grey),
+                                      ),
                                     )
-                                  : null),
-                        child:
-                            _image == null &&
-                                (widget.profileData['basic_info']?['profile_photo'] ==
-                                        null ||
-                                    widget
-                                        .profileData['basic_info']['profile_photo']
-                                        .toString()
-                                        .isEmpty)
-                            ? const Icon(
-                                Icons.person_outline,
-                                size: 40,
-                                color: Colors.grey,
-                              )
-                            : null,
+                                  : Container(
+                                      color: Theme.of(context).brightness ==
+                                              Brightness.light
+                                          ? const Color(0xFFF3F6FF)
+                                          : Theme.of(context).cardColor,
+                                      child: const Icon(Icons.person_outline,
+                                          size: 40, color: Colors.grey),
+                                    )),
+                        ),
                       ),
                     ),
                     Positioned(

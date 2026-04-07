@@ -175,7 +175,7 @@ class DashboardQuickMenu extends StatelessWidget {
             _buildQuickMenuCard(
               context,
               'personal_finance.my_wallet'.tr(context),
-              Icons.savings_rounded,
+              Icons.payments_rounded,
               const Color(0xFF7E57C2),
               () {
                 Navigator.push(

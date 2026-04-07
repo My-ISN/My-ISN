@@ -375,23 +375,41 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage>
               ),
               shape: BoxShape.circle,
             ),
-            child: CircleAvatar(
-              radius: 50,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              backgroundImage:
-                  (info['profile_photo'] != null &&
-                      !info['profile_photo'].contains('default_profile'))
-                  ? CachedNetworkImageProvider(info['profile_photo'])
-                  : null,
-              child:
-                  (info['profile_photo'] == null ||
-                      info['profile_photo'].contains('default_profile'))
-                  ? Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Colors.grey.withValues(alpha: 0.2),
-                    )
-                  : null,
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: ClipOval(
+                child: (info['profile_photo'] != null &&
+                        !info['profile_photo'].contains('default_profile'))
+                    ? CachedNetworkImage(
+                        imageUrl: info['profile_photo'],
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          child: Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          child: Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey.withValues(alpha: 0.2),
+                          ),
+                        ),
+                      )
+                    : Container(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Colors.grey.withValues(alpha: 0.2),
+                        ),
+                      ),
+              ),
             ),
           ),
           const SizedBox(height: 16),

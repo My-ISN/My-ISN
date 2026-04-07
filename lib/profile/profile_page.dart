@@ -195,32 +195,55 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   shape: BoxShape.circle,
                 ),
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  backgroundImage:
-                      (basic['profile_photo'] != null &&
-                          basic['profile_photo'].toString().isNotEmpty)
-                        ? CachedNetworkImageProvider(
-                            '${AppConstants.serverRoot}/public/uploads/users/thumb/${basic['profile_photo']}',
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: ClipOval(
+                    child: (basic['profile_photo'] != null &&
+                            basic['profile_photo'].toString().isNotEmpty)
+                        ? CachedNetworkImage(
+                            imageUrl:
+                                '${AppConstants.serverRoot}/uploads/users/thumb/${basic['profile_photo']}',
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              child: const Icon(Icons.person,
+                                  size: 50, color: Colors.grey),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              child: const Icon(Icons.person,
+                                  size: 50, color: Colors.grey),
+                            ),
                           )
                         : (widget.userData['profile_photo'] != null &&
-                              widget.userData['profile_photo']
-                                  .toString()
-                                  .isNotEmpty)
-                        ? CachedNetworkImageProvider(
-                            '${AppConstants.serverRoot}/uploads/users/thumb/${widget.userData['profile_photo']}',
-                          )
-                      : null,
-                  child:
-                      (basic['profile_photo'] == null ||
-                              basic['profile_photo'].toString().isEmpty) &&
-                          (widget.userData['profile_photo'] == null ||
-                              widget.userData['profile_photo']
-                                  .toString()
-                                  .isEmpty)
-                      ? const Icon(Icons.person, size: 50, color: Colors.grey)
-                      : null,
+                                widget.userData['profile_photo']
+                                    .toString()
+                                    .isNotEmpty)
+                            ? CachedNetworkImage(
+                                imageUrl:
+                                    '${AppConstants.serverRoot}/uploads/users/thumb/${widget.userData['profile_photo']}',
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  child: const Icon(Icons.person,
+                                      size: 50, color: Colors.grey),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  child: const Icon(Icons.person,
+                                      size: 50, color: Colors.grey),
+                                ),
+                              )
+                            : Container(
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                child: const Icon(Icons.person,
+                                    size: 50, color: Colors.grey),
+                              ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),

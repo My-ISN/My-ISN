@@ -331,7 +331,7 @@ class _SideDrawerState extends State<SideDrawer> {
                   _buildExpandableSection(
                     context,
                     title: 'side_drawer.financial'.tr(context),
-                    icon: Icons.account_balance_wallet_outlined,
+                    icon: Icons.account_balance_outlined,
                     isExpanded: _expandedSections['financial'] ?? false,
                     onExpansionChanged: (expanded) {
                       setState(() => _expandedSections['financial'] = expanded);
@@ -358,7 +358,7 @@ class _SideDrawerState extends State<SideDrawer> {
                       if (_hasPermission('mobile_personal_finance_enable'))
                         _buildMenuItem(
                           context,
-                          icon: Icons.savings_outlined,
+                          icon: Icons.payments_outlined,
                           title: 'personal_finance.my_wallet'.tr(context),
                           isActive: widget.activePage == 'my_wallet',
                           padding: const EdgeInsets.only(left: 32, right: 12),
@@ -596,27 +596,37 @@ class _SideDrawerState extends State<SideDrawer> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 35,
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.primary.withAlpha(25),
-              backgroundImage:
-                  (widget.userData['profile_photo'] != null &&
-                      widget.userData['profile_photo'].toString().isNotEmpty)
-                  ? CachedNetworkImageProvider(
-                      '${AppConstants.serverRoot}/uploads/users/${widget.userData['profile_photo']}',
-                    )
-                  : null,
-              child:
-                  (widget.userData['profile_photo'] == null ||
-                      widget.userData['profile_photo'].toString().isEmpty)
-                  ? Icon(
-                      Icons.person,
-                      size: 40,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : null,
+            Container(
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(context).colorScheme.primary.withAlpha(25),
+              ),
+              child: ClipOval(
+                child: (widget.userData['profile_photo'] != null &&
+                        widget.userData['profile_photo'].toString().isNotEmpty)
+                    ? CachedNetworkImage(
+                        imageUrl:
+                            '${AppConstants.serverRoot}/uploads/users/thumb/${widget.userData['profile_photo']}',
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Theme.of(context).colorScheme.primary.withAlpha(128),
+                        ),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      )
+                    : Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+              ),
             ),
             const SizedBox(height: 15),
             Text(

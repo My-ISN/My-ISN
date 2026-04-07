@@ -111,10 +111,6 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
           ],
         ),
       ),
-      drawer: SideDrawer(
-        userData: widget.userData,
-        activePage: 'creative_idea',
-      ),
       endDrawer: SideDrawer(
         userData: widget.userData,
         activePage: 'creative_idea',
@@ -160,6 +156,46 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
             ),
           )
         : null,
+    );
+  }
+
+  Widget _buildProfileImage({
+    required String? profilePhoto,
+    required double size,
+    Color? iconColor,
+  }) {
+    final theme = Theme.of(context);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+      ),
+      child: ClipOval(
+        child: (profilePhoto != null && profilePhoto.toString().isNotEmpty)
+            ? CachedNetworkImage(
+                imageUrl:
+                    '${AppConstants.serverRoot}/uploads/users/thumb/$profilePhoto',
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Icon(
+                  Icons.person,
+                  size: size * 0.6,
+                  color: (iconColor ?? theme.colorScheme.primary)
+                      .withValues(alpha: 0.5),
+                ),
+                errorWidget: (context, url, error) => Icon(
+                  Icons.person,
+                  size: size * 0.6,
+                  color: iconColor ?? theme.colorScheme.primary,
+                ),
+              )
+            : Icon(
+                Icons.person,
+                size: size * 0.6,
+                color: iconColor ?? theme.colorScheme.primary,
+              ),
+      ),
     );
   }
 
@@ -216,7 +252,6 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
   }
 
   Widget _buildPodiumPosition(dynamic user, int rank, double size) {
-    final theme = Theme.of(context);
     final isFirst = rank == 1;
     final color = rank == 1 ? const Color(0xFFFFD700) : (rank == 2 ? const Color(0xFFC0C0C0) : const Color(0xFFCD7F32));
 
@@ -232,17 +267,10 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                 shape: BoxShape.circle,
                 border: Border.all(color: color, width: isFirst ? 4 : 2),
               ),
-              child: CircleAvatar(
-                radius: size / 2,
-                backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                backgroundImage: user != null && user['profile_photo'] != null && user['profile_photo'].toString().isNotEmpty
-                    ? CachedNetworkImageProvider('${AppConstants.serverRoot}/uploads/users/thumb/${user['profile_photo']}')
-                    : null,
-                onBackgroundImageError: (exception, stackTrace) {},
-                child: (user == null || user['profile_photo'] == null || user['profile_photo'].toString().isEmpty)
-                    ? Icon(Icons.person, size: size * 0.5, color: theme.colorScheme.primary)
-                    : null,
-              ),
+                child: _buildProfileImage(
+                  profilePhoto: user != null ? user['profile_photo'] : null,
+                  size: size,
+                ),
             ),
             Positioned(
               bottom: 0,
@@ -274,7 +302,6 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
   }
 
   Widget _buildRankItem(dynamic user, int rank) {
-    final theme = Theme.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
@@ -283,16 +310,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
         side: BorderSide(color: Colors.grey.withAlpha(51)),
       ),
       child: ListTile(
-        leading: CircleAvatar(
-          radius: 20,
-          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-          backgroundImage: user['profile_photo'] != null && user['profile_photo'].toString().isNotEmpty
-              ? CachedNetworkImageProvider('${AppConstants.serverRoot}/uploads/users/thumb/${user['profile_photo']}')
-              : null,
-          onBackgroundImageError: (e, s) {},
-          child: (user['profile_photo'] == null || user['profile_photo'].toString().isEmpty)
-              ? Icon(Icons.person, size: 20, color: theme.colorScheme.primary)
-              : null,
+        leading: _buildProfileImage(
+          profilePhoto: user['profile_photo'],
+          size: 40,
         ),
         title: Text(
           '${user['first_name']} ${user['last_name']}',
@@ -334,16 +354,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-            backgroundImage: widget.userData['profile_photo'] != null && widget.userData['profile_photo'].toString().isNotEmpty
-                ? CachedNetworkImageProvider('${AppConstants.serverRoot}/uploads/users/thumb/${widget.userData['profile_photo']}')
-                : null,
-            onBackgroundImageError: (e, s) {},
-            child: (widget.userData['profile_photo'] == null || widget.userData['profile_photo'].toString().isEmpty)
-                ? Icon(Icons.person, size: 20, color: theme.colorScheme.primary)
-                : null,
+          _buildProfileImage(
+            profilePhoto: widget.userData['profile_photo'],
+            size: 40,
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -1237,7 +1250,6 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
   }
 
   Widget _buildIdeaCard(dynamic idea) {
-    final theme = Theme.of(context);
     final status = int.tryParse(idea['status'].toString()) ?? 0;
     
     Color statusColor;
@@ -1304,16 +1316,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
               const SizedBox(height: 12),
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                    backgroundImage: idea['profile_photo'] != null && idea['profile_photo'].toString().isNotEmpty
-                        ? CachedNetworkImageProvider('${AppConstants.serverRoot}/uploads/users/thumb/${idea['profile_photo']}')
-                        : null,
-                    onBackgroundImageError: (e, s) {},
-                    child: (idea['profile_photo'] == null || idea['profile_photo'].toString().isEmpty)
-                        ? Icon(Icons.person, size: 12, color: theme.colorScheme.primary)
-                        : null,
+                  _buildProfileImage(
+                    profilePhoto: idea['profile_photo'],
+                    size: 24,
                   ),
                   const SizedBox(width: 8),
                   Text(

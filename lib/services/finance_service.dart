@@ -178,14 +178,8 @@ class FinanceService {
     int limit = 10,
     int offset = 0,
   }) async {
-    final userDataString = await storage.read(key: 'user_data');
-    final userData = json.decode(userDataString ?? '{}');
-    final userId = userData['id'] ?? userData['user_id'];
-
-    if (userId == null) throw Exception('User ID not found');
-
     String url =
-        '$baseUrl/get_personal_finance_transactions?user_id=$userId&type=$type&limit=$limit&offset=$offset';
+        '$baseUrl/get_personal_finance_transactions?type=$type&limit=$limit&offset=$offset';
     if (monthYear != null) url += '&month_year=$monthYear';
 
     final response = await http.get(Uri.parse(url));
@@ -282,15 +276,9 @@ class FinanceService {
   Future<Map<String, dynamic>> storePersonalFinanceTransaction(
     Map<String, dynamic> data,
   ) async {
-    final userDataString = await storage.read(key: 'user_data');
-    final userData = json.decode(userDataString ?? '{}');
-    final userId = userData['id'] ?? userData['user_id'];
-
-    if (userId == null) throw Exception('User ID not found');
-
     final response = await http.post(
       Uri.parse('$baseUrl/store_personal_finance_transaction'),
-      body: {...data, 'user_id': userId.toString()},
+      body: {...data},
     );
 
     if (response.statusCode == 200) {
@@ -303,15 +291,9 @@ class FinanceService {
   Future<Map<String, dynamic>> updatePersonalFinanceTransaction(
     Map<String, dynamic> data,
   ) async {
-    final userDataString = await storage.read(key: 'user_data');
-    final userData = json.decode(userDataString ?? '{}');
-    final userId = userData['id'] ?? userData['user_id'];
-
-    if (userId == null) throw Exception('User ID not found');
-
     final response = await http.post(
       Uri.parse('$baseUrl/update_personal_finance_transaction'),
-      body: {...data, 'user_id': userId.toString()},
+      body: {...data},
     );
 
     if (response.statusCode == 200) {
@@ -325,16 +307,9 @@ class FinanceService {
     String transactionId,
     String type,
   ) async {
-    final userDataString = await storage.read(key: 'user_data');
-    final userData = json.decode(userDataString ?? '{}');
-    final userId = userData['id'] ?? userData['user_id'];
-
-    if (userId == null) throw Exception('User ID not found');
-
     final response = await http.post(
       Uri.parse('$baseUrl/delete_personal_finance_transaction'),
       body: {
-        'user_id': userId.toString(),
         'id': transactionId,
         'transaction_type': type,
       },
@@ -350,15 +325,9 @@ class FinanceService {
   Future<Map<String, dynamic>> storePersonalBudget(
     Map<String, dynamic> data,
   ) async {
-    final userDataString = await storage.read(key: 'user_data');
-    final userData = json.decode(userDataString ?? '{}');
-    final userId = userData['id'] ?? userData['user_id'];
-
-    if (userId == null) throw Exception('User ID not found');
-
     final response = await http.post(
       Uri.parse('$baseUrl/store_personal_budget'),
-      body: {...data, 'user_id': userId.toString()},
+      body: {...data},
     );
 
     if (response.statusCode == 200) {
@@ -371,15 +340,9 @@ class FinanceService {
   Future<Map<String, dynamic>> updatePersonalBudget(
     Map<String, dynamic> data,
   ) async {
-    final userDataString = await storage.read(key: 'user_data');
-    final userData = json.decode(userDataString ?? '{}');
-    final userId = userData['id'] ?? userData['user_id'];
-
-    if (userId == null) throw Exception('User ID not found');
-
     final response = await http.post(
       Uri.parse('$baseUrl/update_personal_budget'),
-      body: {...data, 'user_id': userId.toString()},
+      body: {...data},
     );
 
     if (response.statusCode == 200) {
@@ -393,16 +356,9 @@ class FinanceService {
     required String category,
     required String budgetMonth,
   }) async {
-    final userDataString = await storage.read(key: 'user_data');
-    final userData = json.decode(userDataString ?? '{}');
-    final userId = userData['id'] ?? userData['user_id'];
-
-    if (userId == null) throw Exception('User ID not found');
-
     final response = await http.post(
       Uri.parse('$baseUrl/delete_personal_budget'),
       body: {
-        'user_id': userId.toString(),
         'category': category,
         'budget_month': budgetMonth,
       },
@@ -418,14 +374,8 @@ class FinanceService {
   Future<Map<String, dynamic>> getPersonalFinanceReport({
     String? year,
   }) async {
-    final userDataString = await storage.read(key: 'user_data');
-    final userData = json.decode(userDataString ?? '{}');
-    final userId = userData['id'] ?? userData['user_id'];
-
-    if (userId == null) throw Exception('User ID not found');
-
-    String url = '$baseUrl/get_personal_finance_report?user_id=$userId';
-    if (year != null) url += '&year=$year';
+    String url = '$baseUrl/get_personal_finance_report?';
+    if (year != null) url += 'year=$year';
 
     final response = await http.get(Uri.parse(url));
 

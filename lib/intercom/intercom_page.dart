@@ -119,7 +119,7 @@ class _IntercomPageState extends State<IntercomPage> {
         showBackButton: false,
         title: 'My ISN',
       ),
-      drawer: SideDrawer(
+      endDrawer: SideDrawer(
         userData: widget.userData,
         activePage: 'intercom',
       ),

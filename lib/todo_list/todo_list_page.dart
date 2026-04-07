@@ -780,6 +780,9 @@ class _TodoListPageState extends State<TodoListPage> {
                                     setModalState(() => _isListening = true);
                                     _speech.listen(
                                       localeId: 'id_ID',
+                                      listenFor: const Duration(hours: 1),
+                                      pauseFor: const Duration(seconds: 60),
+                                      listenMode: stt.ListenMode.dictation,
                                       onResult: (val) {
                                         setModalState(() {
                                           controller.text = val.recognizedWords;
@@ -924,6 +927,9 @@ class _TodoListPageState extends State<TodoListPage> {
                                     setModalState(() => _isListening = true);
                                     _speech.listen(
                                       localeId: 'id_ID',
+                                      listenFor: const Duration(hours: 1),
+                                      pauseFor: const Duration(seconds: 60),
+                                      listenMode: stt.ListenMode.dictation,
                                       onResult: (val) {
                                         setModalState(() {
                                           controller.text = val.recognizedWords;
@@ -1282,14 +1288,18 @@ class _TodoListPageState extends State<TodoListPage> {
             const SizedBox(height: 16),
             Text(
               'todo_list.delete_confirm_title'.tr(context),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 12),
             Text(
               'todo_list.delete_confirm_desc'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 32),

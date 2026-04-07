@@ -118,7 +118,6 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       setState(() => isLoading = true);
     }
     try {
-      final userId = widget.userData['user_id'] ?? widget.userData['id'];
       final monthYear = (_selectedYear != null && _selectedMonth != null)
           ? '$_selectedYear-$_selectedMonth'
           : DateFormat('yyyy-MM').format(DateTime.now());
@@ -127,7 +126,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
         Uri.parse(
           '${AppConstants.baseUrl}/get_personal_finance_dashboard',
         ),
-        body: {'user_id': userId.toString(), 'month_year': monthYear},
+        body: {'month_year': monthYear},
       );
 
       if (response.statusCode == 200) {
@@ -216,7 +215,11 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
             const SizedBox(height: 16),
             Text(
               'finance.delete_transaction'.tr(context),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18, 
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -663,7 +666,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       case 3:
         return Icons.assessment_rounded; // Report
       default:
-        return Icons.account_balance_wallet_rounded;
+        return Icons.account_balance_rounded;
     }
   }
 

@@ -476,32 +476,55 @@ class _EmployeesPageState extends State<EmployeesPage> {
                   width: 2,
                 ),
               ),
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: _primaryColor.withValues(alpha: 0.05),
-                backgroundImage:
-                    (photo != null &&
-                        photo.isNotEmpty &&
-                        !photo.contains('default'))
-                    ? CachedNetworkImageProvider(
-                        '${AppConstants.serverRoot}/uploads/users/thumb/$photo',
-                      )
-                    : null,
-                child:
-                    (photo == null ||
-                        photo.isEmpty ||
-                        photo.contains('default'))
-                    ? Text(
-                        name.isNotEmpty
-                            ? name.substring(0, 1).toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: _primaryColor,
+              child: SizedBox(
+                width: 60,
+                height: 60,
+                child: ClipOval(
+                  child: (photo != null &&
+                          photo.isNotEmpty &&
+                          !photo.contains('default'))
+                      ? CachedNetworkImage(
+                          imageUrl:
+                              '${AppConstants.serverRoot}/uploads/users/thumb/$photo',
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Center(
+                            child: Text(
+                              name.isNotEmpty
+                                  ? name.substring(0, 1).toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: _primaryColor,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Text(
+                              name.isNotEmpty
+                                  ? name.substring(0, 1).toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: _primaryColor,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            name.isNotEmpty
+                                ? name.substring(0, 1).toUpperCase()
+                                : '?',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: _primaryColor,
+                            ),
+                          ),
                         ),
-                      )
-                    : null,
+                ),
               ),
             ),
             const SizedBox(width: 16),
