@@ -464,9 +464,9 @@ class _TodoListPageState extends State<TodoListPage> {
         },
       );
 
-      debugPrint('Move Response: ${response.statusCode} - ${response.body}');
+      final result = json.decode(response.body);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && result['status'] == true) {
         _fetchTodos();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -481,7 +481,7 @@ class _TodoListPageState extends State<TodoListPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '${'todo_list.move_failed'.tr(context)} (${response.statusCode})',
+                '${'todo_list.move_failed'.tr(context)}: ${result['message'] ?? response.statusCode}',
               ),
               backgroundColor: Colors.red,
             ),
@@ -490,6 +490,14 @@ class _TodoListPageState extends State<TodoListPage> {
       }
     } catch (e) {
       debugPrint('Error moving todo: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${'todo_list.move_failed'.tr(context)}: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

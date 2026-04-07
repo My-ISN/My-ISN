@@ -5,14 +5,12 @@ class DashboardWelcomeCard extends StatelessWidget {
   final Map<String, dynamic> user;
   final Map<String, dynamic>? stats;
   final Map<String, dynamic>? attendance;
-  final VoidCallback onClockBreak;
 
   const DashboardWelcomeCard({
     super.key,
     required this.user,
     this.stats,
     this.attendance,
-    required this.onClockBreak,
   });
 
   @override
@@ -35,14 +33,6 @@ class DashboardWelcomeCard extends StatelessWidget {
         attendance!['break_out'].toString().isNotEmpty &&
         attendance!['break_out'].toString() != '-';
 
-    String breakLabel = 'dashboard.break_time_clock'.tr(context);
-    if (hasBreakIn) {
-      breakLabel = 'dashboard.already_break'.tr(context);
-    } else if (hasBreakOut) {
-      breakLabel = 'dashboard.end_break'.tr(context);
-    } else if (hasClockIn) {
-      breakLabel = 'dashboard.start_break'.tr(context);
-    }
 
     return Container(
       width: double.infinity,
@@ -87,7 +77,7 @@ class DashboardWelcomeCard extends StatelessWidget {
                 child: _buildTimeDisplay(
                   'dashboard.clock_in'.tr(context).toUpperCase(),
                   hasClockIn ? attendance!['clock_in'] : '--:--',
-                  const Color(0xFF2ECC71),
+                  const Color(0xFF7E57C2),
                 ),
               ),
               const SizedBox(width: 12),
@@ -95,7 +85,27 @@ class DashboardWelcomeCard extends StatelessWidget {
                 child: _buildTimeDisplay(
                   'dashboard.clock_out'.tr(context).toUpperCase(),
                   hasClockOut ? attendance!['clock_out'] : '--:--',
-                  const Color(0xFFE74C3C),
+                  const Color(0xFF7E57C2),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTimeDisplay(
+                  'dashboard.start_break'.tr(context).toUpperCase(),
+                  hasBreakOut ? attendance!['break_out'] : '--:--',
+                  const Color(0xFF7E57C2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildTimeDisplay(
+                  'dashboard.end_break'.tr(context).toUpperCase(),
+                  hasBreakIn ? attendance!['break_in'] : '--:--',
+                  const Color(0xFF7E57C2),
                 ),
               ),
             ],
@@ -113,9 +123,6 @@ class DashboardWelcomeCard extends StatelessWidget {
                       ) +
                       (attendance!['is_early'] == true
                           ? ' (${'dashboard.early_out'.tr(context)}: ${attendance!['early_time']})'
-                          : '') +
-                      (hasBreakOut
-                          ? ' | Rest: ${attendance!['break_out']}${hasBreakIn ? ' - ${attendance!['break_in']}' : ''}'
                           : '')
                   : 'dashboard.clock_in_only_details'.tr(
                       context,
@@ -124,38 +131,6 @@ class DashboardWelcomeCard extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
-          const SizedBox(height: 12),
-          if (hasBreakIn || hasBreakOut)
-            Text(
-              'Rest: ${attendance!['break_out']}${hasBreakIn ? ' - ${attendance!['break_in']}' : ''}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: (!hasClockIn || hasClockOut || hasBreakIn)
-                  ? null
-                  : onClockBreak,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7E57C2),
-                disabledBackgroundColor: Colors.grey.shade200,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                breakLabel,
-                style: TextStyle(
-                  color: (!hasClockIn || hasClockOut || hasBreakIn)
-                      ? Colors.grey
-                      : Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -15,6 +15,8 @@ import 'helpdesk/helpdesk_list_page.dart';
 import 'login_page.dart';
 import 'widgets/secondary_app_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'services/notification_service.dart';
 
 class SettingsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -28,12 +30,14 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final storage = const FlutterSecureStorage();
   final LocalAuthentication auth = LocalAuthentication();
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   bool _isFingerprintEnabled = false;
   bool _hasToken = false;
   bool _isLoading = true;
   String _appVersion = "Loading...";
   String _userType = ''; // fetched from API, same as profile_page
+  String _selectedNotificationSound = 'default';
 
   @override
   void initState() {
@@ -42,12 +46,29 @@ class _SettingsPageState extends State<SettingsPage> {
     _initPackageInfo();
   }
 
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
   Future<void> _initPackageInfo() async {
     final info = await PackageInfo.fromPlatform();
     if (mounted) {
       setState(() {
         _appVersion = info.version;
       });
+    }
+  }
+
+  Future<void> _playPreview(String value) async {
+    try {
+      String soundFile = value == 'default' ? 'notification_tone_swift_gesture' : value;
+      String ext = 'mp3';
+      _audioPlayer.stop(); // Don't await stop to minimize delay
+      await _audioPlayer.play(AssetSource('audio/$soundFile.$ext'));
+    } catch (e) {
+      debugPrint('Error playing preview: $e');
     }
   }
 
@@ -74,9 +95,12 @@ class _SettingsPageState extends State<SettingsPage> {
       debugPrint('Settings: failed to fetch user type: $e');
     }
 
+    String? notificationSound = await storage.read(key: 'notification_sound');
+
     setState(() {
       _isFingerprintEnabled = serverEnabled;
       _hasToken = token != null;
+      _selectedNotificationSound = notificationSound ?? 'default';
       _isLoading = false;
     });
   }
@@ -645,6 +669,144 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Future<void> _showNotificationSoundDialog() async {
+    final List<Map<String, String>> sounds = [
+      {'id': 'default', 'label': 'settings.sound_default'},
+      {
+        'id': 'elegant_notification_sound',
+        'label': 'settings.sound_elegant'
+      },
+      {'id': 'message_ringtone_magic', 'label': 'settings.sound_magic'},
+      {'id': 'relax_message_tone', 'label': 'settings.sound_relax'},
+    ];
+
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          return Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 24),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Icon(
+                    Icons.notifications_active_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 32,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: Text(
+                    'settings.select_notification_sound'.tr(context),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: sounds.map((sound) {
+                        final isSelected =
+                            _selectedNotificationSound == sound['id'];
+                        final soundId = sound['id']!;
+
+                        return ListTile(
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 16),
+                          leading: Radio<String>(
+                            value: soundId,
+                            groupValue: _selectedNotificationSound,
+                            activeColor: Theme.of(context).colorScheme.primary,
+                            onChanged: (value) async {
+                              if (value != null) {
+                                await storage.write(
+                                  key: 'notification_sound',
+                                  value: value,
+                                );
+                                setSheetState(() {
+                                  _selectedNotificationSound = value;
+                                });
+                                setState(() {
+                                  _selectedNotificationSound = value;
+                                });
+                                _playPreview(value);
+                                NotificationService().createChannel();
+                                NotificationService()
+                                    .updateTokenOnServer(widget.userData);
+                              }
+                            },
+                          ),
+                          title: Text(
+                            sound['label']!.tr(context),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          onTap: () async {
+                            await storage.write(
+                              key: 'notification_sound',
+                              value: soundId,
+                            );
+                            setSheetState(() {
+                              _selectedNotificationSound = soundId;
+                            });
+                            setState(() {
+                              _selectedNotificationSound = soundId;
+                            });
+                            
+                            // Always play preview on tap, even if already selected
+                            _playPreview(soundId);
+                            
+                            NotificationService().createChannel();
+                            NotificationService()
+                                .updateTokenOnServer(widget.userData);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      ),
+    ).then((_) {
+      _audioPlayer.stop();
+    });
+  }
+
   Future<void> _showThemeDialog() async {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     ThemeMode currentMode = themeProvider.themeMode;
@@ -863,6 +1025,51 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _showThemeDialog,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'settings.notification'.tr(context),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Theme.of(context).brightness == Brightness.dark
+                        ? Border.all(color: Colors.white24)
+                        : null,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7E57C2).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.notifications_active_outlined,
+                        color: Color(0xFF7E57C2),
+                      ),
+                    ),
+                    title: Text('settings.notification_sound'.tr(context)),
+                    subtitle: Text(
+                      'settings.sound_$_selectedNotificationSound'.tr(context),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: _showNotificationSoundDialog,
                   ),
                 ),
                 const SizedBox(height: 32),

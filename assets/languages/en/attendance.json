@@ -11,6 +11,9 @@
         "late": "Late",
         "late_with_time": "Late ({time})",
         "early_with_time": "Early ({time})",
+        "absent": "Absent",
+        "early_leave": "Total Early Leaving",
+        "total_rest": "Total Rest",
         "months": {
             "1": "January",
             "2": "February",

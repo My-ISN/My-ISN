@@ -37,6 +37,13 @@
         "link_error": "Tidak dapat membuka link: {error}",
         "wa_error": "Tidak dapat membuka WhatsApp: {error}",
         "device_info": "Perangkat Android (Pembaruan Pengaturan)",
-        "whatsapp_help_msg": "Halo admin My ISN, saya butuh bantuan terkait akun saya..."
+        "whatsapp_help_msg": "Halo admin My ISN, saya butuh bantuan terkait akun saya...",
+        "notification": "Notifikasi",
+        "notification_sound": "Suara Notifikasi",
+        "select_notification_sound": "Pilih Suara Notifikasi",
+        "sound_default": "Default Sistem",
+        "sound_elegant": "Elegant Notification",
+        "sound_magic": "Magic Ringtone",
+        "sound_relax": "Relax Tone"
     }
 }

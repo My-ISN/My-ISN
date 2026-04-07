@@ -458,7 +458,9 @@ class _SideDrawerState extends State<SideDrawer> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const IntercomPage(),
+                              builder: (context) => IntercomPage(
+                            userData: widget.userData,
+                          ),
                             ),
                           );
                         },

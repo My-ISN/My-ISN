@@ -37,6 +37,13 @@
         "link_error": "Could not open link: {error}",
         "wa_error": "Could not open WhatsApp: {error}",
         "device_info": "Android Device (Settings Update)",
-        "whatsapp_help_msg": "Hello My ISN admin, I need help regarding my account..."
+        "whatsapp_help_msg": "Hello My ISN admin, I need help regarding my account...",
+        "notification": "Notification",
+        "notification_sound": "Notification Sound",
+        "select_notification_sound": "Select Notification Sound",
+        "sound_default": "System Default",
+        "sound_elegant": "Elegant Notification",
+        "sound_magic": "Magic Ringtone",
+        "sound_relax": "Relax Tone"
     }
 }

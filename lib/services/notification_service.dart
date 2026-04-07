@@ -58,25 +58,31 @@ class NotificationService {
       Log.e("Error initializing local notifications: $e");
     }
 
-    // 4. Create a High Importance Channel for Android
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'foxgeen_push_channel', // id
-      'My ISN Push Notifications', // title
-      description:
-          'Digunakan untuk notifikasi pengumuman penting.', // description
-      importance: Importance.max,
-    );
-
-    await _localNotifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.createNotificationChannel(channel);
+    await createChannel();
 
     // 5. Listen for Foreground Messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       Log.i("Foreground message received: ${message.notification?.title}");
       Log.d("Message data: ${message.data}");
+      
+      // Get the latest channel to ensure correct sound
+      const storage = FlutterSecureStorage();
+      String? sound = await storage.read(key: 'notification_sound');
+      
+      String soundResource = (sound == null || sound == 'default') 
+          ? 'notification_tone_swift_gesture' 
+          : sound;
+      
+      String channelId = 'foxgeen_push_channel_$soundResource';
+
+      final AndroidNotificationChannel channel = AndroidNotificationChannel(
+        channelId,
+        'My ISN Push Notifications',
+        importance: Importance.max,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound(soundResource),
+      );
+
       _showLocalNotification(message, channel);
     });
 
@@ -103,6 +109,33 @@ class NotificationService {
     });
   }
 
+  Future<void> createChannel() async {
+    const storage = FlutterSecureStorage();
+    String? sound = await storage.read(key: 'notification_sound');
+    
+    // Default to swift gesture if nothing is selected or 'default' is chosen
+    String soundResource = (sound == null || sound == 'default') 
+        ? 'notification_tone_swift_gesture' 
+        : sound;
+    
+    String channelId = 'foxgeen_push_channel_$soundResource';
+
+    final AndroidNotificationChannel channel = AndroidNotificationChannel(
+      channelId,
+      'My ISN Push Notifications',
+      description: 'Digunakan untuk notifikasi pengumuman penting.',
+      importance: Importance.max,
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound(soundResource),
+    );
+
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(channel);
+  }
+
   void _handleNotificationClick(Map<String, dynamic> data) {
     Log.i("Notification Clicked Data: $data");
     if (data.containsKey('announcement_id')) {
@@ -126,6 +159,9 @@ class NotificationService {
     RemoteNotification? notification = message.notification;
 
     if (notification != null) {
+      const storage = FlutterSecureStorage();
+      String? sound = await storage.read(key: 'notification_sound');
+
       await _localNotifications.show(
         notification.hashCode,
         notification.title,
@@ -138,6 +174,7 @@ class NotificationService {
             icon: 'ic_notification',
             importance: Importance.max,
             priority: Priority.high,
+            playSound: true,
           ),
         ),
         payload: json.encode(message.data),
@@ -152,6 +189,16 @@ class NotificationService {
 
       final userId = userData['user_id'] ?? userData['id'];
       if (userId == null) return;
+
+      // Get current channel ID
+      const storage = FlutterSecureStorage();
+      String? sound = await storage.read(key: 'notification_sound');
+      
+      String soundResource = (sound == null || sound == 'default') 
+          ? 'notification_tone_swift_gesture' 
+          : sound;
+      
+      String channelId = 'foxgeen_push_channel_$soundResource';
 
       // Get device info
       final deviceInfo = DeviceInfoPlugin();
@@ -178,6 +225,7 @@ class NotificationService {
           'fcm_token': token,
           'device_id': deviceId,
           'device_name': deviceName,
+          'notification_channel': channelId,
         },
       );
 

@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../services/intercom_service.dart';
 import '../localization/app_localizations.dart';
 import 'package:intl/intl.dart';
+import '../widgets/custom_app_bar.dart';
+import '../widgets/side_drawer.dart';
 
 class IntercomPage extends StatefulWidget {
-  const IntercomPage({super.key});
+  final Map<String, dynamic> userData;
+  const IntercomPage({super.key, required this.userData});
 
   @override
   State<IntercomPage> createState() => _IntercomPageState();
@@ -111,14 +114,14 @@ class _IntercomPageState extends State<IntercomPage> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('title'.tr(context), style: const TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            onPressed: () => _fetchHistory(),
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
+      appBar: CustomAppBar(
+        userData: widget.userData,
+        showBackButton: false,
+        title: 'My ISN',
+      ),
+      drawer: SideDrawer(
+        userData: widget.userData,
+        activePage: 'intercom',
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -143,7 +146,6 @@ class _IntercomPageState extends State<IntercomPage> {
 
   Widget _buildInputSection(ThemeData theme, bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         boxShadow: [
@@ -155,49 +157,67 @@ class _IntercomPageState extends State<IntercomPage> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _messageController,
-                  decoration: InputDecoration(
-                    hintText: 'placeholder'.tr(context),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[900] : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                    filled: true,
-                    fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: TextField(
+                      controller: _messageController,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: InputDecoration(
+                        hintText: 'placeholder'.tr(context),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      maxLines: 2,
+                      minLines: 1,
+                    ),
                   ),
-                  maxLines: 2,
-                  minLines: 1,
                 ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
+                const SizedBox(width: 8),
+                FloatingActionButton.small(
                   onPressed: _isSending ? null : () => _sendMessage(_messageController.text),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
+                  backgroundColor: const Color(0xFF7E57C2),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
                   child: _isSending
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
                       : const Icon(Icons.send),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'listener_info'.tr(context),
-            style: TextStyle(fontSize: 11, color: isDark ? Colors.grey[400] : Colors.grey[600], fontStyle: FontStyle.italic),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'listener_info'.tr(context),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -239,7 +259,7 @@ class _IntercomPageState extends State<IntercomPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(_getIconData(preset['icon']!), color: Colors.purple, size: 28),
+                      Icon(_getIconData(preset['icon']!), color: const Color(0xFF7E57C2), size: 28),
                       const SizedBox(height: 6),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -249,7 +269,7 @@ class _IntercomPageState extends State<IntercomPage> {
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: Colors.purple,
+                            color: const Color(0xFF7E57C2),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -296,13 +316,11 @@ class _IntercomPageState extends State<IntercomPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           itemCount: _history.length,
           itemBuilder: (context, index) {
-            final item = _history[index];
-            final isPlayedVal = item['is_played'];
-            final isUnplayed = isPlayedVal.toString() == '0' || isPlayedVal == 0 || isPlayedVal == false;
-
-            final dateStr = item['created_at'] ?? '';
-            final date = dateStr.isNotEmpty ? DateTime.tryParse(dateStr) : null;
-            final formattedDate = date != null ? DateFormat('HH:mm').format(date) : '';
+              final item = _history[index];
+              final isUnplayed = item['is_played'] == 0 || item['is_played'] == '0';
+              final dateStr = item['created_at'] ?? '';
+              final date = dateStr.isNotEmpty ? DateTime.tryParse(dateStr) : null;
+              final formattedDate = date != null ? DateFormat('HH:mm').format(date) : '';
 
               return Card(
                 elevation: 0,
@@ -334,7 +352,7 @@ class _IntercomPageState extends State<IntercomPage> {
                   subtitle: Row(
                     children: [
                       Text(
-                        '${item['first_name'] ?? 'Staff'} • $formattedDate',
+                        '${item['first_name']} • $formattedDate',
                         style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                       ),
                       const SizedBox(width: 8),

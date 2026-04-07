@@ -11,6 +11,9 @@
         "late": "Terlambat",
         "late_with_time": "Terlambat ({time})",
         "early_with_time": "Pulang Awal ({time})",
+        "absent": "Tidak Hadir",
+        "early_leave": "Total Pulang Cepat",
+        "total_rest": "Total Jam Istirahat",
         "months": {
             "1": "Januari",
             "2": "Februari",

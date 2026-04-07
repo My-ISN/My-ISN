@@ -21,6 +21,7 @@ import 'widgets/dashboard_welcome_card.dart';
 import 'widgets/dashboard_stats_grid.dart';
 import 'widgets/dashboard_quick_menu.dart';
 import 'widgets/customer_dashboard_content.dart';
+import '../services/heartbeat_service.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -31,7 +32,7 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> {
+class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
   bool _isLoading = true;
   Map<String, dynamic> _dashboardData = {};
   Map<String, dynamic> _customerDashboardData = {};
@@ -44,6 +45,26 @@ class _DashboardPageState extends State<DashboardPage> {
     _currentIndex = widget.initialIndex ?? 0;
     _fetchDashboardData();
     _checkAppUpdate();
+
+    // Start heartbeat
+    HeartbeatService().start(widget.userData);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    HeartbeatService().stop();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      HeartbeatService().pause();
+    } else if (state == AppLifecycleState.resumed) {
+      HeartbeatService().resume();
+    }
   }
 
   bool _hasPermission(String resource) {
@@ -581,59 +602,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Future<void> _clockBreak() async {
-    final activeAtt = _dashboardData['attendance'];
-    if (activeAtt == null) return;
-
-    setState(() => _isLoading = true);
-    try {
-      final response = await http.post(
-        Uri.parse('https://foxgeen.com/HRIS/mobileapi/clock_break'),
-        body: {'user_id': widget.userData['id']?.toString() ?? ''},
-      );
-      final data = json.decode(response.body);
-      if (data['status'] == true) {
-        _fetchDashboardData();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'main.success_with_msg'.tr(
-                context,
-                args: {'message': data['message']?.toString() ?? ''},
-              ),
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        throw data['message'];
-      }
-    } catch (e) {
-      if (mounted) {
-        if (ConnectivityStatus.of(context)) {
-          String errorMessage = e.toString();
-          if (errorMessage.contains('SocketException') ||
-              errorMessage.contains('ClientException') ||
-              errorMessage.contains('HandshakeException')) {
-            errorMessage = 'login.conn_error'.tr(context);
-          }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'main.error_with_msg'.tr(
-                  context,
-                  args: {'message': errorMessage},
-                ),
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
 
   Widget _buildHomeContent() {
     if (_isLoading) {
@@ -674,7 +642,6 @@ class _DashboardPageState extends State<DashboardPage> {
               user: user,
               stats: _dashboardData['stats'],
               attendance: attendance,
-              onClockBreak: _clockBreak,
             ),
             const SizedBox(height: 24),
             DashboardStatsGrid(stats: _dashboardData['stats']),
