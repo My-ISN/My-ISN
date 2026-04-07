@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "590267640125",
+    "project_id": "foxgeen-c0a20",
+    "storage_bucket": "foxgeen-c0a20.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:590267640125:android:2b8edcb8e5e590266c3d54",
+        "android_client_info": {
+          "package_name": "com.example.foxgeen_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFfNV1VmM8E9C13QTAT8-DNGXt8ZbqnxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

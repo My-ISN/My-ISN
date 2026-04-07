@@ -1,0 +1,50 @@
+{
+    "attendance": {
+        "fetch_error": "Failed to fetch attendance data",
+        "summary": "Attendance Summary",
+        "details": "Details",
+        "present": "Present",
+        "no_data": "No data",
+        "check_in": "Check In",
+        "check_out": "Check Out",
+        "notes": "Notes",
+        "late": "Late",
+        "late_with_time": "Late ({time})",
+        "early_with_time": "Early ({time})",
+        "absent": "Absent",
+        "early_leave": "Total Early Leaving",
+        "total_rest": "Total Rest",
+        "months": {
+            "1": "January",
+            "2": "February",
+            "3": "March",
+            "4": "April",
+            "5": "May",
+            "6": "June",
+            "7": "July",
+            "8": "August",
+            "9": "September",
+            "10": "October",
+            "11": "November",
+            "12": "December"
+        },
+        "weekdays": {
+            "0": "Sunday",
+            "1": "Monday",
+            "2": "Tuesday",
+            "3": "Wednesday",
+            "4": "Thursday",
+            "5": "Friday",
+            "6": "Saturday"
+        },
+        "weekdays_short": {
+            "0": "Sun",
+            "1": "Mon",
+            "2": "Tue",
+            "3": "Wed",
+            "4": "Thu",
+            "5": "Fri",
+            "6": "Sat"
+        }
+    }
+}

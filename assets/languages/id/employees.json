@@ -1,0 +1,129 @@
+{
+    "employees": {
+        "title": "Karyawan",
+        "detail_title": "Detail Karyawan",
+        "edit_profile": "Edit Profil",
+        "edit_contract": "Edit Kontrak",
+        "edit_employment": "Edit Pekerjaan",
+        "edit_personal": "Edit Pribadi",
+        "edit_history": "Edit Riwayat",
+        "edit_documents": "Edit Dokumen",
+        "search_hint": "Cari nama, jabatan, atau departemen...",
+        "show": "Lihat",
+        "total": "{count} Total",
+        "no_employees": "Tidak ada karyawan ditemukan",
+        "add_employee": "Tambah Karyawan",
+        "sections": {
+            "profile": "Profil Dasar",
+            "account": "Informasi Akun",
+            "work_details": "Detail Pekerjaan",
+            "salary_worklog": "Gaji & Log Kerja"
+        },
+        "page_x_of_y": "Halaman {current} dari {total}",
+        "showing_x_of_y": "Menampilkan {current} dari {total} entri",
+        "first_name": "Nama Depan",
+        "last_name": "Nama Belakang",
+        "employee_id": "ID Karyawan",
+        "contact_number": "Nomor Kontak",
+        "gender": "Jenis Kelamin",
+        "email": "Email",
+        "username": "Username",
+        "password": "Kata Sandi",
+        "start_contract": "Awal Kontrak",
+        "leave_categories": "Kategori Cuti",
+        "office_shift": "Shift Kantor",
+        "role": "Peran/Role",
+        "department": "Departemen",
+        "designation": "Jabatan",
+        "basic_salary": "Gaji Pokok",
+        "hourly_rate": "Tarif Per Jam",
+        "work_log_hours": "Target Jam Log Kerja",
+        "all": "Semua",
+        "none": "Tidak Ada",
+        "per_month": "Per Bulan",
+        "status_work_label": "Status Kerja",
+        "work_log": "Log Kerja",
+        "status_target_worklog": "Status Target Log Kerja",
+        "payslip_type": "Tipe Slip Gaji",
+        "overview": {
+            "contact_info": "Informasi Kontak",
+            "profile_data_not_available": "Data profil tidak tersedia"
+        },
+        "contract_data": {
+            "title": "Data Kontrak",
+            "not_available": "Data kontrak tidak tersedia"
+        },
+        "salary_shift": {
+            "title": "Gaji & Shift"
+        },
+        "period_leave": {
+            "title": "Periode & Cuti"
+        },
+        "employment_detail": {
+            "detail_title": "Detail Pekerjaan",
+            "not_available": "Data pekerjaan tidak tersedia"
+        },
+        "role_desc": "Deskripsi Peran",
+        "personal_info": "Informasi Pribadi",
+        "personal_info_not_available": "Data pribadi tidak tersedia",
+        "bank_info": "Informasi Bank",
+        "work_exp": "Pengalaman Kerja",
+        "education": "Pendidikan",
+        "emp_docs": "Dokumen Karyawan",
+        "delete_title": "Hapus Karyawan",
+        "delete_confirm": "Apakah Anda yakin ingin menghapus data karyawan ini?",
+        "delete_success": "Karyawan berhasil dihapus",
+        "delete_error": "Gagal menghapus karyawan",
+        "delete_conn_error": "Gagal menghapus karyawan: Koneksi bermasalah",
+        "save": "SIMPAN",
+        "save_success": "Data berhasil disimpan",
+        "edit_upcoming": "Fitur edit untuk bagian ini akan segera hadir",
+        "try_again": "Coba Lagi",
+        "fetch_error": "Gagal Memuat Data",
+        "status_work": {
+            "contract": "Kontrak Karyawan",
+            "probation": "Masa Percobaan",
+            "trainee": "Trainee",
+            "permanent": "Tetap",
+            "freelance": "Pekerja Lepas"
+        },
+        "status_work_list": {
+            "contract": "Kontrak Karyawan",
+            "probation": "Masa Percobaan",
+            "trainee": "Trainee",
+            "permanent": "Tetap",
+            "freelance": "Pekerja Lepas"
+        },
+        "tabs": {
+            "profile": "Profil",
+            "contract": "Kontrak",
+            "employment": "Pekerjaan",
+            "personal": "Pribadi",
+            "history": "Riwayat",
+            "documents": "Dokumen"
+        },
+        "edit_sections": {
+            "profil": "profil",
+            "kontrak": "kontrak",
+            "pekerjaan": "pekerjaan",
+            "pribadi": "pribadi",
+            "riwayat": "riwayat",
+            "dokumen": "dokumen"
+        },
+        "form": {
+            "company": "Perusahaan",
+            "post": "Jabatan\/Posisi",
+            "from_year": "Tahun Mulai",
+            "to_year": "Tahun Selesai",
+            "school_uni": "Sekolah\/Universitas",
+            "education_level": "Jenjang Pendidikan",
+            "doc_name": "Nama Dokumen",
+            "doc_type": "Tipe Dokumen (contoh: KTP, Sertifikat)",
+            "select_file": "Pilih File",
+            "fill_all_fields": "Harap isi semua bidang dan pilih file",
+            "no_fields": "Tidak ada bidang tersedia"
+        },
+        "default_role": "Karyawan",
+        "default_dept": "Umum"
+    }
+}

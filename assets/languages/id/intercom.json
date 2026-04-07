@@ -1,0 +1,23 @@
+{
+    "title": "Intercom Rumah",
+    "send_to_speaker": "Kirim ke Speaker Rumah",
+    "placeholder": "Ketik pesan...",
+    "history": "Riwayat Pesan (30 terakhir)",
+    "send_success": "Pesan berhasil dikirim!",
+    "send_error": "Gagal mengirim pesan",
+    "fetch_error": "Gagal memuat riwayat",
+    "empty_history": "Belum ada riwayat pesan",
+    "played": "Sudah diputar",
+    "unplayed": "Belum diputar",
+    "clear_history": "Hapus Semua",
+    "clear_confirm": "Hapus semua riwayat pesan?",
+    "listener_info": "Halaman listener harus tetap terbuka di rumah untuk mengeluarkan suara.",
+    "presets": {
+        "package": "Ada paket di depan pintu",
+        "guest": "Ada tamu",
+        "meal": "Makan sudah siap",
+        "leaving": "Mau berangkat, pintu dikunci",
+        "lights": "Tolong matikan lampu dapur",
+        "phone": "Ada telepon penting"
+    }
+}
