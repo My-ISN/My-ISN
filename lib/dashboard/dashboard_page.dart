@@ -8,6 +8,7 @@ import '../widgets/custom_app_bar.dart';
 
 import '../widgets/side_drawer.dart';
 import '../profile/profile_page.dart';
+import '../login_page.dart';
 import '../attendance_page.dart';
 import '../payroll/payroll_page.dart';
 import '../localization/app_localizations.dart';
@@ -566,9 +567,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
 
     return Scaffold(
       extendBody: true,
-      appBar: CustomAppBar(userData: user, showBackButton: false),
-      body: IndexedStack(index: _currentIndex, children: pages),
-      endDrawer: SideDrawer(
+      appBar: isCustomer ? null : CustomAppBar(userData: user, showBackButton: false),
+      body: isCustomer ? _buildMaintenancePage() : IndexedStack(index: _currentIndex, children: pages),
+      endDrawer: isCustomer ? null : SideDrawer(
         userData: user,
         activePage: activePage,
         onTabSelected: (index) {
@@ -583,7 +584,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
           });
         },
       ),
-      bottomNavigationBar: Theme(
+      bottomNavigationBar: isCustomer ? null : Theme(
         data: Theme.of(context).copyWith(
           canvasColor: Colors.transparent,
           bottomNavigationBarTheme: const BottomNavigationBarThemeData(
@@ -635,13 +636,122 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   }
 
   Widget _buildCustomerContent() {
-    return CustomerDashboardContent(
-      userData: widget.userData,
-      customerDashboardData: _customerDashboardData,
-      onRefresh: _fetchDashboardData,
-      onProfileTap: (index) => setState(() => _currentIndex = index),
-      onLaunchWhatsApp: _launchWhatsApp,
+    return _buildMaintenancePage();
+  }
+
+  Widget _buildMaintenancePage() {
+    final user = _dashboardData['user'] ?? widget.userData;
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF673AB7).withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.engineering_rounded,
+              size: 80,
+              color: Color(0xFF673AB7),
+            ),
+          ),
+          const SizedBox(height: 32),
+          const Text(
+            'Layanan Client Sedang Dalam Pemeliharaan',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Kami sedang menyiapkan pengalaman belanja yang luar biasa untuk Anda. Untuk sementara, Dashboard Client belum tersedia.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 48),
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton(
+              onPressed: () => _handleLogout(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF673AB7),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.logout_rounded, size: 20),
+                  SizedBox(width: 12),
+                  Text(
+                    'Kembali ke Login',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'User: ${user['nama']}',
+            style: TextStyle(color: Colors.grey[400], fontSize: 12),
+          ),
+        ],
+      ),
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    // Show confirmation is better
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Konfirmasi Logout'),
+        content: const Text('Apakah Anda yakin ingin kembali ke halaman login?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Ya, Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    // Clear state/storage
+    const storage = FlutterSecureStorage();
+    await storage.deleteAll();
+
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+        (route) => false,
+      );
+    }
   }
 
 
