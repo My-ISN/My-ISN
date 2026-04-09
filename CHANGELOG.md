@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.1] - 2026-04-08
+
+### Perbaikan v1.2.1
+
+- **Auth — Finger Print Pasca-Migrasi Domain**: Perbaikan error `FormatException: Unexpected end of input` saat registrasi sidik jari. Disebabkan oleh fungsi `str_starts_with()` yang tidak tersedia di PHP 7.4 pada server baru; diganti dengan `substr()` yang kompatibel di semua versi PHP.
+- **Auth — Google Login Tidak Menyimpan Sesi**: Perbaikan bug di mana login via Google Sign-In tidak menyimpan data pengguna (`user_data`) ke secure storage, menyebabkan seluruh halaman yang memerlukan `user_id` (Finance, Intercom, Creative Idea, Rent Plan, dll.) menampilkan error `User ID not found`.
+
+---
+
 ## [1.2.0] - 2026-04-07
 
 ### Penambahan v1.2.0

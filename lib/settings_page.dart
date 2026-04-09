@@ -450,6 +450,7 @@ class _SettingsPageState extends State<SettingsPage> {
           },
         );
 
+        debugPrint('Settings Register Biometric Response Body: ${response.body}');
         final data = json.decode(response.body);
         if (data['status'] == true) {
           await storage.write(key: 'biometric_token', value: biometricToken);

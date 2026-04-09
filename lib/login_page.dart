@@ -463,6 +463,16 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
 
+        // Simpan user data ke storage (sama seperti login biasa)
+        await storage.write(
+          key: 'user_data',
+          value: json.encode(data['data']),
+        );
+
+        // Update FCM Token
+        NotificationService().updateTokenOnServer(data['data']);
+
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
