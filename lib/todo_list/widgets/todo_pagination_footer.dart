@@ -38,13 +38,6 @@ class TodoPaginationFooter extends StatelessWidget {
           decoration: BoxDecoration(
             color: primaryColor,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: primaryColor.withValues(alpha: 0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Text(
             'todo_list.page_x_of_y'.tr(
@@ -74,12 +67,8 @@ class TodoPaginationFooter extends StatelessWidget {
   }
 
   Widget _buildPageButton(BuildContext context, {required IconData icon, VoidCallback? onPressed}) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null
-          ? (isDark ? Colors.white12 : Colors.grey[200])
-          : Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(12),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
@@ -89,13 +78,13 @@ class TodoPaginationFooter extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.1),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
             ),
           ),
           child: Icon(
             icon,
             color: onPressed == null
-                ? (isDark ? Colors.white24 : Colors.grey[400])
+                ? Colors.grey[400]
                 : primaryColor,
             size: 24,
           ),

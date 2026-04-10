@@ -532,97 +532,85 @@ class _PayrollPageState extends State<PayrollPage>
   Widget _buildTabSwitcher() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(15),
-          border: Theme.of(context).brightness == Brightness.dark
-              ? Border.all(color: Colors.white24)
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          ),
         ),
-        child: AnimatedBuilder(
-          animation: _tabController.animation!,
-          builder: (context, child) {
-            double value = _tabController.animation!.value;
-            return Stack(
-              children: [
-                Align(
-                  alignment: Alignment(value * 2 - 1, 0),
-                  child: Container(
-                    width: (MediaQuery.of(context).size.width - 48) / 2,
-                    height: 42,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+        child: SizedBox(
+          height: 50,
+          child: AnimatedBuilder(
+            animation: _tabController.animation!,
+            builder: (context, child) {
+              double value = _tabController.animation!.value;
+              return Stack(
+                children: [
+                  Align(
+                    alignment: Alignment(value * 2 - 1, 0),
+                    child: Container(
+                      width: (MediaQuery.of(context).size.width - 48) / 2,
+                      height: 42,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          _tabController.animateTo(0);
-                        },
-                        child: Container(
-                          color: Colors.transparent,
-                          alignment: Alignment.center,
-                          child: Text(
-                            'payroll.make_payment'.tr(context),
-                            style: TextStyle(
-                              color: value < 0.5
-                                  ? Colors.white
-                                  : Colors.grey[500],
-                              fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            _tabController.animateTo(0);
+                          },
+                          child: Container(
+                            color: Colors.transparent,
+                            alignment: Alignment.center,
+                            child: Text(
+                              'payroll.make_payment'.tr(context),
+                              style: TextStyle(
+                                color: value < 0.5
+                                    ? Colors.white
+                                    : Colors.grey[500],
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          _tabController.animateTo(1);
-                        },
-                        child: Container(
-                          color: Colors.transparent,
-                          alignment: Alignment.center,
-                          child: Text(
-                            'payroll.history'.tr(context),
-                            style: TextStyle(
-                              color: value > 0.5
-                                  ? Colors.white
-                                  : Colors.grey[500],
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            _tabController.animateTo(1);
+                          },
+                          child: Container(
+                            color: Colors.transparent,
+                            alignment: Alignment.center,
+                            child: Text(
+                              'payroll.history'.tr(context),
+                              style: TextStyle(
+                                color: value > 0.5
+                                    ? Colors.white
+                                    : Colors.grey[500],
+                                fontWeight: value > 0.5 ? FontWeight.bold : FontWeight.normal,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -631,53 +619,48 @@ class _PayrollPageState extends State<PayrollPage>
   Widget _buildMonthlyReportBox() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Theme.of(context).brightness == Brightness.dark
-              ? Border.all(color: Colors.white24)
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'dashboard.payroll_report'.tr(context),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            if (_payrollStats == null)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20.0),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else
-              Row(
-                children: [
-                  _buildReportStat(
-                    'IDR ${_formatCurrency(_payrollStats?['total'])}',
-                    'dashboard.total'.tr(context),
-                  ),
-                  const SizedBox(width: 32),
-                  _buildReportStat(
-                    'IDR ${_formatCurrency(_payrollStats?['this_month'])}',
-                    'dashboard.this_month'.tr(context),
-                  ),
-                ],
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'dashboard.payroll_report'.tr(context),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
               ),
-          ],
+              const SizedBox(height: 20),
+              if (_payrollStats == null)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              else
+                Row(
+                  children: [
+                    _buildReportStat(
+                      'IDR ${_formatCurrency(_payrollStats?['total'])}',
+                      'dashboard.total'.tr(context),
+                    ),
+                    const SizedBox(width: 32),
+                    _buildReportStat(
+                      'IDR ${_formatCurrency(_payrollStats?['this_month'])}',
+                      'dashboard.this_month'.tr(context),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -727,25 +710,16 @@ class _PayrollPageState extends State<PayrollPage>
             );
           }
           final item = _history[index];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Theme.of(context).brightness == Brightness.dark
-                  ? Border.all(color: Colors.white24)
-                  : null,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+          return Card(
+            elevation: 0,
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+              ),
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
+            child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () => _showPayslipDetails(item['payslip_id']),
                 child: Padding(
@@ -793,9 +767,8 @@ class _PayrollPageState extends State<PayrollPage>
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
       ),
     );
   }
@@ -845,187 +818,193 @@ class _PayrollPageState extends State<PayrollPage>
   }
 
   Widget _buildSelectionCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10),
-        ],
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SearchableDropdown(
-            label: 'payroll.select_staff'.tr(context),
-            icon: Icons.person_search_rounded,
-            value: _selectedStaffId != null
-                ? (_staffList.firstWhere(
-                        (s) => s['user_id'].toString() == _selectedStaffId,
-                        orElse: () => {'full_name': ''},
-                      )['full_name'] ??
-                      '')
-                : '',
-            options: _staffList
-                .map(
-                  (s) => {
-                    'id': s['user_id'].toString(),
-                    'name': s['full_name'].toString(),
-                  },
-                )
-                .toList(),
-            onSelected: (val) {
-              setState(() {
-                _selectedStaffId = val;
-                _previewData = null;
-              });
-              _fetchPreview();
-            },
-          ),
-          const SizedBox(height: 20),
-          InkWell(
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _selectedMonth,
-                firstDate: DateTime(2020),
-                lastDate: DateTime(2100),
-                initialDatePickerMode: DatePickerMode.year,
-              );
-              if (picked != null) {
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SearchableDropdown(
+              label: 'payroll.select_staff'.tr(context),
+              icon: Icons.person_search_rounded,
+              value: _selectedStaffId != null
+                  ? (_staffList.firstWhere(
+                          (s) => s['user_id'].toString() == _selectedStaffId,
+                          orElse: () => {'full_name': ''},
+                        )['full_name'] ??
+                        '')
+                  : '',
+              options: _staffList
+                  .map(
+                    (s) => {
+                      'id': s['user_id'].toString(),
+                      'name': s['full_name'].toString(),
+                    },
+                  )
+                  .toList(),
+              onSelected: (val) {
                 setState(() {
-                  _selectedMonth = picked;
+                  _selectedStaffId = val;
                   _previewData = null;
                 });
                 _fetchPreview();
-              }
-            },
-            child: IgnorePointer(
-              child: TextFormField(
-                controller: TextEditingController(
-                  text:
-                      "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}",
-                ),
-                style: const TextStyle(fontSize: 14),
-                decoration: InputDecoration(
-                  labelText: 'payroll.select_month'.tr(context),
-                  labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
-                  prefixIcon: const Icon(
-                    Icons.calendar_month_rounded,
-                    size: 18,
-                    color: Color(0xFF7E57C2),
+              },
+            ),
+            const SizedBox(height: 20),
+            InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedMonth,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                  initialDatePickerMode: DatePickerMode.year,
+                );
+                if (picked != null) {
+                  setState(() {
+                    _selectedMonth = picked;
+                    _previewData = null;
+                  });
+                  _fetchPreview();
+                }
+              },
+              child: IgnorePointer(
+                child: TextFormField(
+                  controller: TextEditingController(
+                    text:
+                        "${_selectedMonth.year}-${_selectedMonth.month.toString().padLeft(2, '0')}",
                   ),
-                  suffixIcon: const Icon(
-                    Icons.arrow_drop_down_rounded,
-                    color: Color(0xFF7E57C2),
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white12
-                          : Colors.grey[200]!,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white12
-                          : Colors.grey[200]!,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(
+                  style: const TextStyle(fontSize: 14),
+                  decoration: InputDecoration(
+                    labelText: 'payroll.select_month'.tr(context),
+                    labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    prefixIcon: const Icon(
+                      Icons.calendar_month_rounded,
+                      size: 18,
                       color: Color(0xFF7E57C2),
-                      width: 2,
+                    ),
+                    suffixIcon: const Icon(
+                      Icons.arrow_drop_down_rounded,
+                      color: Color(0xFF7E57C2),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white12
+                            : Colors.grey[200]!,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white12
+                            : Colors.grey[200]!,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF7E57C2),
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSalaryPreviewCard() {
     final breakdown = _previewData!['breakdown'];
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10),
-        ],
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'payroll.preview_salary'.tr(context),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          const Divider(height: 32),
-          _buildAmountRow(
-            'payroll.basic_salary'.tr(context),
-            breakdown['basic_salary'],
-          ),
-          ..._buildDynamicPreviewRows(breakdown['allowances'], false),
-          ..._buildDynamicPreviewRows(breakdown['commissions'], false),
-          ..._buildDynamicPreviewRows(breakdown['other_payments'], false),
-          const Divider(height: 32),
-          ..._buildDynamicPreviewRows(breakdown['statutory_deductions'], true),
-          ..._buildDynamicPreviewRows(breakdown['optional_deductions'], true),
-          if ((breakdown['advance_salary_deduct'] ?? 0) > 0)
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'payroll.preview_salary'.tr(context),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+            ),
+            Divider(height: 32, color: Theme.of(context).dividerColor.withValues(alpha: 0.05)),
             _buildAmountRow(
-              'payroll.advance_salary'.tr(context),
-              breakdown['advance_salary_deduct'],
-              isNegative: true,
+              'payroll.basic_salary'.tr(context),
+              breakdown['basic_salary'],
             ),
-          if ((breakdown['loan_deduct'] ?? 0) > 0)
-            _buildAmountRow(
-              'payroll.loan'.tr(context),
-              breakdown['loan_deduct'],
-              isNegative: true,
-            ),
-          const Divider(height: 32),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'payroll.net_salary'.tr(context),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  'IDR ${_formatCurrency(breakdown['net_salary'])}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF7E57C2),
+            ..._buildDynamicPreviewRows(breakdown['allowances'], false),
+            ..._buildDynamicPreviewRows(breakdown['commissions'], false),
+            ..._buildDynamicPreviewRows(breakdown['other_payments'], false),
+            Divider(height: 32, color: Theme.of(context).dividerColor.withValues(alpha: 0.05)),
+            ..._buildDynamicPreviewRows(breakdown['statutory_deductions'], true),
+            ..._buildDynamicPreviewRows(breakdown['optional_deductions'], true),
+            if ((breakdown['advance_salary_deduct'] ?? 0) > 0)
+              _buildAmountRow(
+                'payroll.advance_salary'.tr(context),
+                breakdown['advance_salary_deduct'],
+                isNegative: true,
+              ),
+            if ((breakdown['loan_deduct'] ?? 0) > 0)
+              _buildAmountRow(
+                'payroll.loan'.tr(context),
+                breakdown['loan_deduct'],
+                isNegative: true,
+              ),
+            Divider(height: 32, color: Theme.of(context).dividerColor.withValues(alpha: 0.05)),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF7E57C2).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'payroll.net_salary'.tr(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
+                  Text(
+                    'IDR ${_formatCurrency(breakdown['net_salary'])}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF7E57C2),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1040,125 +1019,132 @@ class _PayrollPageState extends State<PayrollPage>
   }
 
   Widget _buildAccountSelectionCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10),
-        ],
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SearchableDropdown(
-            label: 'payroll.source_account'.tr(context),
-            icon: Icons.account_balance_wallet_rounded,
-            value: _selectedAccountId != null
-                ? (_accounts.firstWhere(
-                        (a) => a['account_id'].toString() == _selectedAccountId,
-                        orElse: () => {'account_name': ''},
-                      )['account_name'] ??
-                      '')
-                : '',
-            options: _accounts
-                .map(
-                  (a) => {
-                    'id': a['account_id'].toString(),
-                    'name':
-                        "${a['account_name']} (IDR ${_formatCurrency(a['account_balance'])})",
-                  },
-                )
-                .toList(),
-            onSelected: (val) => setState(() => _selectedAccountId = val),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SearchableDropdown(
+              label: 'payroll.source_account'.tr(context),
+              icon: Icons.account_balance_wallet_rounded,
+              value: _selectedAccountId != null
+                  ? (_accounts.firstWhere(
+                          (a) => a['account_id'].toString() == _selectedAccountId,
+                          orElse: () => {'account_name': ''},
+                        )['account_name'] ??
+                        '')
+                  : '',
+              options: _accounts
+                  .map(
+                    (a) => {
+                      'id': a['account_id'].toString(),
+                      'name':
+                          "${a['account_name']} (IDR ${_formatCurrency(a['account_balance'])})",
+                    },
+                  )
+                  .toList(),
+              onSelected: (val) => setState(() => _selectedAccountId = val),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildActionCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10),
-        ],
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
-      child: Column(
-        children: [
-          TextField(
-            controller: _commentController,
-            style: const TextStyle(fontSize: 14),
-            decoration: InputDecoration(
-              labelText: 'payroll.comments'.tr(context),
-              labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
-              prefixIcon: const Icon(
-                Icons.chat_rounded,
-                size: 18,
-                color: Color(0xFF7E57C2),
-              ),
-              filled: true,
-              fillColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : Colors.white,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white12
-                      : Colors.grey[200]!,
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white12
-                      : Colors.grey[200]!,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: _commentController,
+              style: const TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                labelText: 'payroll.comments'.tr(context),
+                labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
+                prefixIcon: const Icon(
+                  Icons.chat_rounded,
+                  size: 18,
                   color: Color(0xFF7E57C2),
-                  width: 2,
+                ),
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.white,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey[200]!,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white12
+                        : Colors.grey[200]!,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF7E57C2),
+                    width: 2,
+                  ),
                 ),
               ),
+              maxLines: 2,
             ),
-            maxLines: 2,
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: _isActionLoading ? null : _executePayment,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7E57C2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isActionLoading ? null : _executePayment,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7E57C2),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-              ),
-              child: _isActionLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(
-                      'payroll.pay_now'.tr(context),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                child: _isActionLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        'payroll.pay_now'.tr(context),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1504,14 +1490,8 @@ class _PayrollPageState extends State<PayrollPage>
               color: Theme.of(context).cardColor,
               shape: BoxShape.circle,
               border: Theme.of(context).brightness == Brightness.dark
-                  ? Border.all(color: Colors.white24)
-                  : null,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(76),
-                  blurRadius: 20,
-                ),
-              ],
+                  ? Border.all(color: Colors.white.withValues(alpha: 0.1))
+                  : Border.all(color: Colors.black.withValues(alpha: 0.05)),
             ),
             child: Icon(icon, size: 64, color: Colors.grey[300]),
           ),

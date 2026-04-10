@@ -173,14 +173,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: TextField(
         controller: _searchController,
@@ -198,10 +194,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
                   },
                 )
               : null,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide.none,
-          ),
+          border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 18),
         ),
       ),
@@ -255,7 +248,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
@@ -322,7 +315,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
       itemBuilder: (context, index) {
         final employee = _filteredEmployees[index];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 12),
           child: _buildEmployeeCard(
             context,
             name: '${employee['first_name']} ${employee['last_name'] ?? ''}',
@@ -371,15 +364,9 @@ class _EmployeesPageState extends State<EmployeesPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: _primaryColor,
+            color: _primaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: _primaryColor.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            border: Border.all(color: _primaryColor.withValues(alpha: 0.2)),
           ),
           child: Text(
             'employees.page_x_of_y'.tr(
@@ -389,8 +376,8 @@ class _EmployeesPageState extends State<EmployeesPage> {
                 'total': _totalPages.toString(),
               },
             ),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: _primaryColor,
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),
@@ -411,12 +398,8 @@ class _EmployeesPageState extends State<EmployeesPage> {
   }
 
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null
-          ? (isDark ? Colors.white12 : Colors.grey[200])
-          : Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(12),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
@@ -426,13 +409,13 @@ class _EmployeesPageState extends State<EmployeesPage> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.1),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
             ),
           ),
           child: Icon(
             icon,
             color: onPressed == null
-                ? (isDark ? Colors.white24 : Colors.grey[400])
+                ? Colors.grey[400]
                 : _primaryColor,
             size: 24,
           ),
@@ -450,44 +433,66 @@ class _EmployeesPageState extends State<EmployeesPage> {
     String? email,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),
-        child: Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: _primaryColor.withValues(alpha: 0.2),
-                  width: 2,
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _primaryColor.withValues(alpha: 0.2),
+                    width: 2,
+                  ),
                 ),
-              ),
-              child: SizedBox(
-                width: 60,
-                height: 60,
-                child: ClipOval(
-                  child: (photo != null &&
-                          photo.isNotEmpty &&
-                          !photo.contains('default'))
-                      ? CachedNetworkImage(
-                          imageUrl:
-                              '${AppConstants.serverRoot}/uploads/users/thumb/$photo',
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Center(
+                child: SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: ClipOval(
+                    child: (photo != null &&
+                            photo.isNotEmpty &&
+                            !photo.contains('default'))
+                        ? CachedNetworkImage(
+                            imageUrl:
+                                '${AppConstants.serverRoot}/uploads/users/thumb/$photo',
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(
+                              child: Text(
+                                name.isNotEmpty
+                                    ? name.substring(0, 1).toUpperCase()
+                                    : '?',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: _primaryColor,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Center(
+                              child: Text(
+                                name.isNotEmpty
+                                    ? name.substring(0, 1).toUpperCase()
+                                    : '?',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: _primaryColor,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Center(
                             child: Text(
                               name.isNotEmpty
                                   ? name.substring(0, 1).toUpperCase()
@@ -499,90 +504,66 @@ class _EmployeesPageState extends State<EmployeesPage> {
                               ),
                             ),
                           ),
-                          errorWidget: (context, url, error) => Center(
-                            child: Text(
-                              name.isNotEmpty
-                                  ? name.substring(0, 1).toUpperCase()
-                                  : '?',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: _primaryColor,
-                              ),
-                            ),
-                          ),
-                        )
-                      : Center(
-                          child: Text(
-                            name.isNotEmpty
-                                ? name.substring(0, 1).toUpperCase()
-                                : '?',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: _primaryColor,
-                            ),
-                          ),
-                        ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    role,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          dept,
-                          style: TextStyle(
-                            color: _primaryColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.2,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      role,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            dept,
+                            style: TextStyle(
+                              color: _primaryColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                children: [
+                  _buildCardAction(Icons.email_outlined, () {}),
+                  const SizedBox(height: 8),
+                  _buildCardAction(Icons.chat_bubble_outline_rounded, () {}),
                 ],
               ),
-            ),
-            Column(
-              children: [
-                _buildCardAction(Icons.email_outlined, () {}),
-                const SizedBox(height: 8),
-                _buildCardAction(Icons.chat_bubble_outline_rounded, () {}),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -595,8 +576,11 @@ class _EmployeesPageState extends State<EmployeesPage> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.05),
+          color: _primaryColor.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          ),
         ),
         child: Icon(icon, color: _primaryColor, size: 18),
       ),

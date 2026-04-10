@@ -36,95 +36,86 @@ class FinanceAccountItem extends StatelessWidget {
     final currencyFormat = _formatCurrency(account['account_balance']);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white10
-                  : Colors.grey.withAlpha(13),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(
-                  Theme.of(context).brightness == Brightness.dark ? 51 : 13,
-                ),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF7E57C2).withAlpha(25),
-                      borderRadius: BorderRadius.circular(12),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.account_balance_wallet_rounded,
+                        color: Color(0xFF7E57C2),
+                        size: 24,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.account_balance_wallet_rounded,
-                      color: Color(0xFF7E57C2),
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          account['account_name'] ?? '',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            account['account_name'] ?? '',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${account['bank'] ?? '-'} • ${account['account_number'] ?? '-'}',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
+                          const SizedBox(height: 2),
+                          Text(
+                            '${account['bank'] ?? '-'} • ${account['account_number'] ?? '-'}',
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const Divider(height: 24, thickness: 0.5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'finance.current_balance'.tr(context),
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                  ],
+                ),
+                const Divider(height: 24, thickness: 0.5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'finance.current_balance'.tr(context),
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Rp $currencyFormat',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 17,
-                      color: Colors.green,
+                    Text(
+                      'Rp $currencyFormat',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 17,
+                        color: Colors.green,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

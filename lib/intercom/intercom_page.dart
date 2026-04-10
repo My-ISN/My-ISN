@@ -137,13 +137,11 @@ class _IntercomPageState extends State<IntercomPage> {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
           ),
-        ],
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -241,9 +239,11 @@ class _IntercomPageState extends State<IntercomPage> {
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: theme.primaryColor.withOpacity(0.08),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -313,17 +313,18 @@ class _IntercomPageState extends State<IntercomPage> {
 
               return Card(
                 elevation: 0,
-                margin: const EdgeInsets.only(bottom: 10),
+                margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
-                    color: isUnplayed ? theme.primaryColor.withOpacity(0.3) : Colors.transparent,
-                    width: 1,
+                    color: isUnplayed
+                        ? theme.primaryColor.withValues(alpha: 0.3)
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.1),
                   ),
                 ),
-                color: isUnplayed 
-                  ? theme.primaryColor.withOpacity(0.05) 
-                  : (isDark ? Colors.grey[900] : Colors.white),
+                color: isUnplayed
+                    ? theme.primaryColor.withValues(alpha: 0.05)
+                    : Theme.of(context).cardColor,
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   leading: CircleAvatar(

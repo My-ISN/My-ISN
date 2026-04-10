@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.3.0] - 2026-04-10
+
+### Penambahan v1.3.0
+
+- **UI — Global Standardization (Flat Premium)**: Implementasi desain sistem "Flat Premium" di seluruh aplikasi. Seluruh elemen visual kini menggunakan kartu tanpa bayangan (*elevation: 0*) dengan border halus (`DividerColor.withValues(alpha: 0.08)`) untuk estetika administratif yang lebih bersih dan elit.
+- **UI — Standardisasi Radius**: Penyeragaman radius sudut (*corner radius*) sebesar **24px** pada seluruh kontainer utama dan Card untuk konsistensi visual di seluruh modul.
+- **UI — SecondaryAppBar Everywhere**: Integrasi komponen `SecondaryAppBar` di seluruh halaman detail (Payroll, Settings, Diagnosis Hub, All Menus) guna memastikan navigasi yang seragam dan profesional.
+- **Modul More Apps**: Penambahan fitur "More Apps" di Dashboard untuk mempermudah akses ke ekosistem aplikasi internal dalam satu pintu.
+
+### Perubahan v1.3.0
+
+- **AI Assistant Transformation**: Re-orientasi fungsi AI Assistant yang sebelumnya berupa sistem chat umum kini difokuskan secara eksklusif sebagai antarmuka **Knowledge Base** untuk input data dan akses informasi internal yang lebih presisi dan terarah.
+- **Modul Diagnosis — Refaktorisasi Total**: Desain ulang total modul Diagnosis (Internet, Notifikasi, Penyimpanan, Versi) dengan antarmuka berbasis *sectioned cards* dan ikonografi modern yang mendukung visi Flat Premium.
+- **UI — Dashboard Refinement**: Pembaruan visual pada widget **Quick Menu**, **Working Duration**, **My Leave**, dan **Requests** di Dashboard Staff untuk menghilangkan desain "hitam kontras" dan menggantinya dengan gaya seamless.
+- **Optimisasi — Migrasi API Flutter Modern**: Migrasi seluruh panggilan legacy `withAlpha` dan `withOpacity` ke API modern `withValues(alpha: ...)` guna memastikan kepatuhan penuh terhadap standar Flutter 3.22+.
+
+### Perbaikan v1.3.0
+
+- **Auth — Biometric Registration Stability**: Peningkatan stabilitas dan sistem logging pada proses registrasi sidik jari untuk pelacakan error yang lebih akurat.
+- **UI — Image Loading Exceptions**: Implementasi mekanisme *error handling* tangguh dan placeholder pada pemuatan gambar profil di Settings dan Profile guna mencegah crash saat kegagalan jaringan.
+- **Async Safety**: Audit dan perbaikan seluruh operasional asinkron yang melibatkan `BuildContext` dengan penambahan pengecekan `mounted`.
+
+---
+
 ## [1.2.1] - 2026-04-08
 
 ### Perbaikan v1.2.1

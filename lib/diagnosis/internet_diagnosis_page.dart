@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../localization/app_localizations.dart';
 import '../constants.dart';
-
+import '../widgets/secondary_app_bar.dart';
 
 class InternetDiagnosisPage extends StatefulWidget {
   const InternetDiagnosisPage({super.key});
@@ -84,24 +84,7 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'diagnosis.internet_title'.tr(context),
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Theme.of(context).cardColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: SecondaryAppBar(title: 'diagnosis.internet_title'.tr(context)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -112,64 +95,60 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  color: _primaryColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.wifi, size: 64, color: _primaryColor),
+                child: Icon(Icons.wifi, size: 60, color: _primaryColor),
               ),
             ),
             const SizedBox(height: 32),
             Text(
               'diagnosis.internet_checking'.tr(context),
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
+              style: const TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'diagnosis.internet_verifying'.tr(context),
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                 fontSize: 14,
               ),
             ),
             const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Theme.of(context).brightness == Brightness.dark
-                    ? Border.all(color: Colors.white24)
-                    : null,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+            Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+                ),
               ),
-              child: Column(
-                children: [
-                  _buildStep(
-                    'diagnosis.server_status'.tr(context),
-                    'diagnosis.server_desc'.tr(context),
-                    _currentStep >= 1,
-                    _step1Success,
-                    _step1Error,
-                  ),
-                  const Divider(height: 32),
-                  _buildStep(
-                    'diagnosis.latency'.tr(context),
-                    '${'diagnosis.latency_desc'.tr(context)} ($_latency)',
-                    _currentStep >= 2,
-                    _step2Success,
-                    _step2Error,
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    _buildStep(
+                      'diagnosis.server_status'.tr(context),
+                      'diagnosis.server_desc'.tr(context),
+                      _currentStep >= 1,
+                      _step1Success,
+                      _step1Error,
+                    ),
+                    _buildDivider(),
+                    _buildStep(
+                      'diagnosis.latency'.tr(context),
+                      '${'diagnosis.latency_desc'.tr(context)} ($_latency)',
+                      _currentStep >= 2,
+                      _step2Success,
+                      _step2Error,
+                    ),
+                  ],
+                ),
               ),
             ),
             if (_step2Success)
@@ -179,19 +158,20 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.green.withValues(alpha: 0.1)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.check_circle, color: Colors.green),
+                      const Icon(Icons.check_circle_outline_rounded, color: Colors.green),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'diagnosis.internet_success'.tr(context),
-                          style: TextStyle(
-                            color: Colors.green.shade800,
-                            fontWeight: FontWeight.w500,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
                           ),
                         ),
                       ),
@@ -205,6 +185,14 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
     );
   }
 
+  Widget _buildDivider() {
+    return Divider(
+      height: 40,
+      indent: 44,
+      color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+    );
+  }
+
   Widget _buildStep(
     String title,
     String subtitle,
@@ -214,9 +202,9 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
   ) {
     Widget icon;
     if (error != null) {
-      icon = const Icon(Icons.cancel, color: Colors.red, size: 28);
+      icon = const Icon(Icons.cancel_outlined, color: Colors.red, size: 28);
     } else if (isSuccess) {
-      icon = const Icon(Icons.check_circle, color: Colors.green, size: 28);
+      icon = const Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 28);
     } else if (isStarted) {
       icon = SizedBox(
         width: 24,
@@ -228,8 +216,8 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
       );
     } else {
       icon = Icon(
-        Icons.radio_button_unchecked,
-        color: Colors.grey.shade300,
+        Icons.radio_button_unchecked_rounded,
+        color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         size: 28,
       );
     }
@@ -247,11 +235,9 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
                 style: TextStyle(
                   color: isStarted
                       ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.3),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 2),
@@ -260,8 +246,8 @@ class _InternetDiagnosisPageState extends State<InternetDiagnosisPage> {
                 style: TextStyle(
                   color: error != null
                       ? Colors.red
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 13,
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 12,
                 ),
               ),
             ],

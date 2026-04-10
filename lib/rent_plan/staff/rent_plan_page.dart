@@ -904,14 +904,9 @@ class _RentPlanPageState extends State<RentPlanPage>
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border(left: BorderSide(color: color, width: 4)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -945,14 +940,10 @@ class _RentPlanPageState extends State<RentPlanPage>
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          ),
         ),
         child: TextField(
           controller: _searchController,
@@ -1058,23 +1049,19 @@ class _RentPlanPageState extends State<RentPlanPage>
     final double totalHarga =
         double.tryParse(rental['grand_total']?.toString() ?? '0') ?? 0;
 
-    return Container(
+    return Card(
+      elevation: 0,
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           onTap: () {
             Navigator.push(
               context,
@@ -1454,13 +1441,6 @@ class _RentPlanPageState extends State<RentPlanPage>
           decoration: BoxDecoration(
             color: _primaryColor,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: _primaryColor.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
           ),
           child: Text(
             'rent_plan.page_x_of_y'.tr(
@@ -1492,12 +1472,8 @@ class _RentPlanPageState extends State<RentPlanPage>
   }
 
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null
-          ? (isDark ? Colors.white12 : Colors.grey[200])
-          : Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(12),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
@@ -1507,13 +1483,13 @@ class _RentPlanPageState extends State<RentPlanPage>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.1),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
             ),
           ),
           child: Icon(
             icon,
             color: onPressed == null
-                ? (isDark ? Colors.white24 : Colors.grey[400])
+                ? Colors.grey[400]
                 : _primaryColor,
             size: 24,
           ),

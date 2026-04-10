@@ -3,6 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../localization/app_localizations.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/secondary_app_bar.dart';
 
 class StorageDiagnosisPage extends StatefulWidget {
   const StorageDiagnosisPage({super.key});
@@ -90,7 +91,7 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.3),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -102,14 +103,14 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
             const SizedBox(height: 16),
             Text(
               'diagnosis.clear_confirm_title'.tr(context),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
             Text(
               'diagnosis.clear_confirm_desc'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 32),
@@ -120,7 +121,7 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
                     onPressed: () => Navigator.pop(context, false),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+                      side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -177,24 +178,7 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'diagnosis.storage_title'.tr(context),
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Theme.of(context).cardColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: SecondaryAppBar(title: 'diagnosis.storage_title'.tr(context)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -210,7 +194,7 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
                 ),
                 child: Icon(
                   Icons.storage_outlined,
-                  size: 64,
+                  size: 60,
                   color: _primaryColor,
                 ),
               ),
@@ -218,47 +202,43 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
             const SizedBox(height: 32),
             Text(
               'diagnosis.storage_checking'.tr(context),
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
+              style: const TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'diagnosis.storage_verifying'.tr(context),
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                 fontSize: 14,
               ),
             ),
             const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Theme.of(context).brightness == Brightness.dark
-                    ? Border.all(color: Colors.white24)
-                    : null,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+            Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+                ),
               ),
-              child: Column(
-                children: [
-                  _buildStep(
-                    'diagnosis.cache_size'.tr(context),
-                    '${'diagnosis.cache_desc'.tr(context)} ($_cacheSize)',
-                    _currentStep >= 1,
-                    _step1Success,
-                    null,
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    _buildStep(
+                      'diagnosis.cache_size'.tr(context),
+                      '${'diagnosis.cache_desc'.tr(context)} ($_cacheSize)',
+                      _currentStep >= 1,
+                      _step1Success,
+                      null,
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 32),
@@ -284,6 +264,7 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    elevation: 0,
                   ),
                 ),
               ),
@@ -302,9 +283,9 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
   ) {
     Widget icon;
     if (error != null) {
-      icon = const Icon(Icons.cancel, color: Colors.red, size: 28);
+      icon = const Icon(Icons.cancel_outlined, color: Colors.red, size: 28);
     } else if (isSuccess) {
-      icon = const Icon(Icons.check_circle, color: Colors.green, size: 28);
+      icon = const Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 28);
     } else if (isStarted) {
       icon = SizedBox(
         width: 24,
@@ -316,8 +297,8 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
       );
     } else {
       icon = Icon(
-        Icons.radio_button_unchecked,
-        color: Colors.grey.shade300,
+        Icons.radio_button_unchecked_rounded,
+        color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         size: 28,
       );
     }
@@ -335,11 +316,9 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
                 style: TextStyle(
                   color: isStarted
                       ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.3),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 2),
@@ -348,8 +327,8 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
                 style: TextStyle(
                   color: error != null
                       ? Colors.red
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 13,
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 12,
                 ),
               ),
             ],

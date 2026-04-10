@@ -26,25 +26,22 @@ class TodoStatsCard extends StatelessWidget {
     double progress = totalCount > 0 ? (completedCount / totalCount) : 0;
     if (progress > 1.0) progress = 1.0;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: Theme.of(context).cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           InkWell(
             onTap: onToggleExpand,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Row(

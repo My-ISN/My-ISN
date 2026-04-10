@@ -95,6 +95,9 @@ class MyApp extends StatelessWidget {
           primary: const Color(0xFF7E57C2),
           brightness: Brightness.light,
           surface: Colors.white,
+          surfaceContainer: Colors.white,
+          surfaceContainerLow: Colors.white,
+          surfaceContainerLowest: Colors.white,
           surfaceContainerHighest: const Color(0xFFF1F5F9),
         ),
         scaffoldBackgroundColor: const Color(0xFFF8FAFF),
@@ -103,6 +106,10 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
         cardColor: Colors.white,
+        cardTheme: const CardThemeData(
+          color: Colors.white,
+          surfaceTintColor: Colors.transparent,
+        ),
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
       ),
@@ -119,6 +126,9 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF000000),
           elevation: 0,
+        ),
+        cardTheme: const CardThemeData(
+          surfaceTintColor: Colors.transparent,
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),

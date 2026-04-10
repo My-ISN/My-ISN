@@ -36,20 +36,17 @@ class TodoItemTile extends StatelessWidget {
     final String description = todo['description'] ?? '-';
     final String date = todo['created_at'] ?? '-';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: Theme.of(context).brightness == Brightness.dark
+          ? Colors.transparent
+          : Theme.of(context).cardColor,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Theme.of(context).brightness == Brightness.dark
-            ? Border.all(color: Colors.white24)
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),

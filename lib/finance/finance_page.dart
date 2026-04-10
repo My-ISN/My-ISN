@@ -1188,16 +1188,9 @@ class _FinancePageState extends State<FinancePage>
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Theme.of(context).brightness == Brightness.dark
-                ? Border.all(color: Colors.white24)
-                : null,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            border: Border.all(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            ),
           ),
           child: AnimatedSize(
             duration: const Duration(milliseconds: 300),

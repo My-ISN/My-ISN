@@ -912,199 +912,72 @@ class _SettingsPageState extends State<SettingsPage> {
           : ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                Text(
-                  'settings.language'.tr(context),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? Border.all(color: Colors.white24)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                _buildSectionHeader(context, 'settings.language'.tr(context)),
+                _buildSeamlessCard(
+                  context,
                   child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.language_rounded,
-                        color: Color(0xFF7E57C2),
-                      ),
-                    ),
+                    leading: _buildIconContainer(context, Icons.language_rounded),
                     title: Text('settings.language'.tr(context)),
                     subtitle: Text(
-                      Provider.of<LanguageProvider>(
-                                context,
-                              ).locale.languageCode ==
-                              'id'
+                      Provider.of<LanguageProvider>(context).locale.languageCode == 'id'
                           ? 'Bahasa Indonesia'
                           : 'English',
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const Icon(Icons.chevron_right, size: 20),
                     onTap: _showLanguageDialog,
                   ),
                 ),
-                const SizedBox(height: 32),
-                Text(
-                  'settings.theme'.tr(context),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? Border.all(color: Colors.white24)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 24),
+
+                _buildSectionHeader(context, 'settings.theme'.tr(context)),
+                _buildSeamlessCard(
+                  context,
                   child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Provider.of<ThemeProvider>(context).themeMode ==
-                                ThemeMode.system
-                            ? Icons.brightness_4_rounded
-                            : Provider.of<ThemeProvider>(context).themeMode ==
-                                  ThemeMode.light
-                            ? Icons.light_mode_rounded
-                            : Icons.dark_mode_rounded,
-                        color: const Color(0xFF7E57C2),
-                      ),
+                    leading: _buildIconContainer(
+                      context,
+                      Provider.of<ThemeProvider>(context).themeMode == ThemeMode.system
+                          ? Icons.brightness_4_rounded
+                          : Provider.of<ThemeProvider>(context).themeMode == ThemeMode.light
+                              ? Icons.light_mode_rounded
+                              : Icons.dark_mode_rounded,
                     ),
                     title: Text('settings.theme'.tr(context)),
                     subtitle: Text(
-                      Provider.of<ThemeProvider>(context).themeMode ==
-                              ThemeMode.system
+                      Provider.of<ThemeProvider>(context).themeMode == ThemeMode.system
                           ? 'settings.theme_system'.tr(context)
-                          : Provider.of<ThemeProvider>(context).themeMode ==
-                                ThemeMode.light
-                          ? 'settings.theme_light'.tr(context)
-                          : 'settings.theme_dark'.tr(context),
+                          : Provider.of<ThemeProvider>(context).themeMode == ThemeMode.light
+                              ? 'settings.theme_light'.tr(context)
+                              : 'settings.theme_dark'.tr(context),
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const Icon(Icons.chevron_right, size: 20),
                     onTap: _showThemeDialog,
                   ),
                 ),
-                const SizedBox(height: 32),
-                Text(
-                  'settings.notification'.tr(context),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? Border.all(color: Colors.white24)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 24),
+
+                _buildSectionHeader(context, 'settings.notification'.tr(context)),
+                _buildSeamlessCard(
+                  context,
                   child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.notifications_active_outlined,
-                        color: Color(0xFF7E57C2),
-                      ),
-                    ),
+                    leading: _buildIconContainer(context, Icons.notifications_active_outlined),
                     title: Text('settings.notification_sound'.tr(context)),
                     subtitle: Text(
                       'settings.sound_$_selectedNotificationSound'.tr(context),
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: const Icon(Icons.chevron_right, size: 20),
                     onTap: _showNotificationSoundDialog,
                   ),
                 ),
-                const SizedBox(height: 32),
-                Text(
-                  'settings.fingerprint'.tr(context),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
 
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? Border.all(color: Colors.white24)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                _buildSectionHeader(context, 'settings.fingerprint'.tr(context)),
+                _buildSeamlessCard(
+                  context,
                   child: Column(
                     children: [
                       ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.fingerprint,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
+                        leading: _buildIconContainer(context, Icons.fingerprint,
+                            color: Theme.of(context).colorScheme.primary),
                         title: Text('settings.fingerprint'.tr(context)),
                         subtitle: Text(
                           _hasToken
@@ -1114,32 +987,33 @@ class _SettingsPageState extends State<SettingsPage> {
                         trailing: Switch(
                           value: _isFingerprintEnabled,
                           onChanged: _toggleFingerprint,
-                          activeThumbColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
+                          activeColor: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       if (_hasToken) ...[
-                        const Divider(height: 1, indent: 70),
+                        _buildDivider(context),
                         ListTile(
-                          leading: const SizedBox(width: 40),
+                          contentPadding: const EdgeInsets.only(left: 72, right: 16),
                           title: Text(
                             'settings.re_register'.tr(context),
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          onTap: () async {
-                            // Only call _registerBiometric, it will handle the scan
-                            _registerBiometric();
-                          },
+                          onTap: _registerBiometric,
                         ),
-                        const Divider(height: 1, indent: 70),
+                        _buildDivider(context),
                         ListTile(
-                          leading: const SizedBox(width: 40),
+                          contentPadding: const EdgeInsets.only(left: 72, right: 16),
                           title: Text(
                             'settings.delete_fingerprint'.tr(context),
-                            style: const TextStyle(color: Colors.red),
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           onTap: _deleteFingerprint,
                         ),
@@ -1147,121 +1021,86 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 24),
 
-                const SizedBox(height: 32),
-                Text(
-                  'settings.account'.tr(context),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? Border.all(color: Colors.white24)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                _buildSectionHeader(context, 'settings.account'.tr(context)),
+                _buildSeamlessCard(
+                  context,
                   child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 28,
-                      backgroundColor: const Color(0xFF7E57C2),
-                      backgroundImage:
-                          (widget.userData['profile_photo'] != null &&
-                              widget.userData['profile_photo']
-                                  .toString()
-                                  .isNotEmpty)
-                          ? CachedNetworkImageProvider(
-                              '${AppConstants.serverRoot}/public/uploads/users/thumb/${widget.userData['profile_photo']}',
-                            )
-                          : null,
-                      child:
-                          (widget.userData['profile_photo'] == null ||
-                              widget.userData['profile_photo']
-                                  .toString()
-                                  .isEmpty)
-                          ? Text(
-                              (widget.userData['nama'] ?? 'U')
-                                  .substring(0, 1)
-                                  .toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                              ),
-                            )
-                          : null,
-                    ),
-                    title: Text(widget.userData['nama'] ?? 'User'),
-                    subtitle: Text(widget.userData['email'] ?? ''),
-                  ),
-                ),
-                // ── Informasi Aplikasi ────────────────────────────
-                const SizedBox(height: 32),
-                Text(
-                  'settings.app_info'.tr(context),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? Border.all(color: Colors.white24)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                    contentPadding: const EdgeInsets.all(16),
+                    leading: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                          width: 2,
+                        ),
                       ),
-                    ],
+                      child: CircleAvatar(
+                        radius: 28,
+                        backgroundColor: const Color(0xFF7E57C2),
+                        backgroundImage: (widget.userData['profile_photo'] != null &&
+                                widget.userData['profile_photo'].toString().isNotEmpty)
+                            ? CachedNetworkImageProvider(
+                                '${AppConstants.serverRoot}/public/uploads/users/thumb/${widget.userData['profile_photo']}',
+                              )
+                            : null,
+                        child: (widget.userData['profile_photo'] == null ||
+                                widget.userData['profile_photo'].toString().isEmpty)
+                            ? Text(
+                                (widget.userData['nama'] ?? 'U').substring(0, 1).toUpperCase(),
+                                style: const TextStyle(color: Colors.white, fontSize: 18),
+                              )
+                            : null,
+                      ),
+                    ),
+                    title: Text(
+                      widget.userData['nama'] ?? 'User',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      widget.userData['email'] ?? '',
+                      style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
                   ),
+                ),
+                const SizedBox(height: 24),
+
+                _buildSectionHeader(context, 'settings.app_info'.tr(context)),
+                _buildSeamlessCard(
+                  context,
                   child: Column(
                     children: [
                       _buildInfoTile(
+                        context,
                         icon: Icons.info_outline,
                         title: 'settings.app_version'.tr(context),
                         trailing: _appVersion,
                       ),
-                      const Divider(height: 1, indent: 70),
+                      _buildDivider(context),
                       _buildInfoTile(
+                        context,
                         icon: Icons.shield_outlined,
                         title: 'settings.privacy_policy'.tr(context),
-                        onTap: () =>
-                            _launchURL('${AppConstants.serverRoot}/erp/privacy'),
+                        onTap: () => _launchURL('${AppConstants.serverRoot}/erp/privacy'),
                       ),
-                      const Divider(height: 1, indent: 70),
+                      _buildDivider(context),
                       _buildInfoTile(
+                        context,
                         icon: Icons.help_outline,
                         title: 'settings.help_support'.tr(context),
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  HelpdeskListPage(userData: widget.userData),
+                              builder: (context) => HelpdeskListPage(userData: widget.userData),
                             ),
                           );
                         },
                       ),
-                      const Divider(height: 1, indent: 70),
+                      _buildDivider(context),
                       _buildInfoTile(
+                        context,
                         icon: Icons.business_outlined,
                         title: 'Iskom Sarana Nusantara',
                         trailing: '© 2026',
@@ -1269,147 +1108,133 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 24),
 
-                const SizedBox(height: 32),
-                Text(
-                  'settings.diagnosis'.tr(context),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Theme.of(context).brightness == Brightness.dark
-                        ? Border.all(color: Colors.white24)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.notifications_active_outlined,
-                            color: Color(0xFF7E57C2),
-                          ),
+                _buildSectionHeader(context, 'settings.diagnosis'.tr(context)),
+                _buildSeamlessCard(
+                  context,
+                  child: ListTile(
+                    leading: _buildIconContainer(context, Icons.notifications_active_outlined),
+                    title: Text('settings.diagnosis'.tr(context)),
+                    subtitle: Text('settings.diagnosis_desc'.tr(context)),
+                    trailing: const Icon(Icons.chevron_right, size: 20),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DiagnosisHubPage(),
                         ),
-                        title: Text('settings.diagnosis'.tr(context)),
-                        subtitle: Text('settings.diagnosis_desc'.tr(context)),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const DiagnosisHubPage(),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
-                // ── Zona Berbahaya (Hanya untuk Customer) ──
                 if (_userType == 'customer') ...[
-                  Text(
-                    'delete_account.section_title'.tr(context),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.red.withOpacity(0.3)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
+                  _buildSectionHeader(context, 'delete_account.section_title'.tr(context),
+                      isDanger: true),
+                  _buildSeamlessCard(
+                    context,
+                    isDanger: true,
                     child: ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.delete_forever_outlined,
-                          color: Colors.red,
-                        ),
-                      ),
+                      leading: _buildIconContainer(context, Icons.delete_forever_outlined,
+                          isDanger: true),
                       title: Text(
                         'delete_account.btn_label'.tr(context),
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text('delete_account.btn_desc'.tr(context)),
-                      trailing: const Icon(
-                        Icons.chevron_right,
-                        color: Colors.red,
-                      ),
+                      trailing: const Icon(Icons.chevron_right, color: Colors.red, size: 20),
                       onTap: _showDeleteAccountSheet,
                     ),
                   ),
                   const SizedBox(height: 32),
                 ],
-
-
               ],
             ),
     );
   }
 
-  Widget _buildInfoTile({
+  Widget _buildSectionHeader(BuildContext context, String title, {bool isDanger = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+          color: isDanger ? Colors.red : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeamlessCard(BuildContext context, {required Widget child, bool isDanger = false}) {
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: isDanger
+              ? Colors.red.withValues(alpha: 0.2)
+              : Theme.of(context).dividerColor.withValues(alpha: 0.08),
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildIconContainer(BuildContext context, IconData icon,
+      {Color? color, bool isDanger = false}) {
+    final themeColor = color ?? const Color(0xFF7E57C2);
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color:
+            isDanger ? Colors.red.withValues(alpha: 0.1) : themeColor.withValues(alpha: 0.1),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        icon,
+        color: isDanger ? Colors.red : themeColor,
+        size: 20,
+      ),
+    );
+  }
+
+  Widget _buildDivider(BuildContext context) {
+    return Divider(
+      height: 1,
+      indent: 72,
+      color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+    );
+  }
+
+  Widget _buildInfoTile(
+    BuildContext context, {
     required IconData icon,
     required String title,
     String? trailing,
     VoidCallback? onTap,
   }) {
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: const Color(0xFF7E57C2), size: 20),
+      leading: _buildIconContainer(context, icon),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
       ),
-      title: Text(title),
       trailing: trailing != null
           ? Text(
               trailing,
-              style: const TextStyle(color: Colors.grey, fontSize: 13),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
             )
-          : (onTap != null
-                ? const Icon(Icons.chevron_right, color: Colors.grey)
-                : null),
+          : (onTap != null ? const Icon(Icons.chevron_right, size: 20) : null),
       onTap: onTap,
     );
   }

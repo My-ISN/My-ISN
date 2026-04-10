@@ -197,38 +197,51 @@ class DashboardQuickMenu extends StatelessWidget {
   Widget _buildDynamicQuickMenu(BuildContext context, List<Widget> items) {
     if (items.isEmpty) return const SizedBox();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double itemWidth = (constraints.maxWidth - (10 * 2)) / 3;
-        final double fixedHeight = itemWidth * 1.05;
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double itemWidth = (constraints.maxWidth) / 3;
+            final double fixedHeight = itemWidth * 1.0;
 
-        final List<List<Widget>> rows = [];
-        for (var i = 0; i < items.length; i += 3) {
-          rows.add(
-            items.sublist(i, i + 3 > items.length ? items.length : i + 3),
-          );
-        }
+            final List<List<Widget>> rows = [];
+            for (var i = 0; i < items.length; i += 3) {
+              rows.add(
+                items.sublist(i, i + 3 > items.length ? items.length : i + 3),
+              );
+            }
 
-        return Column(
-          children: rows.map((rowItems) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  ...rowItems.map((item) {
-                    return Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
+            return Column(
+              children: rows.map((rowItems) {
+                return Row(
+                  children: [
+                    ...rowItems.map((item) {
+                      return Expanded(
                         child: SizedBox(height: fixedHeight, child: item),
+                      );
+                    }),
+                    // Fill empty slots in the last row
+                    if (rowItems.length < 3)
+                      ...List.generate(
+                        3 - rowItems.length,
+                        (index) => const Expanded(child: SizedBox()),
                       ),
-                    );
-                  }),
-                ],
-              ),
+                  ],
+                );
+              }).toList(),
             );
-          }).toList(),
-        );
-      },
+          },
+        ),
+      ),
     );
   }
 
@@ -239,55 +252,42 @@ class DashboardQuickMenu extends StatelessWidget {
     Color color,
     VoidCallback onTap,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Theme.of(context).brightness == Brightness.dark
-            ? Border.all(color: Colors.white24)
-            : Border.all(color: Colors.grey.withValues(alpha: 0.05)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Icon(icon, color: color, size: 24),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                    height: 1.1,
-                  ),
-                ),
-              ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
             ),
           ),
-        ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.onSurface,
+                height: 1.1,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

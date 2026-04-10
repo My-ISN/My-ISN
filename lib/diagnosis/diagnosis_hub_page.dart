@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/secondary_app_bar.dart';
 import 'notification_diagnosis_page.dart';
 import 'internet_diagnosis_page.dart';
 import 'storage_diagnosis_page.dart';
@@ -13,26 +14,9 @@ class DiagnosisHubPage extends StatelessWidget {
     const Color primaryColor = Color(0xFF7E57C2);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'diagnosis.title'.tr(context),
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Theme.of(context).cardColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: SecondaryAppBar(title: 'diagnosis.title'.tr(context)),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.all(24),
         children: [
           _buildDiagnosisCard(
             context,
@@ -102,69 +86,61 @@ class DiagnosisHubPage extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Theme.of(context).brightness == Brightness.dark
-            ? Border.all(color: Colors.white24)
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: color.withAlpha(13),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+        ),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: color.withAlpha(25),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 26),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                child: Icon(icon, color: color, size: 26),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        desc,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      desc,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                        height: 1.4,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: color.withAlpha(51),
-                  size: 16,
-                ),
-              ],
-            ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                size: 16,
+              ),
+            ],
           ),
         ),
       ),

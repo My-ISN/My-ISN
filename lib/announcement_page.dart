@@ -583,94 +583,90 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   final item = _announcements[index];
                   final isUnread = item['is_seen'].toString() == '0';
 
-                  return Container(
+                  return Card(
+                    elevation: 0,
                     margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
+                      side: BorderSide(
+                        color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                       ),
-                      leading: Stack(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.campaign,
-                              color: Color(0xFF7E57C2),
-                            ),
-                          ),
-                          if (isUnread)
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: Container(
-                                width: 10,
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Theme.of(context).cardColor,
-                                    width: 2,
-                                  ),
-                                ),
+                    ),
+                    child: InkWell(
+                      onTap: () => _showDetail(item),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isUnread
+                                    ? const Color(0xFF7E57C2).withValues(alpha: 0.1)
+                                    : Colors.grey.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                isUnread
+                                    ? Icons.notifications_active_rounded
+                                    : Icons.notifications_none_rounded,
+                                color: isUnread
+                                    ? const Color(0xFF7E57C2)
+                                    : Colors.grey,
+                                size: 24,
                               ),
                             ),
-                        ],
-                      ),
-                      title: Text(
-                        item['title'] ?? '',
-                        style: TextStyle(
-                          fontWeight: isUnread
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          fontSize: 16,
-                          color: isDark ? Colors.white : Colors.black,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['title'] ?? '',
+                                    style: TextStyle(
+                                      fontWeight: isUnread
+                                          ? FontWeight.bold
+                                          : FontWeight.w600,
+                                      fontSize: 15,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    item['created_at'] ?? '',
+                                    style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isUnread)
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF7E57C2),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: Colors.grey[400],
+                            ),
+                          ],
                         ),
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text(
-                            item['summary'] ?? (item['description'] ?? ''),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : Colors.grey[600],
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            item['created_at'] ?? '',
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.grey[500]
-                                  : Colors.grey[400],
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () => _showDetail(item),
                     ),
                   );
                 },

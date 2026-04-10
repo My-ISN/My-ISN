@@ -25,82 +25,95 @@ class DashboardStatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
           children: [
-            Expanded(
-              child: _buildStatCard(
-                context,
-                'dashboard.working_duration'.tr(context),
-                _formatWorkingDuration(stats?['working_duration']),
-                Icons.hourglass_empty,
-                const Color(0xFF2ECC71),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'dashboard.working_duration'.tr(context),
+                    _formatWorkingDuration(stats?['working_duration']),
+                    Icons.hourglass_empty,
+                    const Color(0xFF2ECC71),
+                  ),
+                ),
+                _buildDivider(context),
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'dashboard.my_leave'.tr(context),
+                    '${stats?['leave_count'] ?? 0}',
+                    Icons.calendar_today,
+                    const Color(0xFF7E57C2),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Divider(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+                height: 1,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildStatCard(
-                context,
-                'dashboard.my_leave'.tr(context),
-                '${stats?['leave_count'] ?? 0}',
-                Icons.calendar_today,
-                const Color(0xFF7E57C2),
-                isOutline: true,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'dashboard.overtime_request'.tr(context),
+                    '${stats?['overtime_count'] ?? 0}',
+                    Icons.more_time,
+                    const Color(0xFF7E57C2),
+                  ),
+                ),
+                _buildDivider(context),
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    'dashboard.travel_request'.tr(context),
+                    '${stats?['travel_count'] ?? 0}',
+                    Icons.flight_takeoff,
+                    const Color(0xFF2ECC71),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                context,
-                'dashboard.overtime_request'.tr(context),
-                '${stats?['overtime_count'] ?? 0}',
-                Icons.more_time,
-                const Color(0xFF7E57C2),
-                isOutline: true,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildStatCard(
-                context,
-                'dashboard.travel_request'.tr(context),
-                '${stats?['travel_count'] ?? 0}',
-                Icons.flight_takeoff,
-                const Color(0xFF7E57C2),
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildStatCard(
+  Widget _buildDivider(BuildContext context) {
+    return Container(
+      height: 40,
+      width: 1,
+      color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+    );
+  }
+
+  Widget _buildStatItem(
     BuildContext context,
     String title,
     String value,
     IconData icon,
-    Color color, {
-    bool isOutline = false,
-  }) {
-    return Container(
+    Color color,
+  ) {
+    return Padding(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isOutline ? Theme.of(context).cardColor : color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white24
-              : (isOutline
-                    ? Theme.of(context).dividerColor
-                    : Colors.transparent),
-        ),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -111,25 +124,36 @@ class DashboardStatsGrid extends StatelessWidget {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: isOutline ? Colors.grey : Colors.white,
-                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(icon, color: isOutline ? color : Colors.white, size: 20),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 16,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             value,
             style: TextStyle(
-              color: isOutline
-                  ? Theme.of(context).colorScheme.onSurface
-                  : Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
           ),
         ],
       ),

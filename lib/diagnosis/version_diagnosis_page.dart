@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_localizations.dart';
 import '../services/version_check_service.dart';
+import '../widgets/secondary_app_bar.dart';
 
 class VersionDiagnosisPage extends StatefulWidget {
   const VersionDiagnosisPage({super.key});
@@ -113,24 +114,7 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'diagnosis.version_title'.tr(context),
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Theme.of(context).cardColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: SecondaryAppBar(title: 'diagnosis.version_title'.tr(context)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -146,7 +130,7 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                 ),
                 child: Icon(
                   Icons.system_update_alt_outlined,
-                  size: 64,
+                  size: 60,
                   color: _primaryColor,
                 ),
               ),
@@ -154,71 +138,67 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
             const SizedBox(height: 32),
             Text(
               'diagnosis.version_checking'.tr(context),
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
+              style: const TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'diagnosis.version_verifying'.tr(context),
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                 fontSize: 14,
               ),
             ),
             const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
-                border: Theme.of(context).brightness == Brightness.dark
-                    ? Border.all(color: Colors.white24)
-                    : null,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+            Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+                ),
               ),
-              child: Column(
-                children: [
-                  _buildStep(
-                    'diagnosis.current_version'.tr(context),
-                    _localVersion != null
-                        ? 'v${_localVersion!.split('+')[0]}'
-                        : 'diagnosis.current_version_desc'.tr(context),
-                    _currentStep >= 1,
-                    _step1Success,
-                    _step1Error,
-                  ),
-                  const Divider(height: 32),
-                  _buildStep(
-                    'diagnosis.latest_version'.tr(context),
-                    _serverVersion != null
-                        ? 'v${_serverVersion!.split('+')[0]}'
-                        : 'diagnosis.latest_version_desc'.tr(context),
-                    _currentStep >= 2,
-                    _step2Success,
-                    _step2Error,
-                  ),
-                  const Divider(height: 32),
-                  _buildStep(
-                    'diagnosis.update_status'.tr(context),
-                    _currentStep < 3
-                        ? '...'
-                        : (_isUpdateNeeded
-                              ? 'diagnosis.update_needed'.tr(context)
-                              : 'diagnosis.up_to_date'.tr(context)),
-                    _currentStep >= 3,
-                    _step3Success,
-                    _step3Error,
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    _buildStep(
+                      'diagnosis.current_version'.tr(context),
+                      _localVersion != null
+                          ? 'v${_localVersion!.split('+')[0]}'
+                          : 'diagnosis.current_version_desc'.tr(context),
+                      _currentStep >= 1,
+                      _step1Success,
+                      _step1Error,
+                    ),
+                    _buildDivider(),
+                    _buildStep(
+                      'diagnosis.latest_version'.tr(context),
+                      _serverVersion != null
+                          ? 'v${_serverVersion!.split('+')[0]}'
+                          : 'diagnosis.latest_version_desc'.tr(context),
+                      _currentStep >= 2,
+                      _step2Success,
+                      _step2Error,
+                    ),
+                    _buildDivider(),
+                    _buildStep(
+                      'diagnosis.update_status'.tr(context),
+                      _currentStep < 3
+                          ? '...'
+                          : (_isUpdateNeeded
+                                ? 'diagnosis.update_needed'.tr(context)
+                                : 'diagnosis.up_to_date'.tr(context)),
+                      _currentStep >= 3,
+                      _step3Success,
+                      _step3Error,
+                    ),
+                  ],
+                ),
               ),
             ),
             if (_step3Success) ...[
@@ -230,19 +210,19 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                     color: _isUpdateNeeded
                         ? Colors.orange.withValues(alpha: 0.1)
                         : Colors.green.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: _isUpdateNeeded
-                          ? Colors.orange.withValues(alpha: 0.3)
-                          : Colors.green.withValues(alpha: 0.3),
+                          ? Colors.orange.withValues(alpha: 0.15)
+                          : Colors.green.withValues(alpha: 0.15),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         _isUpdateNeeded
-                            ? Icons.info_outline
-                            : Icons.check_circle,
+                            ? Icons.info_outline_rounded
+                            : Icons.check_circle_outline_rounded,
                         color: _isUpdateNeeded ? Colors.orange : Colors.green,
                       ),
                       const SizedBox(width: 12),
@@ -255,7 +235,8 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                             color: _isUpdateNeeded
                                 ? Colors.orange.shade800
                                 : Colors.green.shade800,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
                           ),
                         ),
                       ),
@@ -284,8 +265,9 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        elevation: 0,
                       ),
-                      icon: const Icon(Icons.download, color: Colors.white),
+                      icon: const Icon(Icons.download_rounded, color: Colors.white),
                       label: Text(
                         'main.update_now'.tr(context),
                         style: const TextStyle(
@@ -304,6 +286,14 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
     );
   }
 
+  Widget _buildDivider() {
+    return Divider(
+      height: 40,
+      indent: 44,
+      color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+    );
+  }
+
   Widget _buildStep(
     String title,
     String subtitle,
@@ -313,9 +303,9 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
   ) {
     Widget icon;
     if (error != null) {
-      icon = const Icon(Icons.cancel, color: Colors.red, size: 28);
+      icon = const Icon(Icons.cancel_outlined, color: Colors.red, size: 28);
     } else if (isSuccess) {
-      icon = const Icon(Icons.check_circle, color: Colors.green, size: 28);
+      icon = const Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 28);
     } else if (isStarted) {
       icon = SizedBox(
         width: 24,
@@ -327,8 +317,8 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
       );
     } else {
       icon = Icon(
-        Icons.radio_button_unchecked,
-        color: Colors.grey.shade300,
+        Icons.radio_button_unchecked_rounded,
+        color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         size: 28,
       );
     }
@@ -346,11 +336,9 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                 style: TextStyle(
                   color: isStarted
                       ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.3),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 2),
@@ -359,8 +347,8 @@ class _VersionDiagnosisPageState extends State<VersionDiagnosisPage> {
                 style: TextStyle(
                   color: error != null
                       ? Colors.red
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 13,
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 12,
                 ),
               ),
             ],

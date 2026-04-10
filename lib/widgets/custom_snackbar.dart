@@ -67,7 +67,7 @@ class CustomSnackBar {
         margin: const EdgeInsets.only(
           left: 16,
           right: 16,
-          bottom: 130, // Fixed height to stay above FAB
+          bottom: 10, // Lowered even further to 10
           top: 16,
         ),
         duration: const Duration(seconds: 3),

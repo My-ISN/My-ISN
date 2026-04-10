@@ -181,24 +181,37 @@ class _AllMenusPageState extends State<AllMenusPage> {
                     ],
                   ),
                 ),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.95,
+                Card(
+                  elevation: 0,
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    side: BorderSide(
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+                    ),
                   ),
-                  itemCount: modules.length,
-                  itemBuilder: (context, index) {
-                    return _buildMenuCard(
-                      context,
-                      modules[index],
-                    );
-                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 0,
+                        mainAxisSpacing: 0,
+                        childAspectRatio: 0.95,
+                      ),
+                      itemCount: modules.length,
+                      itemBuilder: (context, index) {
+                        return _buildMenuTile(
+                          context,
+                          modules[index],
+                        );
+                      },
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
               ],
             );
           }),
@@ -208,7 +221,7 @@ class _AllMenusPageState extends State<AllMenusPage> {
     );
   }
 
-  Widget _buildMenuCard(
+  Widget _buildMenuTile(
     BuildContext context,
     AppModule m,
   ) {
@@ -221,148 +234,97 @@ class _AllMenusPageState extends State<AllMenusPage> {
     final bool isMaxReached =
         _isEditing && !isPinned && _tempPinnedKeys!.length >= 5;
 
-    return AnimatedScale(
-      scale: isPinned && _isEditing ? 1.05 : 1.0,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOutBack,
-      child: AnimatedOpacity(
-        opacity: isMaxReached ? 0.5 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(24),
-            border: _isEditing && isPinned
-                ? Border.all(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2.5,
-                  )
-                : Theme.of(context).brightness == Brightness.dark
-                    ? Border.all(color: Colors.white12)
-                    : Border.all(color: Colors.grey.withValues(alpha: 0.08)),
-            boxShadow: [
-              if (isPinned && _isEditing)
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                  blurRadius: 15,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 4),
-                )
-              else
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                if (_isEditing) {
-                  _togglePinned(m.titleKey);
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => m.pageBuilder(context, widget.userData),
-                    ),
-                  );
-                }
-              },
-              borderRadius: BorderRadius.circular(24),
-              child: Stack(
+    return Opacity(
+      opacity: isMaxReached ? 0.3 : 1.0,
+      child: InkWell(
+        onTap: () {
+          if (_isEditing) {
+            _togglePinned(m.titleKey);
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => m.pageBuilder(context, widget.userData),
+              ),
+            );
+          }
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Center(
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: isPinned && _isEditing
-                                  ? m.color.withValues(alpha: 0.2)
-                                  : m.color.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Icon(
-                              m.icon,
-                              color: m.color,
-                              size: 30,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          m.titleKey.tr(context),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isPinned && _isEditing
-                                ? FontWeight.w900
-                                : FontWeight.w700,
-                            letterSpacing: -0.2,
-                            height: 1.1,
-                          ),
-                        ),
-                      ],
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _isEditing && isPinned
+                            ? m.color.withValues(alpha: 0.2)
+                            : m.color.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: _isEditing && isPinned
+                            ? Border.all(color: m.color, width: 2)
+                            : null,
+                      ),
+                      child: Icon(
+                        m.icon,
+                        color: m.color,
+                        size: 24,
+                      ),
                     ),
                   ),
-                  if (_isEditing && isPinned)
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Text(
-                          '${pinnedIndex + 1}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    )
-                  else if (_isEditing && !isMaxReached)
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.add_rounded,
-                          size: 14,
-                          color: Colors.grey.withValues(alpha: 0.4),
-                        ),
-                      ),
+                  const SizedBox(height: 8),
+                  Text(
+                    m.titleKey.tr(context),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight:
+                          _isEditing && isPinned ? FontWeight.w900 : FontWeight.w800,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      letterSpacing: -0.2,
+                      height: 1.1,
                     ),
+                  ),
                 ],
               ),
             ),
-          ),
+            if (_isEditing && isPinned)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '${pinnedIndex + 1}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              )
+            else if (_isEditing && !isMaxReached)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Icon(
+                  Icons.add_circle_outline_rounded,
+                  size: 14,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                ),
+              ),
+          ],
         ),
       ),
     );

@@ -981,12 +981,8 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   }
 
   Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: onPressed == null
-          ? (isDark ? Colors.white12 : Colors.grey[200])
-          : Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(12),
+      color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
@@ -996,13 +992,13 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.1),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
             ),
           ),
           child: Icon(
             icon,
             color: onPressed == null
-                ? (isDark ? Colors.white24 : Colors.grey[400])
+                ? Colors.grey[400]
                 : _primaryColor,
             size: 24,
           ),
@@ -1142,16 +1138,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Theme.of(context).brightness == Brightness.dark
-                ? Border.all(color: Colors.white24)
-                : null,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            border: Border.all(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            ),
           ),
           child: AnimatedSize(
             duration: const Duration(milliseconds: 300),
@@ -1381,8 +1370,10 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.withOpacity(0.05)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1496,8 +1487,10 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.grey.withOpacity(0.05)),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1627,8 +1620,10 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(

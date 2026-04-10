@@ -162,22 +162,17 @@ class _AttendancePageState extends State<AttendancePage> {
 
     final weekdayLabels = ['0', '1', '2', '3', '4', '5', '6'];
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Theme.of(context).brightness == Brightness.dark
-            ? Border.all(color: Colors.white24)
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(13),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
       child: Column(
         children: [
           Row(
@@ -266,8 +261,9 @@ class _AttendancePageState extends State<AttendancePage> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildDayCell(int day, Map<String, dynamic>? record) {
     final bool isPresent =
@@ -479,16 +475,24 @@ class _AttendancePageState extends State<AttendancePage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white.withAlpha(13)
+            ? Colors.white.withValues(alpha: 0.05)
             : const Color(0xFFF8FAFF),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            style: TextStyle(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[400]
+                  : Colors.grey[600],
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -504,93 +508,90 @@ class _AttendancePageState extends State<AttendancePage> {
     final summary = _attendanceData['summary'] ?? {};
     final present = summary['present'] ?? 0;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        border: Theme.of(context).brightness == Brightness.dark
-            ? Border.all(color: Colors.white24)
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(13),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
-      child: Column(
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => setState(() => _isSummaryExpanded = !_isSummaryExpanded),
-              borderRadius: BorderRadius.circular(24),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'attendance.summary'.tr(context),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                        Icon(
-                          _isSummaryExpanded ? Icons.expand_less : Icons.expand_more,
-                          color: Colors.grey,
-                        ),
-                      ],
+      child: InkWell(
+        onTap: () => setState(() => _isSummaryExpanded = !_isSummaryExpanded),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'attendance.summary'.tr(context),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    const SizedBox(height: 24),
-                    Column(
-                      children: [
-                        _buildSummaryStat(
-                          'attendance.present'.tr(context),
-                          present,
-                          const Color(0xFF2ECC71),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildSummaryStat(
-                          'attendance.late'.tr(context),
-                          summary['late'] ?? 0,
-                          Colors.orange,
-                        ),
-                        if (_isSummaryExpanded) ...[
-                          const SizedBox(height: 8),
-                          _buildSummaryStat(
-                            'attendance.absent'.tr(context),
-                            summary['absent'] ?? 0,
-                            Colors.red.shade400,
-                          ),
-                          const SizedBox(height: 8),
-                          _buildSummaryStat(
-                            'attendance.early_leave'.tr(context),
-                            summary['early_leave'] ?? 0,
-                            Colors.blue.shade400,
-                          ),
-                          const SizedBox(height: 8),
-                          _buildSummaryStat(
-                            'attendance.total_rest'.tr(context),
-                            summary['total_rest'] ?? '0 jam',
-                            _primaryColor,
-                            showAsText: true,
-                          ),
-                        ],
-                      ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isSummaryExpanded
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
+                      color: _primaryColor,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Column(
+                children: [
+                  _buildSummaryStat(
+                    'attendance.present'.tr(context),
+                    present,
+                    const Color(0xFF2ECC71),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildSummaryStat(
+                    'attendance.late'.tr(context),
+                    summary['late'] ?? 0,
+                    Colors.orange,
+                  ),
+                  if (_isSummaryExpanded) ...[
+                    const SizedBox(height: 8),
+                    _buildSummaryStat(
+                      'attendance.absent'.tr(context),
+                      summary['absent'] ?? 0,
+                      Colors.red.shade400,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildSummaryStat(
+                      'attendance.early_leave'.tr(context),
+                      summary['early_leave'] ?? 0,
+                      Colors.blue.shade400,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildSummaryStat(
+                      'attendance.total_rest'.tr(context),
+                      summary['total_rest'] ?? '0 jam',
+                      _primaryColor,
+                      showAsText: true,
                     ),
                   ],
-                ),
+                ],
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -650,8 +651,8 @@ class DonutPainter extends CustomPainter {
 
     final bgPaint = Paint()
       ..color = brightness == Brightness.dark
-          ? Colors.white12
-          : Colors.grey.withAlpha(13)
+          ? Colors.white.withValues(alpha: 0.1)
+          : Colors.grey.withValues(alpha: 0.1)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 
