@@ -4,6 +4,7 @@ import '../services/finance_service.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
 import '../widgets/secondary_app_bar.dart';
+import '../widgets/custom_snackbar.dart';
 
 class AddPersonalFinancePage extends StatefulWidget {
   final int initialType; // 1 = Income, 2 = Expense, 3 = Budget
@@ -176,9 +177,7 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih kategori terlebih dahulu'), backgroundColor: Colors.orange),
-      );
+      context.showWarningSnackBar('Pilih kategori terlebih dahulu');
       return;
     }
 
@@ -223,9 +222,7 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan: $e'), backgroundColor: Colors.red),
-        );
+          context.showErrorSnackBar('Gagal menyimpan: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

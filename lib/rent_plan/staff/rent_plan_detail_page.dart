@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import '../../widgets/searchable_dropdown.dart';
 import '../../localization/app_localizations.dart';
 import '../../constants.dart';
+import '../../widgets/custom_snackbar.dart';
 
 import '../../widgets/secondary_app_bar.dart';
 
@@ -149,13 +150,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     } else {
       if (mounted) {
         if (!silent) setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ??
-                  'rent_plan.failed_fetch_detail'.tr(context),
-            ),
-          ),
+        context.showErrorSnackBar(
+          response['message'] ??
+              'rent_plan.failed_fetch_detail'.tr(context),
         );
       }
     }
@@ -418,12 +415,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     if (_lastUpdateTimes.containsKey(field)) {
       final lastUpdate = _lastUpdateTimes[field]!;
       if (now.difference(lastUpdate).inSeconds < 2) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('rent_plan.please_wait'.tr(context)),
-            duration: const Duration(seconds: 1),
-          ),
-        );
+        context.showWarningSnackBar('rent_plan.please_wait'.tr(context));
         return;
       }
     }
@@ -444,13 +436,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       // Refresh data di background untuk memastikan sinkronisasi
       _fetchDetail(silent: true);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('rent_plan.status_updated'.tr(context)),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 1),
-          ),
-        );
+        context.showSuccessSnackBar('rent_plan.status_updated'.tr(context));
       }
     } else {
       // Rollback jika gagal
@@ -458,14 +444,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         _rentalData![field] = originalValue;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ??
-                  'rent_plan.failed_update_status'.tr(context),
-            ),
-            backgroundColor: Colors.red,
-          ),
+        context.showErrorSnackBar(
+          response['message'] ??
+              'rent_plan.failed_update_status'.tr(context),
         );
       }
     }
@@ -828,24 +809,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     if (response['status'] == true) {
       _fetchDetail(silent: true);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('rent_plan.detail_updated'.tr(context)),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccessSnackBar('rent_plan.detail_updated'.tr(context));
         setState(() => _activeTab = 'OVERVIEW');
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ??
-                  'rent_plan.failed_update_detail'.tr(context),
-            ),
-            backgroundColor: Colors.red,
-          ),
+        context.showErrorSnackBar(
+          response['message'] ??
+              'rent_plan.failed_update_detail'.tr(context),
         );
       }
     }
@@ -1039,12 +1010,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${'rent_plan.opening'.tr(context)} ${tab.toLowerCase()}',
-            ),
-          ),
+        context.showSuccessSnackBar(
+          '${'rent_plan.opening'.tr(context)} ${tab.toLowerCase()}',
         );
       }
     }
@@ -1356,9 +1323,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     final requiredCount = isPribadi ? 3 : 2;
 
     if (_extLamaSewaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('rent_plan.duration_required'.tr(context))),
-      );
+      context.showWarningSnackBar('rent_plan.duration_required'.tr(context));
       return;
     }
 
@@ -1367,12 +1332,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         .cast<String>()
         .toList();
     if (selectedIds.length < requiredCount) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            '${'rent_plan.select'.tr(context)} $requiredCount ${'rent_plan.guarantee'.tr(context)}',
-          ),
-        ),
+      context.showWarningSnackBar(
+        '${'rent_plan.select'.tr(context)} $requiredCount ${'rent_plan.guarantee'.tr(context)}',
       );
       return;
     }
@@ -1381,12 +1342,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     for (int i = 1; i <= requiredCount; i++) {
       if (_selectedExtJaminanIdsMap[i] != null &&
           _extFileJaminanMap[i] == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${'rent_plan.upload_guarantee_file'.tr(context)} $i',
-            ),
-          ),
+        context.showWarningSnackBar(
+          '${'rent_plan.upload_guarantee_file'.tr(context)} $i',
         );
         return;
       }
@@ -1418,12 +1375,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     setState(() => _isSaving = false);
 
     if (res['status'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('rent_plan.extension_success'.tr(context)),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showSuccessSnackBar('rent_plan.extension_success'.tr(context));
       _extLamaSewaController.clear();
       _extDiskonController.clear();
       _extNotesController.clear();
@@ -1439,13 +1391,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       });
       _fetchDetail();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            res['message'] ?? 'rent_plan.extension_failed'.tr(context),
-          ),
-          backgroundColor: Colors.red,
-        ),
+      context.showErrorSnackBar(
+        res['message'] ?? 'rent_plan.extension_failed'.tr(context),
       );
     }
   }
@@ -3635,13 +3582,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                           _fetchDetail();
                         } else {
                           setState(() => _isLoading = false);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                res['message'] ??
-                                    'rent_plan.failed_save'.tr(context),
-                              ),
-                            ),
+                          context.showErrorSnackBar(
+                            res['message'] ??
+                                'rent_plan.failed_save'.tr(context),
                           );
                         }
                       },
@@ -4205,13 +4148,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                   if (proofFile == null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'rent_plan.upload_proof_error'.tr(
-                                            context,
-                                          ),
-                                        ),
+                                    context.showWarningSnackBar(
+                                      'rent_plan.upload_proof_error'.tr(
+                                        context,
                                       ),
                                     );
                                     return;
@@ -4232,15 +4171,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                                     _fetchDetail();
                                   } else {
                                     setState(() => _isLoading = false);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          res['message'] ??
-                                              'rent_plan.failed_payment'.tr(
-                                                context,
-                                              ),
-                                        ),
-                                      ),
+                                    context.showErrorSnackBar(
+                                      res['message'] ??
+                                          'rent_plan.failed_payment'.tr(
+                                            context,
+                                          ),
                                     );
                                   }
                                 },
@@ -4413,13 +4348,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                         _fetchDetail();
                       } else {
                         setState(() => _isLoading = false);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              res['message'] ??
-                                  'rent_plan.failed_delete'.tr(context),
-                            ),
-                          ),
+                        context.showErrorSnackBar(
+                          res['message'] ??
+                              'rent_plan.failed_delete'.tr(context),
                         );
                       }
                     },

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 import 'employee_edit_page.dart';
 import '../widgets/secondary_app_bar.dart';
@@ -1232,36 +1233,21 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage>
       final data = json.decode(response.body);
       if (data['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('employees.delete_success'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('employees.delete_success'.tr(context));
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                data['message'] ?? 'employees.delete_error'.tr(context),
-              ),
-              backgroundColor: Colors.red,
-            ),
+          context.showErrorSnackBar(
+            data['message'] ?? 'employees.delete_error'.tr(context),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('profile.conn_error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('profile.conn_error'.tr(context));
       }
     }
   }

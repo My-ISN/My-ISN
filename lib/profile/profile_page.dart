@@ -15,6 +15,7 @@ import '../services/log_service.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../widgets/side_drawer.dart';
+import '../widgets/custom_snackbar.dart';
 
 class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -66,14 +67,10 @@ class _ProfilePageState extends State<ProfilePage> {
         Log.w('PROFILE API ERROR: ${data['message']}');
         if (mounted) {
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'main.error_with_msg'.tr(
-                  context,
-                  args: {'message': data['message'].toString()},
-                ),
-              ),
+          context.showErrorSnackBar(
+            'main.error_with_msg'.tr(
+              context,
+              args: {'message': data['message'].toString()},
             ),
           );
         }
@@ -82,9 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
       Log.e('Error fetching profile details: $e');
       if (mounted && ConnectivityStatus.of(context)) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('profile.conn_error'.tr(context))),
-        );
+        context.showErrorSnackBar('profile.conn_error'.tr(context));
       } else if (mounted) {
         setState(() => _isLoading = false);
       }

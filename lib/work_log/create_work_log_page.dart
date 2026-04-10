@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 import '../widgets/secondary_app_bar.dart';
 
@@ -63,9 +64,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
         .toList();
 
     if (items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('work_log.fill_required'.tr(context))),
-      );
+      context.showWarningSnackBar('work_log.fill_required'.tr(context));
       return;
     }
 
@@ -89,32 +88,13 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
 
       final result = json.decode(response.body);
       if (response.statusCode == 200 && result['status'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              result['message'] ?? 'work_log.save_success'.tr(context),
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccessSnackBar(result['message'] ?? 'work_log.save_success'.tr(context));
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              result['message'] ?? 'work_log.save_failed'.tr(context),
-            ),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar(result['message'] ?? 'work_log.save_failed'.tr(context));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('work_log.conn_error'.tr(context)),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showErrorSnackBar('work_log.conn_error'.tr(context));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }

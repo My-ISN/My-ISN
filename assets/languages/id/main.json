@@ -1,5 +1,6 @@
 {
     "main": {
+        "no_internet": "Tidak ada koneksi internet",
         "apply": "Terapkan",
         "dashboard": "Dashboard",
         "attendance": "Absensi",

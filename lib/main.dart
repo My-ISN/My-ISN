@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'localization/app_localizations.dart';
 import 'providers/language_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/quick_menu_provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -23,6 +24,7 @@ void main() async {
 
   final languageProvider = LanguageProvider();
   final themeProvider = ThemeProvider();
+  final quickMenuProvider = QuickMenuProvider();
 
   try {
     await NotificationService().initialize(navigatorKey);
@@ -51,6 +53,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => languageProvider),
         ChangeNotifierProvider(create: (_) => themeProvider),
+        ChangeNotifierProvider(create: (_) => quickMenuProvider),
       ],
       child: MyApp(initialUserData: userData),
     ),

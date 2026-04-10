@@ -6,6 +6,7 @@ import '../widgets/secondary_app_bar.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 
 class TicketDetailPage extends StatefulWidget {
@@ -74,11 +75,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
     if (!_hasPermission('mobile_helpdesk_answer')) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('helpdesk.no_permission'.tr(context)),
-          ),
-        );
+        context.showWarningSnackBar('helpdesk.no_permission'.tr(context));
       }
       return;
     }
@@ -126,12 +123,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
           _replyController.text = message; // Put message back in text field
         });
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? 'helpdesk.failed_reply'.tr(context)),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar(data['message'] ?? 'helpdesk.failed_reply'.tr(context));
         }
       }
     } catch (e) {
@@ -141,12 +133,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
         _replyController.text = message;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('helpdesk.failed_reply'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('helpdesk.failed_reply'.tr(context));
       }
     } finally {
       if (mounted) setState(() => _isSending = false);

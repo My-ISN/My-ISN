@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 import '../widgets/searchable_dropdown.dart';
 import '../widgets/secondary_app_bar.dart';
@@ -135,30 +136,22 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
       final data = json.decode(response.body);
       if (data['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('employees.save_success'.tr(context))),
-          );
+          context.showSuccessSnackBar('employees.save_success'.tr(context));
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'main.error_with_msg'.tr(
-                  context,
-                  args: {'message': data['message']},
-                ),
-              ),
+          context.showErrorSnackBar(
+            'main.error_with_msg'.tr(
+              context,
+              args: {'message': data['message']},
             ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        context.showErrorSnackBar('Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);

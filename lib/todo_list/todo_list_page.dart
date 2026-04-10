@@ -9,8 +9,10 @@ import 'dart:async';
 
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
+import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 import '../widgets/searchable_dropdown.dart';
 import 'widgets/todo_stats_card.dart';
@@ -289,12 +291,7 @@ class _TodoListPageState extends State<TodoListPage> {
     );
 
     if (todo != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('todo_list.search_result_msg'.tr(context, args: {'%s': todo['description'] ?? ''})),
-          backgroundColor: _primaryColor,
-        ),
-      );
+      context.showSuccessSnackBar('todo_list.search_result_msg'.tr(context, args: {'%s': todo['description'] ?? ''}));
     }
   }
 
@@ -366,12 +363,7 @@ class _TodoListPageState extends State<TodoListPage> {
         _sortTodos(_allTodos);
         _paginateLocal();
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('todo_list.status_update_failed'.tr(context)),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showErrorSnackBar('todo_list.status_update_failed'.tr(context));
     }
   }
 
@@ -392,31 +384,17 @@ class _TodoListPageState extends State<TodoListPage> {
       if (response.statusCode == 200) {
         _fetchTodos();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('todo_list.delete_success'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('todo_list.delete_success'.tr(context));
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${'todo_list.delete_failed'.tr(context)} (\${response.statusCode})',
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar('${'todo_list.delete_failed'.tr(context)} (${response.statusCode})');
         }
       }
     } catch (e) {
       debugPrint('Error deleting todo: \$e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: \$e'), backgroundColor: Colors.red),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     }
   }
@@ -444,12 +422,7 @@ class _TodoListPageState extends State<TodoListPage> {
       if (response.statusCode == 200) {
         _fetchTodos();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('todo_list.save_success'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('todo_list.save_success'.tr(context));
         }
       }
     } catch (e) {
@@ -475,19 +448,7 @@ class _TodoListPageState extends State<TodoListPage> {
     await _savePendingTodos();
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.cloud_off, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(child: Text('todo_list.offline_saved'.tr(context))),
-            ],
-          ),
-          backgroundColor: Colors.orange[800],
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      context.showWarningSnackBar('todo_list.offline_saved'.tr(context));
     }
   }
 
@@ -523,13 +484,7 @@ class _TodoListPageState extends State<TodoListPage> {
         _fetchTodos();
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('todo_list.sync_success'.tr(context)),
-              backgroundColor: Colors.blue[700],
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          context.showSuccessSnackBar('todo_list.sync_success'.tr(context));
         }
       }
     } finally {
@@ -584,12 +539,7 @@ class _TodoListPageState extends State<TodoListPage> {
       if (response.statusCode == 200) {
         _fetchTodos();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('todo_list.update_success'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('todo_list.update_success'.tr(context));
         }
       }
     } catch (e) {
@@ -618,20 +568,7 @@ class _TodoListPageState extends State<TodoListPage> {
   void _copyTodoText(String text) {
     Clipboard.setData(ClipboardData(text: text));
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle_outline, color: Colors.white),
-              const SizedBox(width: 12),
-              Text('todo_list.copy_success'.tr(context)),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+      context.showSuccessSnackBar('todo_list.copy_success'.tr(context));
     }
   }
 
@@ -666,34 +603,17 @@ class _TodoListPageState extends State<TodoListPage> {
       if (response.statusCode == 200 && result['status'] == true) {
         _fetchTodos();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('todo_list.move_success'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('todo_list.move_success'.tr(context));
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${'todo_list.move_failed'.tr(context)}: ${result['message'] ?? response.statusCode}',
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar('${'todo_list.move_failed'.tr(context)}: ${result['message'] ?? response.statusCode}');
         }
       }
     } catch (e) {
       debugPrint('Error moving todo: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${'todo_list.move_failed'.tr(context)}: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('${'todo_list.move_failed'.tr(context)}: $e');
       }
     }
   }

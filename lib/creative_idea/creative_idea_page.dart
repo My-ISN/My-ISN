@@ -7,6 +7,7 @@ import '../services/creative_idea_service.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
+import '../widgets/custom_snackbar.dart';
 
 class CreativeIdeaPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -1069,21 +1070,11 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                     if (res['status'] == true) {
                       Navigator.pop(context); // Close edit sheet
                       Navigator.pop(context); // Close detail sheet
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('creative_idea.update_success'.tr(context)),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
+                      context.showSuccessSnackBar('creative_idea.update_success'.tr(context));
                       _fetchIdeas();
                       _fetchLeaderboard();
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(res['message'] ?? 'Error'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
+                      context.showErrorSnackBar(res['message'] ?? 'Error');
                     }
                   }
                 },
@@ -1208,21 +1199,11 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
           Navigator.pop(context); // Close loading
           if (res['status'] == true) {
             Navigator.pop(context); // Close detail sheet
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('creative_idea.delete_success'.tr(context)),
-                backgroundColor: Colors.green,
-              ),
-            );
+            context.showSuccessSnackBar('creative_idea.delete_success'.tr(context));
             _fetchIdeas();
             _fetchLeaderboard();
           } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(res['message'] ?? 'Error'),
-                backgroundColor: Colors.red,
-              ),
-            );
+            context.showErrorSnackBar(res['message'] ?? 'Error');
           }
         }
       }
@@ -1480,20 +1461,10 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                   Navigator.pop(context); // Close loading
                   if (res['status'] == true) {
                     Navigator.pop(context); // Close sheet
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('creative_idea.success_msg'.tr(context)),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                    context.showSuccessSnackBar('creative_idea.success_msg'.tr(context));
                     _fetchIdeas();
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(res['message'] ?? 'Error'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+                    context.showErrorSnackBar(res['message'] ?? 'Error');
                   }
                 }
               },

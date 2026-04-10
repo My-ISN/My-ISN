@@ -72,6 +72,10 @@
         "quick_menu_helpdesk": "Helpdesk",
         "quick_menu_ai_bot": "Bot AI",
         "quick_menu_creative_idea": "Ide Kreatif",
-        "quick_menu_intercom": "Intercom Rumah"
+        "quick_menu_intercom": "Intercom Rumah",
+        "quick_menu_more": "Selengkapnya",
+        "edit": "Ubah",
+        "edit_quick_menu_info": "Pilih maksimal 5 menu untuk ditampilkan di dashboard.",
+        "reset": "Atur Ulang"
     }
 }

@@ -5,6 +5,7 @@ import '../localization/app_localizations.dart';
 import 'package:intl/intl.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
+import '../widgets/custom_snackbar.dart';
 
 class IntercomPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -70,9 +71,7 @@ class _IntercomPageState extends State<IntercomPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (!silent) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('fetch_error'.tr(context))),
-          );
+          context.showErrorSnackBar('fetch_error'.tr(context));
         }
       }
     }
@@ -86,22 +85,12 @@ class _IntercomPageState extends State<IntercomPage> {
       await _intercomService.sendIntercomMessage(message);
       if (mounted) {
         _messageController.clear();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('send_success'.tr(context)),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccessSnackBar('send_success'.tr(context));
         _fetchHistory(silent: true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('send_error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('send_error'.tr(context));
       }
     } finally {
       if (mounted) setState(() => _isSending = false);

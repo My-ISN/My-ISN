@@ -19,6 +19,7 @@ import 'widgets/secondary_app_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'services/notification_service.dart';
+import 'widgets/custom_snackbar.dart';
 
 
 class SettingsPage extends StatefulWidget {
@@ -137,28 +138,18 @@ class _SettingsPageState extends State<SettingsPage> {
             _isFingerprintEnabled = value;
           });
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  value
-                      ? 'settings.fingerprint_enabled_msg'.tr(context)
-                      : 'settings.fingerprint_disabled_msg'.tr(context),
-                ),
-                backgroundColor: value ? Colors.green : Colors.orange,
-              ),
-            );
+            if (value) {
+              context.showSuccessSnackBar('settings.fingerprint_enabled_msg'.tr(context));
+            } else {
+              context.showWarningSnackBar('settings.fingerprint_disabled_msg'.tr(context));
+            }
           }
         } else {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'main.error_with_msg'.tr(
-                    context,
-                    args: {'message': data['message'] ?? 'Error'},
-                  ),
-                ),
-                backgroundColor: Colors.red,
+            context.showErrorSnackBar(
+              'main.error_with_msg'.tr(
+                context,
+                args: {'message': data['message'] ?? 'Error'},
               ),
             );
           }
@@ -166,12 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
       } catch (e) {
         debugPrint('Error toggle fingerprint: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('login.conn_error'.tr(context)),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar('login.conn_error'.tr(context));
         }
       } finally {
         setState(() => _isLoading = false);
@@ -283,24 +269,14 @@ class _SettingsPageState extends State<SettingsPage> {
             _isFingerprintEnabled = false;
           });
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('settings.delete_success'.tr(context)),
-                backgroundColor: Colors.red,
-              ),
-            );
+            context.showSuccessSnackBar('settings.delete_success'.tr(context));
           }
         } else {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'main.error_with_msg'.tr(
-                    context,
-                    args: {'message': data['message'] ?? 'Error'},
-                  ),
-                ),
-                backgroundColor: Colors.red,
+            context.showErrorSnackBar(
+              'main.error_with_msg'.tr(
+                context,
+                args: {'message': data['message'] ?? 'Error'},
               ),
             );
           }
@@ -308,12 +284,7 @@ class _SettingsPageState extends State<SettingsPage> {
       } catch (e) {
         debugPrint('Error delete fingerprint: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('login.conn_error'.tr(context)),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar('login.conn_error'.tr(context));
         }
       } finally {
         setState(() => _isLoading = false);
@@ -470,28 +441,14 @@ class _SettingsPageState extends State<SettingsPage> {
             _isFingerprintEnabled = true;
           });
 
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('settings.reg_success'.tr(context)),
-                backgroundColor: Colors.green,
-              ),
-            );
-          }
+          context.showSuccessSnackBar('settings.reg_success'.tr(context));
         } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'main.error_with_msg'.tr(
-                    context,
-                    args: {'message': data['message'] ?? 'Error'},
-                  ),
-                ),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
+          context.showErrorSnackBar(
+            'main.error_with_msg'.tr(
+              context,
+              args: {'message': data['message'] ?? 'Error'},
+            ),
+          );
         }
       }
     } catch (e) {
@@ -593,15 +550,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ElevatedButton(
                       onPressed: () {
                         final p = passwordController.text.trim();
-                        if (p.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('login.password_required'.tr(context)),
-                              backgroundColor: Colors.orange,
-                            ),
-                          );
-                          return;
-                        }
+                          context.showWarningSnackBar('login.password_required'.tr(context));
                         Navigator.pop(context, p);
                       },
                       style: ElevatedButton.styleFrom(
@@ -1472,15 +1421,9 @@ class _SettingsPageState extends State<SettingsPage> {
         throw Exception('Could not launch $url');
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'settings.link_error'.tr(context, args: {'error': e.toString()}),
-            ),
-          ),
-        );
-      }
+          context.showErrorSnackBar(
+            'settings.link_error'.tr(context, args: {'error': e.toString()}),
+          );
     }
   }
 
@@ -1800,8 +1743,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _deleteAccount() async {
     setState(() => _isLoading = true);
     try {
-      final userId = (widget.userData['id'] ?? widget.userData['user_id'])
-          .toString();
+      final userId = (widget.userData['id'] ?? widget.userData['user_id']).toString();
       final response = await http.post(
         Uri.parse('${AppConstants.baseUrl}/delete_account'),
         body: {'user_id': userId},
@@ -1813,12 +1755,7 @@ class _SettingsPageState extends State<SettingsPage> {
         await storage.deleteAll();
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('delete_account.success'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('delete_account.success'.tr(context));
           // Navigate back to login
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -1826,27 +1763,13 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         }
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                data['message'] ?? 'delete_account.error'.tr(context),
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        context.showErrorSnackBar(
+          data['message'] ?? 'delete_account.error'.tr(context),
+        );
       }
     } catch (e) {
       debugPrint('Error deleting account: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('delete_account.error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      context.showErrorSnackBar('delete_account.error'.tr(context));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

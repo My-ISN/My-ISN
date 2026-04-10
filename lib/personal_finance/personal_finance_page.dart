@@ -12,6 +12,7 @@ import '../constants.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/period_filter_widget.dart';
+import '../widgets/custom_snackbar.dart';
 
 import 'add_personal_finance_page.dart';
 
@@ -287,12 +288,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
 
       if (response['status']) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('finance.transaction_deleted_success'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('finance.transaction_deleted_success'.tr(context));
           _fetchTransactions(type: type);
           _fetchDashboardData();
         }
@@ -301,12 +297,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menghapus: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+          context.showErrorSnackBar('Gagal menghapus: $e');
       }
     }
   }
@@ -2069,12 +2060,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       );
       if (response['status'] == 'success') {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('finance.budget_deleted_success'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('finance.budget_deleted_success'.tr(context));
           _fetchDashboardData();
         }
       } else {
@@ -2082,12 +2068,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menghapus: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('Gagal menghapus: $e');
       }
     }
   }

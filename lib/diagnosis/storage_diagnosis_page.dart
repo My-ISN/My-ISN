@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../localization/app_localizations.dart';
+import '../widgets/custom_snackbar.dart';
 
 class StorageDiagnosisPage extends StatefulWidget {
   const StorageDiagnosisPage({super.key});
@@ -164,17 +165,10 @@ class _StorageDiagnosisPageState extends State<StorageDiagnosisPage> {
       if (cacheDir.existsSync()) {
         cacheDir.deleteSync(recursive: true);
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('diagnosis.clear_success'.tr(context)),
-          backgroundColor: Colors.green,
-        ),
-      );
+      context.showSuccessSnackBar('diagnosis.clear_success'.tr(context));
       _startAnalysis();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      context.showErrorSnackBar(e.toString());
       setState(() => _isAnalyzing = false);
     }
   }

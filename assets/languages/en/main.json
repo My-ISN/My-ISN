@@ -1,5 +1,6 @@
 {
     "main": {
+        "no_internet": "No internet connection",
         "apply": "Apply",
         "dashboard": "Dashboard",
         "attendance": "Attendance",

@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../services/rent_plan_service.dart';
 import '../../localization/app_localizations.dart';
 import '../../constants.dart';
+import '../../widgets/custom_snackbar.dart';
 
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -58,13 +59,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     } else {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ??
-                  'rent_plan.failed_fetch_detail'.tr(context),
-            ),
-          ),
+        context.showErrorSnackBar(
+          response['message'] ??
+              'rent_plan.failed_fetch_detail'.tr(context),
         );
       }
     }
@@ -312,12 +309,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${'rent_plan.opening'.tr(context)} ${tab.toLowerCase()}',
-            ),
-          ),
+        context.showErrorSnackBar(
+          '${'rent_plan.opening'.tr(context)} ${tab.toLowerCase()}',
         );
       }
     }

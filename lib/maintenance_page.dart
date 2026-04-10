@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'login_page.dart';
 import 'localization/app_localizations.dart';
+import 'widgets/custom_snackbar.dart';
 
 class MaintenancePage extends StatefulWidget {
   final String? message;
@@ -33,7 +34,7 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
     // Clear any leftover snackbars from previous pages
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).clearSnackBars();
+        context.clearSnackBars();
       }
     });
   }

@@ -6,6 +6,7 @@ import '../widgets/side_drawer.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 import 'create_ticket_page.dart';
 import 'ticket_detail_page.dart';
@@ -191,22 +192,12 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
       final data = json.decode(response.body);
       if (data['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('helpdesk.success_delete'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('helpdesk.success_delete'.tr(context));
           _loadData();
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? 'helpdesk.failed_delete'.tr(context)),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar(data['message'] ?? 'helpdesk.failed_delete'.tr(context));
         }
       }
     } catch (e) {

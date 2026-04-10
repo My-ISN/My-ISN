@@ -8,6 +8,7 @@ import 'widgets/secondary_app_bar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'localization/app_localizations.dart';
 import 'widgets/custom_app_bar.dart'; // For NotificationManager
+import 'widgets/custom_snackbar.dart';
 
 class AnnouncementPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -108,9 +109,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (ConnectivityStatus.of(context)) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('announcement.fetch_error'.tr(context))),
-          );
+          context.showErrorSnackBar('announcement.fetch_error'.tr(context));
         }
       }
     }
@@ -254,9 +253,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('announcement.fetch_error'.tr(context))),
-        );
+        context.showErrorSnackBar('announcement.fetch_error'.tr(context));
       }
     } catch (e) {
       if (mounted) Navigator.of(loaderContext).pop();

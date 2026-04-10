@@ -27,7 +27,7 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
     _activeInstances++;
     // Set padding for floating bar (bar height + margin + shadow/buffer)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ConnectivityStatus.bottomPadding.value = 110.0;
+      ConnectivityStatus.bottomPadding.value = 92.0;
     });
   }
 

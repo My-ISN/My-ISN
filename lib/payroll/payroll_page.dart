@@ -8,6 +8,7 @@ import '../constants.dart';
 
 import '../services/log_service.dart';
 import '../widgets/connectivity_wrapper.dart';
+import '../widgets/custom_snackbar.dart';
 
 class PayrollPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -192,23 +193,13 @@ class _PayrollPageState extends State<PayrollPage>
       } else {
         Log.w('Preview failed: ${data['message']}');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? 'Gagal memuat preview gaji'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar(data['message'] ?? 'Gagal memuat preview gaji');
         }
       }
     } catch (e) {
       Log.e('Error fetching preview: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Kesalahan koneksi saat memuat preview'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        context.showWarningSnackBar('Kesalahan koneksi saat memuat preview');
       }
     } finally {
       setState(() => _isActionLoading = false);
@@ -448,12 +439,7 @@ class _PayrollPageState extends State<PayrollPage>
         });
         _fetchPayrollHistory();
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message'] ?? 'Error'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar(data['message'] ?? 'Error');
       }
     } catch (e) {
       Log.e('Error executing payment: $e');

@@ -7,12 +7,15 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'package:pinput/pinput.dart';
+import 'dart:async';
 import 'dashboard/dashboard_page.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'localization/app_localizations.dart';
 import 'constants.dart';
 
 import 'widgets/secondary_app_bar.dart';
+import 'widgets/custom_snackbar.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -22,21 +25,189 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
+  // Step Control
+  int _currentStep = 0; // 0: Phone, 1: OTP, 2: Profile
+  bool _isLoading = false;
+  bool _isEmailMethod = false;
+
+  // Step 1: Phone
+  final _phoneController = TextEditingController();
+
+  // Step 2: OTP
+  final _otpController = TextEditingController();
+  int _resendSeconds = 0;
+  Timer? _resendTimer;
+
+  // Step 3: Profile
+  final _fullNameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _contactController = TextEditingController();
-
   String _selectedGender = 'Male';
   File? _image;
-  bool _isLoading = false;
   final _picker = ImagePicker();
 
   final LocalAuthentication auth = LocalAuthentication();
   final storage = const FlutterSecureStorage();
   bool _canCheckBiometrics = false;
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _otpController.dispose();
+    _fullNameController.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _resendTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startResendTimer() {
+    setState(() => _resendSeconds = 60);
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendSeconds > 0) {
+        setState(() => _resendSeconds--);
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> _requestOtp() async {
+    final phone = _phoneController.text.trim();
+    if (phone.isEmpty) {
+      context.showWarningSnackBar('login.fill_all_fields'.tr(context));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      debugPrint('Requesting OTP to: ${AppConstants.baseUrl}/send_otp');
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}/send_otp'),
+        body: {'phone': phone},
+      );
+
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: "${response.body}"');
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 200 && data['status'] == true) {
+        if (!mounted) return;
+        context.showSuccessSnackBar('register.otp_sent'.tr(context));
+        _startResendTimer();
+        FocusScope.of(context).unfocus();
+        setState(() => _currentStep = 1);
+      } else {
+        if (!mounted) return;
+        context.showErrorSnackBar(data['message'] ?? 'login.conn_error'.tr(context));
+      }
+    } catch (e) {
+      debugPrint('Error request OTP: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _verifyOtp() async {
+    final code = _otpController.text.trim();
+    if (code.length < 6) {
+      context.showWarningSnackBar('register.enter_otp_hint'.tr(context));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      debugPrint('Verifying OTP to: ${AppConstants.baseUrl}/verify_otp');
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}/verify_otp'),
+        body: {
+          'phone': _phoneController.text.trim(),
+          'otp': code,
+        },
+      );
+
+      debugPrint('Response Status: ${response.statusCode}');
+      debugPrint('Response Body: "${response.body}"');
+
+      final data = json.decode(response.body);
+      if (response.statusCode == 200 && data['status'] == true) {
+        if (!mounted) return;
+        context.showSuccessSnackBar('register.otp_verified'.tr(context));
+        FocusScope.of(context).unfocus();
+        setState(() => _currentStep = 2);
+      } else {
+        if (!mounted) return;
+        context.showErrorSnackBar(data['message'] ?? 'register.invalid_otp'.tr(context));
+      }
+    } catch (e) {
+      debugPrint('Error verify OTP: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _register() async {
+    if (_fullNameController.text.isEmpty ||
+        _usernameController.text.isEmpty ||
+        (_isEmailMethod && _emailController.text.isEmpty) ||
+        _passwordController.text.isEmpty) {
+      context.showWarningSnackBar('login.fill_all_fields'.tr(context));
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${AppConstants.baseUrl}/register'),
+      );
+
+      request.fields['full_name'] = _fullNameController.text;
+      request.fields['username'] = _usernameController.text;
+      request.fields['email'] = _emailController.text;
+      request.fields['password'] = _passwordController.text;
+      request.fields['contact_number'] = _phoneController.text;
+      request.fields['gender'] = _selectedGender == 'Male' ? '1' : '2';
+      request.fields['registration_method'] = _isEmailMethod ? 'email' : 'phone';
+
+      if (_image != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('profile_photo', _image!.path),
+        );
+      }
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+      var data = json.decode(response.body);
+
+      if (response.statusCode == 200 && data['status'] == true) {
+        if (!mounted) return;
+        context.showSuccessSnackBar('main.success_with_msg'.tr(context, args: {'message': 'register.title'.tr(context)}));
+
+        final userData = data['data'];
+        if (_canCheckBiometrics) {
+          await _showEnableFingerprintDialog(_usernameController.text, _passwordController.text);
+        }
+
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardPage(userData: userData)),
+        );
+      } else {
+        if (!mounted) return;
+        context.showErrorSnackBar(data['message'] ?? 'login.conn_error'.tr(context));
+      }
+    } catch (e) {
+      debugPrint('Error finalize register: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   void initState() {
@@ -107,111 +278,6 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future<void> _register() async {
-    if (_firstNameController.text.isEmpty ||
-        _lastNameController.text.isEmpty ||
-        _usernameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _contactController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('login.fill_all_fields'.tr(context))),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('${AppConstants.baseUrl}/register'),
-      );
-
-      request.fields['first_name'] = _firstNameController.text;
-      request.fields['last_name'] = _lastNameController.text;
-      request.fields['username'] = _usernameController.text;
-      request.fields['email'] = _emailController.text;
-      request.fields['password'] = _passwordController.text;
-      request.fields['contact_number'] = _contactController.text;
-      request.fields['gender'] = _selectedGender == 'Male' ? '1' : '2';
-
-      if (_image != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('profile_photo', _image!.path),
-        );
-      }
-
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
-
-      dynamic data;
-      try {
-        data = json.decode(response.body);
-      } catch (e) {
-        debugPrint('RAW RESPONSE: ${response.body}');
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('login.server_error'.tr(context))),
-        );
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      if (response.statusCode == 200 && data['status'] == true) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'main.success_with_msg'.tr(
-                context,
-                args: {'message': data['message']?.toString() ?? ''},
-              ),
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Auto-login logic
-        final userData = data['data'];
-        final identifier = _usernameController.text;
-        final password = _passwordController.text;
-
-        // Tawarkan aktifkan fingerprint
-        if (_canCheckBiometrics) {
-          await _showEnableFingerprintDialog(identifier, password);
-        }
-
-        if (!mounted) return;
-        // Langsung masuk Dashboard
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DashboardPage(userData: userData),
-          ),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message'] ?? 'login.conn_error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted && ConnectivityStatus.of(context)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('login.conn_error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -223,314 +289,596 @@ class _RegisterPageState extends State<RegisterPage> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: SecondaryAppBar(title: 'register.title'.tr(context)),
-        body: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
-                  'register.subtitle'.tr(context),
-                  style: TextStyle(
-                    color: Colors.grey.shade500,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Profile Photo Picker (Premium Design)
-              Center(
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: [
-                                  const Color(0xFF7E57C2).withValues(alpha: 0.2),
-                                  const Color(0xFF7E57C2).withOpacity(0.05),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 86,
-                            height: 86,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: CircleAvatar(
-                              radius: 40,
-                              backgroundColor: const Color(0xFFF8F9FE),
-                              backgroundImage: _image != null
-                                  ? FileImage(_image!)
-                                  : null,
-                              child: _image == null
-                                  ? Icon(
-                                      Icons.person_outline_rounded,
-                                      size: 40,
-                                      color: Colors.grey.shade400,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 4,
-                            right: 4,
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF7E57C2),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 3,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(
-                                      0xFF7E57C2,
-                                    ).withOpacity(0.3),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'register.set_profile_photo'.tr(context),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildPremiumField(
-                      controller: _firstNameController,
-                      label: 'register.first_name'.tr(context),
-                      hint: 'register.first_name'.tr(context),
-                      icon: Icons.person_outline_rounded,
-                      autoCapitalize: true,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildPremiumField(
-                      controller: _lastNameController,
-                      label: 'register.last_name'.tr(context),
-                      hint: 'register.last_name'.tr(context),
-                      icon: Icons.person_outline_rounded,
-                      autoCapitalize: true,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildPremiumField(
-                controller: _usernameController,
-                label: 'register.username'.tr(context),
-                hint: 'register.username'.tr(context),
-                icon: Icons.alternate_email_rounded,
-              ),
-              const SizedBox(height: 12),
-              _buildPremiumField(
-                controller: _emailController,
-                label: 'register.email'.tr(context),
-                hint: 'register.email'.tr(context),
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildPremiumField(
-                      controller: _passwordController,
-                      label: 'register.password'.tr(context),
-                      hint: '••••••••',
-                      icon: Icons.lock_outline_rounded,
-                      isPassword: true,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildPremiumField(
-                      controller: _contactController,
-                      label: 'register.contact'.tr(context),
-                      hint: '0812...',
-                      icon: Icons.phone_android_rounded,
-                      keyboardType: TextInputType.phone,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              Text(
-                'register.gender'.tr(context),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w900,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : const Color(0xFF4A4A4A),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 4,
-                ),
+        body: Stack(
+          children: [
+            // Decorative background blobs
+            Positioned(
+              top: -100,
+              right: -50,
+              child: Container(
+                width: 300,
+                height: 300,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withOpacity(0.05)
-                      : const Color(0xFFF8F9FE),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.01),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedGender,
-                    isExpanded: true,
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: Color(0xFF7E57C2),
-                    ),
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    items: ['Male', 'Female'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(
-                          value == 'Male'
-                              ? 'register.male'.tr(context)
-                              : 'register.female'.tr(context),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedGender = newValue!;
-                      });
-                    },
-                  ),
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF7E57C2).withValues(alpha: 0.08),
                 ),
               ),
+            ),
+            Positioned(
+              bottom: -50,
+              left: -100,
+              child: Container(
+                width: 350,
+                height: 350,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+                ),
+              ),
+            ),
 
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _register,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7E57C2),
-                    foregroundColor: Colors.white,
-                    elevation: 4,
-                    shadowColor: const Color(0xFF7E57C2).withOpacity(0.3),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+            SafeArea(
+              child: Column(
+                children: [
+                   const SizedBox(height: 10),
+                  // Progress Indicator
+                  if (!_isEmailMethod) _buildStepIndicator(),
+                  
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 600),
+                      switchInCurve: Curves.easeOutBack,
+                      switchOutCurve: Curves.easeIn,
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.1),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: SingleChildScrollView(
+                        key: ValueKey(_currentStep.toString() + _isEmailMethod.toString()),
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
+                        child: _buildCurrentStepView(),
+                      ),
                     ),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
-                      : Text(
-                          'register.create_account'.tr(context),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                ),
+                ],
               ),
-              const SizedBox(height: 20),
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'register.have_account'.tr(context),
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Text(
-                        'register.login'.tr(context),
-                        style: const TextStyle(
-                          color: Color(0xFF7E57C2),
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStepIndicator() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 45),
+      child: Row(
+        children: [
+          _stepNode(0, 'register.step_phone'.tr(context), Icons.phone_android_rounded),
+          _stepLine(0),
+          _stepNode(1, 'register.step_otp'.tr(context), Icons.lock_clock_rounded),
+          _stepLine(1),
+          _stepNode(2, 'register.step_profile'.tr(context), Icons.person_rounded),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepNode(int step, String label, IconData icon) {
+    bool isActive = _currentStep >= step;
+    bool isCompleted = _currentStep > step;
+    
+    return Column(
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 400),
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            gradient: isActive 
+              ? const LinearGradient(
+                  colors: [Color(0xFF9575CD), Color(0xFF7E57C2)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+            color: isActive ? null : Colors.grey.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+            boxShadow: isActive ? [
+              BoxShadow(
+                color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            ] : [],
+            border: Border.all(
+              color: isActive ? Colors.transparent : Colors.grey.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: Center(
+            child: isCompleted
+                ? const Icon(Icons.check, color: Colors.white, size: 18)
+                : Icon(
+                    icon,
+                    color: isActive ? Colors.white : Colors.grey.shade400,
+                    size: 18,
+                  ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: isActive ? const Color(0xFF7E57C2) : Colors.grey.shade500,
+            fontWeight: isActive ? FontWeight.w900 : FontWeight.w500,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _stepLine(int step) {
+    bool isActive = _currentStep > step;
+    return Expanded(
+      child: Container(
+        height: 3,
+        margin: const EdgeInsets.only(bottom: 22, left: 4, right: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(2),
+          color: isActive ? const Color(0xFF7E57C2).withValues(alpha: 0.8) : Colors.grey.withValues(alpha: 0.15),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrentStepView() {
+    if (_isEmailMethod) {
+      return _buildEmailRegistrationForm();
+    }
+    switch (_currentStep) {
+      case 0:
+        return _buildPhoneStep();
+      case 1:
+        return _buildOtpStep();
+      case 2:
+        return _buildProfileStep();
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildPhoneStep() {
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.phone_android_rounded, size: 70, color: Color(0xFF7E57C2)),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'register.phone_number'.tr(context),
+          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'register.subtitle'.tr(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ),
+        const SizedBox(height: 40),
+        _buildPremiumField(
+          controller: _phoneController,
+          label: 'register.phone_number'.tr(context),
+          icon: Icons.phone_iphone_rounded,
+          keyboardType: TextInputType.phone,
+          prefix: IntrinsicWidth(
+            child: Row(
+              children: [
+                const SizedBox(width: 16),
+                const Icon(Icons.phone_iphone_rounded, color: Color(0xFF7E57C2), size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  '+62',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  height: 20,
+                  width: 1.5,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+        _buildActionButton(
+          text: 'register.send_otp'.tr(context),
+          onPressed: _requestOtp,
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(height: 1, width: 30, color: Colors.grey.withValues(alpha: 0.2)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                'OR',
+                style: TextStyle(color: Colors.grey.shade400, fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Container(height: 1, width: 30, color: Colors.grey.withValues(alpha: 0.2)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () => setState(() {
+            _isEmailMethod = true;
+          }),
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFF7E57C2),
+          ),
+          child: Text(
+            'register.or_use_email'.tr(context),
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmailRegistrationForm() {
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Text(
+          'register.email_reg_title'.tr(context),
+          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+        ),
+        const SizedBox(height: 28),
+        _buildProfilePicker(),
+        const SizedBox(height: 32),
+        _buildPremiumField(
+          controller: _fullNameController,
+          label: 'register.full_name'.tr(context),
+          icon: Icons.badge_outlined,
+          autoCapitalize: true,
+        ),
+        const SizedBox(height: 18),
+        _buildPremiumField(
+          controller: _usernameController,
+          label: 'register.username'.tr(context),
+          icon: Icons.alternate_email_rounded,
+        ),
+        const SizedBox(height: 18),
+        _buildPremiumField(
+          controller: _emailController,
+          label: 'register.email'.tr(context),
+          icon: Icons.email_outlined,
+          keyboardType: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 18),
+        _buildPremiumField(
+          controller: _phoneController,
+          label: 'register.contact'.tr(context),
+          icon: Icons.phone_android_rounded,
+          keyboardType: TextInputType.phone,
+          prefix: IntrinsicWidth(
+            child: Row(
+              children: [
+                const SizedBox(width: 16),
+                const Icon(Icons.phone_android_rounded, color: Color(0xFF7E57C2), size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  '+62',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  height: 20,
+                  width: 1.5,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 18),
+        _buildPremiumField(
+          controller: _passwordController,
+          label: 'register.password'.tr(context),
+          icon: Icons.lock_outline_rounded,
+          isPassword: true,
+        ),
+        const SizedBox(height: 20),
+        _buildGenderSelector(),
+        const SizedBox(height: 36),
+        _buildActionButton(
+          text: 'register.create_account'.tr(context),
+          onPressed: _register,
+        ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () => setState(() {
+            _isEmailMethod = false;
+          }),
+          child: Text(
+            'register.use_phone_number'.tr(context),
+            style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOtpStep() {
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.verified_user_rounded, size: 70, color: Color(0xFF7E57C2)),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'register.otp_code'.tr(context),
+          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            'register.enter_otp_hint'.tr(context),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ),
+        const SizedBox(height: 40),
+        Pinput(
+          length: 6,
+          controller: _otpController,
+          onCompleted: (pin) => _verifyOtp(),
+          defaultPinTheme: PinTheme(
+            width: 45,
+            height: 55,
+            textStyle: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF7E57C2),
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: Colors.grey.shade400, width: 2),
+              ),
+            ),
+          ),
+          focusedPinTheme: PinTheme(
+            width: 45,
+            height: 55,
+            textStyle: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF7E57C2),
+            ),
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: Color(0xFF7E57C2), width: 3),
+              ),
+            ),
+          ),
+          submittedPinTheme: PinTheme(
+            width: 45,
+            height: 55,
+            textStyle: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF7E57C2),
+            ),
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: Color(0xFF7E57C2), width: 2),
+              ),
+            ),
+          ),
+          keyboardType: TextInputType.number,
+        ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'register.resend_otp_in'.tr(
+                context,
+                args: {'seconds': _resendSeconds.toString()},
+              ),
+              style: TextStyle(color: Colors.grey.shade500),
+            ),
+            if (_resendSeconds == 0)
+              TextButton(
+                onPressed: _requestOtp,
+                child: Text(
+                  'register.send_otp'.tr(context),
+                  style: const TextStyle(color: Color(0xFF7E57C2), fontWeight: FontWeight.bold),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _buildActionButton(
+          text: 'register.verify_otp'.tr(context),
+          onPressed: _verifyOtp,
+        ),
+        TextButton(
+          onPressed: () => setState(() => _currentStep = 0),
+          child: Text('register.back'.tr(context), style: TextStyle(color: Colors.grey.shade600)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileStep() {
+    return Column(
+      children: [
+        _buildProfilePicker(),
+        const SizedBox(height: 24),
+        _buildPremiumField(
+          controller: _fullNameController,
+          label: 'register.full_name'.tr(context),
+          icon: Icons.badge_outlined,
+          autoCapitalize: true,
+        ),
+        const SizedBox(height: 16),
+        _buildPremiumField(
+          controller: _usernameController,
+          label: 'register.username'.tr(context),
+          icon: Icons.alternate_email_rounded,
+        ),
+        if (_isEmailMethod) ...[
+          _buildPremiumField(
+            controller: _emailController,
+            label: 'register.email'.tr(context),
+            icon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 16),
+        ],
+        _buildPremiumField(
+          controller: _passwordController,
+          label: 'register.password'.tr(context),
+          icon: Icons.lock_outline_rounded,
+          isPassword: true,
+        ),
+        const SizedBox(height: 16),
+        _buildGenderSelector(),
+        const SizedBox(height: 32),
+        _buildActionButton(
+          text: 'register.create_account'.tr(context),
+          onPressed: _register,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfilePicker() {
+    return Center(
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: _pickImage,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFF7E57C2).withValues(alpha: 0.2),
+                        const Color(0xFF7E57C2).withOpacity(0.05),
+                      ],
+                    ),
+                  ),
+                ),
+                CircleAvatar(
+                  radius: 43,
+                  backgroundColor: const Color(0xFFF8F9FE),
+                  backgroundImage: _image != null ? FileImage(_image!) : null,
+                  child: _image == null
+                      ? Icon(Icons.person_outline_rounded, size: 40, color: Colors.grey.shade400)
+                      : null,
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(color: Color(0xFF7E57C2), shape: BoxShape.circle),
+                    child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'register.set_profile_photo'.tr(context),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenderSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'register.gender'.tr(context),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF4A4A4A),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : const Color(0xFFF8F9FE),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedGender,
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF7E57C2)),
+              items: ['Male', 'Female'].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value == 'Male' ? 'register.male'.tr(context) : 'register.female'.tr(context)),
+                );
+              }).toList(),
+              onChanged: (v) => setState(() => _selectedGender = v!),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -667,45 +1015,31 @@ class _RegisterPageState extends State<RegisterPage> {
           await storage.write(key: 'biometric_token', value: biometricToken);
           await storage.write(key: 'fingerprint_enabled', value: 'true');
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('login.fingerprint_enabled'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('login.fingerprint_enabled'.tr(context));
         } else {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'login.fingerprint_failed'.tr(
-                  context,
-                  args: {'message': data['message']},
-                ),
-              ),
-              backgroundColor: Colors.red,
+          context.showErrorSnackBar(
+            'login.fingerprint_failed'.tr(
+              context,
+              args: {'message': data['message']},
             ),
           );
         }
       }
     } catch (e) {
       debugPrint('Error registering biometric: $e');
-      if (mounted && ConnectivityStatus.of(context)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('login.fingerprint_conn_error'.tr(context))),
-        );
-      }
+        context.showErrorSnackBar('login.fingerprint_conn_error'.tr(context));
     }
   }
 
   Widget _buildPremiumField({
     required TextEditingController controller,
     required String label,
-    required String hint,
     required IconData icon,
     bool isPassword = false,
     bool autoCapitalize = false,
     TextInputType keyboardType = TextInputType.text,
+    Widget? prefix,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -758,12 +1092,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   }
                 : null,
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: const Color(0xFF7E57C2), size: 20),
-              hintText: hint,
-              hintStyle: TextStyle(
-                color: Colors.grey.shade400,
-                fontWeight: FontWeight.w500,
-              ),
+              prefixIcon: prefix ?? Icon(icon, color: const Color(0xFF7E57C2), size: 20),
               filled: true,
               fillColor: Colors.transparent,
               border: OutlineInputBorder(
@@ -789,6 +1118,60 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required String text,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF9575CD), Color(0xFF7E57C2)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+        ),
+        child: _isLoading
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              )
+            : Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+      ),
     );
   }
 }

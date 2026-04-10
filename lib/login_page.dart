@@ -13,6 +13,7 @@ import 'widgets/connectivity_wrapper.dart';
 import 'localization/app_localizations.dart';
 import 'constants.dart';
 import 'maintenance_page.dart';
+import 'widgets/custom_snackbar.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -59,12 +60,7 @@ class _LoginPageState extends State<LoginPage> {
     final identifier = _identifierController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (identifier.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('login.fill_all_fields'.tr(context))),
-      );
-      return;
-    }
+      context.showWarningSnackBar('login.fill_all_fields'.tr(context));
 
     FocusScope.of(context).unfocus();
 
@@ -114,12 +110,7 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('login.server_error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('login.server_error'.tr(context));
         return;
       }
 
@@ -138,15 +129,10 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200 && data['status'] == true) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'login.login_success'.tr(
-                context,
-                args: {'name': data['data']['nama']},
-              ),
-            ),
-            backgroundColor: Colors.green,
+        context.showSuccessSnackBar(
+          'login.login_success'.tr(
+            context,
+            args: {'name': data['data']['nama']},
           ),
         );
 
@@ -172,23 +158,11 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message'] ?? 'login.login_failed'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar(data['message'] ?? 'login.login_failed'.tr(context));
       }
     } catch (e) {
       if (!mounted) return;
-      if (ConnectivityStatus.of(context)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('login.conn_error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+        context.showErrorSnackBar('login.conn_error'.tr(context));
     } finally {
       if (mounted) {
         setState(() {
@@ -337,40 +311,24 @@ class _LoginPageState extends State<LoginPage> {
           debugPrint('Verification read: $verify');
 
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('login.fingerprint_enabled'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('login.fingerprint_enabled'.tr(context));
         } else {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'login.fingerprint_failed'.tr(
-                  context,
-                  args: {'message': data['message']},
-                ),
-              ),
-              backgroundColor: Colors.red,
+          context.showErrorSnackBar(
+            'login.fingerprint_failed'.tr(
+              context,
+              args: {'message': data['message']},
             ),
           );
         }
       } else {
         // Jika user membatalkan scan
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('login.fingerprint_cancelled'.tr(context))),
-        );
+        context.showWarningSnackBar('login.fingerprint_cancelled'.tr(context));
       }
     } catch (e) {
       debugPrint('Error registering biometric: $e');
-      if (mounted && ConnectivityStatus.of(context)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('login.fingerprint_conn_error'.tr(context))),
-        );
-      }
+        context.showErrorSnackBar('login.fingerprint_conn_error'.tr(context));
     }
   }
 
@@ -380,9 +338,7 @@ class _LoginPageState extends State<LoginPage> {
     debugPrint('Reading token for login: $token, enabled: $enabled');
 
     if (token == null || enabled != 'true') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('login.fingerprint_not_enabled'.tr(context))),
-      );
+      context.showWarningSnackBar('login.fingerprint_not_enabled'.tr(context));
       return;
     }
 
@@ -419,15 +375,10 @@ class _LoginPageState extends State<LoginPage> {
         final data = json.decode(response.body);
         if (data['status'] == true) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'login.welcome_back_name'.tr(
-                  context,
-                  args: {'name': data['data']['nama']},
-                ),
-              ),
-              backgroundColor: Colors.green,
+          context.showSuccessSnackBar(
+            'login.welcome_back_name'.tr(
+              context,
+              args: {'name': data['data']['nama']},
             ),
           );
           // Save user data for persistence (deep linking etc)
@@ -448,24 +399,12 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                data['message'] ?? 'login.login_failed'.tr(context),
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar(data['message'] ?? 'login.login_failed'.tr(context));
         }
       }
     } catch (e) {
       if (mounted && ConnectivityStatus.of(context)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('login.conn_error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('login.conn_error'.tr(context));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -504,15 +443,10 @@ class _LoginPageState extends State<LoginPage> {
       final data = json.decode(response.body);
       if (data['status'] == true) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'login.google_success'.tr(
-                context,
-                args: {'name': data['data']['nama']?.toString() ?? ''},
-              ),
-            ),
-            backgroundColor: Colors.green,
+        context.showSuccessSnackBar(
+          'login.google_success'.tr(
+            context,
+            args: {'name': data['data']['nama']?.toString() ?? ''},
           ),
         );
 
@@ -534,22 +468,12 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(data['message'] ?? 'login.google_failed'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar(data['message'] ?? 'login.google_failed'.tr(context));
       }
     } catch (error) {
       debugPrint('Google Sign-In Error: $error');
       if (mounted && ConnectivityStatus.of(context)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('login.conn_error'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('login.conn_error'.tr(context));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

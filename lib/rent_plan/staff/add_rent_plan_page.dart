@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../widgets/searchable_dropdown.dart';
 import '../../localization/app_localizations.dart';
 import '../../widgets/secondary_app_bar.dart';
+import '../../widgets/custom_snackbar.dart';
 
 class AddRentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -140,12 +141,8 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       });
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ?? 'rent_plan.error.fetch_failed'.tr(context),
-            ),
-          ),
+        context.showErrorSnackBar(
+          response['message'] ?? 'rent_plan.error.fetch_failed'.tr(context),
         );
         Navigator.pop(context);
       }
@@ -300,11 +297,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
     if (_jenisSewa == 'pribadi' && _fileKtp == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('rent_plan.validation.ktp_required'.tr(context)),
-        ),
-      );
+      context.showWarningSnackBar('rent_plan.validation.ktp_required'.tr(context));
       return;
     }
 
@@ -317,14 +310,10 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         .length;
 
     if (jaminanCount < minJaminan || jaminanFileCount < minJaminan) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'rent_plan.validation.guarantee_min'.tr(
-              context,
-              args: {'min': minJaminan.toString()},
-            ),
-          ),
+      context.showWarningSnackBar(
+        'rent_plan.validation.guarantee_min'.tr(
+          context,
+          args: {'min': minJaminan.toString()},
         ),
       );
       return;
@@ -432,32 +421,17 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       setState(() => _isSubmitting = false);
 
       if (res['status'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('rent_plan.success_create'.tr(context)),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccessSnackBar('rent_plan.success_create'.tr(context));
         Navigator.pop(context, true);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res['message'] ?? 'rent_plan.fail_save'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar(res['message'] ?? 'rent_plan.fail_save'.tr(context));
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'rent_plan.error_occurred'.tr(
-              context,
-              args: {'error': e.toString()},
-            ),
-          ),
-          backgroundColor: Colors.red,
+      context.showErrorSnackBar(
+        'rent_plan.error_occurred'.tr(
+          context,
+          args: {'error': e.toString()},
         ),
       );
     }
@@ -468,12 +442,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
 
     // Check required files based on jenisSewa
     if (_jenisSewa == 'pribadi' && _fileKtp == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('rent_plan.validation.ktp_required'.tr(context)),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showWarningSnackBar('rent_plan.validation.ktp_required'.tr(context));
       return;
     }
 
@@ -481,15 +450,10 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     int requiredGua = _jenisSewa == 'pribadi' ? 3 : 2;
     int providedGua = _selectedJaminanIds.values.where((v) => v != null).length;
     if (providedGua < requiredGua) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'rent_plan.validation.guarantee_min'.tr(
-              context,
-              args: {'min': requiredGua.toString()},
-            ),
-          ),
-          backgroundColor: Colors.red,
+      context.showWarningSnackBar(
+        'rent_plan.validation.guarantee_min'.tr(
+          context,
+          args: {'min': requiredGua.toString()},
         ),
       );
       return;

@@ -12,6 +12,7 @@ import '../constants.dart';
 
 import '../widgets/searchable_dropdown.dart';
 import '../widgets/secondary_app_bar.dart';
+import '../widgets/custom_snackbar.dart';
 
 class ProfileEditPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -279,30 +280,17 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
       if (data['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profile.update_success'.tr(context))),
-          );
+          context.showSuccessSnackBar('profile.update_success'.tr(context));
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'main.error_with_msg'.tr(
-                  context,
-                  args: {'message': data['message'].toString()},
-                ),
-              ),
-            ),
-          );
+          context.showErrorSnackBar('main.error_with_msg'.tr(context, args: {'message': data['message'].toString()}));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('profile.conn_error'.tr(context))),
-        );
+        context.showErrorSnackBar('profile.conn_error'.tr(context));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -344,30 +332,17 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
       if (data['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('profile.update_success'.tr(context))),
-          );
+          context.showSuccessSnackBar('profile.update_success'.tr(context));
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'main.error_with_msg'.tr(
-                  context,
-                  args: {'message': data['message'].toString()},
-                ),
-              ),
-            ),
-          );
+          context.showErrorSnackBar('main.error_with_msg'.tr(context, args: {'message': data['message'].toString()}));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('profile.conn_error'.tr(context))),
-        );
+        context.showErrorSnackBar('profile.conn_error'.tr(context));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);

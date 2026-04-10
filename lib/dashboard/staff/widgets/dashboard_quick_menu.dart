@@ -2,17 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../localization/app_localizations.dart';
 import '../../../widgets/custom_app_bar.dart'; // For NotificationManager
 import '../../../widgets/connectivity_wrapper.dart';
-import '../../../rent_plan/staff/rent_plan_page.dart' as staff_rp;
-import '../../../rent_plan/client/rent_plan_page.dart' as client_rp;
-import '../../../todo_list/todo_list_page.dart';
-import '../../../employees/employees_page.dart';
-import '../../../work_log/work_log_page.dart';
-import '../../../finance/finance_page.dart';
-import '../../../personal_finance/personal_finance_page.dart';
-import '../../../helpdesk/helpdesk_list_page.dart';
-import '../../../ai_bot/ai_bot_page.dart';
-import '../../../creative_idea/creative_idea_page.dart';
-import '../../../intercom/intercom_page.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/quick_menu_provider.dart';
+import 'menu_registry.dart';
+import '../../all_menus_page.dart';
 
 class DashboardQuickMenu extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -29,9 +22,72 @@ class DashboardQuickMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = dashboardData['user'] ?? userData;
-    final bool isCustomer = user['user_type'] == 'customer' ||
-        user['user_role_id'] == 21 ||
-        user['user_role_id'] == '21';
+    final quickMenuProvider = Provider.of<QuickMenuProvider>(context);
+    final pinnedKeys = quickMenuProvider.pinnedKeys;
+
+    final allModules = MenuRegistry.getModules(user);
+    final allPermitted = allModules.where((m) {
+      if (m.permission == null) return true;
+      return hasPermission(m.permission!);
+    }).toList();
+
+    final List<AppModule> displayModules;
+
+    if (pinnedKeys != null && pinnedKeys.isNotEmpty) {
+      // Show customized pins
+      displayModules = pinnedKeys
+          .map((key) => allModules.firstWhere(
+                (m) => m.titleKey == key,
+                orElse: () => allModules.first,
+              ))
+          .where((m) {
+        if (m.permission == null) return true;
+        return hasPermission(m.permission!);
+      }).toList();
+    } else {
+      // Show default priority
+      displayModules = allPermitted;
+    }
+
+    const int maxVisible = 5;
+    // Show 'More' if we have more than 6 total permitted, 
+    // OR if the user has pinned a subset of their permitted modules.
+    final bool showMore = (pinnedKeys != null && pinnedKeys.isNotEmpty)
+        ? allPermitted.length > displayModules.length
+        : allPermitted.length > maxVisible + 1;
+
+    final List<Widget> menuItems = [];
+
+    // Take up to 5 if showing more, else show all displayModules
+    final int displayCount = showMore ? maxVisible : displayModules.length;
+
+    for (int i = 0; i < displayCount; i++) {
+      if (i >= displayModules.length) break;
+      final m = displayModules[i];
+      menuItems.add(_buildMenuWidget(context, m, user));
+    }
+
+    if (showMore) {
+      menuItems.add(
+        _buildQuickMenuCard(
+          context,
+          'dashboard.quick_menu_more'.tr(context),
+          Icons.grid_view_rounded,
+          const Color(0xFF7E57C2),
+          () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AllMenusPage(
+                  userData: user,
+                  hasPermission: hasPermission,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,204 +110,87 @@ class DashboardQuickMenu extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _buildDynamicQuickMenu(context, [
-          if (hasPermission('mobile_rent_plan_enable'))
-            _buildQuickMenuCard(
-              context,
-              'dashboard.quick_menu_rent_plan'.tr(context),
-              Icons.house_rounded,
-              const Color(0xFF7E57C2),
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => isCustomer
-                        ? client_rp.RentPlanPage(userData: user)
-                        : staff_rp.RentPlanPage(userData: user),
-                  ),
-                );
-              },
-            ),
-          if (hasPermission('mobile_todo_enable'))
-            ValueListenableBuilder<int>(
-              valueListenable: NotificationManager().unreadTodoCount,
-              builder: (context, count, child) {
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    _buildQuickMenuCard(
-                      context,
-                      'dashboard.quick_menu_todo_list'.tr(context),
-                      Icons.assignment_rounded,
-                      const Color(0xFF7E57C2),
-                      () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TodoListPage(userData: user),
-                          ),
-                        );
-                      },
-                    ),
-                    if (count > 0)
-                      Positioned(
-                        right: 8,
-                        top: 5,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Theme.of(context).cardColor,
-                              width: 1.5,
-                            ),
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 18,
-                            minHeight: 18,
-                          ),
-                          child: Text(
-                            count > 9 ? '9+' : '$count',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w900,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          if (hasPermission('mobile_employees_enable'))
-            _buildQuickMenuCard(
-              context,
-              'dashboard.quick_menu_employees'.tr(context),
-              Icons.people_alt_rounded,
-              const Color(0xFF7E57C2),
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EmployeesPage(userData: user),
-                  ),
-                );
-              },
-            ),
-          if (hasPermission('mobile_worklog_enable'))
-            _buildQuickMenuCard(
-              context,
-              'dashboard.quick_menu_work_log'.tr(context),
-              Icons.assignment_turned_in_rounded,
-              const Color(0xFF7E57C2),
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => WorkLogPage(userData: user),
-                  ),
-                );
-              },
-            ),
-          if (hasPermission('mobile_finance_enable'))
-            _buildQuickMenuCard(
-              context,
-              'dashboard.quick_menu_finance'.tr(context),
-              Icons.account_balance_wallet_rounded,
-              const Color(0xFF7E57C2),
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FinancePage(userData: user),
-                  ),
-                );
-              },
-            ),
-          if (hasPermission('mobile_personal_finance_enable'))
-            _buildQuickMenuCard(
-              context,
-              'personal_finance.my_wallet'.tr(context),
-              Icons.payments_rounded,
-              const Color(0xFF7E57C2),
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PersonalFinancePage(userData: user),
-                  ),
-                );
-              },
-            ),
-          if (hasPermission('mobile_helpdesk_view'))
-            _buildQuickMenuCard(
-              context,
-              'dashboard.quick_menu_helpdesk'.tr(context),
-              Icons.support_agent_rounded,
-              const Color(0xFF7E57C2),
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => HelpdeskListPage(userData: user),
-                  ),
-                );
-              },
-            ),
-          _buildQuickMenuCard(
-            context,
-            'dashboard.quick_menu_ai_bot'.tr(context),
-            Icons.smart_toy_rounded,
-            const Color(0xFF7E57C2),
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AiBotPage(userData: user),
-                ),
-              );
-            },
-            ),
-          if (hasPermission('creative_idea'))
-            _buildQuickMenuCard(
-              context,
-              'dashboard.quick_menu_creative_idea'.tr(context),
-              Icons.lightbulb_rounded,
-              const Color(0xFF7E57C2),
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreativeIdeaPage(userData: user),
-                  ),
-                );
-              },
-            ),
-          if (hasPermission('mobile_intercom_view'))
-            _buildQuickMenuCard(
-              context,
-              'dashboard.quick_menu_intercom'.tr(context),
-              Icons.volume_up_rounded,
-              const Color(0xFF7E57C2),
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => IntercomPage(userData: user),
-                  ),
-                );
-              },
-            ),
-        ]),
+        _buildDynamicQuickMenu(context, menuItems),
         ValueListenableBuilder<double>(
           valueListenable: ConnectivityStatus.bottomPadding,
           builder: (context, padding, _) =>
               SizedBox(height: padding.clamp(0.0, double.infinity)),
         ),
       ],
+    );
+  }
+
+  Widget _buildMenuWidget(
+      BuildContext context, AppModule m, Map<String, dynamic> user) {
+    if (m.permission == 'mobile_todo_enable') {
+      return ValueListenableBuilder<int>(
+        valueListenable: NotificationManager().unreadTodoCount,
+        builder: (context, count, child) {
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildQuickMenuCard(
+                context,
+                m.titleKey.tr(context),
+                m.icon,
+                m.color,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => m.pageBuilder(context, user),
+                    ),
+                  );
+                },
+              ),
+              if (count > 0)
+                Positioned(
+                  right: 8,
+                  top: 5,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).cardColor,
+                        width: 1.5,
+                      ),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      count > 9 ? '9+' : '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      );
+    }
+
+    return _buildQuickMenuCard(
+      context,
+      m.titleKey.tr(context),
+      m.icon,
+      m.color,
+      () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => m.pageBuilder(context, user),
+          ),
+        );
+      },
     );
   }
 

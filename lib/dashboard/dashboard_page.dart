@@ -12,6 +12,7 @@ import '../login_page.dart';
 import '../attendance_page.dart';
 import '../payroll/payroll_page.dart';
 import '../localization/app_localizations.dart';
+import '../widgets/custom_snackbar.dart';
 import '../services/version_check_service.dart';
 import '../constants.dart';
 import '../maintenance_page.dart';
@@ -435,7 +436,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       if (response.statusCode == 503) {
         final data = json.decode(response.body);
         if (mounted) {
-          ScaffoldMessenger.of(context).clearSnackBars();
+          context.clearSnackBars();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -466,12 +467,8 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       } else {
         if (mounted) {
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                data['message'] ?? 'dashboard.fetch_error'.tr(context),
-              ),
-            ),
+          context.showErrorSnackBar(
+            data['message'] ?? 'dashboard.fetch_error'.tr(context),
           );
         }
       }
@@ -480,9 +477,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       if (mounted) {
         setState(() => _isLoading = false);
         if (ConnectivityStatus.of(context)) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('dashboard.fetch_error'.tr(context))),
-          );
+          context.showErrorSnackBar('dashboard.fetch_error'.tr(context));
         }
       }
     }
@@ -499,7 +494,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       if (response.statusCode == 503) {
         final data = json.decode(response.body);
         if (mounted) {
-          ScaffoldMessenger.of(context).clearSnackBars();
+          context.clearSnackBars();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -522,12 +517,8 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       } else {
         if (mounted) {
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                data['message'] ?? 'dashboard.fetch_error'.tr(context),
-              ),
-            ),
+          context.showErrorSnackBar(
+            data['message'] ?? 'dashboard.fetch_error'.tr(context),
           );
         }
       }
@@ -615,24 +606,26 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
           });
         },
       ),
-      bottomNavigationBar: isCustomer ? null : Theme(
-        data: Theme.of(context).copyWith(
-          canvasColor: Colors.transparent,
-          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-          ),
-        ),
-        child: CustomBottomNav(
-          currentIndex: _currentIndex,
-          userData: user,
-          onTap: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-        ),
-      ),
+      bottomNavigationBar: isCustomer
+          ? null
+          : Theme(
+              data: Theme.of(context).copyWith(
+                canvasColor: Colors.transparent,
+                bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                ),
+              ),
+              child: CustomBottomNav(
+                currentIndex: _currentIndex,
+                userData: user,
+                onTap: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+              ),
+            ),
     );
   }
 
@@ -811,12 +804,8 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     } catch (e) {
       debugPrint('Error launching WhatsApp: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'settings.wa_error'.tr(context, args: {'error': e.toString()}),
-            ),
-          ),
+        context.showErrorSnackBar(
+          'settings.wa_error'.tr(context, args: {'error': e.toString()}),
         );
       }
     }

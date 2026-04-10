@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 import '../widgets/searchable_dropdown.dart';
 import '../widgets/secondary_app_bar.dart';
@@ -200,30 +201,22 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
 
       if (data['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('employees.save_success'.tr(context))),
-          );
+          context.showSuccessSnackBar('employees.save_success'.tr(context));
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'main.error_with_msg'.tr(
-                  context,
-                  args: {'message': data['message']},
-                ),
-              ),
+          context.showErrorSnackBar(
+            'main.error_with_msg'.tr(
+              context,
+              args: {'message': data['message']},
             ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        context.showErrorSnackBar('Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -1209,13 +1202,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
                 if (titleController.text.isEmpty ||
                     typeController.text.isEmpty ||
                     selectedFile == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'employees.form.fill_all_fields'.tr(context),
-                      ),
-                    ),
-                  );
+                  context.showWarningSnackBar('employees.form.fill_all_fields'.tr(context));
                   return;
                 }
                 _uploadDocument(
@@ -1267,17 +1254,13 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
         if (mounted) Navigator.pop(context, true); // Refresh detail
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: ${data['message']}')));
+          context.showErrorSnackBar('Error: ${data['message']}');
         }
       }
     } catch (e) {
       debugPrint('Error uploading document: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        context.showErrorSnackBar('Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);

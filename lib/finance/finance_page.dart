@@ -15,6 +15,7 @@ import '../widgets/period_filter_widget.dart';
 import 'widgets/finance_account_item.dart';
 import 'widgets/finance_transaction_item.dart';
 import 'add_finance_data_page.dart';
+import '../widgets/custom_snackbar.dart';
 
 class FinancePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -358,50 +359,22 @@ class _FinancePageState extends State<FinancePage>
       final response = await _financeService.deleteFinanceAccount(accountId);
       if (response['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle_rounded, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Text('finance.account_deleted_success'.tr(context)),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.fixed,
-            ),
-          );
+          context.showSuccessSnackBar('finance.account_deleted_success'.tr(context));
           _fetchAccounts();
           _loadData(); // Refresh dashboard stats
         }
       } else {
         if (mounted) {
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.error_rounded, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      response['message'] ?? 'Failed to delete account',
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.fixed,
-            ),
+          context.showErrorSnackBar(
+            response['message'] ?? 'Failed to delete account',
           );
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
-        );
+        context.showErrorSnackBar('Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -416,13 +389,7 @@ class _FinancePageState extends State<FinancePage>
       );
       if (response['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('finance.transaction_deleted_success'.tr(context)),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.fixed,
-            ),
-          );
+          context.showSuccessSnackBar('finance.transaction_deleted_success'.tr(context));
           _loadData();
         }
       } else {
@@ -433,14 +400,8 @@ class _FinancePageState extends State<FinancePage>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'main.error_with_msg'.tr(context, args: {'msg': e.toString()}),
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.fixed,
-          ),
+        context.showErrorSnackBar(
+          'main.error_with_msg'.tr(context, args: {'msg': e.toString()}),
         );
       }
     } finally {
@@ -766,9 +727,7 @@ class _FinancePageState extends State<FinancePage>
     final dynamic transactionId = transaction['transaction_id'];
 
     if (encodedId == null || transactionId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('finance.web_link_error'.tr(context))),
-      );
+      context.showErrorSnackBar('finance.web_link_error'.tr(context));
       return;
     }
 
@@ -784,14 +743,10 @@ class _FinancePageState extends State<FinancePage>
 
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'finance.web_launch_error'.tr(
-                context,
-                args: {'item': 'transaction', 'id': transactionId.toString()},
-              ),
-            ),
+        context.showErrorSnackBar(
+          'finance.web_launch_error'.tr(
+            context,
+            args: {'item': 'transaction', 'id': transactionId.toString()},
           ),
         );
       }
@@ -991,9 +946,7 @@ class _FinancePageState extends State<FinancePage>
     final dynamic accountId = account['account_id'];
 
     if (encodedId == null || accountId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('finance.web_link_error'.tr(context))),
-      );
+      context.showErrorSnackBar('finance.web_link_error'.tr(context));
       return;
     }
 
@@ -1009,14 +962,10 @@ class _FinancePageState extends State<FinancePage>
 
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'finance.web_launch_error'.tr(
-                context,
-                args: {'item': 'account', 'id': accountId.toString()},
-              ),
-            ),
+        context.showErrorSnackBar(
+          'finance.web_launch_error'.tr(
+            context,
+            args: {'item': 'account', 'id': accountId.toString()},
           ),
         );
       }
@@ -1192,13 +1141,7 @@ class _FinancePageState extends State<FinancePage>
                 if (result == true) {
                   _loadData();
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Data saved successfully!'),
-                        backgroundColor: Colors.green,
-                        behavior: SnackBarBehavior.fixed,
-                      ),
-                    );
+                    context.showSuccessSnackBar('Data saved successfully!');
                   }
                 }
               },

@@ -9,6 +9,7 @@ import '../../widgets/custom_app_bar.dart';
 import '../../widgets/side_drawer.dart';
 import '../../localization/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../widgets/custom_snackbar.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -78,12 +79,7 @@ class _RentPlanPageState extends State<RentPlanPage>
 
   void _showDeleteConfirmation(int rentalId) {
     if (!_hasPermission('mobile_rent_plan_delete')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('main.unauthorized_module'.tr(context)),
-          backgroundColor: Colors.red,
-        ),
-      );
+      context.showWarningSnackBar('main.unauthorized_module'.tr(context));
       return;
     }
     showModalBottomSheet(
@@ -195,11 +191,7 @@ class _RentPlanPageState extends State<RentPlanPage>
             if (isProcessing) return;
 
             if (selectedMethod == 'transfer' && selectedBank == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Silakan pilih bank terlebih dahulu'),
-                ),
-              );
+              context.showWarningSnackBar('Silakan pilih bank terlebih dahulu');
               return;
             }
 
@@ -225,38 +217,23 @@ class _RentPlanPageState extends State<RentPlanPage>
                   // Cash success
                   if (mounted) {
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          result['message'] ??
-                              'Pembayaran berhasil dikonfirmasi',
-                        ),
-                        backgroundColor: Colors.green,
-                      ),
+                    context.showSuccessSnackBar(
+                      result['message'] ??
+                          'Pembayaran berhasil dikonfirmasi',
                     );
                     _fetchRentPlans(); // Refresh the list
                   }
                 }
               } else {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        result['message'] ?? 'Gagal memproses pembayaran',
-                      ),
-                      backgroundColor: Colors.red,
-                    ),
+                  context.showErrorSnackBar(
+                    result['message'] ?? 'Gagal memproses pembayaran',
                   );
                 }
               }
             } catch (e) {
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Error: $e'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                context.showErrorSnackBar('Error: $e');
               }
             } finally {
               if (mounted) setSheetState(() => isProcessing = false);
@@ -742,39 +719,14 @@ class _RentPlanPageState extends State<RentPlanPage>
     final response = await _rentPlanService.deleteRentPlan(rentalId);
     if (response['status'] == true) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle_rounded, color: Colors.white),
-                const SizedBox(width: 12),
-                Text('rent_plan.delete_success'.tr(context)),
-              ],
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
+        context.showSuccessSnackBar('rent_plan.delete_success'.tr(context));
         _fetchRentPlans();
       }
     } else {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_rounded, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    response['message'] ??
-                        'rent_plan.delete_failed'.tr(context),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red,
-          ),
+        context.showErrorSnackBar(
+          response['message'] ?? 'rent_plan.delete_failed'.tr(context),
         );
       }
     }
@@ -800,12 +752,8 @@ class _RentPlanPageState extends State<RentPlanPage>
     } else {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ?? 'rent_plan.failed_fetch'.tr(context),
-            ),
-          ),
+        context.showErrorSnackBar(
+          response['message'] ?? 'rent_plan.failed_fetch'.tr(context),
         );
       }
     }

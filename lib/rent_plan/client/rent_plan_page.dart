@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/side_drawer.dart';
 import '../../widgets/connectivity_wrapper.dart';
+import '../../widgets/custom_snackbar.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -87,12 +88,8 @@ class _RentPlanPageState extends State<RentPlanPage>
     } else {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response['message'] ?? 'rent_plan.failed_fetch'.tr(context),
-            ),
-          ),
+        context.showErrorSnackBar(
+          response['message'] ?? 'rent_plan.failed_fetch'.tr(context),
         );
       }
     }

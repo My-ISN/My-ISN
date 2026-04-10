@@ -6,6 +6,7 @@ import 'localization/app_localizations.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'constants.dart';
 import 'maintenance_page.dart';
+import 'widgets/custom_snackbar.dart';
 
 
 
@@ -86,15 +87,10 @@ class _AttendancePageState extends State<AttendancePage> {
           errorMessage = 'login.conn_error'.tr(context);
         }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'main.error_with_msg'.tr(
-                context,
-                args: {'message': errorMessage},
-              ),
-            ),
-            backgroundColor: Colors.red,
+        context.showErrorSnackBar(
+          'main.error_with_msg'.tr(
+            context,
+            args: {'message': errorMessage},
           ),
         );
       }

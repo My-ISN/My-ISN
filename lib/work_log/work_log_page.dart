@@ -4,8 +4,10 @@ import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
 
 import '../widgets/side_drawer.dart';
+import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 import '../widgets/period_filter_widget.dart';
 import 'create_work_log_page.dart';
@@ -900,9 +902,7 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
         if (result['status'] == true) {
           if (mounted) {
             Navigator.pop(context, true);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('work_log.delete_success'.tr(context))),
-            );
+            context.showSuccessSnackBar('work_log.delete_success'.tr(context));
           }
         }
       }

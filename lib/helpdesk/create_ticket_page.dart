@@ -5,6 +5,7 @@ import '../widgets/secondary_app_bar.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../widgets/custom_snackbar.dart';
 
 
 class CreateTicketPage extends StatefulWidget {
@@ -40,9 +41,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
   Future<void> _submitTicket() async {
     if (!_formKey.currentState!.validate() || _selectedPriority == null) {
       if (_selectedPriority == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('helpdesk.select_priority'.tr(context))),
-        );
+        context.showWarningSnackBar('helpdesk.select_priority'.tr(context));
       }
       return;
     }
@@ -67,33 +66,18 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
 
       if (data['status'] == true) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('helpdesk.success_create'.tr(context)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          context.showSuccessSnackBar('helpdesk.success_create'.tr(context));
           Navigator.pop(context, true);
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? 'helpdesk.failed_create'.tr(context)),
-              backgroundColor: Colors.red,
-            ),
-          );
+          context.showErrorSnackBar(data['message'] ?? 'helpdesk.failed_create'.tr(context));
         }
       }
     } catch (e) {
       debugPrint('Helpdesk: Error creating ticket: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('helpdesk.failed_create'.tr(context)),
-            backgroundColor: Colors.red,
-          ),
-        );
+        context.showErrorSnackBar('helpdesk.failed_create'.tr(context));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);

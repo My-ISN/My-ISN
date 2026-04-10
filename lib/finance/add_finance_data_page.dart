@@ -5,6 +5,7 @@ import '../services/finance_service.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/searchable_dropdown.dart';
 import '../widgets/secondary_app_bar.dart';
+import '../widgets/custom_snackbar.dart';
 
 class AddFinanceDataPage extends StatefulWidget {
   final List<dynamic> accounts;
@@ -313,13 +314,8 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'main.error_with_msg'.tr(context, args: {'msg': e.toString()}),
-            ),
-            backgroundColor: Colors.red,
-          ),
+        context.showErrorSnackBar(
+          'main.error_with_msg'.tr(context, args: {'msg': e.toString()}),
         );
       }
     } finally {
