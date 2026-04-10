@@ -15,8 +15,10 @@
         "item_hint": "Apa yang Anda kerjakan?",
         "save_log": "Simpan Log",
         "fill_required": "Harap isi tanggal dan minimal satu item",
-        "from_job_desk": "Dari Todo List",
-        "select_job": "Pilih dari Todo List Hari Ini",
+        "from_job_desk": "Dari Jobdesk",
+        "from_todo_list": "Dari Todo List",
+        "select_todo": "Pilih dari Todo List Hari Ini",
+        "select_job": "Pilih dari Jobdesk Jabatan",
         "search_job": "Cari tugas...",
         "status_completed": "Selesai",
         "showing_x_of_y": "Menampilkan {current} dari {total}",
@@ -31,6 +33,7 @@
         "delete_success": "Log Kerja berhasil dihapus",
         "fetch_details_failed": "Gagal memuat detail.",
         "save_failed": "Gagal menyimpan Log Kerja",
-        "conn_error": "Kesalahan koneksi ke server"
+        "conn_error": "Kesalahan koneksi ke server",
+        "select_all": "Pilih Semua"
     }
 }

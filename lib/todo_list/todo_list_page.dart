@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:async';
 
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
@@ -59,11 +62,22 @@ class _TodoListPageState extends State<TodoListPage> {
   List<dynamic> _employees = [];
   bool _isEmployeesLoading = false;
 
+  // Offline Sync State
+  List<Map<String, dynamic>> _pendingTodos = [];
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
+  bool _isSyncing = false;
+
   @override
   void initState() {
     super.initState();
     _initializeData();
     _initSpeech();
+    _loadPendingTodos();
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) {
+      if (result != ConnectivityResult.none) {
+        _syncPendingTodos();
+      }
+    });
   }
 
   void _initSpeech() async {
@@ -101,12 +115,32 @@ class _TodoListPageState extends State<TodoListPage> {
             _currentUserData = json.decode(userDataStr);
           });
           _fetchTodos();
+          _fetchEmployees();
           _markAsSeen();
         }
       } else {
         if (mounted) setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _loadPendingTodos() async {
+    const storage = FlutterSecureStorage();
+    final jsonStr = await storage.read(key: 'pending_todos');
+    if (jsonStr != null) {
+      try {
+        setState(() {
+          _pendingTodos = List<Map<String, dynamic>>.from(json.decode(jsonStr));
+        });
+      } catch (e) {
+        debugPrint('Error loading pending todos: $e');
+      }
+    }
+  }
+
+  Future<void> _savePendingTodos() async {
+    const storage = FlutterSecureStorage();
+    await storage.write(key: 'pending_todos', value: json.encode(_pendingTodos));
   }
 
   Future<void> _markAsSeen() async {
@@ -388,13 +422,20 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Future<void> _addTodo(String description) async {
-    try {
-      final String targetUserId =
-          (_viewMode == 'team' && _selectedEmployeeId != null)
-          ? _selectedEmployeeId!
-          : (_currentUserData!['id'] ?? _currentUserData!['user_id'])
+    final String targetUserId =
+        (_viewMode == 'team' && _selectedEmployeeId != null)
+            ? _selectedEmployeeId!
+            : (_currentUserData!['id'] ?? _currentUserData!['user_id'])
                 .toString();
 
+    // Check connectivity
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      _saveTodoOffline(description, targetUserId);
+      return;
+    }
+
+    try {
       final response = await http.post(
         Uri.parse('${AppConstants.baseUrl}/add_todo'),
         body: {'user_id': targetUserId, 'description': description},
@@ -413,7 +454,93 @@ class _TodoListPageState extends State<TodoListPage> {
       }
     } catch (e) {
       debugPrint('Error adding todo: $e');
+      // If error (timeout/network), save offline too
+      _saveTodoOffline(description, targetUserId);
     }
+  }
+
+  void _saveTodoOffline(String description, String userId) async {
+    final newItem = {
+      'todo_item_id': 'offline_${DateTime.now().millisecondsSinceEpoch}',
+      'description': description,
+      'user_id': userId,
+      'is_done': '0',
+      'priority': '2',
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    setState(() {
+      _pendingTodos.add(newItem);
+    });
+    await _savePendingTodos();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.cloud_off, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text('todo_list.offline_saved'.tr(context))),
+            ],
+          ),
+          backgroundColor: Colors.orange[800],
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _syncPendingTodos() async {
+    if (_isSyncing || _pendingTodos.isEmpty) return;
+
+    _isSyncing = true;
+    List<Map<String, dynamic>> successfullySynced = [];
+
+    try {
+      for (var todo in _pendingTodos) {
+        try {
+          final response = await http.post(
+            Uri.parse('${AppConstants.baseUrl}/add_todo'),
+            body: {
+              'user_id': todo['user_id'].toString(),
+              'description': todo['description'],
+            },
+          );
+          if (response.statusCode == 200) {
+            successfullySynced.add(todo);
+          }
+        } catch (e) {
+          debugPrint('Sync error for item: $e');
+        }
+      }
+
+      if (successfullySynced.isNotEmpty) {
+        setState(() {
+          _pendingTodos.removeWhere((item) => successfullySynced.contains(item));
+        });
+        await _savePendingTodos();
+        _fetchTodos();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('todo_list.sync_success'.tr(context)),
+              backgroundColor: Colors.blue[700],
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } finally {
+      _isSyncing = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
   }
 
   Future<void> _updateTodo(dynamic todoId, String description) async {
@@ -433,6 +560,29 @@ class _TodoListPageState extends State<TodoListPage> {
 
       if (response.statusCode == 200) {
         _fetchTodos();
+      }
+    } catch (e) {
+      debugPrint('Error updating todo: $e');
+    }
+  }
+
+  Future<void> _updateTodoPriority(dynamic todoId, int newPriority) async {
+    if (_currentUserData == null) return;
+    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id'])
+        .toString();
+
+    try {
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}/edit_todo'),
+        body: {
+          'todo_item_id': todoId.toString(),
+          'user_id': userId,
+          'priority': newPriority.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _fetchTodos();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -441,19 +591,63 @@ class _TodoListPageState extends State<TodoListPage> {
             ),
           );
         }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${response.statusCode}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
       }
     } catch (e) {
-      debugPrint('Error updating todo: $e');
+      debugPrint('Error updating todo priority: $e');
     }
+  }
+
+  void _showPriorityDialog(dynamic todo) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('todo_list.priority'.tr(context)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildPriorityOption(context, todo, 1, Colors.red, 'todo_list.high'.tr(context)),
+            _buildPriorityOption(context, todo, 2, Colors.orange, 'todo_list.normal'.tr(context)),
+            _buildPriorityOption(context, todo, 3, Colors.grey, 'todo_list.low'.tr(context)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _copyTodoText(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Text('todo_list.copy_success'.tr(context)),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  Widget _buildPriorityOption(BuildContext context, dynamic todo, int priority, Color color, String label) {
+    return ListTile(
+      leading: Container(
+        width: 12,
+        height: 12,
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      ),
+      title: Text(label),
+      onTap: () {
+        Navigator.pop(context);
+        _updateTodoPriority(todo['todo_item_id'], priority);
+      },
+    );
   }
 
   Future<void> _moveTodo(dynamic todo, String targetUserId) async {
@@ -1098,7 +1292,7 @@ class _TodoListPageState extends State<TodoListPage> {
                   child: CircularProgressIndicator(),
                 ),
               )
-            else if (_todos.isEmpty && !_isLoading)
+            else if (_todos.isEmpty && _pendingTodos.isEmpty && !_isLoading)
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: Center(
@@ -1123,22 +1317,29 @@ class _TodoListPageState extends State<TodoListPage> {
                 ),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final todo = _todos[index];
+                    final bool isPendingItem = index < _pendingTodos.length;
+                    final todo = isPendingItem
+                        ? _pendingTodos[index]
+                        : _todos[index - _pendingTodos.length];
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: TodoItemTile(
                         todo: todo,
+                        isOffline: isPendingItem,
                         isCompleted: (todo['is_done'] == '1' || todo['is_done'] == 1 || todo['is_done'] == true),
-                        onToggle: () => _toggleTodo(todo),
-                        onEdit: () => _showEditTodoDialog(todo),
-                        onDelete: () => _confirmDelete(todo),
-                        onMove: () => _showMoveTodoDialog(todo),
+                        onToggle: () => isPendingItem ? null : _toggleTodo(todo),
+                        onEdit: () => isPendingItem ? null : _showEditTodoDialog(todo),
+                        onDelete: () => isPendingItem ? null : _confirmDelete(todo),
+                        onMove: () => isPendingItem ? null : _showMoveTodoDialog(todo),
                         hasPermissionDelete: _hasPermission('mobile_todo_delete'),
                         hasPermissionTeam: _hasPermission('mobile_todo_team'),
                         primaryColor: _primaryColor,
+                        onPriorityChange: () => isPendingItem ? null : _showPriorityDialog(todo),
+                        onCopy: () => _copyTodoText(todo['description']),
                       ),
                     );
-                  }, childCount: _todos.length),
+                  }, childCount: _todos.length + _pendingTodos.length),
                 ),
               ),
             SliverToBoxAdapter(

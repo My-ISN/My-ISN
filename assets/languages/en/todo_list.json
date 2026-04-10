@@ -3,6 +3,7 @@
         "title": "Todo List",
         "add_task": "Add Task",
         "edit_task": "Edit Task",
+        "copy_task": "Copy",
         "delete_task": "Delete Task",
         "new_task_title": "Add New Task",
         "task_name": "Task Name",
@@ -11,7 +12,7 @@
         "due_date": "Due Date",
         "priority": "Priority",
         "low": "Low",
-        "medium": "Medium",
+        "normal": "Normal",
         "high": "High",
         "completed": "Completed",
         "complete": "Complete",
@@ -21,6 +22,7 @@
         "finished": "Finished",
         "general_accumulation": "Task accumulation",
         "save_success": "Task saved successfully",
+        "copy_success": "Text copied to clipboard",
         "update_success": "Task updated successfully",
         "delete_success": "Task deleted successfully",
         "delete_failed": "Failed to delete task",
@@ -45,6 +47,9 @@
         "move_failed": "Failed to move task",
         "search_result_msg": "Task you are looking for: \"%s\"",
         "no_permission_delete": "You do not have permission to delete tasks",
-        "no_permission_add": "You do not have permission to add tasks"
+        "no_permission_add": "You do not have permission to add tasks",
+        "offline_saved": "Task saved offline (will sync later)",
+        "sync_success": "Offline tasks synced successfully",
+        "pending_sync": "Pending Sync"
     }
 }

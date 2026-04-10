@@ -12,6 +12,7 @@ import 'services/notification_service.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'localization/app_localizations.dart';
 import 'constants.dart';
+import 'maintenance_page.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -81,18 +82,57 @@ class _LoginPageState extends State<LoginPage> {
           )
           .timeout(const Duration(seconds: 15));
 
+      if (response.statusCode == 503) {
+        final data = json.decode(response.body);
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MaintenancePage(message: data['message']),
+            ),
+          );
+        }
+        return;
+      }
+
       var data;
       try {
         data = json.decode(response.body);
       } catch (e) {
         debugPrint('Failed to decode JSON. Raw response: ${response.body}');
         if (!mounted) return;
+
+        // Special handling for maintenance mode on decode failure
+        if (response.statusCode == 503) {
+          final decodedData = json.decode(response.body);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MaintenancePage(message: decodedData['message']),
+            ),
+          );
+          return;
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('login.server_error'.tr(context)),
             backgroundColor: Colors.red,
           ),
         );
+        return;
+      }
+
+      // Explicit check for maintenance mode
+      if (response.statusCode == 503) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MaintenancePage(message: data['message']),
+            ),
+          );
+        }
         return;
       }
 
@@ -362,6 +402,19 @@ class _LoginPageState extends State<LoginPage> {
           Uri.parse(url),
           body: {'biometric_token': token},
         );
+
+        if (response.statusCode == 503) {
+          final data = json.decode(response.body);
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MaintenancePage(message: data['message']),
+              ),
+            );
+          }
+          return;
+        }
 
         final data = json.decode(response.body);
         if (data['status'] == true) {

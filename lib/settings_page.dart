@@ -20,6 +20,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'services/notification_service.dart';
 
+
 class SettingsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
 
@@ -439,11 +440,19 @@ class _SettingsPageState extends State<SettingsPage> {
         // Baru set loading SETELAH dialog ditutup
         setState(() => _isLoading = true);
 
+        final String identifier = (widget.userData['username']?.toString().isNotEmpty == true)
+            ? widget.userData['username'].toString()
+            : (widget.userData['email']?.toString() ?? '');
+
+        debugPrint('--- Register Biometric Debug ---');
+        debugPrint('Identifier to send: "$identifier"');
+        debugPrint('Password length: ${password.length}');
+        debugPrint('--------------------------------');
+
         final response = await http.post(
           Uri.parse(url),
           body: {
-            'identifier':
-                widget.userData['username'] ?? widget.userData['email'],
+            'identifier': identifier,
             'password': password,
             'biometric_token': biometricToken,
             'device_info': 'settings.device_info'.tr(context),
@@ -495,97 +504,127 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<String?> _promptForPassword() async {
     final passwordController = TextEditingController();
     final primaryColor = Theme.of(context).colorScheme.primary;
+    bool obscureText = true;
 
     return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
-          padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'settings.confirm_password'.tr(context).toUpperCase(),
-                style: TextStyle(
-                  color: primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  letterSpacing: 1.2,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'settings.confirm_password'.tr(context).toUpperCase(),
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    letterSpacing: 1.2,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                autofocus: true,
-                focusNode: FocusNode()..requestFocus(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'settings.enter_password'.tr(context),
-                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                onSubmitted: (value) => Navigator.pop(context, value.trim()),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                const SizedBox(height: 12),
+                TextField(
+                  controller: passwordController,
+                  obscureText: obscureText,
+                  autofocus: true,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'settings.enter_password'.tr(context),
+                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
                       ),
-                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      'settings.cancel'.tr(context),
-                      style: TextStyle(color: Colors.grey[600]),
+                      onPressed: () {
+                        setModalState(() {
+                          obscureText = !obscureText;
+                        });
+                      },
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: () =>
-                        Navigator.pop(context, passwordController.text.trim()),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
+                  onSubmitted: (value) {
+                    final p = value.trim();
+                    if (p.isNotEmpty) {
+                      Navigator.pop(context, p);
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      child: Text(
+                        'settings.cancel'.tr(context),
+                        style: TextStyle(color: Colors.grey[600]),
                       ),
                     ),
-                    child: Text(
-                      'settings.confirm'.tr(context),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: () {
+                        final p = passwordController.text.trim();
+                        if (p.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('login.password_required'.tr(context)),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                          return;
+                        }
+                        Navigator.pop(context, p);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'settings.confirm'.tr(context),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1391,6 +1430,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   const SizedBox(height: 32),
                 ],
+
+
               ],
             ),
     );

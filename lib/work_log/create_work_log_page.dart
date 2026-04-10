@@ -135,6 +135,26 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
   }
 
   void _showTodoPicker() {
+    _showQuickAddPicker(
+      title: 'work_log.select_todo'.tr(context),
+      endpoint: '/get_todos',
+      isTodo: true,
+    );
+  }
+
+  void _showJobDeskPicker() {
+    _showQuickAddPicker(
+      title: 'work_log.select_job'.tr(context),
+      endpoint: '/get_jobdesks',
+      isTodo: false,
+    );
+  }
+
+  void _showQuickAddPicker({
+    required String title,
+    required String endpoint,
+    required bool isTodo,
+  }) {
     final dateStr = _selectedDate.toIso8601String().split('T')[0];
     final userId = (widget.userData['id'] ?? widget.userData['user_id'])
         .toString();
@@ -144,7 +164,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        List<dynamic> modalTodos = [];
+        List<dynamic> modalItems = [];
         bool modalLoading = true;
         bool hasFetched = false;
 
@@ -152,8 +172,9 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
           builder: (ctx, setModalState) {
             if (!hasFetched) {
               hasFetched = true;
-              final url =
-                  '${AppConstants.baseUrl}/get_todos?user_id=$userId&date=$dateStr';
+              final url = isTodo
+                  ? '${AppConstants.baseUrl}$endpoint?user_id=$userId&date=$dateStr'
+                  : '${AppConstants.baseUrl}$endpoint?user_id=$userId';
               http
                   .get(Uri.parse(url))
                   .then((response) {
@@ -162,7 +183,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                       final result = json.decode(response.body);
                       if (result['status'] == true) {
                         setModalState(() {
-                          modalTodos = List<dynamic>.from(result['data']);
+                          modalItems = List<dynamic>.from(result['data']);
                           modalLoading = false;
                         });
                       } else {
@@ -180,22 +201,28 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
             final currentSelectedItems = _itemControllers
                 .map((c) => c.text.trim())
                 .toList();
-            return _TodoPicker(
-              todoItems: modalTodos,
+            return _QuickAddPicker(
+              title: title,
+              items: modalItems,
               isLoading: modalLoading,
               selectedItems: currentSelectedItems,
-              onSelect: (todoName) {
+              isTodo: isTodo,
+              onSelect: (itemNames) {
                 setState(() {
-                  bool added = false;
-                  for (var controller in _itemControllers) {
-                    if (controller.text.isEmpty) {
-                      controller.text = todoName;
-                      added = true;
-                      break;
+                  for (var itemName in itemNames) {
+                    bool added = false;
+                    for (var controller in _itemControllers) {
+                      if (controller.text.isEmpty) {
+                        controller.text = itemName;
+                        added = true;
+                        break;
+                      }
                     }
-                  }
-                  if (!added) {
-                    _itemControllers.add(TextEditingController(text: todoName));
+                    if (!added) {
+                      _itemControllers.add(
+                        TextEditingController(text: itemName),
+                      );
+                    }
                   }
                 });
                 Navigator.pop(ctx);
@@ -204,6 +231,40 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildQuickAddButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(left: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: _primaryColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _primaryColor.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: _primaryColor),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: _primaryColor,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -287,7 +348,6 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
 
             const SizedBox(height: 30),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'work_log.items'.tr(context),
@@ -296,11 +356,16 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TextButton.icon(
-                  onPressed: _showTodoPicker,
-                  icon: const Icon(Icons.playlist_add_check_rounded, size: 20),
-                  label: Text('work_log.from_job_desk'.tr(context)),
-                  style: TextButton.styleFrom(foregroundColor: _primaryColor),
+                const Spacer(),
+                _buildQuickAddButton(
+                  onTap: _showTodoPicker,
+                  icon: Icons.playlist_add_check_rounded,
+                  label: 'work_log.from_todo_list'.tr(context),
+                ),
+                _buildQuickAddButton(
+                  onTap: _showJobDeskPicker,
+                  icon: Icons.assignment_outlined,
+                  label: 'work_log.from_job_desk'.tr(context),
                 ),
               ],
             ),
@@ -386,31 +451,35 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
   }
 }
 
-class _TodoPicker extends StatefulWidget {
-  final List<dynamic> todoItems;
+class _QuickAddPicker extends StatefulWidget {
+  final String title;
+  final List<dynamic> items;
   final bool isLoading;
   final List<String> selectedItems;
-  final Function(String) onSelect;
+  final bool isTodo;
+  final Function(List<String>) onSelect;
 
-  const _TodoPicker({
-    required this.todoItems,
+  const _QuickAddPicker({
+    required this.title,
+    required this.items,
     required this.isLoading,
     required this.selectedItems,
+    required this.isTodo,
     required this.onSelect,
   });
 
   @override
-  State<_TodoPicker> createState() => _TodoPickerState();
+  State<_QuickAddPicker> createState() => _QuickAddPickerState();
 }
 
-class _TodoPickerState extends State<_TodoPicker> {
+class _QuickAddPickerState extends State<_QuickAddPicker> {
   String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final filteredTodos = widget.todoItems.where((todo) {
-      final name = (todo['item_name'] ?? '').toString();
+    final filteredItems = widget.items.where((item) {
+      final name = (item['item_name'] ?? '').toString();
       final matchesSearch = name.toLowerCase().contains(
         _searchQuery.toLowerCase(),
       );
@@ -439,17 +508,19 @@ class _TodoPickerState extends State<_TodoPicker> {
             padding: const EdgeInsets.all(24),
             child: Row(
               children: [
-                const Icon(
-                  Icons.playlist_add_check_rounded,
-                  color: Color(0xFF7E57C2),
+                Icon(
+                  widget.isTodo
+                      ? Icons.playlist_add_check_rounded
+                      : Icons.assignment_outlined,
+                  color: const Color(0xFF7E57C2),
                   size: 28,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'work_log.select_job'.tr(context),
+                    widget.title,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -462,6 +533,30 @@ class _TodoPickerState extends State<_TodoPicker> {
               ],
             ),
           ),
+          if (widget.isTodo && filteredItems.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: () {
+                    final names = filteredItems
+                        .map((e) => (e['item_name'] ?? '').toString())
+                        .toList();
+                    widget.onSelect(names);
+                  },
+                  icon: const Icon(Icons.library_add_check_rounded, size: 18),
+                  label: Text(
+                    'work_log.select_all'.tr(context),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF7E57C2),
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: TextField(
@@ -487,13 +582,15 @@ class _TodoPickerState extends State<_TodoPicker> {
           Expanded(
             child: widget.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : filteredTodos.isEmpty
+                : filteredItems.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.assignment_turned_in_outlined,
+                          widget.isTodo
+                              ? Icons.assignment_turned_in_outlined
+                              : Icons.assignment_late_outlined,
                           size: 48,
                           color: Colors.grey[300],
                         ),
@@ -509,11 +606,11 @@ class _TodoPickerState extends State<_TodoPicker> {
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: filteredTodos.length,
+                    itemCount: filteredItems.length,
                     itemBuilder: (context, index) {
-                      final todo = filteredTodos[index];
-                      final bool isDone =
-                          todo['status'] == 1 || todo['status'] == '1';
+                      final item = filteredItems[index];
+                      final bool isDone = widget.isTodo &&
+                          (item['status'] == 1 || item['status'] == '1');
 
                       return ListTile(
                         leading: Container(
@@ -526,13 +623,19 @@ class _TodoPickerState extends State<_TodoPicker> {
                           child: Icon(
                             isDone
                                 ? Icons.check_circle_rounded
-                                : Icons.radio_button_unchecked,
-                            color: isDone ? Colors.green : Colors.grey,
+                                : widget.isTodo
+                                    ? Icons.radio_button_unchecked
+                                    : Icons.assignment_turned_in_rounded,
+                            color: isDone
+                                ? Colors.green
+                                : widget.isTodo
+                                    ? Colors.grey
+                                    : const Color(0xFF7E57C2),
                             size: 20,
                           ),
                         ),
                         title: Text(
-                          todo['item_name'] ?? '-',
+                          item['item_name'] ?? '-',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -548,13 +651,39 @@ class _TodoPickerState extends State<_TodoPicker> {
                                   fontSize: 11,
                                 ),
                               )
-                            : null,
+                            : widget.isTodo
+                                ? Row(
+                                    children: [
+                                      Text(
+                                        _getTimeAgo(
+                                          context,
+                                          item['created_at']?.toString() ?? '',
+                                        ),
+                                        style: TextStyle(
+                                          color: Colors.grey[500],
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        width: 7,
+                                        height: 7,
+                                        decoration: BoxDecoration(
+                                          color: _getPriorityColor(
+                                            item['priority'],
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : null,
                         trailing: const Icon(
                           Icons.add_circle_outline_rounded,
                           size: 20,
                           color: Color(0xFF7E57C2),
                         ),
-                        onTap: () => widget.onSelect(todo['item_name'] ?? ''),
+                        onTap: () => widget.onSelect([item['item_name'] ?? '']),
                       );
                     },
                   ),
@@ -563,5 +692,34 @@ class _TodoPickerState extends State<_TodoPicker> {
         ],
       ),
     );
+  }
+
+  Color _getPriorityColor(dynamic priority) {
+    // 1: Tinggi (Red), 2: Normal (Yellow), 3: Rendah (Grey)
+    final p = int.tryParse(priority?.toString() ?? '2') ?? 2;
+    if (p == 1) return Colors.red;
+    if (p == 3) return Colors.grey;
+    return Colors.orange; // Default/Normal: Kuning (Orange visual)
+  }
+
+  String _getTimeAgo(BuildContext context, String datetime) {
+    if (datetime.isEmpty) return '';
+    try {
+      final past = DateTime.parse(datetime);
+      final diff = DateTime.now().difference(past);
+
+      if (diff.inDays >= 30) {
+        return '${(diff.inDays / 30).floor()} bln lalu';
+      } else if (diff.inDays >= 1) {
+        return '${diff.inDays} hr lalu';
+      } else if (diff.inHours >= 1) {
+        return '${diff.inHours} jam lalu';
+      } else if (diff.inMinutes >= 1) {
+        return '${diff.inMinutes} mnt lalu';
+      }
+      return 'baru saja';
+    } catch (e) {
+      return '';
+    }
   }
 }

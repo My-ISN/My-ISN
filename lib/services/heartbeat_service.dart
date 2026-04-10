@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'dart:convert';
 import '../constants.dart';
+import '../main.dart';
+import '../maintenance_page.dart';
 
 
 class HeartbeatService {
@@ -63,6 +66,19 @@ class HeartbeatService {
 
       if (response.statusCode == 200) {
         debugPrint('HeartbeatService: Sent successfully at ${DateTime.now()}');
+      } else if (response.statusCode == 503) {
+        debugPrint('HeartbeatService: Maintenance mode detected');
+        final data = json.decode(response.body);
+        
+        // Trigger global redirect using navigatorKey
+        navigatorKey.currentState?.pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => MaintenancePage(message: data['message']),
+          ),
+          (route) => false,
+        );
+        
+        stop(); // Stop heartbeat if maintenance is on
       } else {
         debugPrint('HeartbeatService: Failed with status ${response.statusCode}');
       }

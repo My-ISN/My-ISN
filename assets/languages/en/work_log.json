@@ -15,8 +15,10 @@
         "item_hint": "What are you working on?",
         "save_log": "Save Log",
         "fill_required": "Please select date and at least one item",
-        "from_job_desk": "From Todo List",
-        "select_job": "Select from Today's Todo List",
+        "from_job_desk": "From Job Desk",
+        "from_todo_list": "From Todo List",
+        "select_todo": "Select from Today's Todo List",
+        "select_job": "Select from Job Desk",
         "search_job": "Search task...",
         "status_completed": "Completed",
         "showing_x_of_y": "Showing {current} to {total}",
@@ -31,6 +33,7 @@
         "delete_success": "Work Log deleted successfully",
         "fetch_details_failed": "Failed to load details.",
         "save_failed": "Failed to save Work Log",
-        "conn_error": "Server connection error"
+        "conn_error": "Server connection error",
+        "select_all": "Select All"
     }
 }

@@ -3,6 +3,7 @@
         "title": "Daftar Tugas",
         "add_task": "Tambah Tugas",
         "edit_task": "Ubah Tugas",
+        "copy_task": "Salin",
         "delete_task": "Hapus Tugas",
         "new_task_title": "Tambah Tugas Baru",
         "task_name": "Nama Tugas",
@@ -11,7 +12,7 @@
         "due_date": "Tenggat Waktu",
         "priority": "Prioritas",
         "low": "Rendah",
-        "medium": "Sedang",
+        "normal": "Normal",
         "high": "Tinggi",
         "completed": "Selesai",
         "complete": "Selesai",
@@ -21,6 +22,7 @@
         "finished": "Selesai",
         "general_accumulation": "Akumulasi tugas",
         "save_success": "Tugas berhasil disimpan",
+        "copy_success": "Teks berhasil disalin ke clipboard",
         "update_success": "Tugas berhasil diperbarui",
         "delete_success": "Tugas berhasil dihapus",
         "delete_failed": "Gagal menghapus tugas",
@@ -45,6 +47,9 @@
         "move_failed": "Gagal memindahkan tugas",
         "search_result_msg": "Tugas yang Anda cari: \"%s\"",
         "no_permission_delete": "Anda tidak memiliki izin untuk menghapus tugas",
-        "no_permission_add": "Anda tidak memiliki izin untuk menambah tugas"
+        "no_permission_add": "Anda tidak memiliki izin untuk menambah tugas",
+        "offline_saved": "Tugas disimpan secara offline (akan disinkronkan nanti)",
+        "sync_success": "Tugas offline berhasil disinkronkan",
+        "pending_sync": "Menunggu Sinkronisasi"
     }
 }

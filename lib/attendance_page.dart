@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'localization/app_localizations.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'constants.dart';
+import 'maintenance_page.dart';
 
 
 
@@ -41,6 +42,20 @@ class _AttendancePageState extends State<AttendancePage> {
       final url =
           '${AppConstants.baseUrl}/get_attendance?user_id=$userId&month=$month&year=$year';
       final response = await http.get(Uri.parse(url));
+      
+      if (response.statusCode == 503) {
+        if (mounted) {
+          final data = json.decode(response.body);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MaintenancePage(message: data['message']),
+            ),
+          );
+        }
+        return;
+      }
+
       final data = json.decode(response.body);
 
       if (data['status'] == true) {

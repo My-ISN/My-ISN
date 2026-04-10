@@ -14,6 +14,7 @@ import '../payroll/payroll_page.dart';
 import '../localization/app_localizations.dart';
 import '../services/version_check_service.dart';
 import '../constants.dart';
+import '../maintenance_page.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -430,6 +431,21 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
           '${AppConstants.baseUrl}/get_dashboard_data?user_id=$userId';
 
       final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 503) {
+        final data = json.decode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MaintenancePage(message: data['message']),
+            ),
+          );
+        }
+        return;
+      }
+
       final data = json.decode(response.body);
 
       if (data['status'] == true) {
@@ -479,6 +495,21 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
           '${AppConstants.baseUrl}/get_customer_dashboard?user_id=$userId';
 
       final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 503) {
+        final data = json.decode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MaintenancePage(message: data['message']),
+            ),
+          );
+        }
+        return;
+      }
+
       final data = json.decode(response.body);
 
       if (data['status'] == true) {

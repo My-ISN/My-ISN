@@ -11,6 +11,9 @@ class TodoItemTile extends StatelessWidget {
   final bool hasPermissionDelete;
   final bool hasPermissionTeam;
   final Color primaryColor;
+  final VoidCallback onPriorityChange;
+  final VoidCallback onCopy;
+  final bool isOffline;
 
   const TodoItemTile({
     super.key,
@@ -23,6 +26,9 @@ class TodoItemTile extends StatelessWidget {
     required this.hasPermissionDelete,
     required this.hasPermissionTeam,
     required this.primaryColor,
+    required this.onPriorityChange,
+    required this.onCopy,
+    this.isOffline = false,
   });
 
   @override
@@ -116,6 +122,27 @@ class TodoItemTile extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             _buildAgeBadge(context, date, isCompleted),
+                            if (!isCompleted)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 6),
+                                child: Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    color: _getPriorityColor(todo['priority']),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            if (isOffline)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 6),
+                                child: Icon(
+                                  Icons.cloud_queue_rounded,
+                                  size: 14,
+                                  color: Colors.blue[300],
+                                ),
+                              ),
                           ],
                         ),
                       ],
@@ -123,7 +150,10 @@ class TodoItemTile extends StatelessWidget {
                   ),
                   PopupMenuButton<String>(
                     onSelected: (value) {
+                      if (isOffline) return;
                       if (value == 'edit') onEdit();
+                      if (value == 'copy') onCopy();
+                      if (value == 'priority') onPriorityChange();
                       if (value == 'delete') onDelete();
                       if (value == 'toggle') onToggle();
                       if (value == 'move') onMove();
@@ -131,7 +161,7 @@ class TodoItemTile extends StatelessWidget {
                     icon: Icon(
                       Icons.more_horiz_rounded,
                       size: 20,
-                      color: Colors.grey[400],
+                      color: isOffline ? Colors.grey[300] : Colors.grey[400],
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -148,6 +178,34 @@ class TodoItemTile extends StatelessWidget {
                             ),
                             const SizedBox(width: 12),
                             Text('todo_list.edit_task'.tr(context)),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'copy',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.copy_rounded,
+                              size: 20,
+                              color: primaryColor,
+                            ),
+                            const SizedBox(width: 12),
+                            Text('todo_list.copy_task'.tr(context)),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'priority',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.priority_high_rounded,
+                              size: 20,
+                              color: primaryColor,
+                            ),
+                            const SizedBox(width: 12),
+                            Text('todo_list.priority'.tr(context)),
                           ],
                         ),
                       ),
@@ -284,5 +342,13 @@ class TodoItemTile extends StatelessWidget {
     } catch (e) {
       return const SizedBox.shrink();
     }
+  }
+
+  Color _getPriorityColor(dynamic priority) {
+    // 1: Tinggi (Red), 2: Normal (Yellow), 3: Rendah (Grey)
+    final p = int.tryParse(priority?.toString() ?? '2') ?? 2;
+    if (p == 1) return Colors.red;
+    if (p == 3) return Colors.grey;
+    return Colors.orange; // Default/Normal: Kuning (Orange visual)
   }
 }
