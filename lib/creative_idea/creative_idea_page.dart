@@ -7,6 +7,7 @@ import '../services/creative_idea_service.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
+import '../widgets/pagination_header.dart';
 import '../widgets/custom_snackbar.dart';
 
 class CreativeIdeaPage extends StatefulWidget {
@@ -534,7 +535,21 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                             if (index == 0) {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: _buildPaginationHeader(),
+                                child: PaginationHeader(
+                                  limit: _selectedLimit,
+                                  totalCount: _totalCount,
+                                  totalLabel: 'todo_list.total'.tr(context, args: {'count': _totalCount.toString()}),
+                                  limitOptions: _limitOptions,
+                                  onLimitChanged: (value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        _selectedLimit = value;
+                                        _currentPage = 1;
+                                      });
+                                      _fetchIdeas();
+                                    }
+                                  },
+                                ),
                               );
                             }
                             
@@ -554,89 +569,7 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
     );
   }
 
-  Widget _buildPaginationHeader() {
-    final theme = Theme.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              'main.show'.tr(context),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _buildPremiumDropdown(),
-          ],
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            'todo_list.total'.tr(
-              context,
-              args: {'count': _totalCount.toString()},
-            ),
-            style: TextStyle(
-              color: theme.colorScheme.primary,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildPremiumDropdown() {
-    final theme = Theme.of(context);
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 18,
-            color: theme.colorScheme.primary,
-          ),
-          style: TextStyle(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                _currentPage = 1;
-              });
-              _fetchIdeas();
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
 
   Widget _buildPaginationControls() {
     if (_totalPages <= 1) return const SizedBox(height: 20);

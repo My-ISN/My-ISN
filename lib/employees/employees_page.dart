@@ -10,6 +10,7 @@ import '../constants.dart';
 
 import 'employee_detail_page.dart';
 import 'employee_add_page.dart';
+import '../widgets/pagination_header.dart';
 
 class EmployeesPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -50,9 +51,6 @@ class _EmployeesPageState extends State<EmployeesPage> {
       if (mounted) setState(() => _isLoading = true);
       final companyId = widget.userData['company_id'] ?? 2;
       final offset = (_currentPage - 1) * _selectedLimit;
-
-      // If we want "Show All", we could send a very large limit, but let's stick to the requested values.
-      // The user wants pagination to disappear if displaying everything.
 
       final url =
           '${AppConstants.baseUrl}/get_employees?company_id=$companyId&limit=$_selectedLimit&offset=$offset';
@@ -121,7 +119,21 @@ class _EmployeesPageState extends State<EmployeesPage> {
                     const SizedBox(height: 24),
                     _buildPremiumSearchBar(),
                     const SizedBox(height: 32),
-                    _buildListHeader(),
+                    PaginationHeader(
+                      limit: _selectedLimit,
+                      totalCount: _totalCount,
+                      totalLabel: 'employees.total'.tr(context, args: {'count': _totalCount.toString()}),
+                      limitOptions: _limitOptions,
+                      onLimitChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedLimit = value;
+                            _currentPage = 1;
+                          });
+                          _fetchEmployees();
+                        }
+                      },
+                    ),
                     const SizedBox(height: 16),
                     if (_isLoading)
                       _buildLoadingState()
@@ -170,12 +182,13 @@ class _EmployeesPageState extends State<EmployeesPage> {
   }
 
   Widget _buildPremiumSearchBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey[50],
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
       ),
       child: TextField(
@@ -183,11 +196,18 @@ class _EmployeesPageState extends State<EmployeesPage> {
         onChanged: _filterEmployees,
         decoration: InputDecoration(
           hintText: 'employees.search_hint'.tr(context),
-          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-          prefixIcon: Icon(Icons.search_rounded, color: _primaryColor),
+          hintStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+            fontSize: 14,
+          ),
+          prefixIcon: Icon(Icons.search_rounded, color: _primaryColor, size: 22),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.cancel_rounded, size: 20),
+                  icon: Icon(
+                    Icons.cancel_rounded,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                  ),
                   onPressed: () {
                     _searchController.clear();
                     _filterEmployees('');
@@ -196,88 +216,6 @@ class _EmployeesPageState extends State<EmployeesPage> {
               : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 18),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildListHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              'employees.show'.tr(context),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _buildPremiumDropdown(),
-          ],
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: _primaryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            'employees.total'.tr(
-              context,
-              args: {'count': _totalCount.toString()},
-            ),
-            style: TextStyle(
-              color: _primaryColor,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPremiumDropdown() {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 18,
-            color: _primaryColor,
-          ),
-          style: TextStyle(
-            color: _primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                _currentPage = 1;
-              });
-              _fetchEmployees();
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
         ),
       ),
     );

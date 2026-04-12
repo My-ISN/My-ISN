@@ -84,7 +84,8 @@
         "edit_budget": "Edit Budget",
         "delete_budget_confirm_msg": "Are you sure you want to delete the budget for {category}?",
         "budget_deleted_success": "Budget deleted successfully",
-        "this_year": "This Year"
+        "this_year": "This Year",
+        "account_name": "Account Name"
     },
     "personal_finance": {
         "title": "Personal Finance",

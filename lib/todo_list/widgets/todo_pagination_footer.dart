@@ -36,8 +36,11 @@ class TodoPaginationFooter extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: primaryColor,
-            borderRadius: BorderRadius.circular(12),
+            color: primaryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: primaryColor.withValues(alpha: 0.1),
+            ),
           ),
           child: Text(
             'todo_list.page_x_of_y'.tr(
@@ -47,8 +50,8 @@ class TodoPaginationFooter extends StatelessWidget {
                 'total': totalPages.toString(),
               },
             ),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: primaryColor,
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),

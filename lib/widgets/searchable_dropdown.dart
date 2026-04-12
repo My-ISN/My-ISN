@@ -27,43 +27,50 @@ class SearchableDropdown extends StatelessWidget {
 
     return InkWell(
       onTap: () => _showSearchOptions(context),
+      borderRadius: BorderRadius.circular(20),
       child: IgnorePointer(
         child: TextFormField(
           controller: TextEditingController(text: value),
-          style: const TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
             labelText: required ? '$label *' : label,
-            labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
+            labelStyle: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
             prefixIcon: Icon(
               icon ?? Icons.search_rounded,
               size: 18,
-              color: const Color(0xFF7E57C2),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
             ),
-            suffixIcon: const Icon(
+            suffixIcon: Icon(
               Icons.arrow_drop_down_rounded,
-              color: Color(0xFF7E57C2),
+              color: Theme.of(context).colorScheme.primary,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(
-                color: isDark ? Colors.white12 : Colors.grey[200]!,
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
               ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(
-                color: isDark ? Colors.white12 : Colors.grey[200]!,
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 2),
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
             ),
             filled: true,
-            fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+            fillColor: isDark 
+                ? Colors.white.withValues(alpha: 0.03) 
+                : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 16,
+              vertical: 20,
             ),
           ),
           validator: required
@@ -136,26 +143,37 @@ class _SearchPickerModalState extends State<_SearchPickerModal> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.fromLTRB(24, 8, 16, 16),
             child: Row(
               children: [
-                const Icon(
-                  Icons.search_rounded,
-                  color: Color(0xFF7E57C2),
-                  size: 28,
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.search_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Text(
                   widget.title,
                   style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 const Spacer(),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.close_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+                  ),
                 ),
               ],
             ),
@@ -164,11 +182,16 @@ class _SearchPickerModalState extends State<_SearchPickerModal> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: TextField(
               onChanged: (val) => setState(() => _searchQuery = val),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               decoration: InputDecoration(
                 hintText: widget.placeholder ?? 'Search...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                hintStyle: TextStyle(color: Theme.of(context).hintColor.withValues(alpha: 0.5)),
+                prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                filled: true,
+                fillColor: Theme.of(context).dividerColor.withValues(alpha: 0.05),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,

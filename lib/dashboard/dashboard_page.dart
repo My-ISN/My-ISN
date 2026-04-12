@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/connectivity_wrapper.dart';
@@ -40,6 +41,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   Map<String, dynamic> _customerDashboardData = {};
   int _currentIndex = 0;
   final storage = const FlutterSecureStorage();
+  DateTime? _lastBackPressTime;
 
   @override
   void initState() {
@@ -587,45 +589,68 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         activePage = 'profile';
     }
 
-    return Scaffold(
-      extendBody: true,
-      appBar: isCustomer ? null : CustomAppBar(userData: user, showBackButton: false),
-      body: isCustomer ? _buildMaintenancePage() : IndexedStack(index: _currentIndex, children: pages),
-      endDrawer: isCustomer ? null : SideDrawer(
-        userData: user,
-        activePage: activePage,
-        onTabSelected: (index) {
-          int targetIndex = index;
-          if (!isCustomer) {
-            if (!hasPayroll && index > 2) {
-              targetIndex = index - 1;
-            }
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
+
+        final now = DateTime.now();
+        if (_lastBackPressTime == null ||
+            now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+          _lastBackPressTime = now;
+          if (context.mounted) {
+            context.showWarningSnackBar('main.exit_again'.tr(context));
           }
-          setState(() {
-            _currentIndex = targetIndex;
-          });
-        },
-      ),
-      bottomNavigationBar: isCustomer
-          ? null
-          : Theme(
-              data: Theme.of(context).copyWith(
-                canvasColor: Colors.transparent,
-                bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                ),
-              ),
-              child: CustomBottomNav(
-                currentIndex: _currentIndex,
+          return;
+        }
+        SystemNavigator.pop();
+      },
+      child: Scaffold(
+        extendBody: true,
+        appBar: isCustomer
+            ? null
+            : CustomAppBar(userData: user, showBackButton: false),
+        body: isCustomer
+            ? _buildMaintenancePage()
+            : IndexedStack(index: _currentIndex, children: pages),
+        endDrawer: isCustomer
+            ? null
+            : SideDrawer(
                 userData: user,
-                onTap: (index) {
+                activePage: activePage,
+                onTabSelected: (index) {
+                  int targetIndex = index;
+                  if (!isCustomer) {
+                    if (!hasPayroll && index > 2) {
+                      targetIndex = index - 1;
+                    }
+                  }
                   setState(() {
-                    _currentIndex = index;
+                    _currentIndex = targetIndex;
                   });
                 },
               ),
-            ),
+        bottomNavigationBar: isCustomer
+            ? null
+            : Theme(
+                data: Theme.of(context).copyWith(
+                  canvasColor: Colors.transparent,
+                  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                  ),
+                ),
+                child: CustomBottomNav(
+                  currentIndex: _currentIndex,
+                  userData: user,
+                  onTap: (index) {
+                    setState(() {
+                      _currentIndex = index;
+                    });
+                  },
+                ),
+              ),
+      ),
     );
   }
 

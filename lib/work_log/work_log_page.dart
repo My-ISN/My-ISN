@@ -4,13 +4,13 @@ import 'dart:convert';
 import '../widgets/custom_app_bar.dart';
 
 import '../widgets/side_drawer.dart';
-import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
 import '../widgets/custom_snackbar.dart';
 
 import '../widgets/period_filter_widget.dart';
 import 'create_work_log_page.dart';
+import '../widgets/pagination_header.dart';
 
 class WorkLogPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -164,11 +164,50 @@ class _WorkLogPageState extends State<WorkLogPage> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: PaginationHeader(
+                  limit: _selectedLimit,
+                  totalCount: _totalCount,
+                  totalLabel: 'work_log.total'.tr(context, args: {'count': _totalCount.toString()}),
+                  limitOptions: _limitOptions,
+                  onLimitChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedLimit = value;
+                        _currentPage = 1;
+                      });
+                      _fetchLogs(page: 1);
+                    }
+                  },
+                  extraLeftActions: [
+                    PeriodFilterButton(
+                      selectedMonth: _selectedMonth!,
+                      selectedYear: _selectedYear!,
+                      months: _months,
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => PeriodPickerSheet(
+                            initialMonth: _selectedMonth!,
+                            initialYear: _selectedYear!,
+                            months: _months,
+                            years: _years,
+                            onApply: (month, year) {
+                              setState(() {
+                                _selectedMonth = month;
+                                _selectedYear = year;
+                                _currentPage = 1;
+                              });
+                              _fetchStats();
+                              _fetchLogs(page: 1);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                child: _buildPaginationHeader(),
               ),
             ),
             if (!_hasPermission('mobile_worklog_view'))
@@ -271,164 +310,54 @@ class _WorkLogPageState extends State<WorkLogPage> {
     );
   }
 
-  Widget _buildPaginationHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              'main.show'.tr(context),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _buildPremiumDropdown(),
-            const SizedBox(width: 8),
-            // DatePicker (Month-Year)
-            PeriodFilterButton(
-              selectedMonth: _selectedMonth!,
-              selectedYear: _selectedYear!,
-              months: _months,
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => PeriodPickerSheet(
-                    initialMonth: _selectedMonth!,
-                    initialYear: _selectedYear!,
-                    months: _months,
-                    years: _years,
-                    onApply: (month, year) {
-                      setState(() {
-                        _selectedMonth = month;
-                        _selectedYear = year;
-                        _currentPage = 1;
-                      });
-                      _fetchStats();
-                      _fetchLogs(page: 1);
-                    },
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-        if (_logs.isNotEmpty)
+
+
+  Widget _buildPaginationFooter() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildPageButton(
+            icon: Icons.chevron_left_rounded,
+            onPressed: _currentPage > 1
+                ? () => _fetchLogs(page: _currentPage - 1)
+                : null,
+          ),
+          const SizedBox(width: 20),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
               color: _primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: _primaryColor.withValues(alpha: 0.1),
+              ),
             ),
             child: Text(
-              'work_log.total'.tr(
+              'work_log.page_x_of_y'.tr(
                 context,
-                args: {'count': _totalCount.toString()},
+                args: {
+                  'current': _currentPage.toString(),
+                  'total': _totalPages.toString(),
+                },
               ),
               style: TextStyle(
                 color: _primaryColor,
-                fontSize: 11,
                 fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
             ),
           ),
-      ],
-    );
-  }
-
-  Widget _buildPremiumDropdown() {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+          const SizedBox(width: 20),
+          _buildPageButton(
+            icon: Icons.chevron_right_rounded,
+            onPressed: _currentPage < _totalPages
+                ? () => _fetchLogs(page: _currentPage + 1)
+                : null,
+          ),
+        ],
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 18,
-            color: _primaryColor,
-          ),
-          style: TextStyle(
-            color: _primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                _currentPage = 1;
-              });
-              _fetchLogs(page: 1);
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaginationFooter() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildPageButton(
-          icon: Icons.chevron_left_rounded,
-          onPressed: _currentPage > 1
-              ? () => _fetchLogs(page: _currentPage - 1)
-              : null,
-        ),
-        const SizedBox(width: 16),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: _primaryColor,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: _primaryColor.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text(
-            'work_log.page_x_of_y'.tr(
-              context,
-              args: {
-                'current': _currentPage.toString(),
-                'total': _totalPages.toString(),
-              },
-            ),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        _buildPageButton(
-          icon: Icons.chevron_right_rounded,
-          onPressed: _currentPage < _totalPages
-              ? () => _fetchLogs(page: _currentPage + 1)
-              : null,
-        ),
-      ],
     );
   }
 
@@ -465,8 +394,8 @@ class _WorkLogPageState extends State<WorkLogPage> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),
@@ -478,7 +407,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
             onTap: () => setState(() => _isStatsExpanded = !_isStatsExpanded),
             borderRadius: BorderRadius.circular(24),
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -504,23 +433,19 @@ class _WorkLogPageState extends State<WorkLogPage> {
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: _primaryColor.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _isStatsExpanded
-                              ? Icons.expand_less_rounded
-                              : Icons.expand_more_rounded,
-                          color: _primaryColor,
-                          size: 20,
-                        ),
-                      ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isStatsExpanded
+                          ? Icons.expand_less_rounded
+                          : Icons.expand_more_rounded,
+                      color: _primaryColor,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
@@ -552,7 +477,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
                                       _targetItems.toString(),
                                       Colors.blue,
                                     ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               _isStatsLoading
                                   ? const SizedBox(
                                       height: 36,
@@ -571,35 +496,42 @@ class _WorkLogPageState extends State<WorkLogPage> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 85,
-                              height: 85,
-                              child: _isStatsLoading
-                                  ? const Center(
-                                      child: CircularProgressIndicator(),
-                                    )
-                                  : CircularProgressIndicator(
-                                      value: progress,
-                                      strokeWidth: 10,
-                                      backgroundColor: Colors.grey[100],
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        _primaryColor,
-                                      ),
-                                      strokeCap: StrokeCap.round,
-                                    ),
-                            ),
-                            if (!_isStatsLoading)
-                              Text(
-                                '${(progress * 100).toInt()}%',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0, end: progress),
+                          duration: const Duration(milliseconds: 1200),
+                          curve: Curves.easeOutQuart,
+                          builder: (context, value, child) {
+                            return Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 85,
+                                  height: 85,
+                                  child: _isStatsLoading
+                                      ? const Center(
+                                          child: CircularProgressIndicator(),
+                                        )
+                                      : CircularProgressIndicator(
+                                          value: value,
+                                          strokeWidth: 10,
+                                          backgroundColor: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            _primaryColor,
+                                          ),
+                                          strokeCap: StrokeCap.round,
+                                        ),
                                 ),
-                              ),
-                          ],
+                                if (!_isStatsLoading)
+                                  Text(
+                                    '${(value * 100).toInt()}%',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -618,9 +550,9 @@ class _WorkLogPageState extends State<WorkLogPage> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[500],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             fontSize: 12,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 4),
@@ -640,15 +572,16 @@ class _WorkLogPageState extends State<WorkLogPage> {
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
+      color: Theme.of(context).scaffoldBackgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         side: BorderSide(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),
       ),
       child: InkWell(
         onTap: () => _showDetails(log),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -657,7 +590,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: _primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 child: Icon(
                   Icons.assignment_rounded,
@@ -681,7 +614,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
                     Text(
                       log['estimate_number'] ?? '-',
                       style: TextStyle(
-                        color: Colors.grey[500],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -708,7 +641,10 @@ class _WorkLogPageState extends State<WorkLogPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
             ],
           ),
         ),
@@ -725,6 +661,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
         return _WorkLogDetailsSheet(
           logId: log['estimate_id'].toString(),
           userData: widget.userData,
+          initialData: log,
         );
       },
     );
@@ -740,8 +677,13 @@ class _WorkLogPageState extends State<WorkLogPage> {
 class _WorkLogDetailsSheet extends StatefulWidget {
   final String logId;
   final Map<String, dynamic> userData;
+  final dynamic initialData;
 
-  const _WorkLogDetailsSheet({required this.logId, required this.userData});
+  const _WorkLogDetailsSheet({
+    required this.logId, 
+    required this.userData,
+    this.initialData,
+  });
 
   @override
   State<_WorkLogDetailsSheet> createState() => _WorkLogDetailsSheetState();
@@ -767,9 +709,12 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
         if (result['status'] == true) {
-          setState(() {
-            _details = result['data'];
-          });
+          if (mounted) {
+            setState(() {
+              _details = result['data'];
+              _isLoading = false;
+            });
+          }
         }
       }
     } catch (e) {
@@ -925,40 +870,35 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const SizedBox(
-        height: 300,
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (_details == null) {
-      return SizedBox(
-        height: 300,
-        child: Center(child: Text('work_log.fetch_details_failed'.tr(context))),
-      );
-    }
-
-    final estimate = _details!['estimate'];
-    final items = _details!['items'] as List;
+    final estimate = _details?['estimate'] ?? widget.initialData;
+    final items = (_details?['items'] as List?) ?? [];
+    final double sheetHeight = MediaQuery.of(context).size.height * 0.75;
 
     return Container(
+      height: sheetHeight,
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 20,
-          right: 20,
-          top: 20,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Column(
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: 12, bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
@@ -968,86 +908,185 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Row(
-                  children: [
+                PopupMenuButton<String>(
+                  icon: const Icon(
+                    Icons.more_horiz_rounded,
+                    color: Colors.grey,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _editLog();
+                    } else if (value == 'delete') {
+                      _deleteLog();
+                    }
+                  },
+                  itemBuilder: (context) => [
                     if (_hasPermission('mobile_worklog_edit') ||
                         _hasPermission('mobile_worklog_add'))
-                      IconButton(
-                        onPressed: _editLog,
-                        icon: const Icon(
-                          Icons.edit_outlined,
-                          color: Color(0xFF7E57C2),
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.edit_outlined,
+                              size: 20,
+                              color: Color(0xFF7E57C2),
+                            ),
+                            const SizedBox(width: 12),
+                            Text('main.edit'.tr(context)),
+                          ],
                         ),
                       ),
                     if (_hasPermission('mobile_worklog_delete'))
-                      IconButton(
-                        onPressed: _deleteLog,
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete_outline_rounded,
+                              size: 20,
+                              color: Colors.red,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'main.delete'.tr(context),
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ],
                         ),
                       ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
                   ],
                 ),
               ],
             ),
-            const Divider(),
-            const SizedBox(height: 10),
-            _buildInfoRow(
-              'work_log.date'.tr(context),
-              estimate['estimate_date'],
-            ),
-            _buildInfoRow(
-              'work_log.number'.tr(context),
-              estimate['estimate_number'],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'work_log.items'.tr(context),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 10),
-            ...items.map(
-              (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.check_circle_outline,
-                      size: 18,
-                      color: Colors.green,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDetailRow(
+                    Icons.calendar_today_rounded,
+                    'work_log.date'.tr(context),
+                    estimate['estimate_date'] ?? '-',
+                  ),
+                  const Divider(height: 32),
+                  _buildDetailRow(
+                    Icons.confirmation_number_outlined,
+                    'work_log.number'.tr(context),
+                    estimate['estimate_number'] ?? '-',
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Items Header
+                  Text(
+                    'work_log.items'.tr(context),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(item['item_name'] ?? '-')),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Items List
+                  if (_isLoading && items.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (items.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text(
+                          'work_log.no_items'.tr(context),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.03),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.check_circle_rounded,
+                                size: 20,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  item['item_name'] ?? '-',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                ],
               ),
             ),
-            const SizedBox(height: 30),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(color: Colors.grey[600])),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: const Color(0xFF7E57C2).withValues(alpha: 0.7),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.grey, fontSize: 14),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ],
     );
   }
 }

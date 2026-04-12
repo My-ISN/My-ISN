@@ -45,7 +45,9 @@
         "select_item": "Select Item",
         "logout_confirm_title": "Logout Confirmation",
         "logout_confirm_msg": "Are you sure you want to logout from your account?",
-        "status": "Status"
+        "status": "Status",
+        "edit": "Edit",
+        "exit_again": "Press again to exit"
     },
     "time": {
         "ago": "ago",

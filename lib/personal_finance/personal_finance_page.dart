@@ -13,6 +13,8 @@ import '../widgets/side_drawer.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/period_filter_widget.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/limit_dropdown_widget.dart';
+import '../widgets/pagination_header.dart';
 
 import 'add_personal_finance_page.dart';
 
@@ -814,95 +816,32 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     final bool isIncome = type == 'income';
     final int totalCount = isIncome ? _incomeTotalCount : _expenseTotalCount;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              'rent_plan.show'.tr(context),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _buildLimitDropdown(type),
-            const SizedBox(width: 8),
-            PeriodFilterButton(
-              selectedMonth: _selectedMonth ?? '01',
-              selectedYear: _selectedYear ?? DateTime.now().year.toString(),
-              months: _months,
-              onTap: _showMonthYearPicker,
-            ),
-          ],
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: _primaryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            'rent_plan.total_count'.tr(
-              context,
-              args: {'count': totalCount.toString()},
-            ),
-            style: TextStyle(
-              color: _primaryColor,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+    return PaginationHeader(
+      limit: _selectedLimit,
+      limitOptions: _limitOptions,
+      totalCount: totalCount,
+      onLimitChanged: (int? newValue) {
+        if (newValue != null) {
+          setState(() {
+            _selectedLimit = newValue;
+            if (isIncome) {
+              _incomeCurrentPage = 1;
+            } else {
+              _expenseCurrentPage = 1;
+            }
+          });
+          _fetchTransactions(type: type);
+        }
+      },
+      primaryColor: _primaryColor,
+      extraLeftActions: [
+        PeriodFilterButton(
+          selectedMonth: _selectedMonth ?? '01',
+          selectedYear: _selectedYear ?? DateTime.now().year.toString(),
+          months: _months,
+          onTap: _showMonthYearPicker,
         ),
       ],
-    );
-  }
-
-  Widget _buildLimitDropdown(String type) {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: _primaryColor,
-          ),
-          style: TextStyle(
-            color: _primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                if (type == 'income') {
-                  _incomeCurrentPage = 1;
-                } else {
-                  _expenseCurrentPage = 1;
-                }
-              });
-              _fetchTransactions(type: type);
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 

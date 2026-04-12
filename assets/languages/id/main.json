@@ -45,7 +45,9 @@
         "select_item": "Pilih Item",
         "logout_confirm_title": "Konfirmasi Logout",
         "logout_confirm_msg": "Apakah Anda yakin ingin keluar dari akun Anda?",
-        "status": "Status"
+        "status": "Status",
+        "edit": "Edit",
+        "exit_again": "Tekan sekali lagi untuk keluar"
     },
     "time": {
         "ago": "lalu",

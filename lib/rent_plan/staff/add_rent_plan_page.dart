@@ -934,59 +934,48 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     required Color color,
     required List<Widget> children,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white10
-              : color.withValues(alpha: 0.1),
-          width: 1.5,
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Column(children: children),
           ),
         ],
-      ),
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(icon, color: color, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: Column(children: children),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -1063,7 +1052,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       keyboardType: keyboardType,
       maxLines: maxLines,
       onChanged: onChanged,
-      style: const TextStyle(fontSize: 14),
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       validator: isRequired
           ? (val) => val == null || val.isEmpty
                 ? 'rent_plan.validation.required'.tr(context)
@@ -1072,36 +1061,43 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       decoration: InputDecoration(
         labelText: isRequired ? '$label *' : label,
         prefixIcon: icon != null
-            ? Icon(icon, size: 18, color: Colors.grey[400])
+            ? Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6))
             : null,
         suffixText: suffix,
-        labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
+        suffixStyle: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w800,
+          fontSize: 12,
+        ),
+        labelStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey[200]!),
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.08)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white12
-                : Colors.grey[200]!,
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(
             color: Theme.of(context).colorScheme.primary,
-            width: 2,
+            width: 1.5,
           ),
         ),
         filled: true,
         fillColor: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white.withOpacity(0.05)
-            : Colors.white,
+            ? Colors.white.withValues(alpha: 0.03)
+            : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 16,
+          horizontal: 16,
+          vertical: 20,
         ),
       ),
     );
@@ -1277,36 +1273,38 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         if (date != null) setState(() => _invoiceDate = date);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         constraints: const BoxConstraints(minHeight: 64),
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(0.05)
-              : Colors.white,
+              ? Colors.white.withValues(alpha: 0.03)
+              : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
           border: Border.all(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white12
-                : Colors.grey[200]!,
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: TextStyle(
+                fontSize: 11,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Row(
               children: [
-                Icon(Icons.event_rounded, size: 16, color: Colors.blue[700]),
+                Icon(Icons.event_rounded, size: 18, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   DateFormat('dd MMM yyyy').format(_invoiceDate),
                   style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ],
@@ -1321,10 +1319,10 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(6),
       child: Row(
         children: [
           _buildToggleItem(
@@ -1353,18 +1351,22 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     return Expanded(
       child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? Theme.of(context).cardColor
+                ? (Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Theme.of(context).cardColor)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 5,
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
                   ]
                 : null,
@@ -1374,12 +1376,10 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               label,
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
-                    : (Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white60
-                          : Colors.grey[600]),
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
               ),
             ),
           ),
@@ -1395,19 +1395,21 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     IconData? icon,
   }) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
+    Color primaryColor = Theme.of(context).colorScheme.primary;
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: file == null
-              ? (isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50])
-              : Colors.green.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(16),
+              ? (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.withValues(alpha: 0.03))
+              : Colors.green.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: file == null
-                ? (isDark ? Colors.white12 : Theme.of(context).dividerColor)
-                : Colors.green[200]!,
+                ? Theme.of(context).dividerColor.withValues(alpha: 0.08)
+                : Colors.green.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
@@ -1416,13 +1418,13 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: file == null
-                    ? Colors.blue.withOpacity(0.1)
-                    : Colors.green.withOpacity(0.1),
+                    ? primaryColor.withValues(alpha: 0.1)
+                    : Colors.green.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon ?? Icons.attach_file_rounded,
-                color: file == null ? Colors.blue : Colors.green,
+                color: file == null ? primaryColor : Colors.green,
                 size: 20,
               ),
             ),
@@ -1435,18 +1437,20 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                     label,
                     style: const TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
                     file == null
                         ? 'rent_plan.tap_to_pick'.tr(context)
                         : file.path.split('/').last,
                     style: TextStyle(
                       fontSize: 12,
+                      fontWeight: FontWeight.w600,
                       color: file == null
-                          ? Colors.grey[500]
+                          ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)
                           : Colors.green[700],
                     ),
                   ),
@@ -1484,10 +1488,12 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withValues(alpha: 0.03)
+            : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
       ),
       child: Column(
@@ -1546,12 +1552,14 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   Widget _buildItemRow(int index) {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withValues(alpha: 0.03)
+            : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? Colors.white12 : Theme.of(context).dividerColor,
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
       ),
       child: Column(
@@ -1665,21 +1673,15 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       decimalDigits: 0,
     );
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color:
-                (Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black)
-                    .withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
           ),
-        ],
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1687,33 +1689,43 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'rent_plan.estimated_total'.tr(context),
-                style: TextStyle(
-                  color: Theme.of(context).hintColor,
-                  fontSize: 13,
-                ),
-              ),
-              Text(
-                currencyFormat.format(_totalPrice),
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'rent_plan.estimated_total'.tr(context),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    currencyFormat.format(_totalPrice),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: Theme.of(context).colorScheme.primary,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            height: 56,
+            height: 60,
             child: ElevatedButton(
               onPressed: _isSubmitting ? null : _showAgreementPopup,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 elevation: 0,
               ),
@@ -1730,8 +1742,8 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                       'rent_plan.create_order_now'.tr(context),
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
                       ),
                     ),
             ),

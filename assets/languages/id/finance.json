@@ -84,7 +84,8 @@
         "edit_budget": "Edit Anggaran",
         "delete_budget_confirm_msg": "Apakah Anda yakin ingin menghapus anggaran untuk kategori {category}?",
         "budget_deleted_success": "Anggaran berhasil dihapus",
-        "this_year": "Tahun Ini"
+        "this_year": "Tahun Ini",
+        "account_name": "Nama Akun"
     },
     "personal_finance": {
         "title": "Keuangan Pribadi",

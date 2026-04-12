@@ -7,6 +7,7 @@ import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/pagination_header.dart';
 
 import 'create_ticket_page.dart';
 import 'ticket_detail_page.dart';
@@ -355,14 +356,27 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                 ),
               ),
 
-              // Pagination Header
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: _buildPaginationHeader(),
+                  child: PaginationHeader(
+                    limit: _selectedLimit,
+                    totalCount: _totalCount,
+                    totalLabel: 'todo_list.total'.tr(context, args: {'count': _totalCount.toString()}),
+                    limitOptions: _limitOptions,
+                    onLimitChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedLimit = value;
+                          _currentPage = 1;
+                        });
+                        _fetchTickets();
+                      }
+                    },
+                  ),
                 ),
               ),
 
@@ -690,88 +704,6 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
     );
   }
 
-  Widget _buildPaginationHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              'main.show'.tr(context),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _buildPremiumDropdown(),
-          ],
-        ),
-        if (_allTickets.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'todo_list.total'.tr(
-                context,
-                args: {'count': _totalCount.toString()},
-              ),
-              style: const TextStyle(
-                color: Color(0xFF7E57C2),
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildPremiumDropdown() {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 18,
-            color: Color(0xFF7E57C2),
-          ),
-          style: const TextStyle(
-            color: Color(0xFF7E57C2),
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                _currentPage = 1;
-              });
-              _fetchTickets();
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
 
   Widget _buildTicketCard(Map<String, dynamic> ticket) {
     final status = ticket['ticket_status'].toString();

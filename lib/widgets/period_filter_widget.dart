@@ -36,35 +36,40 @@ class PeriodFilterButton extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(21),
       child: Container(
-        height: 38,
+        height: 42,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.circular(21),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.calendar_month_rounded,
-              size: 14,
-              color: primaryColor,
-            ),
-            const SizedBox(width: 6),
             Text(
               '$monthName $selectedYear',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 11,
+                fontSize: 13,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            const SizedBox(width: 4),
-            const Icon(
+            const SizedBox(width: 2),
+            Icon(
               Icons.keyboard_arrow_down_rounded,
-              size: 14,
-              color: Colors.grey,
+              size: 20,
+              color: primaryColor,
             ),
           ],
         ),
@@ -184,6 +189,12 @@ class _PeriodPickerSheetState extends State<PeriodPickerSheet> {
                           setState(() => _selectedYear = newValue);
                         }
                       },
+                      dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                       items: widget.years.map((year) {
                         return DropdownMenuItem<String>(
                           value: year,
@@ -209,6 +220,12 @@ class _PeriodPickerSheetState extends State<PeriodPickerSheet> {
                           setState(() => _selectedMonth = newValue);
                         }
                       },
+                      dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
                       items: widget.months.map((m) {
                         return DropdownMenuItem<String>(
                           value: m['id'],
@@ -254,12 +271,14 @@ class _PeriodPickerSheetState extends State<PeriodPickerSheet> {
     required Widget child,
   }) {
     return Container(
-      height: 50,
+      height: 55,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
       child: child,
     );

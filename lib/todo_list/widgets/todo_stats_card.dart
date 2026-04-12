@@ -29,9 +29,9 @@ class TodoStatsCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: Theme.of(context).cardColor,
+      color: Theme.of(context).scaffoldBackgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         side: BorderSide(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),
@@ -41,7 +41,7 @@ class TodoStatsCard extends StatelessWidget {
         children: [
           InkWell(
             onTap: onToggleExpand,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Row(
@@ -92,7 +92,7 @@ class TodoStatsCard extends StatelessWidget {
             curve: Curves.easeInOut,
             child: isExpanded
                 ? Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                     child: Row(
                       children: [
                         Expanded(
@@ -100,24 +100,28 @@ class TodoStatsCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildStatMiniRow(
+                                context,
                                 'main.total'.tr(context),
                                 totalCount.toString(),
                                 Colors.blue,
                               ),
                               const SizedBox(height: 12),
                               _buildStatMiniRow(
+                                context,
                                 'todo_list.completed_today'.tr(context),
                                 completedTodayCount.toString(),
                                 Colors.purple,
                               ),
                               const SizedBox(height: 12),
                               _buildStatMiniRow(
+                                context,
                                 'todo_list.complete'.tr(context),
                                 completedCount.toString(),
                                 Colors.green,
                               ),
                               const SizedBox(height: 12),
                               _buildStatMiniRow(
+                                context,
                                 'todo_list.pending'.tr(context),
                                 pendingCount.toString(),
                                 Colors.orange,
@@ -126,47 +130,54 @@ class TodoStatsCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 90,
-                              height: 90,
-                              child: CircularProgressIndicator(
-                                value: progress,
-                                strokeWidth: 10,
-                                backgroundColor: Theme.of(
-                                  context,
-                                ).dividerColor.withValues(alpha: 0.1),
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  primaryColor,
-                                ),
-                                strokeCap: StrokeCap.round,
-                              ),
-                            ),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0, end: progress),
+                          duration: const Duration(milliseconds: 1200),
+                          curve: Curves.easeOutQuart,
+                          builder: (context, value, child) {
+                            return Stack(
+                              alignment: Alignment.center,
                               children: [
-                                Text(
-                                  '${(progress * 100).toInt()}%',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
+                                SizedBox(
+                                  width: 90,
+                                  height: 90,
+                                  child: CircularProgressIndicator(
+                                    value: value,
+                                    strokeWidth: 10,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).dividerColor.withValues(alpha: 0.1),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      primaryColor,
+                                    ),
+                                    strokeCap: StrokeCap.round,
                                   ),
                                 ),
-                                Text(
-                                  'todo_list.completed'
-                                      .tr(context)
-                                      .toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '${(value * 100).toInt()}%',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    Text(
+                                      'todo_list.completed'
+                                          .tr(context)
+                                          .toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -178,7 +189,7 @@ class TodoStatsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatMiniRow(String label, String value, Color color) {
+  Widget _buildStatMiniRow(BuildContext context, String label, String value, Color color) {
     return Row(
       children: [
         Container(
@@ -190,7 +201,7 @@ class TodoStatsCard extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[600],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),

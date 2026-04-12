@@ -222,22 +222,22 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(left: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: _primaryColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _primaryColor.withValues(alpha: 0.2)),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _primaryColor.withValues(alpha: 0.1)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 16, color: _primaryColor),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: _primaryColor,
               ),
@@ -262,9 +262,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 10),
-
-            const SizedBox(height: 25),
+            const SizedBox(height: 12),
 
             // Date Picker
             InkWell(
@@ -275,9 +273,22 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                   firstDate: DateTime.now().subtract(const Duration(days: 30)),
                   lastDate: DateTime.now(),
                   builder: (context, child) {
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
                     return Theme(
                       data: Theme.of(context).copyWith(
-                        colorScheme: ColorScheme.light(primary: _primaryColor),
+                        colorScheme: isDark
+                            ? ColorScheme.dark(
+                                primary: _primaryColor,
+                                onPrimary: Colors.white,
+                                surface: const Color(0xFF1E1E26), // Premium dark surface
+                                onSurface: Colors.white,
+                              )
+                            : ColorScheme.light(primary: _primaryColor),
+                        textButtonTheme: TextButtonThemeData(
+                          style: TextButton.styleFrom(
+                            foregroundColor: _primaryColor,
+                          ),
+                        ),
                       ),
                       child: child!,
                     );
@@ -288,16 +299,25 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                 }
               },
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.calendar_today, color: _primaryColor),
-                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Icon(Icons.calendar_today_rounded, color: _primaryColor, size: 22),
+                    ),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,49 +325,49 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                           Text(
                             'work_log.select_date'.tr(context),
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                               fontSize: 12,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-
+                          const SizedBox(height: 2),
                           Text(
                             _selectedDate.toIso8601String().split('T')[0],
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 18,
+                              letterSpacing: -0.5,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_drop_down),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                    ),
                   ],
                 ),
               ),
             ),
 
             const SizedBox(height: 30),
-            Row(
-              children: [
-                Text(
-                  'work_log.items'.tr(context),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildQuickAddButton(
+                    onTap: _showTodoPicker,
+                    icon: Icons.playlist_add_check_rounded,
+                    label: 'work_log.from_todo_list'.tr(context),
                   ),
-                ),
-                const Spacer(),
-                _buildQuickAddButton(
-                  onTap: _showTodoPicker,
-                  icon: Icons.playlist_add_check_rounded,
-                  label: 'work_log.from_todo_list'.tr(context),
-                ),
-                _buildQuickAddButton(
-                  onTap: _showJobDeskPicker,
-                  icon: Icons.assignment_outlined,
-                  label: 'work_log.from_job_desk'.tr(context),
-                ),
-              ],
+                  _buildQuickAddButton(
+                    onTap: _showJobDeskPicker,
+                    icon: Icons.assignment_outlined,
+                    label: 'work_log.from_job_desk'.tr(context),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 10),
 
@@ -366,23 +386,43 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                           controller: _itemControllers[index],
                           decoration: InputDecoration(
                             hintText: 'work_log.item_hint'.tr(context),
+                            hintStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                              fontSize: 14,
+                            ),
                             filled: true,
-
-                            fillColor: Theme.of(context).cardColor,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                            fillColor: Theme.of(context).scaffoldBackgroundColor,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: _primaryColor.withValues(alpha: 0.3),
+                                width: 1.5,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       if (_itemControllers.length > 1)
                         IconButton(
                           onPressed: () => _removeItem(index),
-                          icon: const Icon(
-                            Icons.remove_circle_outline,
-                            color: Colors.red,
+                          icon: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.remove_rounded,
+                              color: Colors.red,
+                              size: 20,
+                            ),
                           ),
                         ),
                     ],
@@ -408,7 +448,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _primaryColor,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   elevation: 0,
                 ),
@@ -457,7 +497,6 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
     final filteredItems = widget.items.where((item) {
       final name = (item['item_name'] ?? '').toString();
       final matchesSearch = name.toLowerCase().contains(
@@ -543,18 +582,34 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
               onChanged: (v) => setState(() => _searchQuery = v),
               decoration: InputDecoration(
                 hintText: 'work_log.search_job'.tr(context),
-                prefixIcon: const Icon(Icons.search, size: 20),
-                border: OutlineInputBorder(
+                hintStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                  fontSize: 14,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  size: 22,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                ),
+                filled: true,
+                fillColor: Theme.of(context).scaffoldBackgroundColor,
+                enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(
+                    color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
-                filled: true,
-                fillColor: isDark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.white,
               ),
             ),
           ),
@@ -571,15 +626,18 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
                           widget.isTodo
                               ? Icons.assignment_turned_in_outlined
                               : Icons.assignment_late_outlined,
-                          size: 48,
-                          color: Colors.grey[300],
+                          size: 64,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           _searchQuery.isEmpty
                               ? 'todo_list.no_todos'.tr(context)
                               : 'main.no_results'.tr(context),
-                          style: TextStyle(color: Colors.grey[500]),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
@@ -658,10 +716,10 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
                                     ],
                                   )
                                 : null,
-                        trailing: const Icon(
+                        trailing: Icon(
                           Icons.add_circle_outline_rounded,
-                          size: 20,
-                          color: Color(0xFF7E57C2),
+                          size: 22,
+                          color: const Color(0xFF7E57C2).withValues(alpha: 0.6),
                         ),
                         onTap: () => widget.onSelect([item['item_name'] ?? '']),
                       );

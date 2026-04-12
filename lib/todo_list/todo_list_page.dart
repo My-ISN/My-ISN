@@ -13,6 +13,8 @@ import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/limit_dropdown_widget.dart';
+import '../widgets/pagination_header.dart';
 
 import '../widgets/searchable_dropdown.dart';
 import 'widgets/todo_stats_card.dart';
@@ -843,7 +845,7 @@ class _TodoListPageState extends State<TodoListPage> {
             ),
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(24),
                 ),
@@ -990,7 +992,7 @@ class _TodoListPageState extends State<TodoListPage> {
             ),
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(24),
                 ),
@@ -1143,7 +1145,7 @@ class _TodoListPageState extends State<TodoListPage> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Column(
                   children: [
                     TodoStatsCard(
@@ -1296,87 +1298,28 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Widget _buildPaginationHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              'main.show'.tr(context),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _buildPremiumDropdown(),
-          ],
-        ),
-        if (_todos.isNotEmpty)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: _primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'todo_list.total'.tr(
-                context,
-                args: {'count': _totalCount.toString()},
-              ),
-              style: TextStyle(
-                color: _primaryColor,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-      ],
+    return PaginationHeader(
+      limit: _selectedLimit,
+      limitOptions: _limitOptions,
+      totalCount: _totalCount,
+      onLimitChanged: (int? newValue) {
+        if (newValue != null) {
+          setState(() {
+            _selectedLimit = newValue;
+            _currentPage = 1;
+          });
+          _fetchTodos();
+        }
+      },
+      primaryColor: _primaryColor,
+      totalLabel: 'todo_list.total'.tr(
+        context,
+        args: {'count': _totalCount.toString()},
+      ),
     );
   }
 
-  Widget _buildPremiumDropdown() {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 18,
-            color: _primaryColor,
-          ),
-          style: TextStyle(
-            color: _primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                _currentPage = 1;
-              });
-              _fetchTodos();
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
+
 
   void _confirmDelete(dynamic todo) {
     showModalBottomSheet(
@@ -1397,7 +1340,7 @@ class _TodoListPageState extends State<TodoListPage> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.3),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

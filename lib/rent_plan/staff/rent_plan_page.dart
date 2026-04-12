@@ -10,6 +10,7 @@ import '../../widgets/side_drawer.dart';
 import '../../localization/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/custom_snackbar.dart';
+import '../../widgets/pagination_header.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -119,7 +120,7 @@ class _RentPlanPageState extends State<RentPlanPage>
               'rent_plan.delete_confirm_msg'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 32),
@@ -130,7 +131,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      side: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -459,7 +460,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                                 color: Colors.green.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color: Colors.green.withOpacity(0.3),
+                                  color: Colors.green.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Row(
@@ -488,7 +489,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                           children: [
                             Icon(
                               Icons.shield_outlined,
-                              color: primaryPurple.withOpacity(0.5),
+                              color: primaryPurple.withValues(alpha: 0.5),
                               size: 16,
                             ),
                             const SizedBox(width: 8),
@@ -578,7 +579,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                               borderRadius: BorderRadius.circular(8),
                             ),
                             elevation: isProcessing ? 0 : 8,
-                            shadowColor: primaryPurple.withOpacity(0.4),
+                            shadowColor: primaryPurple.withValues(alpha: 0.4),
                           ),
                         ),
                       ),
@@ -610,7 +611,7 @@ class _RentPlanPageState extends State<RentPlanPage>
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isActive
-              ? primaryPurple.withOpacity(0.08)
+              ? primaryPurple.withValues(alpha: 0.08)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
@@ -620,7 +621,7 @@ class _RentPlanPageState extends State<RentPlanPage>
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: primaryPurple.withOpacity(0.15),
+                    color: primaryPurple.withValues(alpha: 0.15),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -682,11 +683,11 @@ class _RentPlanPageState extends State<RentPlanPage>
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: isActive
-              ? primaryPurple.withOpacity(0.05)
+              ? primaryPurple.withValues(alpha: 0.05)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isActive ? primaryPurple : Colors.grey.withOpacity(0.15),
+            color: isActive ? primaryPurple : Colors.grey.withValues(alpha: 0.15),
             width: isActive ? 1.5 : 1,
           ),
         ),
@@ -832,7 +833,21 @@ class _RentPlanPageState extends State<RentPlanPage>
                 if (index == 0) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: _buildListHeader(),
+                    child: PaginationHeader(
+                      limit: _selectedLimit,
+                      totalCount: _totalCount,
+                      totalLabel: 'rent_plan.total_count'.tr(context, args: {'count': _totalCount.toString()}),
+                      limitOptions: _limitOptions,
+                      onLimitChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedLimit = value;
+                            _currentPage = 1;
+                          });
+                          _fetchRentPlans();
+                        }
+                      },
+                    ),
                   );
                 }
 
@@ -866,7 +881,7 @@ class _RentPlanPageState extends State<RentPlanPage>
 
     return Container(
       height: 100,
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 12),
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -889,7 +904,7 @@ class _RentPlanPageState extends State<RentPlanPage>
           _buildStatCard(
             'rent_plan.stats.completed'.tr(context),
             _stats['completed']?.toString() ?? '0',
-            Colors.grey,
+            Colors.blue, // Changed from grey to blue for consistency
           ),
         ],
       ),
@@ -897,52 +912,56 @@ class _RentPlanPageState extends State<RentPlanPage>
   }
 
   Widget _buildStatCard(String label, String value, Color color) {
-    return Container(
-      width: 140,
+    return Card(
+      elevation: 0,
       margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-              fontWeight: FontWeight.w500,
+      child: Container(
+        width: 140,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: color,
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
+                color: color,
+                letterSpacing: -0.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildPremiumSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
           ),
         ),
         child: TextField(
@@ -959,8 +978,11 @@ class _RentPlanPageState extends State<RentPlanPage>
           },
           decoration: InputDecoration(
             hintText: 'rent_plan.search_hint'.tr(context),
-            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-            prefixIcon: Icon(Icons.search_rounded, color: _primaryColor),
+            hintStyle: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+              fontSize: 14,
+            ),
+            prefixIcon: Icon(Icons.search_rounded, color: _primaryColor, size: 22),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
                     icon: const Icon(
@@ -977,11 +999,10 @@ class _RentPlanPageState extends State<RentPlanPage>
                     },
                   )
                 : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 18),
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           ),
         ),
       ),
@@ -1051,17 +1072,17 @@ class _RentPlanPageState extends State<RentPlanPage>
 
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 20),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         side: BorderSide(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
           onTap: () {
             Navigator.push(
               context,
@@ -1074,79 +1095,85 @@ class _RentPlanPageState extends State<RentPlanPage>
             );
           },
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header: Status and Actions
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: Text(
-                        rental['invoice_number'] ?? '#NO-INV',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: _primaryColor,
-                        ),
-                      ),
-                    ),
                     _buildStatusPill(status, statusColor),
-                    if (status.toLowerCase() != 'completed') ...[
-                      const SizedBox(width: 8),
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () => _showPaymentModal(rental),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.payment_rounded,
-                              color: Color(0xFF7E57C2),
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                    if (_hasPermission('mobile_rent_plan_delete')) ...[
-                      const SizedBox(width: 8),
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () => _showDeleteConfirmation(
-                            int.parse(rental['rental_id']),
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.delete_outline_rounded,
-                              color: Colors.red,
-                              size: 18,
+                    Row(
+                      children: [
+                        if (status.toLowerCase() != 'completed') ...[
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => _showPaymentModal(rental),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.payment_rounded,
+                                  color: Color(0xFF7E57C2),
+                                  size: 18,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
+                          const SizedBox(width: 8),
+                        ],
+                        if (_hasPermission('mobile_rent_plan_delete')) ...[
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () => _showDeleteConfirmation(
+                                int.parse(rental['rental_id']),
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  color: Colors.red,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
+                const SizedBox(height: 12),
+                // Invoice Number
+                Text(
+                  rental['invoice_number'] ?? '#NO-INV',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                    color: _primaryColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
                 const SizedBox(height: 16),
+                // Client Info
                 Row(
                   children: [
                     Container(
@@ -1154,7 +1181,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                       height: 52,
                       decoration: BoxDecoration(
                         color: _primaryColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       child: Icon(
                         Icons.person_rounded,
@@ -1170,8 +1197,9 @@ class _RentPlanPageState extends State<RentPlanPage>
                           Text(
                             clientName,
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
                               fontSize: 16,
+                              letterSpacing: -0.3,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1193,8 +1221,9 @@ class _RentPlanPageState extends State<RentPlanPage>
                               },
                             ),
                             style: TextStyle(
-                              color: Colors.grey[500],
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                               fontSize: 13,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -1202,13 +1231,13 @@ class _RentPlanPageState extends State<RentPlanPage>
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  child: Divider(
-                    height: 1,
-                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                  ),
+                const SizedBox(height: 20),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
                 ),
+                const SizedBox(height: 20),
+                // Totals and Time
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -1220,16 +1249,17 @@ class _RentPlanPageState extends State<RentPlanPage>
                             'rent_plan.total_cost'.tr(context),
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey[500],
-                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
                             currencyFormat.format(totalHarga),
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
                             ),
                           ),
                         ],
@@ -1244,11 +1274,12 @@ class _RentPlanPageState extends State<RentPlanPage>
                             'rent_plan.time_remaining'.tr(context),
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey[500],
-                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
                             daysLeft < 0
                                 ? 'rent_plan.days_late'.tr(
@@ -1262,8 +1293,8 @@ class _RentPlanPageState extends State<RentPlanPage>
                                           args: {'days': daysLeft.toString()},
                                         )),
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
                               color: daysLeft < 0
                                   ? Colors.red
                                   : (daysLeft <= 3
@@ -1288,18 +1319,18 @@ class _RentPlanPageState extends State<RentPlanPage>
 
   Widget _buildStatusPill(String status, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         _getRentalStatusLabel(status),
         style: TextStyle(
           color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
+          fontSize: 11,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.2,
         ),
       ),
     );
@@ -1337,87 +1368,6 @@ class _RentPlanPageState extends State<RentPlanPage>
     }
   }
 
-  Widget _buildListHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              'rent_plan.show'.tr(context),
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _buildPremiumDropdown(),
-          ],
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: _primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            'rent_plan.total_count'.tr(
-              context,
-              args: {'count': _totalCount.toString()},
-            ),
-            style: TextStyle(
-              color: _primaryColor,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPremiumDropdown() {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 18,
-            color: _primaryColor,
-          ),
-          style: TextStyle(
-            color: _primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                _currentPage = 1;
-              });
-              _fetchRentPlans();
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
 
   Widget _buildPagination() {
     int totalPages = (_totalCount / _selectedLimit).ceil();
@@ -1428,6 +1378,7 @@ class _RentPlanPageState extends State<RentPlanPage>
       children: [
         _buildPageButton(
           icon: Icons.chevron_left_rounded,
+          isActive: _currentPage > 1,
           onPressed: _currentPage > 1
               ? () {
                   setState(() => _currentPage--);
@@ -1437,10 +1388,13 @@ class _RentPlanPageState extends State<RentPlanPage>
         ),
         const SizedBox(width: 16),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
-            color: _primaryColor,
-            borderRadius: BorderRadius.circular(12),
+            color: _primaryColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(
+              color: _primaryColor.withValues(alpha: 0.1),
+            ),
           ),
           child: Text(
             'rent_plan.page_x_of_y'.tr(
@@ -1450,9 +1404,9 @@ class _RentPlanPageState extends State<RentPlanPage>
                 'total': totalPages.toString(),
               },
             ),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+            style: TextStyle(
+              color: _primaryColor,
+              fontWeight: FontWeight.w900,
               fontSize: 13,
             ),
           ),
@@ -1460,6 +1414,7 @@ class _RentPlanPageState extends State<RentPlanPage>
         const SizedBox(width: 16),
         _buildPageButton(
           icon: Icons.chevron_right_rounded,
+          isActive: _currentPage < totalPages,
           onPressed: _currentPage < totalPages
               ? () {
                   setState(() => _currentPage++);
@@ -1471,26 +1426,32 @@ class _RentPlanPageState extends State<RentPlanPage>
     );
   }
 
-  Widget _buildPageButton({required IconData icon, VoidCallback? onPressed}) {
+  Widget _buildPageButton({
+    required IconData icon,
+    required bool isActive,
+    VoidCallback? onPressed,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(15),
         child: Container(
-          width: 40,
-          height: 40,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(15),
             border: Border.all(
               color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
             ),
           ),
           child: Icon(
             icon,
-            color: onPressed == null
-                ? Colors.grey[400]
-                : _primaryColor,
+            color: isActive
+                ? _primaryColor
+                : (isDark ? Colors.white.withValues(alpha: 0.4) : Colors.grey.withValues(alpha: 0.3)),
             size: 24,
           ),
         ),

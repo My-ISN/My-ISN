@@ -525,21 +525,12 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white10
-              : color.withValues(alpha: 0.1),
-          width: 1.5,
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+          width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -552,7 +543,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 20),
                 ),
@@ -589,6 +580,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     bool isRequired = true,
     String? hint,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextFormField(
       controller: controller,
       enabled: enabled,
@@ -609,28 +601,26 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         suffixText: suffix,
         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey[200]!),
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white12
-                : Colors.grey[200]!,
+            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey[200]!,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(
             color: Theme.of(context).colorScheme.primary,
-            width: 2,
+            width: 1.5,
           ),
         ),
         filled: true,
-        fillColor: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white.withOpacity(0.05)
-            : Colors.white,
+        fillColor: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.grey[50],
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
@@ -652,17 +642,19 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: !hasFile
-              ? (isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50])
-              : Colors.green.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(16),
+              ? (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey[50])
+              : Colors.green.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: !hasFile
-                ? (isDark ? Colors.white12 : Theme.of(context).dividerColor)
-                : Colors.green[200]!,
+                ? (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey[200]!)
+                : Colors.green.withValues(alpha: 0.2),
+            width: 1,
           ),
         ),
         child: Row(
@@ -671,13 +663,13 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: !hasFile
-                    ? Colors.blue.withValues(alpha: 0.1)
+                    ? _primaryColor.withValues(alpha: 0.1)
                     : Colors.green.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon ?? Icons.attach_file_rounded,
-                color: !hasFile ? Colors.blue : Colors.green,
+                color: !hasFile ? _primaryColor : Colors.green,
                 size: 20,
               ),
             ),
@@ -888,6 +880,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   Widget _buildHorizontalMenu() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       child: Row(
         children: _menuTabs.map((tab) {
           final bool isActive = _activeTab == tab;
@@ -909,32 +902,27 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               : _primaryColor;
 
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: 10),
             child: InkWell(
               onTap: isUrlTab
                   ? () => _launchDocumentUrl(tab)
                   : () => setState(() => _activeTab = tab),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
+              borderRadius: BorderRadius.circular(14),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                  horizontal: 16,
+                  vertical: 10,
                 ),
                 decoration: BoxDecoration(
                   color: isActive
                       ? tabActiveColor
-                      : (hasDebt
-                            ? Colors.redAccent.withValues(alpha: 0.1)
-                            : Colors.transparent),
-                  borderRadius: BorderRadius.circular(12),
+                      : Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isActive
-                        ? tabActiveColor
-                        : (hasDebt
-                              ? Colors.redAccent.withOpacity(0.3)
-                              : Theme.of(
-                                  context,
-                                ).dividerColor.withValues(alpha: 0.1)),
+                        ? tabActiveColor.withValues(alpha: 0.2)
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.08),
                   ),
                 ),
                 child: Text(
@@ -943,7 +931,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     color: isActive
                         ? Colors.white
                         : (hasDebt ? Colors.redAccent : Colors.grey[600]),
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1722,17 +1710,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? Theme.of(context).cardColor
+                ? Theme.of(context).scaffoldBackgroundColor
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 5,
-                    ),
-                  ]
-                : null,
+            border: Border.all(
+              color: isSelected
+                  ? _primaryColor.withValues(alpha: 0.3)
+                  : Colors.transparent,
+            ),
           ),
           child: Center(
             child: Text(
@@ -1901,9 +1886,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _primaryColor.withOpacity(0.1)),
+        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.08)),
       ),
       child: Column(
         children: [
@@ -2048,27 +2033,18 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         _buildOverviewCard([
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+            padding: const EdgeInsets.all(20),
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: _rentalData!['status_pembayaran'] == 'sudah'
-                    ? [
-                        Colors.green.withOpacity(0.15),
-                        Colors.green.withOpacity(0.05),
-                      ]
-                    : [
-                        Colors.red.withOpacity(0.15),
-                        Colors.red.withOpacity(0.05),
-                      ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
+              color: _rentalData!['status_pembayaran'] == 'sudah'
+                  ? Colors.green.withValues(alpha: 0.05)
+                  : Colors.red.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: _rentalData!['status_pembayaran'] == 'sudah'
-                    ? Colors.green.withOpacity(0.2)
-                    : Colors.red.withOpacity(0.2),
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.red.withValues(alpha: 0.1),
+                width: 1,
               ),
             ),
             child: Row(
@@ -2078,12 +2054,12 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'rent_plan.total_cost'.tr(context),
+                      'rent_plan.total_cost'.tr(context).toUpperCase(),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 10,
                         color: Colors.grey[500],
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
+                        letterSpacing: 1,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -2106,23 +2082,23 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color:
-                        (_rentalData!['status_pembayaran'] == 'sudah'
-                                ? Colors.green
-                                : Colors.red)
-                            .withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _rentalData!['status_pembayaran'] == 'sudah'
-                        ? Icons.check_circle_rounded
-                        : Icons.error_outline_rounded,
                     color: _rentalData!['status_pembayaran'] == 'sudah'
                         ? Colors.green
                         : Colors.red,
-                    size: 28,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    (_rentalData!['status_pembayaran'] == 'sudah'
+                            ? 'rent_plan.paid'.tr(context)
+                            : 'rent_plan.unpaid'.tr(context))
+                        .toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ],
@@ -2189,15 +2165,22 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: _primaryColor),
-          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: _primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 16, color: _primaryColor),
+          ),
+          const SizedBox(width: 10),
           Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
-              letterSpacing: 0.5,
+              color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
+              letterSpacing: 0.3,
             ),
           ),
         ],
@@ -2208,17 +2191,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   Widget _buildOverviewCard(List<Widget> children) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2249,9 +2229,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: 10,
                     color: Colors.grey[500],
                     fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -2259,8 +2240,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   val1,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: valColor1,
+                    fontWeight: FontWeight.bold,
+                    color: valColor1 ?? Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
               ],
@@ -2276,9 +2257,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 9,
+                      fontSize: 10,
                       color: Colors.grey[500],
                       fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -2286,8 +2268,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     val2,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: valColor2,
+                      fontWeight: FontWeight.bold,
+                      color: valColor2 ?? Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                 ],
@@ -2340,70 +2322,79 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
           InkWell(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
             borderRadius: BorderRadius.vertical(
-              top: const Radius.circular(20),
-              bottom: Radius.circular(_isExpanded ? 0 : 20),
+              top: const Radius.circular(24),
+              bottom: Radius.circular(_isExpanded ? 0 : 24),
             ),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'rent_plan.rental_progress'.tr(context),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                      Row(
+                  TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: progress),
+                    duration: const Duration(milliseconds: 1200),
+                    curve: Curves.easeOutQuart,
+                    builder: (context, value, child) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '${progress.toStringAsFixed(0)}%',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'rent_plan.rental_progress'.tr(context),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '${value.toStringAsFixed(0)}%',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: _primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    _isExpanded
+                                        ? Icons.keyboard_arrow_up_rounded
+                                        : Icons.keyboard_arrow_down_rounded,
+                                    color: Colors.grey[500],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: value / 100,
+                              minHeight: 12,
+                              backgroundColor: _primaryColor.withValues(alpha: 0.1),
                               color: _primaryColor,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            _isExpanded
-                                ? Icons.keyboard_arrow_up_rounded
-                                : Icons.keyboard_arrow_down_rounded,
-                            color: Colors.grey[500],
-                          ),
                         ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: progress / 100,
-                      minHeight: 12,
-                      backgroundColor: _primaryColor.withOpacity(0.1),
-                      color: _primaryColor,
-                    ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -2412,10 +2403,12 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                       _buildDateInfo(
                         'rent_plan.start'.tr(context),
                         _rentalData!['invoice_date'] ?? '-',
+                        Icons.calendar_today_rounded,
                       ),
                       _buildDateInfo(
                         'rent_plan.end'.tr(context),
                         _rentalData!['tanggal_berakhir'] ?? '-',
+                        Icons.event_available_rounded,
                       ),
                     ],
                   ),
@@ -2430,7 +2423,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               children: [
                 Divider(
                   height: 1,
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
                 ),
                 _buildStatusItem(
                   'rent_plan.payment_status'.tr(context),
@@ -2447,8 +2440,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 ),
                 Divider(
                   height: 1,
-                  indent: 56,
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  indent: 64,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
                 ),
                 _buildStatusItem(
                   'rent_plan.fine_status'.tr(context),
@@ -2462,8 +2455,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 ),
                 Divider(
                   height: 1,
-                  indent: 56,
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  indent: 64,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
                 ),
                 _buildStatusItem(
                   'rent_plan.approval_status'.tr(context),
@@ -2480,8 +2473,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 ),
                 Divider(
                   height: 1,
-                  indent: 56,
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  indent: 64,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
                 ),
                 _buildMultiChoiceStatus(),
                 const SizedBox(height: 8),
@@ -2497,26 +2490,36 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     );
   }
 
-  Widget _buildDateInfo(String label, String date) {
-    return Column(
-      crossAxisAlignment: label == 'rent_plan.start'.tr(context)
-          ? CrossAxisAlignment.start
-          : CrossAxisAlignment.end,
+  Widget _buildDateInfo(String label, String date, IconData icon) {
+    return Row(
       children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey[500],
-            fontWeight: FontWeight.w500,
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: _primaryColor.withValues(alpha: 0.05),
+            shape: BoxShape.circle,
           ),
+          child: Icon(icon, size: 16, color: _primaryColor),
         ),
-        const SizedBox(height: 4),
-        Text(
-          date,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey[500],
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              date,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ],
     );
@@ -2530,31 +2533,49 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     Color color,
     Function(bool) onChanged,
   ) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: color, size: 22),
-      ),
-      title: Text(
-        title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
-      subtitle: Text(
-        subtitle,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 12, color: value ? color : Colors.grey[500]),
-      ),
-      trailing: Switch.adaptive(
-        value: value,
-        onChanged: onChanged,
-        activeColor: color,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: value ? color : Colors.grey[500],
+                    fontWeight: value ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Transform.scale(
+            scale: 0.8,
+            child: Switch.adaptive(
+              value: value,
+              onChanged: onChanged,
+              activeColor: color,
+              activeTrackColor: color.withValues(alpha: 0.2),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -2596,25 +2617,26 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     ];
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.assignment_rounded, size: 18, color: Colors.grey[600]),
+              Icon(Icons.assignment_rounded, size: 14, color: Colors.grey[500]),
               const SizedBox(width: 8),
               Text(
-                'rent_plan.rental_status'.tr(context),
+                'rent_plan.rental_status'.tr(context).toUpperCase(),
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
+                  color: Colors.grey[500],
+                  letterSpacing: 0.8,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -2628,18 +2650,18 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    horizontal: 14,
+                    vertical: 10,
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? color.withOpacity(0.1)
-                        : Colors.transparent,
+                        ? color.withValues(alpha: 0.1)
+                        : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected
                           ? color
-                          : Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                          : Theme.of(context).dividerColor.withValues(alpha: 0.08),
                     ),
                   ),
                   child: Row(
@@ -2647,17 +2669,15 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     children: [
                       Icon(
                         opt['icon'],
-                        size: 16,
+                        size: 14,
                         color: isSelected ? color : Colors.grey[500],
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       Text(
                         opt['label'],
                         style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                          fontSize: 11,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           color: isSelected ? color : Colors.grey[600],
                         ),
                       ),
@@ -2807,18 +2827,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Row(
           children: [
@@ -3030,27 +3043,22 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 30),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(32),
           border: Border.all(
-            color: Theme.of(context).dividerColor.withOpacity(0.05),
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.redAccent.withOpacity(0.05),
+                color: Colors.redAccent.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.redAccent.withOpacity(0.1)),
+                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.1)),
               ),
               child: const Icon(
                 Icons.account_balance_wallet_outlined,
@@ -3061,6 +3069,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             const SizedBox(height: 32),
             Text(
               'rent_plan.no_debt_data'.tr(context),
+              textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -3213,9 +3222,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: statusColor.withOpacity(0.2)),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: [
@@ -3315,16 +3324,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       width: isFullWidth ? double.infinity : null,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: color.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: isFullWidth
@@ -3687,19 +3689,13 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
           return Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(32),
               ),
-              boxShadow: isDark
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, -5),
-                      ),
-                    ],
+              border: Border.all(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+              ),
             ),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -4311,7 +4307,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               'rent_plan.delete_debt_confirm'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                fontSize: 14,
               ),
             ),
             const SizedBox(height: 32),
@@ -4322,7 +4319,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                      side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

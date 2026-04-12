@@ -6,6 +6,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/limit_dropdown_widget.dart';
+import '../widgets/pagination_header.dart';
 import '../constants.dart';
 
 class AiBotPage extends StatefulWidget {
@@ -165,65 +167,22 @@ class _AiBotPageState extends State<AiBotPage> {
   }
 
   Widget _buildPaginationHeader() {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            const Text(
-              'Show',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey),
-            ),
-            const SizedBox(width: 8),
-            _buildLimitDropdown(),
-          ],
-        ),
-        if (_totalCount > 0)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withAlpha(25),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '$_totalCount Total',
-              style: TextStyle(
-                color: colorScheme.primary,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-      ],
+    return PaginationHeader(
+      limit: _selectedLimit,
+      limitOptions: _limitOptions,
+      totalCount: _totalCount,
+      onLimitChanged: (val) {
+        if (val != null) {
+          setState(() => _selectedLimit = val);
+          _fetchKnowledge(page: 1);
+        }
+      },
+      primaryColor: Theme.of(context).colorScheme.primary,
+      totalLabel: '$_totalCount Total',
     );
   }
 
-  Widget _buildLimitDropdown() {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withAlpha(50)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
-          items: _limitOptions.map((e) => DropdownMenuItem(value: e, child: Text(e.toString()))).toList(),
-          onChanged: (val) {
-            if (val != null) {
-              setState(() => _selectedLimit = val);
-              _fetchKnowledge(page: 1);
-            }
-          },
-        ),
-      ),
-    );
-  }
+
 
   void _editKnowledge(Map<String, dynamic> item) {
     setState(() {

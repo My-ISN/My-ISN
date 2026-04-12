@@ -16,6 +16,8 @@ import 'widgets/finance_account_item.dart';
 import 'widgets/finance_transaction_item.dart';
 import 'add_finance_data_page.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/limit_dropdown_widget.dart';
+import '../widgets/pagination_header.dart';
 
 class FinancePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -1180,21 +1182,23 @@ class _FinancePageState extends State<FinancePage>
   Widget _buildFinanceHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-      child: GestureDetector(
-        onTap: () => setState(() => _isHeaderExpanded = !_isHeaderExpanded),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-            ),
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
           ),
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
+        ),
+        child: InkWell(
+          onTap: () => setState(() => _isHeaderExpanded = !_isHeaderExpanded),
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1203,9 +1207,10 @@ class _FinancePageState extends State<FinancePage>
                   children: [
                     Text(
                       'finance.total_balance'.tr(context),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     Container(
@@ -1224,11 +1229,11 @@ class _FinancePageState extends State<FinancePage>
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Text(
                   'IDR ${_formatCurrency(_totalBalance)}',
                   style: TextStyle(
-                    fontSize: _isHeaderExpanded ? 24 : 20,
+                    fontSize: _isHeaderExpanded ? 26 : 22,
                     fontWeight: FontWeight.w900,
                     color: const Color(0xFF7E57C2),
                   ),
@@ -1265,8 +1270,9 @@ class _FinancePageState extends State<FinancePage>
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildReportStat(double amount, String label, {bool isIncome = true}) {
     return Column(
@@ -1360,47 +1366,19 @@ class _FinancePageState extends State<FinancePage>
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Left: Show Limit
-              Row(
-                children: [
-                  Text(
-                    'rent_plan.show'.tr(context),
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildAccountsLimitDropdown(),
-                ],
-              ),
-              // Right: Total Badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7E57C2).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'rent_plan.total_count'.tr(
-                    context,
-                    args: {'count': _accountsTotalCount.toString()},
-                  ),
-                  style: const TextStyle(
-                    color: Color(0xFF7E57C2),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
+          child: PaginationHeader(
+            limit: _accountsSelectedLimit,
+            limitOptions: _limitOptions,
+            totalCount: _accountsTotalCount,
+            onLimitChanged: (int? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  _accountsSelectedLimit = newValue;
+                  _accountsPage = 1;
+                });
+                _fetchAccounts();
+              }
+            },
           ),
         ),
         Expanded(
@@ -1430,47 +1408,7 @@ class _FinancePageState extends State<FinancePage>
     );
   }
 
-  Widget _buildAccountsLimitDropdown() {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _accountsSelectedLimit,
-          icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: Color(0xFF7E57C2),
-          ),
-          style: const TextStyle(
-            color: Color(0xFF7E57C2),
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _accountsSelectedLimit = newValue;
-                _accountsPage = 1;
-              });
-              _fetchAccounts();
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildAccountsPagination() {
     int totalPages = (_accountsTotalCount / _accountsSelectedLimit).ceil();
@@ -1576,103 +1514,31 @@ class _FinancePageState extends State<FinancePage>
   }
 
   Widget _buildTransactionFilters() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Left Group: Show [Limit] [DatePicker]
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: [
-                Text(
-                  'rent_plan.show'.tr(context),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                _buildLimitDropdown(),
-                const SizedBox(width: 8),
-                // DatePicker (Month-Year)
-                PeriodFilterButton(
-                  selectedMonth: _selectedMonth ?? '01',
-                  selectedYear: _selectedYear ?? DateTime.now().year.toString(),
-                  months: _months,
-                  onTap: _showMonthYearPicker,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        // Right Group: Total Badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            'rent_plan.total_count'.tr(
-              context,
-              args: {'count': _totalCount.toString()},
-            ),
-            style: const TextStyle(
-              color: Color(0xFF7E57C2),
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+    return PaginationHeader(
+      limit: _selectedLimit,
+      limitOptions: _limitOptions,
+      totalCount: _totalCount,
+      onLimitChanged: (int? newValue) {
+        if (newValue != null) {
+          setState(() {
+            _selectedLimit = newValue;
+            _currentPage = 1;
+          });
+          _fetchTransactions();
+        }
+      },
+      extraLeftActions: [
+        PeriodFilterButton(
+          selectedMonth: _selectedMonth ?? '01',
+          selectedYear: _selectedYear ?? DateTime.now().year.toString(),
+          months: _months,
+          onTap: _showMonthYearPicker,
         ),
       ],
     );
   }
 
-  Widget _buildLimitDropdown() {
-    return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: _selectedLimit,
-          icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: Color(0xFF7E57C2),
-          ),
-          style: const TextStyle(
-            color: Color(0xFF7E57C2),
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedLimit = newValue;
-                _currentPage = 1;
-              });
-              _fetchTransactions();
-            }
-          },
-          items: _limitOptions.map<DropdownMenuItem<int>>((int value) {
-            return DropdownMenuItem<int>(
-              value: value,
-              child: Text(value.toString()),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildPagination() {
     int totalPages = (_totalCount / _selectedLimit).ceil();
