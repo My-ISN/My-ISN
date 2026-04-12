@@ -76,6 +76,7 @@
         "quick_menu_more": "Selengkapnya",
         "edit": "Ubah",
         "edit_quick_menu_info": "Pilih maksimal 5 menu untuk ditampilkan di dashboard.",
-        "reset": "Atur Ulang"
+        "reset": "Atur Ulang",
+        "search_placeholder": "Cari produk..."
     }
 }

@@ -42,6 +42,14 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   int _currentIndex = 0;
   final storage = const FlutterSecureStorage();
   DateTime? _lastBackPressTime;
+  bool _isSearchActive = false;
+
+  // Pagination State
+  int _rentalOffset = 0;
+  int _purchaseOffset = 0;
+  bool _hasMoreRental = true;
+  bool _hasMorePurchase = true;
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -513,6 +521,11 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         if (mounted) {
           setState(() {
             _customerDashboardData = data['data'];
+            _rentalOffset = 0;
+            _purchaseOffset = 0;
+            _hasMoreRental = _customerDashboardData['has_more_rental'] ?? false;
+            _hasMorePurchase = _customerDashboardData['has_more_purchase'] ?? false;
+            _isLoadingMore = false;
             _isLoading = false;
           });
         }
@@ -531,8 +544,53 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       }
     }
   }
+  Future<void> _fetchMoreDashboardProducts(String type) async {
+    if (_isLoadingMore) return;
+    if (type == 'rental' && !_hasMoreRental) return;
+    if (type == 'purchase' && !_hasMorePurchase) return;
 
+    setState(() => _isLoadingMore = true);
 
+    try {
+      final userId = widget.userData['id'] ?? widget.userData['user_id'];
+      
+      // Calculate next offset
+      final nextRentalOffset = type == 'rental' ? _rentalOffset + 10 : 0;
+      final nextPurchaseOffset = type == 'purchase' ? _purchaseOffset + 10 : 0;
+      
+      final url = '${AppConstants.baseUrl}/get_customer_dashboard?user_id=$userId&rental_offset=$nextRentalOffset&purchase_offset=$nextPurchaseOffset';
+
+      final response = await http.get(Uri.parse(url));
+      final data = json.decode(response.body);
+
+      if (data['status'] == true) {
+        if (mounted) {
+          setState(() {
+            final newData = data['data'];
+            if (type == 'rental') {
+              final List existing = _customerDashboardData['products'] ?? [];
+              final List added = newData['products'] ?? [];
+              _customerDashboardData['products'] = [...existing, ...added];
+              _rentalOffset += 10;
+              _hasMoreRental = newData['has_more_rental'] ?? false;
+            } else {
+              final List existing = _customerDashboardData['purchase_products'] ?? [];
+              final List added = newData['purchase_products'] ?? [];
+              _customerDashboardData['purchase_products'] = [...existing, ...added];
+              _purchaseOffset += 10;
+              _hasMorePurchase = newData['has_more_purchase'] ?? false;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching more products: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingMore = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -594,6 +652,13 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       onPopInvokedWithResult: (bool didPop, dynamic result) async {
         if (didPop) return;
 
+        if (_isSearchActive) {
+          setState(() {
+            _isSearchActive = false;
+          });
+          return;
+        }
+
         final now = DateTime.now();
         if (_lastBackPressTime == null ||
             now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
@@ -610,9 +675,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         appBar: isCustomer
             ? null
             : CustomAppBar(userData: user, showBackButton: false),
-        body: isCustomer
-            ? _buildMaintenancePage()
-            : IndexedStack(index: _currentIndex, children: pages),
+        body: IndexedStack(index: _currentIndex, children: pages),
         endDrawer: isCustomer
             ? null
             : SideDrawer(
@@ -630,7 +693,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                   });
                 },
               ),
-        bottomNavigationBar: isCustomer
+        bottomNavigationBar: (isCustomer && _isSearchActive)
             ? null
             : Theme(
                 data: Theme.of(context).copyWith(
@@ -683,124 +746,23 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       hasPermission: _hasPermission,
     );
   }
-
   Widget _buildCustomerContent() {
-    return _buildMaintenancePage();
-  }
-
-  Widget _buildMaintenancePage() {
     final user = _dashboardData['user'] ?? widget.userData;
-    return Container(
-      width: double.infinity,
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFF673AB7).withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.engineering_rounded,
-              size: 80,
-              color: Color(0xFF673AB7),
-            ),
-          ),
-          const SizedBox(height: 32),
-          const Text(
-            'Layanan Client Sedang Dalam Pemeliharaan',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Kami sedang menyiapkan pengalaman belanja yang luar biasa untuk Anda. Untuk sementara, Dashboard Client belum tersedia.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 48),
-          SizedBox(
-            width: double.infinity,
-            height: 55,
-            child: ElevatedButton(
-              onPressed: () => _handleLogout(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF673AB7),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.logout_rounded, size: 20),
-                  SizedBox(width: 12),
-                  Text(
-                    'Kembali ke Login',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'User: ${user['nama']}',
-            style: TextStyle(color: Colors.grey[400], fontSize: 12),
-          ),
-        ],
-      ),
+    return CustomerDashboardContent(
+      userData: user,
+      customerDashboardData: _customerDashboardData,
+      onRefresh: _fetchCustomerDashboard,
+      onProfileTap: (index) => setState(() => _currentIndex = index),
+      onLaunchWhatsApp: (phone, message) => _launchWhatsApp(phone, message),
+      isSearchActive: _isSearchActive,
+      onSearchToggle: (active) {
+        setState(() => _isSearchActive = active);
+      },
+      isLoadingMore: _isLoadingMore,
+      hasMoreRental: _hasMoreRental,
+      hasMorePurchase: _hasMorePurchase,
+      onLoadMore: (type) => _fetchMoreDashboardProducts(type),
     );
-  }
-
-  Future<void> _handleLogout(BuildContext context) async {
-    // Show confirmation is better
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Logout'),
-        content: const Text('Apakah Anda yakin ingin kembali ke halaman login?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Ya, Logout'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    // Clear state/storage
-    const storage = FlutterSecureStorage();
-    await storage.deleteAll();
-
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-        (route) => false,
-      );
-    }
   }
 
 

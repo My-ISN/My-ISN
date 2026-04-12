@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 import '../../../constants.dart';
 import '../../../localization/app_localizations.dart';
 import '../../../widgets/connectivity_wrapper.dart';
-import 'package:intl/intl.dart';
 
 class CustomerDashboardContent extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -12,6 +14,12 @@ class CustomerDashboardContent extends StatefulWidget {
   final Future<void> Function() onRefresh;
   final Function(int) onProfileTap;
   final Function(String, String) onLaunchWhatsApp;
+  final Function(bool)? onSearchToggle;
+  final bool isSearchActive;
+  final Function(String)? onLoadMore;
+  final bool isLoadingMore;
+  final bool hasMoreRental;
+  final bool hasMorePurchase;
 
   const CustomerDashboardContent({
     super.key,
@@ -20,6 +28,12 @@ class CustomerDashboardContent extends StatefulWidget {
     required this.onRefresh,
     required this.onProfileTap,
     required this.onLaunchWhatsApp,
+    this.onSearchToggle,
+    this.isSearchActive = false,
+    this.onLoadMore,
+    this.isLoadingMore = false,
+    this.hasMoreRental = true,
+    this.hasMorePurchase = true,
   });
 
   @override
@@ -31,25 +45,16 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
   final PageController _bannerController = PageController(initialPage: 498); 
   int _currentBannerPage = 0;
   Timer? _bannerTimer;
+  final ScrollController _scrollController = ScrollController();
 
   // Search State
   bool _isSearchActive = false;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  final List<String> _searchHistory = [
-    'Lenovo Thinkpad',
-    'Laptop Gaming i7',
-    'Macbook Pro 2020',
-    'Charger Asus',
-  ];
-
-  final List<String> _searchSuggestions = [
-    'Lenovo T460s',
-    'Dell Latitude',
-    'HP Elitebook',
-    'Asus ROG',
-  ];
+  List<String> _searchHistory = [];
+  List<String> _searchSuggestions = [];
 
   final List<String> _promoImages = [
     'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
@@ -60,20 +65,54 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {
-          _currentBannerPage = 498 % _promoImages.length; // Reset banner on tab change maybe?
+          _currentBannerPage = 498 % _promoImages.length; 
         });
       }
     });
     _currentBannerPage = 498 % _promoImages.length;
     _startBannerAutoScroll();
+    _isSearchActive = widget.isSearchActive;
+    _loadSearchHistory();
+    _generateSuggestions();
+  }
+
+  @override
+  void didUpdateWidget(CustomerDashboardContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isSearchActive != oldWidget.isSearchActive) {
+      setState(() {
+        _isSearchActive = widget.isSearchActive;
+      });
+
+      if (_isSearchActive) {
+        _searchFocusNode.requestFocus();
+      } else {
+        _searchFocusNode.unfocus();
+        _searchController.clear();
+      }
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+      if (!widget.isLoadingMore) {
+        final type = _tabController.index == 0 ? 'rental' : 'purchase';
+        final hasMore = _tabController.index == 0 ? widget.hasMoreRental : widget.hasMorePurchase;
+        if (hasMore) {
+          widget.onLoadMore?.call(type);
+        }
+      }
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _bannerTimer?.cancel();
     _bannerController.dispose();
     _tabController.dispose();
@@ -100,13 +139,97 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
   }
 
   Color _getActiveColor() {
-    return _tabController.index == 0 ? const Color(0xFF673AB7) : const Color(0xFF00897B);
+    return _tabController.index == 0 ? const Color(0xFF673AB7) : const Color(0xFF009688);
   }
+
+  // --- Search Logic ---
+  
+  void _generateSuggestions() {
+    final List products = widget.customerDashboardData['products'] ?? [];
+    final List purchaseProducts = widget.customerDashboardData['purchase_products'] ?? [];
+    
+    final Set<String> uniqueNames = {};
+    
+    // Mix items from both tabs for comprehensive suggestions
+    for (var p in products) {
+      if (p['nama_laptop'] != null) uniqueNames.add(p['nama_laptop']);
+    }
+    for (var p in purchaseProducts) {
+      if (p['nama_laptop'] != null) uniqueNames.add(p['nama_laptop']);
+    }
+    
+    setState(() {
+      _searchSuggestions = uniqueNames.take(8).toList();
+      // Simple HTML fix for suggestions
+      _searchSuggestions = _searchSuggestions.map((name) {
+        return name.replaceAll('&#34;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&');
+      }).toList();
+    });
+  }
+
+  Future<void> _loadSearchHistory() async {
+    try {
+      final String? historyJson = await _storage.read(key: 'customer_search_history');
+      if (historyJson != null) {
+        final List<dynamic> decoded = json.decode(historyJson);
+        setState(() {
+          _searchHistory = decoded.cast<String>();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading search history: $e');
+    }
+  }
+
+  Future<void> _saveSearchHistory() async {
+    try {
+      await _storage.write(
+        key: 'customer_search_history',
+        value: json.encode(_searchHistory),
+      );
+    } catch (e) {
+      debugPrint('Error saving search history: $e');
+    }
+  }
+
+  void _addToHistory(String query) {
+    if (query.trim().isEmpty) return;
+    
+    setState(() {
+      // Move to top if exists, otherwise add to front
+      _searchHistory.removeWhere((item) => item.toLowerCase() == query.trim().toLowerCase());
+      _searchHistory.insert(0, query.trim());
+      
+      // Limit count
+      if (_searchHistory.length > 5) {
+        _searchHistory = _searchHistory.sublist(0, 5);
+      }
+    });
+    
+    _saveSearchHistory();
+  }
+
+  void _clearHistory() {
+    setState(() {
+      _searchHistory.clear();
+    });
+    _saveSearchHistory();
+  }
+
+  void _triggerSearch(String query) {
+    _searchController.text = query;
+    _addToHistory(query);
+    // Here you would trigger real search logic if implemented
+    setState(() {});
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     final stats = widget.customerDashboardData['stats'] ?? {};
     final products = widget.customerDashboardData['products'] ?? [];
+    final purchaseProducts = widget.customerDashboardData['purchase_products'] ?? [];
 
     return Stack(
       children: [
@@ -114,152 +237,242 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
           onRefresh: widget.onRefresh,
           displacement: 20,
           color: _getActiveColor(),
-          child: SingleChildScrollView(
+          child: CustomScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Banner and Floating Search Bar Section
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    _buildPromoBanner(context), // Carousel Redesign
-                    Positioned(
-                      bottom: -28,
-                      left: 20,
-                      right: 20,
-                      child: _buildFloatingSearchBar(context),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 52), // space for floating search bar
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 3. Mini Stats/Balance Bar (Gopay/Ovo Style)
-                      _buildMiniStatsBar(context, stats),
-                      const SizedBox(height: 24),
-
-                      // Tab Bar Selector (Sewa vs Beli)
-                      _buildModeSelector(context),
-                      const SizedBox(height: 12), // Reduced from 32 to 12
-
-                      // 5. Section Title: For You / Rekomendasi
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _tabController.index == 0 
-                                ? 'Rekomendasi Sewa' 
-                                : 'Katalog Pembelian',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'dashboard.see_all'.tr(context) == 'dashboard.see_all' 
-                                  ? 'Lihat Semua' 
-                                  : 'dashboard.see_all'.tr(context),
-                              style: TextStyle(color: _getActiveColor(), fontSize: 13),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      // 6. 2-Column Product Grid
-                      _buildProductGrid(context, products),
-
-                      const SizedBox(height: 20), // Adjusted to 16 for better balance
-
-                      // Help Section at the bottom
-                      _buildHelpCard(context),
-
-                      ValueListenableBuilder<double>(
-                        valueListenable: ConnectivityStatus.bottomPadding,
-                        builder: (context, padding, _) =>
-                            SizedBox(height: padding.clamp(20.0, double.infinity)),
-                      ),
-                    ],
+            slivers: [
+              // 1 & 2. Composite Header (Banner + Sticky Search Bar)
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _StickyHeaderDelegate(
+                  promoImages: _promoImages,
+                  bannerController: _bannerController,
+                  currentBannerPage: _currentBannerPage,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentBannerPage = index % _promoImages.length;
+                    });
+                  },
+                  searchBarBuilder: (context, searchOpacity) => _buildFloatingSearchBar(
+                    context,
+                    searchOpacity: searchOpacity,
+                    onProfileTap: () => widget.onProfileTap(0),
+                    onCartTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Keranjang akan segera hadir!')),
+                      );
+                    },
                   ),
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  activeColor: _getActiveColor(),
+                  statusBarHeight: MediaQuery.of(context).padding.top,
+                  onProfileTap: () => widget.onProfileTap(0),
+                  onCartTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Keranjang akan segera hadir!')),
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+
+              // 3. The rest of the content
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: 32), // Re-increased since pinned header is now smaller but still needs overlap space
+                    // Mini Stats/Balance Bar
+                    _buildMiniStatsBar(context, stats),
+                    const SizedBox(height: 24),
+
+                    // Tab Bar Selector
+                    _buildModeSelector(context),
+                    const SizedBox(height: 12),
+
+                    // Section Title
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _tabController.index == 0 
+                              ? 'Rekomendasi Sewa' 
+                              : 'Katalog Pembelian',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'dashboard.see_all'.tr(context) == 'dashboard.see_all' 
+                                ? 'Lihat Semua' 
+                                : 'dashboard.see_all'.tr(context),
+                            style: TextStyle(color: _getActiveColor(), fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Product Grid
+                    _buildProductGrid(context, _tabController.index == 0 ? products : purchaseProducts),
+
+                    if (widget.isLoadingMore)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20.0),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: _getActiveColor(),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Memuat produk lainnya...',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    
+                    const SizedBox(height: 24),
+                    if (_tabController.index == 0) _buildHelpCard(context),
+                    const SizedBox(height: 48), // Bottom safe area
+                  ]),
+                ),
+              ),
+            ],
           ),
         ),
+        
+        // Search Overlay
         if (_isSearchActive) _buildSearchOverlay(context),
       ],
     );
   }
 
 
-  Widget _buildFloatingSearchBar(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isSearchActive = true;
-          _searchFocusNode.requestFocus();
-        });
-      },
-      child: Container(
-        height: 55,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(30), // Pill Shape
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              spreadRadius: 2,
-              offset: const Offset(0, 8), // More depth
-            ),
-          ],
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+  Widget _buildFloatingSearchBar(BuildContext context, {
+    required double searchOpacity,
+    required VoidCallback onProfileTap, 
+    required VoidCallback onCartTap
+  }) {
+    // Icons only appear in the search bar once it's mostly pinned
+    final double iconOpacity = (searchOpacity - 0.6).clamp(0.0, 1.0) * 2.5;
+    
+    return Container(
+      height: 55,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(30), // Pill Shape
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: const Offset(0, 8), // More depth
           ),
+        ],
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
         ),
-        child: Row(
-          children: [
-            const Icon(Icons.search, color: Color(0xFF7E57C2), size: 22),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'dashboard.search_placeholder'.tr(context),
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                widget.onSearchToggle?.call(true);
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.search, color: Color(0xFF7E57C2), size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'dashboard.search_placeholder'.tr(context),
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 14,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            Container(
-              height: 24,
-              width: 1,
-              color: Colors.grey.withValues(alpha: 0.2),
+          ),
+          
+          if (iconOpacity > 0) ...[
+            // Divider
+            Opacity(
+              opacity: iconOpacity,
+              child: Container(
+                height: 20,
+                width: 1,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+              ),
             ),
-            const SizedBox(width: 12),
-            Icon(Icons.camera_alt_outlined, color: Colors.grey[500], size: 20),
+            
+            // Action Icons
+            Opacity(
+              opacity: iconOpacity,
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: onCartTap,
+                    icon: Icon(Icons.shopping_cart_outlined, 
+                      color: Theme.of(context).hintColor, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    onPressed: onProfileTap,
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withValues(
+                          alpha: Theme.of(context).brightness == Brightness.dark ? 0.25 : 0.1,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.person_outline_rounded, 
+                        color: Theme.of(context).colorScheme.primary, size: 18),
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildSearchOverlay(BuildContext context) {
+    final theme = Theme.of(context);
     return Positioned.fill(
       child: Container(
-        color: Colors.white,
+        color: theme.scaffoldBackgroundColor,
         child: SafeArea(
           child: Column(
             children: [
@@ -267,7 +480,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
@@ -279,12 +492,10 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                          size: 20, color: Colors.black87),
+                      icon: Icon(Icons.arrow_back_ios_new_rounded,
+                          size: 20, color: theme.iconTheme.color),
                       onPressed: () {
-                        setState(() {
-                          _isSearchActive = false;
-                        });
+                        widget.onSearchToggle?.call(false);
                       },
                     ),
                     Expanded(
@@ -292,7 +503,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                         height: 45,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: theme.dividerColor.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: TextField(
@@ -302,7 +513,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                           decoration: InputDecoration(
                             hintText: 'Cari laptop impianmu...',
                             hintStyle:
-                                TextStyle(color: Colors.grey[400], fontSize: 14),
+                                TextStyle(color: theme.hintColor, fontSize: 14),
                             border: InputBorder.none,
                             contentPadding:
                                 const EdgeInsets.symmetric(vertical: 12),
@@ -311,6 +522,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                             setState(() {});
                           },
                           onSubmitted: (value) {
+                            _addToHistory(value);
                             // Implement real search if needed
                           },
                         ),
@@ -336,17 +548,20 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                   children: [
                     // History Section
                     if (_searchHistory.isNotEmpty) ...[
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
+                          const Text(
                             'Pencarian Terakhir',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 14),
                           ),
-                          Text(
-                            'Hapus Semua',
-                            style: TextStyle(color: Colors.redAccent, fontSize: 12),
+                          GestureDetector(
+                            onTap: _clearHistory,
+                            child: const Text(
+                              'Hapus Semua',
+                              style: TextStyle(color: Colors.redAccent, fontSize: 12),
+                            ),
                           ),
                         ],
                       ),
@@ -383,35 +598,41 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
   }
 
   Widget _buildHistoryChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(color: Colors.grey[700], fontSize: 12),
+    return GestureDetector(
+      onTap: () => _triggerSearch(label),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 12),
+        ),
       ),
     );
   }
 
   Widget _buildSuggestionTile(String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Icon(Icons.trending_up_rounded, size: 18, color: Colors.grey[400]),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(color: Colors.grey[800], fontSize: 14),
+    return GestureDetector(
+      onTap: () => _triggerSearch(label),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(Icons.trending_up_rounded, size: 18, color: Theme.of(context).hintColor),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 14),
+              ),
             ),
-          ),
-          Icon(Icons.north_west_rounded, size: 16, color: Colors.grey[300]),
-        ],
+            Icon(Icons.north_west_rounded, size: 16, color: Theme.of(context).hintColor.withValues(alpha: 0.5)),
+          ],
+        ),
       ),
     );
   }
@@ -420,7 +641,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
 
   Widget _buildPromoBanner(BuildContext context) {
     return SizedBox(
-      height: 200,
+      height: 250, // Increased to match header
       width: double.infinity,
       child: Stack(
         children: [
@@ -678,7 +899,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
         crossAxisCount: 2,
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
-        childAspectRatio: 0.6, // Adjusted from 0.68 to 0.6 to fix overflow
+        childAspectRatio: 0.55, // Adjusted to 0.65 to reduce empty space (was 0.5)
       ),
       itemBuilder: (context, index) {
         return _buildProductCard(context, products[index]);
@@ -689,8 +910,21 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
   Widget _buildProductCard(BuildContext context, Map p) {
     final String laptopBaseUrl = '${AppConstants.serverRoot}/uploads/products/';
     final String image = p['gambar'] ?? '';
-    final String name = p['nama_laptop'] ?? 'Laptop';
-    final double price = double.tryParse((p['harga_sewa_ke_1'] ?? '0').toString()) ?? 0;
+    String name = p['nama_laptop'] ?? 'Laptop';
+    
+    // Simple HTML unescape for common entities
+    name = name.replaceAll('&#34;', '"').replaceAll('&#39;', "'").replaceAll('&amp;', '&');
+    
+    // Get price based on context
+    double price = 0;
+    if (_tabController.index == 0) {
+      price = double.tryParse((p['harga_sewa_ke_1'] ?? '0').toString()) ?? 0;
+    } else {
+      price = double.tryParse((p['harga_beli'] ?? '0').toString()) ?? 0;
+    }
+
+    final rating = double.tryParse((p['product_rating'] ?? 0).toString()) ?? 0;
+    final sold = int.tryParse((p['total_sold'] ?? 0).toString()) ?? 0;
 
     return GestureDetector(
       onTap: () => _showProductSpecs(context, p),
@@ -752,7 +986,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -762,14 +996,14 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontSize: 13, // Reduced from 14
                       letterSpacing: -0.3,
                       height: 1.2,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    _tabController.index == 0 ? 'Rp ${_formatPrice(price)}' : 'Rp ${_formatPrice(price * 25)}', // Mock higher price for buying
+                    'Rp ${_formatPrice(price)}',
                     style: TextStyle(
                       color: _getActiveColor(),
                       fontWeight: FontWeight.w900,
@@ -783,7 +1017,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                       const Icon(Icons.star_rounded, color: Colors.orangeAccent, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        '4.8 | Terjual 100+',
+                        '${rating > 0 ? rating : '4.8'} | Terjual ${sold > 0 ? sold : '0'}',
                         style: TextStyle(color: Colors.grey[500], fontSize: 10),
                       ),
                     ],
@@ -982,5 +1216,208 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
         ],
       ),
     );
+  }
+}
+
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final List<String> promoImages;
+  final PageController bannerController;
+  final int currentBannerPage;
+  final Function(int) onPageChanged;
+  final Widget Function(BuildContext, double) searchBarBuilder;
+  final Color backgroundColor;
+  final Color activeColor;
+  final double statusBarHeight;
+  final VoidCallback onProfileTap;
+  final VoidCallback onCartTap;
+
+  _StickyHeaderDelegate({
+    required this.promoImages,
+    required this.bannerController,
+    required this.currentBannerPage,
+    required this.onPageChanged,
+    required this.searchBarBuilder,
+    required this.backgroundColor,
+    required this.activeColor,
+    required this.statusBarHeight,
+    required this.onProfileTap,
+    required this.onCartTap,
+  });
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    const double bannerHeight = 250.0; // Increased from 220
+    const double searchBarOverlap = 10.0; // Reduced overlap for lower position
+    final double opacity = (1.0 - (shrinkOffset / (maxExtent - minExtent))).clamp(0.0, 1.0);
+    final double searchOpacity = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // 1. Banner
+        Positioned(
+          top: -shrinkOffset,
+          left: 0,
+          right: 0,
+          height: bannerHeight,
+          child: Opacity(
+            opacity: opacity,
+            child: _buildBanner(context, bannerHeight),
+          ),
+        ),
+
+        // 2. Sticky Background
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: minExtent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: backgroundColor.withValues(alpha: searchOpacity),
+              boxShadow: searchOpacity > 0.9 
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ] 
+                : null,
+            ),
+          ),
+        ),
+
+        // 3. Search Bar
+        Positioned(
+          top: (bannerHeight - searchBarOverlap - shrinkOffset).clamp(statusBarHeight + 12.0, bannerHeight - searchBarOverlap),
+          left: 0,
+          right: 0,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 20 * (1 - searchOpacity).clamp(0.1, 1.0),
+            ),
+            child: searchBarBuilder(context, searchOpacity),
+          ),
+        ),
+
+        // 4. Top Actions Bar (Only visible when banner is expanded)
+        Positioned(
+          top: statusBarHeight,
+          left: 0,
+          right: 0,
+          child: _buildTopActions(context, searchOpacity),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopActions(BuildContext context, double searchOpacity) {
+    // Fades out as we scroll down
+    final double topOpacity = (1.0 - searchOpacity * 2).clamp(0.0, 1.0);
+    
+    if (topOpacity <= 0) return const SizedBox.shrink();
+
+    return Opacity(
+      opacity: topOpacity,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            _buildTopIcon(
+              context, 
+              Icons.shopping_cart_outlined, 
+              onCartTap,
+              0.0, // Fixed at banner state
+            ),
+            const SizedBox(width: 12),
+            _buildTopIcon(
+              context, 
+              Icons.person_outline_rounded, 
+              onProfileTap,
+              0.0, // Fixed at banner state
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopIcon(BuildContext context, IconData icon, VoidCallback onTap, double searchOpacity) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Color.lerp(
+            Colors.black.withValues(alpha: 0.2), 
+            activeColor.withValues(alpha: 0.1), 
+            searchOpacity
+          ),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Color.lerp(
+              Colors.white.withValues(alpha: 0.3), 
+              activeColor.withValues(alpha: 0.3), 
+              searchOpacity
+            )!,
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          icon,
+          size: 22,
+          color: Color.lerp(Colors.white, activeColor, searchOpacity),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBanner(BuildContext context, double height) {
+    return SizedBox(
+      height: height,
+      child: PageView.builder(
+        controller: bannerController,
+        onPageChanged: onPageChanged,
+        itemCount: 1000,
+        itemBuilder: (context, index) {
+          final imageIndex = index % promoImages.length;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              CachedNetworkImage(
+                imageUrl: promoImages[imageIndex],
+                fit: BoxFit.cover,
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.5),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  double get maxExtent => 280.0; // Reduced back to normal dimensions
+
+  @override
+  double get minExtent => statusBarHeight + 85.0; // Reduced head height since it's just one line now
+
+  @override
+  bool shouldRebuild(covariant _StickyHeaderDelegate oldDelegate) {
+    return currentBannerPage != oldDelegate.currentBannerPage ||
+        activeColor != oldDelegate.activeColor;
   }
 }
