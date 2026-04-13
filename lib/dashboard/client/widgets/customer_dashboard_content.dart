@@ -256,7 +256,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                   searchBarBuilder: (context, searchOpacity) => _buildFloatingSearchBar(
                     context,
                     searchOpacity: searchOpacity,
-                    onProfileTap: () => widget.onProfileTap(0),
+                    onProfileTap: () => Scaffold.of(context).openEndDrawer(),
                     onCartTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Keranjang akan segera hadir!')),
@@ -266,7 +266,8 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   activeColor: _getActiveColor(),
                   statusBarHeight: MediaQuery.of(context).padding.top,
-                  onProfileTap: () => widget.onProfileTap(0),
+                  profilePhoto: widget.userData['profile_photo']?.toString(),
+                  onProfileTap: () => Scaffold.of(context).openEndDrawer(),
                   onCartTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Keranjang akan segera hadir!')),
@@ -446,15 +447,30 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                   IconButton(
                     onPressed: onProfileTap,
                     icon: Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: (widget.userData['profile_photo'] != null && 
+                               widget.userData['profile_photo'].toString().isNotEmpty) 
+                          ? EdgeInsets.zero 
+                          : const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary.withValues(
                           alpha: Theme.of(context).brightness == Brightness.dark ? 0.25 : 0.1,
                         ),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.person_outline_rounded, 
-                        color: Theme.of(context).colorScheme.primary, size: 18),
+                      child: ClipOval(
+                        child: (widget.userData['profile_photo'] != null && 
+                                 widget.userData['profile_photo'].toString().isNotEmpty)
+                            ? CachedNetworkImage(
+                                imageUrl: '${AppConstants.serverRoot}/uploads/users/thumb/${widget.userData['profile_photo']}',
+                                width: 30, // Proportional for search bar icon size
+                                height: 30,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const Icon(Icons.person, size: 18, color: Colors.grey),
+                                errorWidget: (context, url, error) => const Icon(Icons.person, size: 18, color: Colors.grey),
+                              )
+                            : Icon(Icons.person_outline_rounded, 
+                                color: Theme.of(context).colorScheme.primary, size: 18),
+                      ),
                     ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -1228,6 +1244,7 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Color backgroundColor;
   final Color activeColor;
   final double statusBarHeight;
+  final String? profilePhoto;
   final VoidCallback onProfileTap;
   final VoidCallback onCartTap;
 
@@ -1240,6 +1257,7 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.backgroundColor,
     required this.activeColor,
     required this.statusBarHeight,
+    this.profilePhoto,
     required this.onProfileTap,
     required this.onCartTap,
   });
@@ -1327,16 +1345,17 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
           children: [
             _buildTopIcon(
               context, 
-              Icons.shopping_cart_outlined, 
-              onCartTap,
-              0.0, // Fixed at banner state
+              icon: Icons.shopping_cart_outlined, 
+              onTap: onCartTap,
+              searchOpacity: 0.0, 
             ),
             const SizedBox(width: 12),
             _buildTopIcon(
               context, 
-              Icons.person_outline_rounded, 
-              onProfileTap,
-              0.0, // Fixed at banner state
+              icon: Icons.person_outline_rounded, 
+              onTap: onProfileTap,
+              searchOpacity: 0.0,
+              isProfile: true,
             ),
           ],
         ),
@@ -1344,11 +1363,18 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _buildTopIcon(BuildContext context, IconData icon, VoidCallback onTap, double searchOpacity) {
+  Widget _buildTopIcon(BuildContext context, {
+    required IconData icon, 
+    required VoidCallback onTap, 
+    required double searchOpacity,
+    bool isProfile = false,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: (isProfile && profilePhoto != null && profilePhoto!.isNotEmpty) 
+            ? EdgeInsets.zero 
+            : const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Color.lerp(
             Colors.black.withValues(alpha: 0.2), 
@@ -1365,10 +1391,21 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
             width: 1,
           ),
         ),
-        child: Icon(
-          icon,
-          size: 22,
-          color: Color.lerp(Colors.white, activeColor, searchOpacity),
+        child: ClipOval(
+          child: (isProfile && profilePhoto != null && profilePhoto!.isNotEmpty)
+            ? CachedNetworkImage(
+                imageUrl: '${AppConstants.serverRoot}/uploads/users/thumb/$profilePhoto',
+                width: 38,
+                height: 38,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Icon(icon, size: 22, color: Colors.white),
+                errorWidget: (context, url, error) => Icon(icon, size: 22, color: Colors.white),
+              )
+            : Icon(
+                icon,
+                size: 22,
+                color: Color.lerp(Colors.white, activeColor, searchOpacity),
+              ),
         ),
       ),
     );

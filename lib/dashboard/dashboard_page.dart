@@ -676,9 +676,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
             ? null
             : CustomAppBar(userData: user, showBackButton: false),
         body: IndexedStack(index: _currentIndex, children: pages),
-        endDrawer: isCustomer
-            ? null
-            : SideDrawer(
+        endDrawer: SideDrawer(
                 userData: user,
                 activePage: activePage,
                 onTabSelected: (index) {
