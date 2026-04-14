@@ -40,8 +40,10 @@
         "employees": "Employees",
         "quick_menu_rent_plan": "Rent Plan",
         "quick_menu_todo_list": "Todo List",
+        "quick_menu_job_desk": "Job Desk",
         "quick_menu_employees": "Employees",
         "quick_menu_work_log": "Work Log",
+        "quick_menu_quicksend": "Quick Send",
         "whats_new": "What's New in {version}",
         "update_thanks": "Thank you for updating the app! Here are the latest changes:",
         "cool": "Cool!",
@@ -77,7 +79,6 @@
         "edit": "Edit",
         "edit_quick_menu_info": "Select up to 5 menus to display on the dashboard.",
         "reset": "Reset",
-        "search_placeholder": "Find Products...",
-        "quick_menu_quicksend": "Quick Send"
+        "search_placeholder": "Find Products..."
     }
 }

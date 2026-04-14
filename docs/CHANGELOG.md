@@ -1,9 +1,12 @@
 # Changelog
 
-## [1.3.0] - 2026-04-10
+## [1.3.0] - 2026-04-14
 
 ### Penambahan v1.3.0
 
+- **Modul QuickSend & Job Desk**: Implementasi modul komunikasi cepat (QuickSend) dan manajemen daftar pekerjaan (Job Desk) yang terintegrasi penuh dengan sistem perizinan (RBAC).
+- **UI — Sidebar Categorization**: Pengelompokan menu pada Sidebar ke dalam kategori fungsional (Work, Financial, Support) untuk navigasi yang lebih terstruktur.
+- **UI — App Bar Search Menu**: Penambahan fitur pencarian menu langsung pada App Bar untuk akses fitur yang lebih instan.
 - **UI — Global Standardization (Flat Premium)**: Implementasi desain sistem "Flat Premium" di seluruh aplikasi. Seluruh elemen visual kini menggunakan kartu tanpa bayangan (*elevation: 0*) dengan border halus (`DividerColor.withValues(alpha: 0.08)`) untuk estetika administratif yang lebih bersih dan elit.
 - **UI — Standardisasi Radius**: Penyeragaman radius sudut (*corner radius*) sebesar **24px** pada seluruh kontainer utama dan Card untuk konsistensi visual di seluruh modul.
 - **UI — SecondaryAppBar Everywhere**: Integrasi komponen `SecondaryAppBar` di seluruh halaman detail (Payroll, Settings, Diagnosis Hub, All Menus) guna memastikan navigasi yang seragam dan profesional.

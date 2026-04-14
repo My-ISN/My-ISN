@@ -34,6 +34,7 @@ class AppLocalizations {
       'finance',
       'helpdesk',
       'intercom',
+      'job_desk',
     ];
 
     _localizedStrings = {};

@@ -1,0 +1,22 @@
+{
+    "job_desk": {
+        "title": "Job Desk",
+        "empty_msg": "Belum ada Job Desk untuk jabatan ini.",
+        "note": "Catatan Pelaksanaan",
+        "all": "Semua",
+        "add_job_desk": "Tambah Job Desk",
+        "f_title": "Judul Deskripsi",
+        "f_note": "Catatan Tambahan",
+        "f_color": "Warna Penanda",
+        "f_designation": "Jabatan Terkait",
+        "btn_save": "Simpan Data",
+        "btn_cancel": "Batal",
+        "success_save": "Job Desk berhasil disimpan.",
+        "failed_save": "Gagal menyimpan Job Desk.",
+        "field_required": "Kolom ini wajib diisi.",
+        "confirm_delete_title": "Hapus Job Desk?",
+        "confirm_delete_msg": "Apakah Anda yakin ingin menghapus Job Desk ini? Tindakan ini tidak dapat dibatalkan.",
+        "success_delete": "Job Desk berhasil dihapus.",
+        "failed_delete": "Gagal menghapus Job Desk."
+    }
+}

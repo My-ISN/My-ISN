@@ -40,8 +40,10 @@
         "employees": "Karyawan",
         "quick_menu_rent_plan": "Rencana Sewa",
         "quick_menu_todo_list": "Daftar Tugas",
+        "quick_menu_job_desk": "Job Desk",
         "quick_menu_employees": "Karyawan",
         "quick_menu_work_log": "Log Kerja",
+        "quick_menu_quicksend": "Pesan Cepat",
         "whats_new": "Apa yang Baru di {version}",
         "update_thanks": "Terima kasih telah memperbarui aplikasi! Berikut adalah perubahan terbaru:",
         "cool": "Mantap!",
@@ -77,7 +79,6 @@
         "edit": "Ubah",
         "edit_quick_menu_info": "Pilih maksimal 5 menu untuk ditampilkan di dashboard.",
         "reset": "Atur Ulang",
-        "search_placeholder": "Cari produk...",
-        "quick_menu_quicksend": "Pesan Cepat"
+        "search_placeholder": "Cari produk..."
     }
 }

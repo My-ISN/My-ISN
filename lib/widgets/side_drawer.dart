@@ -16,6 +16,7 @@ import '../creative_idea/creative_idea_page.dart';
 import '../personal_finance/personal_finance_page.dart';
 import '../intercom/intercom_page.dart';
 import '../quicksend/quick_send_page.dart';
+import '../job_desk/job_desk_page.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
 
@@ -48,7 +49,7 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'todo_list', 'employees', 'work_log'].contains(
+    if (['rent_plan', 'todo_list', 'employees', 'work_log', 'job_desk'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
@@ -221,6 +222,7 @@ class _SideDrawerState extends State<SideDrawer> {
                   'mobile_todo_enable',
                   'mobile_employees_enable',
                   'mobile_worklog_enable',
+                  'mobile_jobdesk_view',
                 ]))
                   _buildExpandableSection(
                     context,
@@ -315,6 +317,25 @@ class _SideDrawerState extends State<SideDrawer> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => WorkLogPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (_hasPermission('mobile_jobdesk_view'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.assignment_ind_outlined,
+                          title: 'job_desk.title'.tr(context),
+                          isActive: widget.activePage == 'job_desk',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => JobDeskPage(
                                   userData: widget.userData,
                                 ),
                               ),

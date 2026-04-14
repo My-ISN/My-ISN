@@ -13,6 +13,7 @@ import 'package:foxgeen_mobile/intercom/intercom_page.dart';
 import 'package:foxgeen_mobile/profile/profile_page.dart';
 import 'package:foxgeen_mobile/dashboard/dashboard_page.dart';
 import 'package:foxgeen_mobile/quicksend/quick_send_page.dart';
+import 'package:foxgeen_mobile/job_desk/job_desk_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -91,6 +92,14 @@ class MenuRegistry {
         permission: 'mobile_personal_finance_enable',
         categoryKey: 'side_drawer.financial',
         pageBuilder: (context, user) => PersonalFinancePage(userData: user),
+      ),
+      AppModule(
+        titleKey: 'dashboard.quick_menu_job_desk',
+        icon: Icons.assignment_ind_rounded,
+        color: const Color(0xFF7E57C2),
+        permission: 'mobile_jobdesk_view',
+        categoryKey: 'side_drawer.work',
+        pageBuilder: (context, user) => JobDeskPage(userData: user),
       ),
       AppModule(
         titleKey: 'dashboard.quick_menu_employees',

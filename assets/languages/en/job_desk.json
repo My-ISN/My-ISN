@@ -1,0 +1,22 @@
+{
+    "job_desk": {
+        "title": "Job Desk",
+        "empty_msg": "No Job Desk assigned for this designation yet.",
+        "note": "Implementation Note",
+        "all": "All",
+        "add_job_desk": "Add Job Desk",
+        "f_title": "Description Title",
+        "f_note": "Additional Note",
+        "f_color": "Marker Color",
+        "f_designation": "Related Designation",
+        "btn_save": "Save Data",
+        "btn_cancel": "Cancel",
+        "success_save": "Job Desk successfully saved.",
+        "failed_save": "Failed to save Job Desk.",
+        "field_required": "This field is required.",
+        "confirm_delete_title": "Delete Job Desk?",
+        "confirm_delete_msg": "Are you sure you want to delete this Job Desk? This action cannot be undone.",
+        "success_delete": "Job Desk successfully deleted.",
+        "failed_delete": "Failed to delete Job Desk."
+    }
+}
