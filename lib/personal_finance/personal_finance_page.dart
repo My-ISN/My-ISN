@@ -8,6 +8,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_app_bar.dart';
@@ -125,27 +126,17 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           ? '$_selectedYear-$_selectedMonth'
           : DateFormat('yyyy-MM').format(DateTime.now());
 
-      final response = await http.post(
-        Uri.parse(
-          '${AppConstants.baseUrl}/get_personal_finance_dashboard',
-        ),
-        body: {'month_year': monthYear},
+      final response = await _financeService.getPersonalFinanceDashboard(
+        monthYear: monthYear,
       );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final status = data['status'];
-        if (status == 'success' || status == true) {
-          setState(() {
-            dashboardData = data['data'];
-            isLoading = false;
-          });
-        } else {
-          debugPrint('API Error (Status: $status): ${data['message']}');
-          setState(() => isLoading = false);
-        }
+      if (response['status'] == 'success' || response['status'] == true) {
+        setState(() {
+          dashboardData = response['data'];
+          isLoading = false;
+        });
       } else {
-        debugPrint('Server Error: ${response.statusCode}');
+        debugPrint('API Error: ${response['message']}');
         setState(() => isLoading = false);
       }
     } catch (e) {
@@ -360,7 +351,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       isScrollControlled: true,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
@@ -1075,10 +1066,12 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? _primaryColor.withValues(alpha: 0.05)
+                : Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+              color: _primaryColor.withValues(alpha: 0.1),
             ),
           ),
           child: AnimatedSize(
@@ -1308,10 +1301,12 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? _primaryColor.withValues(alpha: 0.05)
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          color: _primaryColor.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -1323,82 +1318,91 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
           const SizedBox(height: 24),
           SizedBox(
             height: 180,
-            child: LineChart(
-              LineChartData(
-                gridData: const FlGridData(show: false),
-                titlesData: FlTitlesData(
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        int index = value.toInt();
-                        if (index >= 0 && index < trendData.length) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              trendData[index]['month_short'],
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Theme.of(context).hintColor,
-                              ),
-                            ),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeOutQuart,
+              builder: (context, factor, child) {
+                return LineChart(
+                  LineChartData(
+                    gridData: const FlGridData(show: false),
+                    titlesData: FlTitlesData(
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      leftTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          interval: 1,
+                          getTitlesWidget: (value, meta) {
+                            int index = value.toInt();
+                            if (index >= 0 && index < trendData.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  trendData[index]['month_short'],
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const Text('');
+                          },
+                        ),
+                      ),
+                    ),
+                    minX: 0,
+                    maxX: (trendData.length - 1).toDouble(),
+                    borderData: FlBorderData(show: false),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: trendData.asMap().entries.map((e) {
+                          return FlSpot(
+                            e.key.toDouble(),
+                            ((double.tryParse(e.value['income'].toString()) ?? 0) /
+                                    1000) *
+                                factor,
                           );
-                        }
-                        return const Text('');
-                      },
-                    ),
+                        }).toList(),
+                        isCurved: true,
+                        color: Colors.greenAccent,
+                        barWidth: 3,
+                        dotData: const FlDotData(show: false),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: Colors.greenAccent.withOpacity(0.1),
+                        ),
+                      ),
+                      LineChartBarData(
+                        spots: trendData.asMap().entries.map((e) {
+                          return FlSpot(
+                            e.key.toDouble(),
+                            ((double.tryParse(e.value['expense'].toString()) ?? 0) /
+                                    1000) *
+                                factor,
+                          );
+                        }).toList(),
+                        isCurved: true,
+                        color: Colors.orangeAccent,
+                        barWidth: 3,
+                        dotData: const FlDotData(show: false),
+                        belowBarData: BarAreaData(
+                          show: true,
+                          color: Colors.orangeAccent.withOpacity(0.1),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                minX: 0,
-                maxX: (trendData.length - 1).toDouble(),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: trendData.asMap().entries.map((e) {
-                      return FlSpot(
-                        e.key.toDouble(),
-                        (double.tryParse(e.value['income'].toString()) ?? 0) /
-                            1000,
-                      );
-                    }).toList(),
-                    isCurved: true,
-                    color: Colors.greenAccent,
-                    barWidth: 3,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: Colors.greenAccent.withOpacity(0.1),
-                    ),
-                  ),
-                  LineChartBarData(
-                    spots: trendData.asMap().entries.map((e) {
-                      return FlSpot(
-                        e.key.toDouble(),
-                        (double.tryParse(e.value['expense'].toString()) ?? 0) /
-                            1000,
-                      );
-                    }).toList(),
-                    isCurved: true,
-                    color: Colors.orangeAccent,
-                    barWidth: 3,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: Colors.orangeAccent.withOpacity(0.1),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 16),
@@ -1425,10 +1429,12 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? _primaryColor.withValues(alpha: 0.05)
+                : Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+              color: _primaryColor.withValues(alpha: 0.1),
             ),
           ),
           child: Column(
@@ -1474,27 +1480,34 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          PieChart(
-                            PieChartData(
-                              sectionsSpace: 2,
-                              centerSpaceRadius: 38,
-                              sections: categories.asMap().entries.map((e) {
-                                final data = e.value;
-                                final categoryName =
-                                    data['category'] ?? 'General';
-                                final val =
-                                    double.tryParse(
-                                      data['percentage'].toString(),
-                                    ) ??
-                                    0;
-                                return PieChartSectionData(
-                                  value: val > 0 ? val : 1, // Fallback visual
-                                  showTitle: false,
-                                  radius: 12,
-                                  color: _getCategoryColor(categoryName),
-                                );
-                              }).toList(),
-                            ),
+                          TweenAnimationBuilder<double>(
+                            tween: Tween<double>(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 1200),
+                            curve: Curves.easeOutQuart,
+                            builder: (context, factor, child) {
+                              return PieChart(
+                                PieChartData(
+                                  sectionsSpace: 2,
+                                  centerSpaceRadius: 38,
+                                  sections: categories.asMap().entries.map((e) {
+                                    final data = e.value;
+                                    final categoryName =
+                                        data['category'] ?? 'General';
+                                    final val =
+                                        double.tryParse(
+                                          data['percentage'].toString(),
+                                        ) ??
+                                        0;
+                                    return PieChartSectionData(
+                                      value: (val > 0 ? val : 1) * factor,
+                                      showTitle: false,
+                                      radius: 12,
+                                      color: _getCategoryColor(categoryName),
+                                    );
+                                  }).toList(),
+                                ),
+                              );
+                            },
                           ),
                           Column(
                             mainAxisSize: MainAxisSize.min,
@@ -1558,10 +1571,12 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? _primaryColor.withValues(alpha: 0.05)
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          color: _primaryColor.withValues(alpha: 0.1),
         ),
       ),
       padding: const EdgeInsets.all(20),
@@ -1648,13 +1663,20 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                       const SizedBox(height: 10),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: progress.clamp(0, 1),
-                          backgroundColor: Colors.grey.withOpacity(0.1),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            progressColor,
-                          ),
-                          minHeight: 8,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0, end: progress.clamp(0, 1)),
+                          duration: const Duration(milliseconds: 1200),
+                          curve: Curves.easeOutQuart,
+                          builder: (context, value, child) {
+                            return LinearProgressIndicator(
+                              value: value,
+                              backgroundColor: Colors.grey.withOpacity(0.1),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                progressColor,
+                              ),
+                              minHeight: 8,
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -1689,7 +1711,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           boxShadow: [
             BoxShadow(
@@ -1858,13 +1880,20 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: progress.clamp(0, 1),
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      progress >= 1.0 ? Colors.red : Colors.green,
-                    ),
-                    minHeight: 12,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: progress.clamp(0, 1)),
+                    duration: const Duration(milliseconds: 1200),
+                    curve: Curves.easeOutQuart,
+                    builder: (context, value, child) {
+                      return LinearProgressIndicator(
+                        value: value,
+                        backgroundColor: Colors.grey.withOpacity(0.1),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progress >= 1.0 ? Colors.red : Colors.green,
+                        ),
+                        minHeight: 12,
+                      );
+                    },
                   ),
                 ),
               ],
@@ -2062,6 +2091,48 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     return colors[hash.abs() % colors.length];
   }
 
+  void _exportReport(String format) async {
+    final String url = "${AppConstants.baseUrl}/export_personal_finance?format=$format&year=$_selectedReportYear";
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              format == 'excel' ? Icons.description_rounded : Icons.picture_as_pdf_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Laporan ${format.toUpperCase()} sedang diunduh...',
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+        backgroundColor: format == 'excel' ? Colors.green : Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    try {
+      final Uri uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          context.showErrorSnackBar('Gagal membuka link unduhan: $url');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showErrorSnackBar('Terjadi kesalahan: $e');
+      }
+    }
+  }
+
   Widget _buildCategoryStatRow(
     String label,
     String value,
@@ -2143,9 +2214,11 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? _primaryColor.withValues(alpha: 0.05)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.grey.withOpacity(0.05)),
+                border: Border.all(color: _primaryColor.withValues(alpha: 0.1)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.02),
@@ -2191,9 +2264,11 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
       height: 42,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? _primaryColor.withValues(alpha: 0.05)
+            : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: _primaryColor.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -2247,9 +2322,11 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? _primaryColor.withValues(alpha: 0.05)
+            : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.withOpacity(0.05)),
+        border: Border.all(color: _primaryColor.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2481,9 +2558,11 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     return Container(
       margin: const EdgeInsets.only(top: 24),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? _primaryColor.withValues(alpha: 0.05)
+            : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.withOpacity(0.05)),
+        border: Border.all(color: _primaryColor.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -2497,8 +2576,76 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: _buildSectionHeader(
-              'personal_finance.monthly_summary'.tr(context),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildSectionHeader(
+                  'personal_finance.monthly_summary'.tr(context),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: _exportReport,
+                  offset: const Offset(0, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'excel',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.description_rounded, color: Colors.green, size: 20),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Excel',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'pdf',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.picture_as_pdf_rounded, color: Colors.red, size: 20),
+                          const SizedBox(width: 12),
+                          Text(
+                            'PDF',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.download_rounded, size: 16, color: _primaryColor),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Export',
+                          style: TextStyle(
+                            color: _primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

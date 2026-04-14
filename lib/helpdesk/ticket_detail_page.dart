@@ -425,55 +425,86 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: isDark 
+            ? const Color(0xFF161616) 
+            : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -4),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, -5),
           ),
         ],
+        border: Border(
+          top: BorderSide(
+            color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.grey.withValues(alpha: 0.15),
+            width: 1,
+          ),
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         child: SafeArea(
           child: Row(
             children: [
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF1F5F9),
+                    color: isDark 
+                        ? Colors.white.withValues(alpha: 0.03) 
+                        : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor.withValues(alpha: isDark ? 0.05 : 0.08),
+                    ),
                   ),
                   child: TextField(
                     controller: _replyController,
                     textCapitalization: TextCapitalization.sentences,
                     maxLines: null,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
                       hintText: 'helpdesk.reply'.tr(context),
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).hintColor.withValues(alpha: 0.5),
+                        fontSize: 13,
+                      ),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               if (_isSending)
                 const SizedBox(
-                  width: 40,
-                  height: 40,
+                  width: 44,
+                  height: 44,
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    padding: EdgeInsets.all(10.0),
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
                   ),
                 )
               else
-                FloatingActionButton.small(
-                  onPressed: _sendReply,
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  child: const Icon(Icons.send, size: 18),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    onPressed: _sendReply,
+                    icon: const Icon(Icons.send_rounded, size: 20),
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(12),
+                  ),
                 ),
             ],
           ),

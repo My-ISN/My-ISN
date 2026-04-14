@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_snackbar.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class IntercomPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -25,6 +26,10 @@ class _IntercomPageState extends State<IntercomPage> {
   bool _isSending = false;
   Timer? _refreshTimer;
 
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isSpeechInitialized = false;
+  bool _isListening = false;
+
   final List<Map<String, String>> _presets = [
     {'key': 'package', 'icon': 'inventory_2'},
     {'key': 'guest', 'icon': 'person_search'},
@@ -39,6 +44,48 @@ class _IntercomPageState extends State<IntercomPage> {
     super.initState();
     _fetchHistory();
     _startRefreshTimer();
+    _initSpeech();
+  }
+
+  void _initSpeech() async {
+    try {
+      _isSpeechInitialized = await _speech.initialize(
+        onStatus: (val) {
+          if (val == 'done' || val == 'notListening') {
+            if (mounted) setState(() => _isListening = false);
+          }
+        },
+        onError: (val) {
+          if (mounted) setState(() => _isListening = false);
+          debugPrint("Speech error: $val");
+        },
+      );
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint("Speech init error: $e");
+    }
+  }
+
+  void _listen() async {
+    if (!_isSpeechInitialized) return;
+
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _messageController.text = val.recognizedWords;
+            });
+          },
+          localeId: 'id_ID', // Default to Indonesian
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
   }
 
   @override
@@ -136,10 +183,10 @@ class _IntercomPageState extends State<IntercomPage> {
   Widget _buildInputSection(ThemeData theme, bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: isDark ? const Color(0xFF161616) : Colors.white,
         border: Border(
           bottom: BorderSide(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            color: Theme.of(context).dividerColor.withValues(alpha: isDark ? 0.08 : 0.05),
           ),
         ),
       ),
@@ -147,62 +194,102 @@ class _IntercomPageState extends State<IntercomPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
             child: Row(
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.grey[900] : const Color(0xFFF1F5F9),
+                      color: isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor.withValues(alpha: isDark ? 0.05 : 0.08),
+                      ),
                     ),
                     child: TextField(
                       controller: _messageController,
                       textCapitalization: TextCapitalization.sentences,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
                         hintText: 'placeholder'.tr(context),
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).hintColor.withValues(alpha: 0.5),
+                          fontSize: 13,
+                        ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 12,
+                          vertical: 14,
                         ),
+                        suffixIcon: _isSpeechInitialized 
+                          ? IconButton(
+                              icon: Icon(
+                                _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+                                color: _isListening ? Colors.red : const Color(0xFF7E57C2),
+                              ),
+                              onPressed: _listen,
+                            )
+                          : null,
                       ),
                       maxLines: 2,
                       minLines: 1,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                FloatingActionButton.small(
-                  onPressed: _isSending ? null : () => _sendMessage(_messageController.text),
-                  backgroundColor: const Color(0xFF7E57C2),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  child: _isSending
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.send),
+                const SizedBox(width: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7E57C2),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    onPressed: _isSending ? null : () => _sendMessage(_messageController.text),
+                    icon: _isSending
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.send_rounded, size: 20),
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(12),
+                  ),
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.fromLTRB(20, 0, 16, 16),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                'listener_info'.tr(context),
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isDark ? Colors.grey[400] : Colors.grey[600],
-                  fontStyle: FontStyle.italic,
-                ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline_rounded, 
+                    size: 13, 
+                    color: isDark ? Colors.grey[500] : Colors.grey[600]
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'listener_info'.tr(context),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? Colors.grey[500] : Colors.grey[600],
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -212,55 +299,76 @@ class _IntercomPageState extends State<IntercomPage> {
   }
 
   Widget _buildPresetsSection(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'send_to_speaker'.tr(context),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7E57C2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'send_to_speaker'.tr(context),
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.5),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 1.1,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.0,
             ),
             itemCount: _presets.length,
             itemBuilder: (context, index) {
               final preset = _presets[index];
               return InkWell(
                 onTap: () => _sendMessage('presets.${preset['key']}'.tr(context)),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
+                    color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                      color: const Color(0xFF7E57C2).withValues(alpha: isDark ? 0.15 : 0.1),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(_getIconData(preset['icon']!), color: const Color(0xFF7E57C2), size: 28),
-                      const SizedBox(height: 6),
+                      Icon(_getIconData(preset['icon']!), color: const Color(0xFF7E57C2), size: 32),
+                      const SizedBox(height: 8),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: Text(
                           _getPresetLabel(preset['key']!),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF7E57C2),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black87,
                           ),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -281,9 +389,14 @@ class _IntercomPageState extends State<IntercomPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history, size: 64, color: Colors.grey.withOpacity(0.3)),
+            const SizedBox(height: 60),
+            Icon(Icons.history_rounded, size: 64, color: theme.primaryColor.withValues(alpha: 0.1)),
             const SizedBox(height: 16),
-            Text('empty_history'.tr(context), style: TextStyle(color: Colors.grey[500])),
+            Text(
+              'empty_history'.tr(context), 
+              style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.w500)
+            ),
+            const SizedBox(height: 60),
           ],
         ),
       );
@@ -293,16 +406,29 @@ class _IntercomPageState extends State<IntercomPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            'history'.tr(context),
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7E57C2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'history'.tr(context),
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.5),
+              ),
+            ],
           ),
         ),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
           itemCount: _history.length,
           itemBuilder: (context, index) {
               final item = _history[index];
@@ -311,57 +437,101 @@ class _IntercomPageState extends State<IntercomPage> {
               final date = dateStr.isNotEmpty ? DateTime.tryParse(dateStr) : null;
               final formattedDate = date != null ? DateFormat('HH:mm').format(date) : '';
 
-              return Card(
-                elevation: 0,
+              return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
                     color: isUnplayed
-                        ? theme.primaryColor.withValues(alpha: 0.3)
-                        : Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                        ? const Color(0xFF7E57C2).withValues(alpha: 0.2)
+                        : theme.dividerColor.withValues(alpha: isDark ? 0.05 : 0.08),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                color: isUnplayed
-                    ? theme.primaryColor.withValues(alpha: 0.05)
-                    : Theme.of(context).cardColor,
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: CircleAvatar(
-                    backgroundColor: isUnplayed ? theme.primaryColor : Colors.grey[400],
-                    radius: 18,
-                    child: const Icon(Icons.volume_up, color: Colors.white, size: 20),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: isUnplayed 
+                          ? const Color(0xFF7E57C2).withValues(alpha: 0.1) 
+                          : theme.dividerColor.withValues(alpha: isDark ? 0.05 : 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.volume_up_rounded, 
+                      color: isUnplayed ? const Color(0xFF7E57C2) : theme.hintColor, 
+                      size: 20
+                    ),
                   ),
                   title: Text(
                     item['message'] ?? '',
                     style: TextStyle(
-                      fontWeight: isUnplayed ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isUnplayed ? FontWeight.w800 : FontWeight.w600,
                       fontSize: 14,
+                      color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
                     ),
                   ),
-                  subtitle: Row(
-                    children: [
-                      Text(
-                        '${item['first_name']} • $formattedDate',
-                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: isUnplayed ? Colors.orange.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          isUnplayed ? 'unplayed'.tr(context) : 'played'.tr(context),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${item['first_name']} • $formattedDate',
                           style: TextStyle(
-                            fontSize: 9,
-                            color: isUnplayed ? Colors.orange[800] : Colors.green[800],
-                            fontWeight: FontWeight.bold,
+                            fontSize: 11, 
+                            color: theme.hintColor.withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w500
                           ),
                         ),
-                      ),
-                    ],
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: isUnplayed 
+                                ? Colors.orange.withValues(alpha: 0.15) 
+                                : Colors.green.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(
+                              color: isUnplayed 
+                                  ? Colors.orange.withValues(alpha: 0.2) 
+                                  : Colors.green.withValues(alpha: 0.2),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 5,
+                                height: 5,
+                                decoration: BoxDecoration(
+                                  color: isUnplayed ? Colors.orange : Colors.green,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                isUnplayed ? 'unplayed'.tr(context) : 'played'.tr(context),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: isUnplayed ? Colors.orange[400] : Colors.green[400],
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

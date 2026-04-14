@@ -40,7 +40,7 @@ class TodoItemTile extends StatelessWidget {
       elevation: 0,
       margin: EdgeInsets.zero,
       color: Theme.of(context).brightness == Brightness.dark
-          ? Colors.transparent
+          ? Theme.of(context).primaryColor.withValues(alpha: 0.04)
           : Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),

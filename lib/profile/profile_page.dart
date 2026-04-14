@@ -16,6 +16,7 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_snackbar.dart';
+import '../dashboard/dashboard_page.dart';
 
 class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -133,6 +134,12 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: CustomAppBar(
         userData: _profileData['basic_info'] ?? widget.userData,
         showBackButton: true,
+        onTabSelected: (tag) {
+          Navigator.popUntil(context, (route) => route.isFirst);
+          // After popping to dashboard, we might need a way to trigger the tab switch.
+          // Since we don't have a global state, we can use a small delay or a notification.
+          // However, for now, popping to dashboard is the primary action.
+        },
       ),
       body: content,
       endDrawer: SideDrawer(
@@ -143,10 +150,14 @@ class _ProfilePageState extends State<ProfilePage> {
         currentIndex: _hasPermission('mobile_payroll_enable') ? 3 : 2,
         userData: widget.userData,
         onTap: (index) {
-          if (index == 0) {
-            Navigator.popUntil(context, (route) => route.isFirst);
-          }
-          // Tambahkan logika navigasi tab lain jika perlu
+          final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+          String tag = 'dashboard';
+          if (index == 1) tag = 'attendance';
+          else if (index == 2) tag = hasPayroll ? 'payroll' : 'profile';
+          else if (index == 3) tag = 'profile';
+          
+          DashboardPage.switchTab(tag);
+          Navigator.popUntil(context, (route) => route.isFirst);
         },
       ),
     );

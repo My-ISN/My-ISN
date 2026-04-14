@@ -314,6 +314,7 @@ class FinanceService {
         'transaction_type': type,
       },
     );
+    
 
     if (response.statusCode == 200) {
       return json.decode(response.body);
@@ -383,6 +384,23 @@ class FinanceService {
       return json.decode(response.body);
     } else {
       throw Exception('Gagal memuat laporan keuangan');
+    }
+  }
+
+  Future<Map<String, dynamic>> getPersonalFinanceDashboard({
+    String? monthYear,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/get_personal_finance_dashboard'),
+      body: {
+        'month_year': monthYear ?? '',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal memuat dashboard keuangan pribadi');
     }
   }
 }

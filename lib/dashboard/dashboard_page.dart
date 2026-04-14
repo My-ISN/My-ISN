@@ -29,13 +29,23 @@ import '../services/heartbeat_service.dart';
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
   final int? initialIndex;
-  const DashboardPage({super.key, required this.userData, this.initialIndex});
+  
+  const DashboardPage({
+    super.key,
+    required this.userData,
+    this.initialIndex,
+  });
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
+
+  static void switchTab(String tag) {
+    _DashboardPageState.instance?.onTabTagSelected(tag);
+  }
 }
 
 class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
+  static _DashboardPageState? instance;
   bool _isLoading = true;
   Map<String, dynamic> _dashboardData = {};
   Map<String, dynamic> _customerDashboardData = {};
@@ -54,6 +64,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   @override
   void initState() {
     super.initState();
+    instance = this;
     _currentIndex = widget.initialIndex ?? 0;
     _fetchDashboardData();
     _checkAppUpdate();
@@ -65,6 +76,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
 
   @override
   void dispose() {
+    if (instance == this) instance = null;
     HeartbeatService().stop();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -592,6 +604,34 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     }
   }
 
+  void onTabTagSelected(String tag) {
+    final user = _dashboardData['user'] ?? widget.userData;
+    final bool isCustomer =
+        user['user_type'] == 'customer' ||
+        user['user_role_id'] == 21 ||
+        user['user_role_id'] == '21';
+    final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+
+    int index = 0;
+    if (isCustomer) {
+      switch (tag) {
+        case 'dashboard': index = 0; break;
+        case 'rent_plan': index = 1; break;
+        case 'profile': index = 2; break;
+      }
+    } else {
+      switch (tag) {
+        case 'dashboard': index = 0; break;
+        case 'attendance': index = 1; break;
+        case 'payroll': if (hasPayroll) index = 2; break;
+        case 'profile': index = hasPayroll ? 3 : 2; break;
+      }
+    }
+    if (mounted) {
+      setState(() => _currentIndex = index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = _dashboardData['user'] ?? widget.userData;
@@ -600,6 +640,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         user['user_role_id'] == 21 ||
         user['user_role_id'] == '21';
     final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+
 
     final List<Widget> pages = isCustomer
         ? [
@@ -674,7 +715,11 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         extendBody: true,
         appBar: isCustomer
             ? null
-            : CustomAppBar(userData: user, showBackButton: false),
+            : CustomAppBar(
+                userData: user,
+                showBackButton: false,
+                onTabSelected: onTabTagSelected,
+              ),
         body: IndexedStack(index: _currentIndex, children: pages),
         endDrawer: SideDrawer(
                 userData: user,

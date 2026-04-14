@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../providers/quick_menu_provider.dart';
 import 'menu_registry.dart';
 import '../../all_menus_page.dart';
+import '../../dashboard_page.dart';
 
 class DashboardQuickMenu extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -135,12 +136,16 @@ class DashboardQuickMenu extends StatelessWidget {
                 m.icon,
                 m.color,
                 () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => m.pageBuilder(context, user),
-                    ),
-                  );
+                  if (m.tabTag != null) {
+                    DashboardPage.switchTab(m.tabTag!);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => m.pageBuilder(context, user),
+                      ),
+                    );
+                  }
                 },
               ),
               if (count > 0)
@@ -184,12 +189,16 @@ class DashboardQuickMenu extends StatelessWidget {
       m.icon,
       m.color,
       () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => m.pageBuilder(context, user),
-          ),
-        );
+        if (m.tabTag != null) {
+          DashboardPage.switchTab(m.tabTag!);
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => m.pageBuilder(context, user),
+            ),
+          );
+        }
       },
     );
   }

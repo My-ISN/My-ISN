@@ -29,9 +29,11 @@ class TodoStatsCard extends StatelessWidget {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: Theme.of(context).brightness == Brightness.dark
+          ? Theme.of(context).primaryColor.withValues(alpha: 0.04)
+          : Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),
@@ -41,7 +43,7 @@ class TodoStatsCard extends StatelessWidget {
         children: [
           InkWell(
             onTap: onToggleExpand,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Row(

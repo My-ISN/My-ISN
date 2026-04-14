@@ -77,6 +77,7 @@
         "edit": "Edit",
         "edit_quick_menu_info": "Select up to 5 menus to display on the dashboard.",
         "reset": "Reset",
-        "search_placeholder": "Find Products..."
+        "search_placeholder": "Find Products...",
+        "quick_menu_quicksend": "Quick Send"
     }
 }

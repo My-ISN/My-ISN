@@ -12,6 +12,7 @@ import 'package:foxgeen_mobile/creative_idea/creative_idea_page.dart';
 import 'package:foxgeen_mobile/intercom/intercom_page.dart';
 import 'package:foxgeen_mobile/profile/profile_page.dart';
 import 'package:foxgeen_mobile/dashboard/dashboard_page.dart';
+import 'package:foxgeen_mobile/quicksend/quick_send_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -20,6 +21,7 @@ class AppModule {
   final String? permission;
   final String categoryKey;
   final Widget Function(BuildContext, Map<String, dynamic>) pageBuilder;
+  final String? tabTag;
 
   AppModule({
     required this.titleKey,
@@ -28,6 +30,7 @@ class AppModule {
     this.permission,
     required this.categoryKey,
     required this.pageBuilder,
+    this.tabTag,
   });
 }
 
@@ -44,6 +47,7 @@ class MenuRegistry {
         color: const Color(0xFF7E57C2),
         permission: 'mobile_rent_plan_enable',
         categoryKey: 'side_drawer.work',
+        tabTag: isCustomer ? 'rent_plan' : null,
         pageBuilder: (context, user) => isCustomer
             ? client_rp.RentPlanPage(userData: user)
             : staff_rp.RentPlanPage(userData: user),
@@ -63,6 +67,14 @@ class MenuRegistry {
         permission: 'mobile_worklog_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => WorkLogPage(userData: user),
+      ),
+      AppModule(
+        titleKey: 'dashboard.quick_menu_quicksend',
+        icon: Icons.send_rounded,
+        color: const Color(0xFF7E57C2),
+        permission: 'mobile_quicksend_view',
+        categoryKey: 'side_drawer.support',
+        pageBuilder: (context, user) => QuickSendPage(userData: user),
       ),
       AppModule(
         titleKey: 'dashboard.quick_menu_finance',
@@ -125,6 +137,7 @@ class MenuRegistry {
           icon: Icons.calendar_today_rounded,
           color: const Color(0xFF7E57C2),
           categoryKey: 'main.xin_dashboard',
+          tabTag: 'attendance',
           pageBuilder: (context, user) =>
               DashboardPage(userData: user, initialIndex: 1),
         ),
@@ -133,6 +146,7 @@ class MenuRegistry {
         icon: Icons.person_rounded,
         color: const Color(0xFF7E57C2),
         categoryKey: 'main.xin_dashboard',
+        tabTag: 'profile',
         pageBuilder: (context, user) => ProfilePage(userData: user),
       ),
       if (!isCustomer)
@@ -142,6 +156,7 @@ class MenuRegistry {
           color: const Color(0xFF7E57C2),
           permission: 'mobile_payroll_enable',
           categoryKey: 'main.xin_dashboard',
+          tabTag: 'payroll',
           pageBuilder: (context, user) =>
               DashboardPage(userData: user, initialIndex: 2),
         ),

@@ -490,7 +490,7 @@ class _AiBotPageState extends State<AiBotPage> {
       appBar: CustomAppBar(
         userData: widget.userData,
         showBackButton: false,
-        title: 'Knowledge Base AI',
+        title: 'My ISN',
       ),
       endDrawer: SideDrawer(
         userData: widget.userData,
@@ -503,8 +503,11 @@ class _AiBotPageState extends State<AiBotPage> {
         },
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Ngajarin AI'),
+        icon: const Icon(Icons.smart_toy_rounded),
+        label: const Text(
+          'Ngajarin AI',
+          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+        ),
       ),
       body: Column(
         children: [

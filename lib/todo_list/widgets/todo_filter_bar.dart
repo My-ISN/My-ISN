@@ -44,8 +44,10 @@ class TodoFilterBar extends StatelessWidget {
       height: 54,
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.circular(24),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).primaryColor.withValues(alpha: 0.04)
+            : Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),
@@ -61,7 +63,7 @@ class TodoFilterBar extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: primaryColor,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -130,7 +132,7 @@ class TodoFilterBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
         ),

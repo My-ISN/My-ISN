@@ -43,10 +43,13 @@ class FinanceTransactionItem extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
         elevation: 0,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).primaryColor.withValues(alpha: 0.05)
+            : Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
           ),
         ),
         child: InkWell(

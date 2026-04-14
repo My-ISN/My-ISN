@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
@@ -7,9 +8,10 @@ import '../announcement_page.dart';
 import '../todo_list/todo_list_page.dart';
 import 'top_notification.dart';
 import '../localization/app_localizations.dart';
-import '../helpdesk/helpdesk_list_page.dart';
-import '../ai_bot/ai_bot_page.dart';
+import '../widgets/custom_snackbar.dart';
 import '../constants.dart';
+import '../dashboard/staff/widgets/menu_registry.dart';
+import '../dashboard/dashboard_page.dart';
 
 
 // Global Manager for Notification State
@@ -134,6 +136,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final PreferredSizeWidget? bottom;
   final bool showActions;
   final List<Widget>? extraActions;
+  final Function(String)? onTabSelected;
 
   const CustomAppBar({
     super.key,
@@ -144,6 +147,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.bottom,
     this.showActions = true,
     this.extraActions,
+    this.onTabSelected,
   });
 
   @override
@@ -157,11 +161,21 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _CustomAppBarState extends State<CustomAppBar> {
   Timer? _timer;
   final NotificationManager _notifManager = NotificationManager();
+  
+  OverlayEntry? _searchOverlayEntry;
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  List<AppModule> _filteredModules = [];
+  bool _isSearchOpen = false;
+  
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  List<String> _historyKeys = [];
 
   @override
   void initState() {
     super.initState();
     _fetchUnreadCount();
+    _loadHistory();
     // Poll every 15 seconds for a snappy feel
     _timer = Timer.periodic(const Duration(seconds: 15), (timer) {
       _fetchUnreadCount();
@@ -188,7 +202,223 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   void dispose() {
     _timer?.cancel();
+    _hideSearchOverlay();
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadHistory() async {
+    try {
+      final String? historyJson = await _storage.read(key: 'module_search_history');
+      if (historyJson != null) {
+        final List<dynamic> decoded = json.decode(historyJson);
+        setState(() {
+          _historyKeys = decoded.cast<String>();
+        });
+      }
+    } catch (e) {
+      // Silent error
+    }
+  }
+
+  Future<void> _saveHistory() async {
+    try {
+      await _storage.write(
+        key: 'module_search_history',
+        value: json.encode(_historyKeys),
+      );
+    } catch (e) {
+      // Silent error
+    }
+  }
+
+  void _addToHistory(String titleKey) {
+    setState(() {
+      _historyKeys.remove(titleKey);
+      _historyKeys.insert(0, titleKey);
+      if (_historyKeys.length > 3) {
+        _historyKeys = _historyKeys.sublist(0, 3);
+      }
+    });
+    _saveHistory();
+  }
+
+  void _showSearchOverlay() {
+    if (_isSearchOpen) return;
+
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    _updateFilteredModules(''); // Initialize with history/empty
+    _searchController.clear();
+
+    _searchOverlayEntry = OverlayEntry(
+      builder: (context) => Stack(
+        children: [
+          // Dimmed Background
+          GestureDetector(
+            onTap: _hideSearchOverlay,
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.5),
+            ),
+          ),
+          // Search Bar & Results
+          Positioned(
+            top: offset.dy + size.height,
+            left: 16,
+            right: 16,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocusNode,
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              hintText: 'Cari menu...',
+                              border: InputBorder.none,
+                              prefixIcon: const Icon(Icons.search, color: Color(0xFF7E57C2)),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: _hideSearchOverlay,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              _updateFilteredModules(value);
+                            },
+                          ),
+                        ),
+                        StatefulBuilder(
+                          builder: (context, setStateOverlay) {
+                            return _filteredModules.isEmpty
+                                ? const SizedBox.shrink()
+                                : Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (_searchController.text.isEmpty && _historyKeys.isNotEmpty)
+                                        const Padding(
+                                          padding: EdgeInsets.only(left: 16, top: 8, bottom: 4),
+                                          child: Text(
+                                            'Pencarian Terakhir',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxHeight: MediaQuery.of(context).size.height * 0.4,
+                                        ),
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          padding: EdgeInsets.zero,
+                                          itemCount: _filteredModules.length,
+                                          itemBuilder: (context, index) {
+                                            final module = _filteredModules[index];
+                                            return ListTile(
+                                              leading: Icon(module.icon, color: module.color),
+                                              title: Text(module.titleKey.tr(context)),
+                                              onTap: () {
+                                                _addToHistory(module.titleKey);
+                                                _hideSearchOverlay();
+                                                if (module.tabTag != null) {
+                                                  if (widget.onTabSelected != null) {
+                                                    widget.onTabSelected!(module.tabTag!);
+                                                  } else {
+                                                    DashboardPage.switchTab(module.tabTag!);
+                                                    Navigator.popUntil(context, (route) => route.isFirst);
+                                                  }
+                                                } else {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => module.pageBuilder(context, widget.userData),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    Overlay.of(context).insert(_searchOverlayEntry!);
+    setState(() => _isSearchOpen = true);
+  }
+
+  void _hideSearchOverlay() {
+    if (!_isSearchOpen) return;
+    _searchOverlayEntry?.remove();
+    _searchOverlayEntry = null;
+    setState(() => _isSearchOpen = false);
+  }
+
+  void _updateFilteredModules(String query) {
+    setState(() {
+      final allModules = MenuRegistry.getModules(widget.userData);
+      if (query.isEmpty) {
+        if (_historyKeys.isEmpty) {
+          _filteredModules = [];
+        } else {
+          // Show history items (max 3)
+          _filteredModules = [];
+          for (var key in _historyKeys) {
+            try {
+              final module = allModules.firstWhere((m) => m.titleKey == key);
+              if (module.permission == null || _hasPermission(module.permission!)) {
+                _filteredModules.add(module);
+              }
+            } catch (e) {
+              // Module no longer exists or protected
+            }
+          }
+        }
+      } else {
+        _filteredModules = allModules.where((module) {
+          final title = module.titleKey.tr(context).toLowerCase();
+          final hasPermission = module.permission == null || _hasPermission(module.permission!);
+          return hasPermission && title.contains(query.toLowerCase());
+        }).toList();
+      }
+      _searchOverlayEntry?.markNeedsBuild();
+    });
   }
 
   Future<void> _fetchUnreadCount() async {
@@ -261,43 +491,18 @@ class _CustomAppBarState extends State<CustomAppBar> {
       actions: widget.showActions
           ? [
               if (widget.extraActions != null) ...widget.extraActions!,
-                IconButton(
-                  padding: const EdgeInsets.all(8.0),
-                  constraints: const BoxConstraints(),
-                  icon: const Icon(
-                    Icons.smart_toy_outlined,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AiBotPage(
-                          userData: widget.userData,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                if (_hasPermission('mobile_helpdesk_view'))
-                  IconButton(
+                Transform.translate(
+                  offset: const Offset(8, 0), // Shift 8 pixels to the right
+                  child: IconButton(
                     padding: const EdgeInsets.all(8.0),
                     constraints: const BoxConstraints(),
                     icon: const Icon(
-                      Icons.support_agent_rounded,
+                      Icons.search,
                       color: Colors.grey,
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HelpdeskListPage(
-                            userData: widget.userData,
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: _showSearchOverlay,
                   ),
+                ),
                 ValueListenableBuilder<int>(
                 valueListenable: _notifManager.unreadCount,
                 builder: (context, count, child) {

@@ -15,6 +15,7 @@ import '../ai_bot/ai_bot_page.dart';
 import '../creative_idea/creative_idea_page.dart';
 import '../personal_finance/personal_finance_page.dart';
 import '../intercom/intercom_page.dart';
+import '../quicksend/quick_send_page.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
 
@@ -53,7 +54,7 @@ class _SideDrawerState extends State<SideDrawer> {
       _expandedSections['work'] = true;
     } else if (['finance', 'my_wallet'].contains(widget.activePage)) {
       _expandedSections['financial'] = true;
-    } else if (['helpdesk', 'ai_bot', 'creative_idea'].contains(
+    } else if (['helpdesk', 'ai_bot', 'creative_idea', 'intercom', 'quicksend'].contains(
       widget.activePage,
     )) {
       _expandedSections['support'] = true;
@@ -382,6 +383,7 @@ class _SideDrawerState extends State<SideDrawer> {
                   'mobile_helpdesk_view',
                   'creative_idea',
                   'mobile_intercom_view',
+                  'mobile_quicksend_view',
                 ]))
                   _buildExpandableSection(
                     context,
@@ -461,8 +463,27 @@ class _SideDrawerState extends State<SideDrawer> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => IntercomPage(
-                            userData: widget.userData,
-                          ),
+                                userData: widget.userData,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    if (_hasPermission('mobile_quicksend_view'))
+                      _buildMenuItem(
+                        context,
+                        icon: Icons.send_outlined,
+                        title: 'dashboard.quick_menu_quicksend'.tr(context),
+                        isActive: widget.activePage == 'quicksend',
+                        padding: const EdgeInsets.only(left: 32, right: 12),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QuickSendPage(
+                                userData: widget.userData,
+                              ),
                             ),
                           );
                         },

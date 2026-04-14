@@ -308,9 +308,14 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-        side: BorderSide(color: Colors.grey.withAlpha(51)),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        ),
       ),
+      color: Theme.of(context).brightness == Brightness.dark
+          ? Theme.of(context).primaryColor.withValues(alpha: 0.04)
+          : Theme.of(context).cardColor,
       child: ListTile(
         leading: _buildProfileImage(
           profilePhoto: user['profile_photo'],
@@ -369,7 +374,7 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                 Text(
                   'creative_idea.your_rank'.tr(context),
                   style: TextStyle(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     fontSize: 12,
                   ),
                 ),
@@ -421,14 +426,16 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
           child: Container(
             height: 50,
             decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(15),
-              border: theme.brightness == Brightness.dark
-                  ? Border.all(color: Colors.white24)
-                  : Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+              color: theme.brightness == Brightness.dark
+                  ? theme.primaryColor.withValues(alpha: 0.04)
+                  : theme.cardColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.dividerColor.withValues(alpha: 0.1),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withAlpha(8),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -896,7 +903,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                 decoration: InputDecoration(
                   hintText: 'creative_idea.idea_title'.tr(context),
                   filled: true,
-                  fillColor: theme.cardColor,
+                  fillColor: theme.brightness == Brightness.dark
+                      ? theme.primaryColor.withValues(alpha: 0.06)
+                      : theme.cardColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -904,7 +913,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -926,7 +937,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                 initialValue: selectedStatus,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: theme.cardColor,
+                  fillColor: theme.brightness == Brightness.dark
+                      ? theme.primaryColor.withValues(alpha: 0.06)
+                      : theme.cardColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -934,10 +947,14 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    ),
                   ),
                 ),
-                dropdownColor: theme.cardColor,
+                dropdownColor: theme.brightness == Brightness.dark
+                    ? theme.scaffoldBackgroundColor
+                    : theme.cardColor,
                 items: [
                   DropdownMenuItem(value: 0, child: Text('creative_idea.pending'.tr(context))),
                   DropdownMenuItem(value: 1, child: Text('creative_idea.approved'.tr(context))),
@@ -964,7 +981,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                 decoration: InputDecoration(
                   hintText: 'creative_idea.idea_description'.tr(context),
                   filled: true,
-                  fillColor: theme.cardColor,
+                  fillColor: theme.brightness == Brightness.dark
+                      ? theme.primaryColor.withValues(alpha: 0.06)
+                      : theme.cardColor,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -972,7 +991,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -1186,9 +1207,14 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),
         elevation: 0,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).primaryColor.withValues(alpha: 0.04)
+            : Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-          side: BorderSide(color: Colors.grey.withAlpha(51)),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -1328,7 +1354,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
               decoration: InputDecoration(
                 hintText: 'creative_idea.idea_title'.tr(context),
                 filled: true,
-                fillColor: theme.cardColor,
+                fillColor: theme.brightness == Brightness.dark
+                    ? theme.primaryColor.withValues(alpha: 0.06)
+                    : theme.cardColor,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -1336,7 +1364,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: Colors.grey.withAlpha(25)),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -1361,7 +1391,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
               decoration: InputDecoration(
                 hintText: 'creative_idea.idea_description'.tr(context),
                 filled: true,
-                fillColor: theme.cardColor,
+                fillColor: theme.brightness == Brightness.dark
+                    ? theme.primaryColor.withValues(alpha: 0.06)
+                    : theme.cardColor,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -1369,7 +1401,9 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: Colors.grey.withAlpha(25)),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),

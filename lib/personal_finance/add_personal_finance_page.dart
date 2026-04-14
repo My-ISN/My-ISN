@@ -298,14 +298,20 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
     required Color color,
     required List<Widget> children,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: isDark 
+            ? Colors.white.withValues(alpha: 0.03) 
+            : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: color.withValues(alpha: 0.1), width: 1.5),
+        border: Border.all(
+          color: isDark ? color.withValues(alpha: 0.15) : color.withValues(alpha: 0.1), 
+          width: 1.5
+        ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.06),
+            color: isDark ? Colors.black.withOpacity(0.1) : color.withOpacity(0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -319,16 +325,29 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1), 
+                    borderRadius: BorderRadius.circular(12)
+                  ),
                   child: Icon(icon, color: color, size: 20),
                 ),
                 const SizedBox(width: 12),
-                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  title, 
+                  style: const TextStyle(
+                    fontSize: 17, 
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5
+                  )
+                ),
               ],
             ),
           ),
-          Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 20), child: Column(children: children)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20), 
+            child: Column(children: children)
+          ),
         ],
       ),
     );
@@ -336,20 +355,40 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
 
   Widget _buildTextField(String label, TextEditingController controller, IconData icon,
       {bool isNumber = false, bool required = true, int maxLines = 1}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const primaryColor = Color(0xFF7E57C2);
+    
     return TextFormField(
       controller: controller,
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       maxLines: maxLines,
-      style: const TextStyle(fontSize: 14),
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       validator: required ? (val) => val == null || val.isEmpty ? 'main.required'.tr(context) : null : null,
       decoration: InputDecoration(
         labelText: required ? '$label *' : label,
-        prefixIcon: Icon(icon, size: 18, color: const Color(0xFF7E57C2).withValues(alpha: 0.7)),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey[200]!)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey[200]!)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 2)),
+        labelStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        prefixIcon: Icon(icon, size: 18, color: primaryColor.withValues(alpha: 0.6)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20), 
+          borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.08))
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20), 
+          borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.08))
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20), 
+          borderSide: const BorderSide(color: primaryColor, width: 1.5)
+        ),
         filled: true,
-        fillColor: Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+        fillColor: isDark 
+            ? Colors.white.withValues(alpha: 0.03) 
+            : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       ),
     );
   }
@@ -374,32 +413,48 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
   }
 
   Widget _buildDatePicker(String label) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const primaryColor = Color(0xFF7E57C2);
+
     return InkWell(
       onTap: _selectDate,
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : Colors.white,
-          border: Border.all(color: Colors.grey[200]!),
-          borderRadius: BorderRadius.circular(16),
+          color: isDark 
+              ? Colors.white.withValues(alpha: 0.03) 
+              : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
+          border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.08)),
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.event_rounded, size: 16, color: Color(0xFF7E57C2)),
-                const SizedBox(width: 8),
-                Text(
-                  _selectedType == 3
-                      ? DateFormat('MMMM yyyy').format(_selectedDate)
-                      : DateFormat('dd MMM yyyy').format(_selectedDate),
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                ),
-              ],
+            Icon(Icons.calendar_today_rounded, size: 18, color: primaryColor.withValues(alpha: 0.6)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _selectedType == 3 ? 'Bulan Anggaran *' : '$label *',
+                    style: TextStyle(
+                      fontSize: 11, 
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      fontWeight: FontWeight.w500
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _selectedType == 3
+                        ? DateFormat('MMMM yyyy').format(_selectedDate)
+                        : DateFormat('dd MMM yyyy').format(_selectedDate),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
             ),
+            Icon(Icons.keyboard_arrow_down_rounded, color: primaryColor.withValues(alpha: 0.8)),
           ],
         ),
       ),
@@ -408,26 +463,26 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
 
   Widget _buildBottomAction() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(top: BorderSide(color: Colors.grey.withValues(alpha: 0.1))),
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.05))),
       ),
       child: ElevatedButton(
         onPressed: _isLoading ? null : _handleSave,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF7E57C2),
           foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 4,
-          shadowColor: const Color(0xFF7E57C2).withOpacity(0.4),
+          minimumSize: const Size(double.infinity, 58),
+          elevation: 8,
+          shadowColor: const Color(0xFF7E57C2).withValues(alpha: 0.4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
         child: _isLoading
-            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
             : Text(
                 'main.save'.tr(context),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.5),
               ),
       ),
     );

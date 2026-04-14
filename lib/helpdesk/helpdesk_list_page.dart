@@ -485,18 +485,21 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
         crit = count;
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: isDark 
+            ? Colors.white.withValues(alpha: 0.03) 
+            : Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.black.withOpacity(0.1) : Colors.black.withOpacity(0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        border: Border.all(color: const Color(0xFF7E57C2).withValues(alpha: isDark ? 0.15 : 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -687,36 +690,54 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   }
 
   Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchController,
-      onChanged: _runFilter,
-      decoration: InputDecoration(
-        hintText: 'todo_list.search_hint'.tr(context),
-        prefixIcon: const Icon(Icons.search),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: isDark 
+            ? Colors.white.withValues(alpha: 0.03) 
+            : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: isDark ? 0.08 : 0.1)),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _runFilter,
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        decoration: InputDecoration(
+          hintText: 'todo_list.search_hint'.tr(context),
+          hintStyle: TextStyle(color: Theme.of(context).hintColor.withValues(alpha: 0.5)),
+          prefixIcon: Icon(Icons.search_rounded, color: const Color(0xFF7E57C2).withValues(alpha: 0.7)),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         ),
-        filled: true,
-        fillColor: Theme.of(context).cardColor,
-        contentPadding: const EdgeInsets.symmetric(vertical: 0),
       ),
     );
   }
 
 
   Widget _buildTicketCard(Map<String, dynamic> ticket) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final status = ticket['ticket_status'].toString();
     final priority = ticket['ticket_priority'].toString();
     final statusColor = _getStatusColor(status);
     final priorityColor = _getPriorityColor(priority);
 
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: isDark 
+            ? Colors.white.withValues(alpha: 0.02) 
+            : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: isDark ? 0.05 : 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withOpacity(0.05) : Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: InkWell(
         onTap: () async {
@@ -731,7 +752,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
           );
           if (result == true) _loadData();
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -812,16 +833,33 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   }
 
   Widget _buildChip(String label, Color color) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+        color: color.withValues(alpha: isDark ? 0.15 : 0.1),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 0.5),
       ),
-      child: Text(
-        label,
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color.withValues(alpha: isDark ? 0.9 : 0.8),
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }

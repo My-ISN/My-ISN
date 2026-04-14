@@ -4,6 +4,7 @@ import '../localization/app_localizations.dart';
 import '../widgets/secondary_app_bar.dart';
 import '../providers/quick_menu_provider.dart';
 import 'staff/widgets/menu_registry.dart';
+import 'dashboard_page.dart';
 
 class AllMenusPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -241,12 +242,17 @@ class _AllMenusPageState extends State<AllMenusPage> {
           if (_isEditing) {
             _togglePinned(m.titleKey);
           } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => m.pageBuilder(context, widget.userData),
-              ),
-            );
+            if (m.tabTag != null) {
+              DashboardPage.switchTab(m.tabTag!);
+              Navigator.pop(context);
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => m.pageBuilder(context, widget.userData),
+                ),
+              );
+            }
           }
         },
         borderRadius: BorderRadius.circular(20),
