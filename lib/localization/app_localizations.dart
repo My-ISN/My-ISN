@@ -35,6 +35,8 @@ class AppLocalizations {
       'helpdesk',
       'intercom',
       'job_desk',
+      'quicksend',
+      'aibot',
     ];
 
     _localizedStrings = {};

@@ -137,7 +137,7 @@ class _IntercomPageState extends State<IntercomPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (!silent) {
-          context.showErrorSnackBar('fetch_error'.tr(context));
+          context.showErrorSnackBar('intercom.fetch_error'.tr(context));
         }
       }
     }
@@ -169,12 +169,12 @@ class _IntercomPageState extends State<IntercomPage> {
       await _intercomService.sendIntercomMessage(message);
       if (mounted) {
         _messageController.clear();
-        context.showSuccessSnackBar('send_success'.tr(context));
+        context.showSuccessSnackBar('intercom.send_success'.tr(context));
         _fetchHistory(silent: true);
       }
     } catch (e) {
       if (mounted) {
-        context.showErrorSnackBar('send_error'.tr(context));
+        context.showErrorSnackBar('intercom.send_error'.tr(context));
       }
     } finally {
       if (mounted) setState(() => _isSending = false);
@@ -237,9 +237,9 @@ class _IntercomPageState extends State<IntercomPage> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Text(
-                          'Tambah Preset',
-                          style: TextStyle(
+                        Text(
+                          'intercom.add_preset'.tr(context),
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -248,7 +248,7 @@ class _IntercomPageState extends State<IntercomPage> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Isi text preset yang ingin dipakai cepat.',
+                      'intercom.add_preset_desc'.tr(context),
                       style: TextStyle(
                         fontSize: 13,
                         color: theme.hintColor,
@@ -262,7 +262,7 @@ class _IntercomPageState extends State<IntercomPage> {
                       minLines: 1,
                       maxLines: 3,
                       decoration: InputDecoration(
-                        hintText: 'Contoh: Ada paket di depan pintu',
+                        hintText: 'intercom.add_preset_hint'.tr(context),
                         filled: true,
                         fillColor: isDark
                             ? Colors.white.withValues(alpha: 0.04)
@@ -302,7 +302,7 @@ class _IntercomPageState extends State<IntercomPage> {
                                 final message = _presetController.text.trim();
                                 if (message.isEmpty) {
                                   context.showErrorSnackBar(
-                                    'Preset tidak boleh kosong',
+                                    'main.required'.tr(context),
                                   );
                                   return;
                                 }
@@ -317,19 +317,19 @@ class _IntercomPageState extends State<IntercomPage> {
                                     Navigator.pop(modalContext);
                                     context.showSuccessSnackBar(
                                       result['message']?.toString() ??
-                                          'Preset berhasil ditambahkan',
+                                          'intercom.add_success_preset'.tr(context),
                                     );
                                     _fetchPresets();
                                   } else {
                                     context.showErrorSnackBar(
                                       result['message']?.toString() ??
-                                          'Gagal menambah preset',
+                                          'intercom.add_fail_preset'.tr(context),
                                     );
                                   }
                                 } catch (_) {
                                   if (mounted) {
                                     context.showErrorSnackBar(
-                                      'Gagal menambah preset',
+                                      'intercom.add_fail_preset'.tr(context),
                                     );
                                   }
                                 } finally {
@@ -355,9 +355,9 @@ class _IntercomPageState extends State<IntercomPage> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text(
-                                'Simpan Preset',
-                                style: TextStyle(
+                            : Text(
+                                'intercom.save_preset'.tr(context),
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w900,
                                   fontSize: 15,
                                 ),
@@ -372,7 +372,7 @@ class _IntercomPageState extends State<IntercomPage> {
                             ? null
                             : () => Navigator.pop(modalContext),
                         child: Text(
-                          'Batal',
+                          'main.cancel'.tr(context),
                           style: TextStyle(color: theme.hintColor),
                         ),
                       ),
@@ -408,9 +408,9 @@ class _IntercomPageState extends State<IntercomPage> {
               backgroundColor: const Color(0xFF7E57C2),
               foregroundColor: Colors.white,
               icon: const Icon(Icons.speaker_notes_rounded),
-              label: const Text(
-                'Tambah Preset',
-                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+              label: Text(
+                'intercom.add_preset'.tr(context),
+                style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
               ),
             )
           : null,
@@ -492,7 +492,7 @@ class _IntercomPageState extends State<IntercomPage> {
                       textCapitalization: TextCapitalization.sentences,
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                       decoration: InputDecoration(
-                        hintText: 'placeholder'.tr(context),
+                        hintText: 'intercom.placeholder'.tr(context),
                         hintStyle: TextStyle(
                           color: Theme.of(context).hintColor.withValues(alpha: 0.5),
                           fontSize: 13,
@@ -562,7 +562,7 @@ class _IntercomPageState extends State<IntercomPage> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'listener_info'.tr(context),
+                      'intercom.listener_info'.tr(context),
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark ? Colors.grey[500] : Colors.grey[600],
@@ -598,7 +598,7 @@ class _IntercomPageState extends State<IntercomPage> {
               ),
               const SizedBox(width: 10),
               Text(
-                'send_to_speaker'.tr(context),
+                'intercom.send_to_speaker'.tr(context),
                 style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.5),
               ),
               if (_isLoadingPresets)
@@ -674,7 +674,7 @@ class _IntercomPageState extends State<IntercomPage> {
       ),
       child: Center(
         child: Text(
-          'Belum ada preset. Atur di web.',
+          'intercom.empty_presets'.tr(context),
           style: TextStyle(color: Colors.grey[500], fontSize: 12, fontStyle: FontStyle.italic),
         ),
       ),
@@ -694,7 +694,7 @@ class _IntercomPageState extends State<IntercomPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'empty_history'.tr(context),
+            'intercom.empty_history'.tr(context),
             style: TextStyle(
               color: theme.hintColor,
               fontWeight: FontWeight.w500,
@@ -721,7 +721,7 @@ class _IntercomPageState extends State<IntercomPage> {
           ),
           const SizedBox(width: 10),
           Text(
-            'history'.tr(context),
+            'intercom.history'.tr(context),
             style: const TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 16,
@@ -827,8 +827,8 @@ class _IntercomPageState extends State<IntercomPage> {
                     const SizedBox(width: 5),
                     Text(
                       isUnplayed
-                          ? 'unplayed'.tr(context)
-                          : 'played'.tr(context),
+                          ? 'intercom.unplayed'.tr(context)
+                          : 'intercom.played'.tr(context),
                       style: TextStyle(
                         fontSize: 9,
                         color: isUnplayed
@@ -848,15 +848,4 @@ class _IntercomPageState extends State<IntercomPage> {
     );
   }
 
-  String _getPresetLabel(String key) {
-    switch (key) {
-      case 'package': return 'Paket'.tr(context);
-      case 'guest': return 'Tamu'.tr(context);
-      case 'meal': return 'Makan'.tr(context);
-      case 'leaving': return 'Pergi'.tr(context);
-      case 'lights': return 'Lampu'.tr(context);
-      case 'phone': return 'Telepon'.tr(context);
-      default: return key;
-    }
-  }
 }

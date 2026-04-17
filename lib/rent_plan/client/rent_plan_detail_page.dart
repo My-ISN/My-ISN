@@ -349,9 +349,9 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           ),
           _buildRowTwoFields(
             'rent_plan.unit_count'.tr(context).toUpperCase(),
-            '${_rentalData!['total_laptop'] ?? 0} unit',
+            '${_rentalData!['total_laptop'] ?? 0} ${'rent_plan.unit'.tr(context).toLowerCase()}',
             'rent_plan.duration'.tr(context).toUpperCase(),
-            '${_rentalData!['lama_sewa'] ?? 0} hari',
+            '${_rentalData!['lama_sewa'] ?? 0} ${'rent_plan.days'.tr(context).toLowerCase()}',
           ),
           _buildRowTwoFields(
             'rent_plan.start'.tr(context).toUpperCase(),

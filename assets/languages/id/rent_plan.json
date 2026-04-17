@@ -19,6 +19,7 @@
         "start_rent": "Mulai Sewa",
         "duration": "Durasi",
         "days": "Hari",
+        "unit": "Unit",
         "personal": "Pribadi",
         "company": "Perusahaan",
         "full_name": "Nama Lengkap",
@@ -240,6 +241,32 @@
         "discard_confirm_title": "Batalkan Pesanan?",
         "discard_confirm_msg": "Data yang telah Anda masukkan tidak akan disimpan jika Anda kembali. Apakah Anda yakin ingin membatalkan?",
         "notification_new_order_title": "Pesanan Rental Berhasil Dibuat",
-        "notification_new_order_msg": "Pesanan #{order_no} telah berhasil diterbitkan. Silakan cek detail untuk langkah selanjutnya."
+        "notification_new_order_msg": "Pesanan #{order_no} telah berhasil diterbitkan. Silakan cek detail untuk langkah selanjutnya.",
+        "emergency_contact": "Nomor Keluarga (Darurat)",
+        "phone_hint": "Contoh: 08123456789",
+        "admin_fee": "Biaya Administrasi",
+        "payment": {
+            "select_bank_first": "Silakan pilih bank terlebih dahulu",
+            "cannot_open_payment_link": "Tidak dapat membuka link pembayaran",
+            "payment_success": "Pembayaran berhasil dikonfirmasi",
+            "payment_failed": "Gagal memproses pembayaran",
+            "create_flip_link": "Buat Link Pembayaran Flip",
+            "payment_method": "Metode Pembayaran",
+            "transfer_qris": "Transfer / QRIS",
+            "transfer_qris_subtitle": "Virtual Account (BCA, Mandiri, dll)",
+            "cash": "Tunai (Cash)",
+            "cash_subtitle": "Titip ke Kurir saat laptop sampai",
+            "select_bank_wallet": "PILIH BANK / E-WALLET",
+            "whatsapp_active": "WhatsApp Aktif",
+            "flip_safety_info": "Link dibuat via Flip for Business — aman & realtime",
+            "preparing_link": "Menyiapkan Link...",
+            "processing": "Memproses...",
+            "create_send_link": "Buat & Kirim Link Bayar",
+            "confirm_cash": "Konfirmasi Bayar Tunai",
+            "qris_all": "QRIS (Semua)",
+            "gopay_dana": "GoPay / Dana",
+            "shopeepay": "ShopeePay",
+            "crypto_credit_card": "Kartu Kredit"
+        }
     }
 }

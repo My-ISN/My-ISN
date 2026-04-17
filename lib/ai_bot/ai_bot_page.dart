@@ -119,7 +119,10 @@ class _AiBotPageState extends State<AiBotPage> {
               ],
             ),
             child: Text(
-              'Page $_currentPage of $_totalPages',
+              'aibot.page_info'.tr(context, args: {
+                'current': _currentPage.toString(),
+                'total': _totalPages.toString(),
+              }),
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
@@ -178,7 +181,7 @@ class _AiBotPageState extends State<AiBotPage> {
         }
       },
       primaryColor: Theme.of(context).colorScheme.primary,
-      totalLabel: '$_totalCount Total',
+      totalLabel: 'aibot.total_count'.tr(context, args: {'count': _totalCount.toString()}),
     );
   }
 
@@ -217,7 +220,7 @@ class _AiBotPageState extends State<AiBotPage> {
     
     // Check if category is selected
     if (_selectedKategori == null) {
-      context.showWarningSnackBar('Silakan pilih kategori');
+      context.showWarningSnackBar('aibot.choose_category_warning'.tr(context));
       return;
     }
 
@@ -238,11 +241,11 @@ class _AiBotPageState extends State<AiBotPage> {
       setState(() => _isSaving = false);
       if (result['status'] == true) {
         Navigator.pop(context); // Close BottomSheet
-        context.showSuccessSnackBar(result['message'] ?? 'Berhasil disimpan');
+        context.showSuccessSnackBar(result['message'] ?? 'aibot.save_success'.tr(context));
         _resetForm();
         _fetchKnowledge(page: 1);
       } else {
-        context.showErrorSnackBar(result['message'] ?? 'Gagal menyimpan');
+        context.showErrorSnackBar(result['message'] ?? 'aibot.save_fail'.tr(context));
       }
     }
   }
@@ -278,16 +281,16 @@ class _AiBotPageState extends State<AiBotPage> {
                   size: 48,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Hapus Knowledge',
-                  style: TextStyle(
+                Text(
+                  'aibot.delete_title'.tr(context),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Apakah Anda yakin ingin menghapus data ini?',
+                  'aibot.delete_confirm'.tr(context),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
@@ -307,7 +310,7 @@ class _AiBotPageState extends State<AiBotPage> {
                           ),
                         ),
                         child: Text(
-                          'Batal',
+                          'aibot.cancel'.tr(context),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
@@ -327,7 +330,7 @@ class _AiBotPageState extends State<AiBotPage> {
                           ),
                           elevation: 0,
                         ),
-                        child: const Text('Hapus'),
+                        child: Text('aibot.delete'.tr(context)),
                       ),
                     ),
                   ],
@@ -344,9 +347,9 @@ class _AiBotPageState extends State<AiBotPage> {
       if (mounted) {
         if (result['status'] == true) {
           _fetchKnowledge(page: 1);
-          context.showSuccessSnackBar('Berhasil dihapus');
+          context.showSuccessSnackBar('aibot.delete_success'.tr(context));
         } else {
-          context.showErrorSnackBar(result['message'] ?? 'Gagal menghapus');
+          context.showErrorSnackBar(result['message'] ?? 'aibot.delete_fail'.tr(context));
         }
       }
     }
@@ -387,13 +390,13 @@ class _AiBotPageState extends State<AiBotPage> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      _editingId != null ? 'Edit Knowledge' : 'Ngajarin AI (Tambah Knowledge)',
+                      _editingId != null ? 'aibot.edit_knowledge'.tr(context) : 'aibot.add_knowledge_title'.tr(context),
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 24),
                     
                     // Dropdown Kategori
-                    const Text('Kategori', style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text('aibot.category'.tr(context), style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: _selectedKategori,
@@ -402,54 +405,70 @@ class _AiBotPageState extends State<AiBotPage> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                       ),
                       items: [..._hardcodedCategories, _addNewLabel]
-                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .map((e) {
+                            String label = e;
+                            if (e == _addNewLabel) {
+                              label = 'aibot.add_new_category'.tr(context);
+                            } else if (e == 'Harga') {
+                              label = 'aibot.cat_harga'.tr(context);
+                            } else if (e == 'Laptop') {
+                              label = 'aibot.cat_laptop'.tr(context);
+                            } else if (e == 'SOP') {
+                              label = 'aibot.cat_sop'.tr(context);
+                            } else if (e == 'FAQ') {
+                              label = 'aibot.cat_faq'.tr(context);
+                            } else if (e == 'Info') {
+                              label = 'aibot.cat_info'.tr(context);
+                            }
+                            return DropdownMenuItem(value: e, child: Text(label));
+                          })
                           .toList(),
                       onChanged: (val) {
                         setModalState(() => _selectedKategori = val);
                         setState(() => _selectedKategori = val); // Sync with outer state
                       },
-                      validator: (val) => val == null ? 'Pilih kategori' : null,
-                      hint: const Text('Pilih Kategori'),
+                      validator: (val) => val == null ? 'aibot.choose_category'.tr(context) : null,
+                      hint: Text('aibot.choose_category'.tr(context)),
                     ),
                     
                     // Text Field for Custom Kategori
                     if (_selectedKategori == _addNewLabel) ...[
                       const SizedBox(height: 16),
-                      const Text('Kategori Baru', style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text('aibot.new_category'.tr(context), style: const TextStyle(fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _customKategoriController,
                         decoration: InputDecoration(
-                          hintText: 'Masukkan nama kategori baru...',
+                          hintText: 'aibot.new_category_hint'.tr(context),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                        validator: (val) => (val == null || val.isEmpty) ? 'Nama kategori wajib diisi' : null,
+                        validator: (val) => (val == null || val.isEmpty) ? 'aibot.category_required'.tr(context) : null,
                       ),
                     ],
                     
                     const SizedBox(height: 16),
-                    const Text('Judul / Topik', style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text('aibot.topic_title'.tr(context), style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _judulController,
                       decoration: InputDecoration(
-                        hintText: 'Contoh: Harga Sewa Laptop Core i5',
+                        hintText: 'aibot.topic_hint'.tr(context),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (val) => (val == null || val.isEmpty) ? 'Judul wajib diisi' : null,
+                      validator: (val) => (val == null || val.isEmpty) ? 'aibot.topic_required'.tr(context) : null,
                     ),
                     
                     const SizedBox(height: 16),
-                    const Text('Isi Pengetahuan', style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text('aibot.content_title'.tr(context), style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _isiController,
                       maxLines: 6,
                       decoration: InputDecoration(
-                        hintText: 'Jelaskan detail informasi di sini agar AI bisa mempelajarinya...',
+                        hintText: 'aibot.content_hint'.tr(context),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (val) => (val == null || val.isEmpty) ? 'Isi wajib diisi' : null,
+                      validator: (val) => (val == null || val.isEmpty) ? 'aibot.content_required'.tr(context) : null,
                     ),
                     
                     const SizedBox(height: 32),
@@ -465,7 +484,7 @@ class _AiBotPageState extends State<AiBotPage> {
                         ),
                         child: _isSaving 
                             ? const CircularProgressIndicator(color: Colors.white)
-                            : Text(_editingId != null ? 'PERBARUI DATA' : 'SIMPAN PENGETAHUAN'),
+                            : Text(_editingId != null ? 'aibot.update_data'.tr(context) : 'aibot.save_knowledge'.tr(context)),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -490,7 +509,7 @@ class _AiBotPageState extends State<AiBotPage> {
       appBar: CustomAppBar(
         userData: widget.userData,
         showBackButton: false,
-        title: 'My ISN',
+        title: 'aibot.title'.tr(context),
       ),
       endDrawer: SideDrawer(
         userData: widget.userData,
@@ -504,9 +523,9 @@ class _AiBotPageState extends State<AiBotPage> {
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.smart_toy_rounded),
-        label: const Text(
-          'Ngajarin AI',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+        label: Text(
+          'aibot.add_button'.tr(context),
+          style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
         ),
       ),
       body: Column(
@@ -516,7 +535,7 @@ class _AiBotPageState extends State<AiBotPage> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Cari knowledge...',
+                hintText: 'aibot.search_hint'.tr(context),
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
@@ -534,7 +553,7 @@ class _AiBotPageState extends State<AiBotPage> {
               child: _isFetching
                   ? const Center(child: CircularProgressIndicator())
                   : _knowledgeList.isEmpty
-                      ? const Center(child: Text('Belum ada data knowledge.'))
+                      ? Center(child: Text('aibot.empty_data'.tr(context)))
                       : ListView.builder(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 80), // Space for FAB
                           itemCount: _knowledgeList.length + 1, // +1 for footer
@@ -567,18 +586,55 @@ class _AiBotPageState extends State<AiBotPage> {
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                            IconButton(
-                                              icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                                              onPressed: () => _editKnowledge(item),
-                                              constraints: const BoxConstraints(),
-                                              padding: EdgeInsets.zero,
-                                            ),
-                                            const SizedBox(width: 12),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                                              onPressed: () => _deleteKnowledge(int.parse(item['id'].toString())),
-                                              constraints: const BoxConstraints(),
-                                              padding: EdgeInsets.zero,
+                                            PopupMenuButton<String>(
+                                              onSelected: (value) {
+                                                if (value == 'edit') {
+                                                  _editKnowledge(item);
+                                                } else if (value == 'delete') {
+                                                  _deleteKnowledge(int.parse(item['id'].toString()));
+                                                }
+                                              },
+                                              icon: Icon(
+                                                Icons.more_horiz_rounded,
+                                                color: Colors.grey[400],
+                                                size: 20,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(16),
+                                              ),
+                                              itemBuilder: (context) => [
+                                                PopupMenuItem(
+                                                  value: 'edit',
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.edit_outlined,
+                                                        size: 20,
+                                                        color: colorScheme.primary,
+                                                      ),
+                                                      const SizedBox(width: 12),
+                                                      Text('aibot.edit_knowledge'.tr(context)),
+                                                    ],
+                                                  ),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Row(
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.delete_outline_rounded,
+                                                        size: 20,
+                                                        color: Colors.red,
+                                                      ),
+                                                      const SizedBox(width: 12),
+                                                      Text(
+                                                        'main.delete'.tr(context),
+                                                        style: const TextStyle(color: Colors.red),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),

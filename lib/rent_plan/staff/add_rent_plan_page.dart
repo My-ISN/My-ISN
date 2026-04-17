@@ -920,11 +920,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
-                  'Nomor Keluarga (Darurat)',
+                  'rent_plan.emergency_contact'.tr(context),
                   controller: _emergencyContactController,
                   icon: Icons.contact_phone_rounded,
                   keyboardType: TextInputType.phone,
-                  hint: 'Contoh: 08123456789',
+                  hint: 'rent_plan.phone_hint'.tr(context),
                 ),
               ],
             ),
@@ -1097,7 +1097,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                 _buildShippingDropdown(),
                 const SizedBox(height: 16),
                 _buildTextField(
-                  'Biaya Administrasi',
+                  'rent_plan.admin_fee'.tr(context),
                   controller: TextEditingController(text: 'Rp 7.000'),
                   enabled: false,
                   icon: Icons.admin_panel_settings_rounded,
@@ -1237,6 +1237,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     IconData? icon,
     String? suffix,
     bool isRequired = true,
+    String? hint,
   }) {
     return TextFormField(
       key: key,
@@ -1254,6 +1255,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           : null,
       decoration: InputDecoration(
         labelText: isRequired ? '$label *' : label,
+        hintText: hint,
         prefixIcon: icon != null
             ? Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6))
             : null,

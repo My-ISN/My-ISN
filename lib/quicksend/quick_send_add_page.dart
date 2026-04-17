@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../widgets/custom_snackbar.dart';
 import '../services/quick_send_service.dart';
 import '../widgets/secondary_app_bar.dart';
+import '../localization/app_localizations.dart';
 
 class QuickSendAddPage extends StatefulWidget {
   const QuickSendAddPage({super.key});
@@ -67,7 +67,7 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
     final phone = _phoneController.text.trim();
 
     if (nama.isEmpty || phone.isEmpty) {
-      CustomSnackBar.showWarning(context, 'Nama dan Nomor HP wajib diisi');
+      CustomSnackBar.showWarning(context, 'quicksend.validation_required'.tr(context));
       return;
     }
 
@@ -97,9 +97,9 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
       setState(() => _isSaving = false);
       if (res['status'] == true) {
         Navigator.pop(context, true);
-        CustomSnackBar.showSuccess(context, 'Kontak dan pesanan berhasil disimpan');
+        CustomSnackBar.showSuccess(context, 'quicksend.save_success'.tr(context));
       } else {
-        CustomSnackBar.showError(context, res['message'] ?? 'Gagal menyimpan data');
+        CustomSnackBar.showError(context, res['message'] ?? 'quicksend.save_fail'.tr(context));
       }
     }
   }
@@ -110,7 +110,7 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
 
     return Scaffold(
       appBar: SecondaryAppBar(
-        title: 'Tambah Kontak',
+        title: 'quicksend.add_contact'.tr(context),
         actions: [
           if (!_isSaving)
             Padding(
@@ -118,7 +118,7 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
               child: TextButton(
                 onPressed: _save,
                 child: Text(
-                  'SIMPAN',
+                  'quicksend.save'.tr(context),
                   style: TextStyle(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w900,
@@ -136,21 +136,21 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle('INFORMASI KONTAK'),
+                  _buildSectionTitle('quicksend.contact_info'.tr(context)),
                   _buildCard([
-                    _buildTextField(_namaController, 'Nama Kontak', Icons.person_rounded),
+                    _buildTextField(_namaController, 'quicksend.contact_name'.tr(context), Icons.person_rounded),
                     const SizedBox(height: 16),
-                    _buildTextField(_phoneController, 'Nomor WhatsApp', Icons.phone_android_rounded, keyboardType: TextInputType.phone),
+                    _buildTextField(_phoneController, 'quicksend.whatsapp_number'.tr(context), Icons.phone_android_rounded, keyboardType: TextInputType.phone),
                   ]),
                   const SizedBox(height: 24),
                   
-                  _buildSectionTitle('TAMPILAN KARTU'),
+                  _buildSectionTitle('quicksend.card_appearance'.tr(context)),
                   _buildCard([
                     Row(
                       children: [
                         Expanded(
                           flex: 1,
-                          child: _buildTextField(_emojiController, 'Icon', null, textAlign: TextAlign.center),
+                          child: _buildTextField(_emojiController, 'quicksend.icon'.tr(context), null, textAlign: TextAlign.center),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -158,7 +158,7 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Pilih Warna', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800)),
+                              Text('quicksend.select_color'.tr(context), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800)),
                               const SizedBox(height: 8),
                               SizedBox(
                                 height: 36,
@@ -194,11 +194,11 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
                   ]),
                   const SizedBox(height: 24),
 
-                  _buildSectionTitle('TEMPLATE PESAN DEFAULT'),
-                  _buildTextField(_tplController, 'Contoh: Halo {nama}, mau pesan {pesanan}. Terima kasih 🙏', null, maxLines: 3),
+                  _buildSectionTitle('quicksend.default_template_title'.tr(context)),
+                  _buildTextField(_tplController, 'quicksend.default_template_hint'.tr(context), null, maxLines: 3),
                   const SizedBox(height: 12),
                   Text(
-                    'Gunakan {nama} dan {pesanan} sebagai variabel otomatis.',
+                    'quicksend.variable_info'.tr(context),
                     style: TextStyle(fontSize: 10, color: Colors.grey[500], fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 24),
@@ -206,11 +206,11 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildSectionTitle('DAFTAR PESANAN / ITEM'),
+                      _buildSectionTitle('quicksend.order_list'.tr(context)),
                       TextButton.icon(
                         onPressed: _addItem,
                         icon: const Icon(Icons.add_circle_outline, size: 16),
-                        label: const Text('TAMBAH', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
+                        label: Text('quicksend.add'.tr(context), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
                         style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
                       ),
                     ],
@@ -267,12 +267,12 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
         children: [
           Expanded(
             flex: 3,
-            child: _buildTextField(_items[index]['nama']!, 'Nama Item', null),
+            child: _buildTextField(_items[index]['nama']!, 'quicksend.item_name'.tr(context), null),
           ),
           const SizedBox(width: 8),
           Expanded(
             flex: 2,
-            child: _buildTextField(_items[index]['satuan']!, 'Satuan', null),
+            child: _buildTextField(_items[index]['satuan']!, 'quicksend.unit'.tr(context), null),
           ),
           if (_items.length > 1)
             IconButton(

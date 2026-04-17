@@ -192,7 +192,7 @@ class _RentPlanPageState extends State<RentPlanPage>
             if (isProcessing) return;
 
             if (selectedMethod == 'transfer' && selectedBank == null) {
-              context.showWarningSnackBar('Silakan pilih bank terlebih dahulu');
+              context.showWarningSnackBar('rent_plan.payment.select_bank_first'.tr(context));
               return;
             }
 
@@ -212,7 +212,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                     await launchUrl(url, mode: LaunchMode.externalApplication);
                     if (mounted) Navigator.pop(context);
                   } else {
-                    throw 'Tidak dapat membuka link pembayaran';
+                    throw 'rent_plan.payment.cannot_open_payment_link'.tr(context);
                   }
                 } else {
                   // Cash success
@@ -220,7 +220,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                     Navigator.pop(context);
                     context.showSuccessSnackBar(
                       result['message'] ??
-                          'Pembayaran berhasil dikonfirmasi',
+                          'rent_plan.payment.payment_success'.tr(context),
                     );
                     _fetchRentPlans(); // Refresh the list
                   }
@@ -228,7 +228,7 @@ class _RentPlanPageState extends State<RentPlanPage>
               } else {
                 if (mounted) {
                   context.showErrorSnackBar(
-                    result['message'] ?? 'Gagal memproses pembayaran',
+                    result['message'] ?? 'rent_plan.payment.payment_failed'.tr(context),
                   );
                 }
               }
@@ -282,10 +282,10 @@ class _RentPlanPageState extends State<RentPlanPage>
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Buat Link Pembayaran Flip',
-                          style: TextStyle(
+                          'rent_plan.payment.create_flip_link'.tr(context),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
@@ -310,9 +310,9 @@ class _RentPlanPageState extends State<RentPlanPage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Metode Pembayaran',
-                          style: TextStyle(
+                        Text(
+                          'rent_plan.payment.payment_method'.tr(context),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                             color: Colors.grey,
@@ -326,8 +326,8 @@ class _RentPlanPageState extends State<RentPlanPage>
                             // Transfer / QRIS
                             Expanded(
                               child: _buildPaymentMethodCard(
-                                title: 'Transfer / QRIS',
-                                subtitle: 'Virtual Account (BCA, Mandiri, dll)',
+                                title: 'rent_plan.payment.transfer_qris'.tr(context),
+                                subtitle: 'rent_plan.payment.transfer_qris_subtitle'.tr(context),
                                 isActive: selectedMethod == 'transfer',
                                 onTap: () => setSheetState(
                                   () => selectedMethod = 'transfer',
@@ -339,8 +339,8 @@ class _RentPlanPageState extends State<RentPlanPage>
                             // Tunai (Cash)
                             Expanded(
                               child: _buildPaymentMethodCard(
-                                title: 'Tunai (Cash)',
-                                subtitle: 'Titip ke Kurir saat laptop sampai',
+                                title: 'rent_plan.payment.cash'.tr(context),
+                                subtitle: 'rent_plan.payment.cash_subtitle'.tr(context),
                                 isActive: selectedMethod == 'cash',
                                 onTap: () => setSheetState(
                                   () => selectedMethod = 'cash',
@@ -353,9 +353,9 @@ class _RentPlanPageState extends State<RentPlanPage>
 
                         if (selectedMethod == 'transfer') ...[
                           const SizedBox(height: 24),
-                          const Text(
-                            'PILIH BANK / E-WALLET',
-                            style: TextStyle(
+                          Text(
+                            'rent_plan.payment.select_bank_wallet'.tr(context),
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                               color: Colors.grey,
@@ -400,14 +400,14 @@ class _RentPlanPageState extends State<RentPlanPage>
                                 () => setSheetState(() => selectedBank = 'bri'),
                               ),
                               _buildBankItem(
-                                'QRIS (Semua)',
+                                'rent_plan.payment.qris_all'.tr(context),
                                 Icons.qr_code_scanner_rounded,
                                 selectedBank == 'qris',
                                 () =>
                                     setSheetState(() => selectedBank = 'qris'),
                               ),
                               _buildBankItem(
-                                'GoPay / Dana',
+                                'rent_plan.payment.gopay_dana'.tr(context),
                                 Icons.account_balance_wallet_rounded,
                                 selectedBank == 'ewallet',
                                 () => setSheetState(
@@ -415,7 +415,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                                 ),
                               ),
                               _buildBankItem(
-                                'ShopeePay',
+                                'rent_plan.payment.shopeepay'.tr(context),
                                 Icons.account_balance_wallet_rounded,
                                 selectedBank == 'shopeepay',
                                 () => setSheetState(
@@ -423,7 +423,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                                 ),
                               ),
                               _buildBankItem(
-                                'Kartu Kredit',
+                                'rent_plan.payment.crypto_credit_card'.tr(context),
                                 Icons.credit_card_rounded,
                                 selectedBank == 'cc',
                                 () => setSheetState(() => selectedBank = 'cc'),
@@ -472,7 +472,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'WhatsApp Aktif',
+                                    'rent_plan.payment.whatsapp_active'.tr(context),
                                     style: TextStyle(
                                       color: Colors.green[600],
                                       fontSize: 11,
@@ -495,7 +495,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Link dibuat via Flip for Business — aman & realtime',
+                                'rent_plan.payment.flip_safety_info'.tr(context),
                                 style: TextStyle(
                                   color: Colors.grey[500],
                                   fontSize: 11,
@@ -533,9 +533,9 @@ class _RentPlanPageState extends State<RentPlanPage>
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
-                          'Batal',
-                          style: TextStyle(
+                        child: Text(
+                          'main.cancel'.tr(context),
+                          style: const TextStyle(
                             color: Colors.grey,
                             fontWeight: FontWeight.bold,
                           ),
@@ -564,11 +564,11 @@ class _RentPlanPageState extends State<RentPlanPage>
                           label: Text(
                             isProcessing
                                 ? (selectedMethod == 'transfer'
-                                      ? 'Menyiapkan Link...'
-                                      : 'Memproses...')
+                                      ? 'rent_plan.payment.preparing_link'.tr(context)
+                                      : 'rent_plan.payment.processing'.tr(context))
                                 : (selectedMethod == 'transfer'
-                                      ? 'Buat & Kirim Link Bayar'
-                                      : 'Konfirmasi Bayar Tunai'),
+                                      ? 'rent_plan.payment.create_send_link'.tr(context)
+                                      : 'rent_plan.payment.confirm_cash'.tr(context)),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           style: ElevatedButton.styleFrom(

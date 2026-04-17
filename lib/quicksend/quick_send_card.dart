@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
 
 class QuickSendCard extends StatelessWidget {
   final Map<String, dynamic> contact;
@@ -100,7 +101,7 @@ class QuickSendCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                _getItemPreview(items),
+                _getItemPreview(context, items),
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -117,8 +118,8 @@ class QuickSendCard extends StatelessWidget {
     );
   }
 
-  String _getItemPreview(List items) {
-    if (items.isEmpty) return 'No items';
+  String _getItemPreview(BuildContext context, List items) {
+    if (items.isEmpty) return 'quicksend.no_items'.tr(context);
     return items.map((e) => e['nama_item']).join(', ');
   }
 

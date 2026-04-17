@@ -1446,11 +1446,11 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             ),
             const SizedBox(height: 16),
             _buildTextField(
-              'Nomor Keluarga (Darurat)',
+              'rent_plan.emergency_contact'.tr(context),
               controller: _emergencyContactController,
               icon: Icons.contact_phone_rounded,
               keyboardType: TextInputType.phone,
-              hint: 'Contoh: 08123456789',
+              hint: 'rent_plan.phone_hint'.tr(context),
             ),
           ],
         ),
@@ -1590,7 +1590,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             _buildShippingDropdown(),
             const SizedBox(height: 16),
             _buildTextField(
-              'Biaya Administrasi',
+              'rent_plan.admin_fee'.tr(context),
               controller: TextEditingController(text: 'Rp 7.000'),
               enabled: false,
               icon: Icons.admin_panel_settings_rounded,

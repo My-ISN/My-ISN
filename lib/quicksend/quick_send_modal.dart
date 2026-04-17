@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_snackbar.dart';
 import '../services/quick_send_service.dart';
+import '../localization/app_localizations.dart';
 
 class QuickSendModal extends StatefulWidget {
   final Map<String, dynamic> contact;
@@ -59,7 +60,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
     String pesananStr = parts.join(', ');
     String tpl = _tplController.text.trim();
     if (tpl.isEmpty) {
-      tpl = 'Halo {nama}, mau pesan {pesanan}. Terima kasih 🙏';
+      tpl = 'quicksend.default_template_hint'.tr(context);
     }
 
     return tpl
@@ -83,7 +84,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
 
     if (phones.isEmpty) {
       if (mounted) {
-        CustomSnackBar.showError(context, 'Nomor HP tidak valid');
+        CustomSnackBar.showError(context, 'quicksend.invalid_phone'.tr(context));
       }
       setState(() => _isSending = false);
       return;
@@ -110,7 +111,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
       }
 
       if (mounted) {
-        CustomSnackBar.showSuccess(context, 'Berhasil mengirim ke $successCount nomor');
+        CustomSnackBar.showSuccess(context, 'quicksend.send_success'.tr(context, args: {'count': successCount.toString()}));
         Navigator.pop(context);
       }
     } catch (e) {
@@ -165,8 +166,8 @@ class _QuickSendModalState extends State<QuickSendModal> {
               size: 56,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Hapus Kontak?',
+            Text(
+              'quicksend.delete_title'.tr(context),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
@@ -174,7 +175,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Apakah Anda yakin ingin menghapus kontak ini beserta daftar pesanannya? Tindakan ini tidak dapat dibatalkan.',
+              'quicksend.delete_confirm'.tr(context),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
@@ -194,8 +195,8 @@ class _QuickSendModalState extends State<QuickSendModal> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: Text(
-                      'Batal',
+                      child: Text(
+                        'quicksend.cancel'.tr(context),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w700,
@@ -219,10 +220,10 @@ class _QuickSendModalState extends State<QuickSendModal> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Hapus',
-                      style: TextStyle(fontWeight: FontWeight.w900),
-                    ),
+                      child: Text(
+                        'quicksend.delete'.tr(context),
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
                   ),
                 ),
               ],
@@ -244,10 +245,10 @@ class _QuickSendModalState extends State<QuickSendModal> {
       final res = await _service.deleteContact(contactId);
       if (mounted) {
         if (res['status'] == true) {
-          CustomSnackBar.showSuccess(context, 'Kontak berhasil dihapus');
+          CustomSnackBar.showSuccess(context, 'quicksend.delete_success'.tr(context));
           Navigator.pop(context, true); // Return true to refresh list
         } else {
-          CustomSnackBar.showError(context, res['message'] ?? 'Gagal menghapus kontak');
+          CustomSnackBar.showError(context, res['message'] ?? 'quicksend.delete_fail'.tr(context));
         }
       }
     } catch (e) {
@@ -311,7 +312,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
                         ),
                       ),
                       Text(
-                        'QuickSend - Chat Cepat',
+                        'quicksend.quicksend_subtitle'.tr(context),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 12,
@@ -325,7 +326,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
                   IconButton(
                     onPressed: _confirmDelete,
                     icon: const Icon(Icons.delete_outline_rounded, color: Colors.white),
-                    tooltip: 'Hapus Kontak',
+                    tooltip: 'quicksend.delete'.tr(context),
                   ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
@@ -411,7 +412,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Template Pesan',
+                        'quicksend.message_template'.tr(context),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
@@ -431,7 +432,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(
-                          'RESET DEFAULT',
+                          'quicksend.reset_default'.tr(context),
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w900,
@@ -447,7 +448,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
                     maxLines: 2,
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                     decoration: InputDecoration(
-                      hintText: 'Halo {nama}, mau pesan {pesanan}...',
+                      hintText: 'quicksend.default_template_hint'.tr(context),
                       filled: true,
                       fillColor: theme.cardColor,
                       border: OutlineInputBorder(
@@ -460,7 +461,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Preview Pesan WhatsApp',
+                    'quicksend.preview_title'.tr(context),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
@@ -478,7 +479,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
                       border: Border.all(color: color.withValues(alpha: 0.1)),
                     ),
                     child: Text(
-                      message.isEmpty ? '— Pilih item untuk melihat preview —' : message,
+                    message.isEmpty ? 'quicksend.preview_empty'.tr(context) : message,
                       style: TextStyle(
                         fontSize: 13,
                         color: message.isEmpty ? Colors.grey[400] : theme.colorScheme.onSurface,
@@ -510,14 +511,14 @@ class _QuickSendModalState extends State<QuickSendModal> {
                                 valueColor: AlwaysStoppedAnimation(Colors.white),
                               ),
                             )
-                          : const Row(
+                          : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.send_rounded, size: 20),
-                                SizedBox(width: 8),
+                                const Icon(Icons.send_rounded, size: 20),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'Kirim via WhatsApp',
-                                  style: TextStyle(
+                                  'quicksend.send_whatsapp'.tr(context),
+                                  style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w900,
                                   ),

@@ -44,7 +44,7 @@ class _QuickSendPageState extends State<QuickSendPage> {
       appBar: CustomAppBar(
         userData: widget.userData,
         showBackButton: false,
-        title: 'My ISN',
+        title: 'quicksend.title'.tr(context),
       ),
       endDrawer: SideDrawer(
         userData: widget.userData,
@@ -63,9 +63,9 @@ class _QuickSendPageState extends State<QuickSendPage> {
               backgroundColor: Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               icon: const Icon(Icons.person_add_rounded),
-              label: const Text(
-                'Tambah Kontak',
-                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+              label: Text(
+                'quicksend.add_contact'.tr(context),
+                style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
               ),
             )
           : null,

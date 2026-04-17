@@ -19,6 +19,7 @@
         "start_rent": "Start Rent",
         "duration": "Duration",
         "days": "Days",
+        "unit": "Unit",
         "personal": "Personal",
         "company": "Company",
         "full_name": "Full Name",
@@ -240,6 +241,32 @@
         "discard_confirm_title": "Cancel Order?",
         "discard_confirm_msg": "Your changes will not be saved if you go back. Are you sure you want to discard?",
         "notification_new_order_title": "Rental Order Successfully Created",
-        "notification_new_order_msg": "Order #{order_no} has been successfully issued. Please check details for next steps."
+        "notification_new_order_msg": "Order #{order_no} has been successfully issued. Please check details for next steps.",
+        "emergency_contact": "Emergency Contact Number",
+        "phone_hint": "Example: 08123456789",
+        "admin_fee": "Administration Fee",
+        "payment": {
+            "select_bank_first": "Please select a bank first",
+            "cannot_open_payment_link": "Cannot open payment link",
+            "payment_success": "Payment successfully confirmed",
+            "payment_failed": "Failed to process payment",
+            "create_flip_link": "Create Flip Payment Link",
+            "payment_method": "Payment Method",
+            "transfer_qris": "Transfer / QRIS",
+            "transfer_qris_subtitle": "Virtual Account (BCA, Mandiri, etc.)",
+            "cash": "Cash",
+            "cash_subtitle": "Hand over to Courier upon laptop arrival",
+            "select_bank_wallet": "SELECT BANK / E-WALLET",
+            "whatsapp_active": "WhatsApp Active",
+            "flip_safety_info": "Link created via Flip for Business — safe & realtime",
+            "preparing_link": "Preparing Link...",
+            "processing": "Processing...",
+            "create_send_link": "Create & Send Payment Link",
+            "confirm_cash": "Confirm Cash Payment",
+            "qris_all": "QRIS (All)",
+            "gopay_dana": "GoPay / Dana",
+            "shopeepay": "ShopeePay",
+            "crypto_credit_card": "Credit Card"
+        }
     }
 }
