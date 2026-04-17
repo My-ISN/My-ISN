@@ -236,6 +236,10 @@
         "delete_confirm_title": "Hapus Rental?",
         "delete_confirm_msg": "Apakah Anda yakin ingin menghapus data rental ini secara permanen? Data yang dihapus tidak dapat dipulihkan.",
         "delete_success": "Data rental berhasil dihapus",
-        "delete_failed": "Gagal menghapus data rental"
+        "delete_failed": "Gagal menghapus data rental",
+        "discard_confirm_title": "Batalkan Pesanan?",
+        "discard_confirm_msg": "Data yang telah Anda masukkan tidak akan disimpan jika Anda kembali. Apakah Anda yakin ingin membatalkan?",
+        "notification_new_order_title": "Pesanan Rental Berhasil Dibuat",
+        "notification_new_order_msg": "Pesanan #{order_no} telah berhasil diterbitkan. Silakan cek detail untuk langkah selanjutnya."
     }
 }

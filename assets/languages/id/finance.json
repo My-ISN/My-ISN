@@ -59,7 +59,7 @@
         "bank_branch": "Cabang Bank",
         "amount": "Jumlah",
         "select_account": "Pilih Akun",
-        "attachment_proof": "Bukti Lampiran",
+        "attachment_proof": "Bukti Lampiran (opsional)",
         "choose_file_hint": "Pilih file / scan struk...",
         "estimated_total": "Total Estimasi",
         "save_account": "Simpan Akun",

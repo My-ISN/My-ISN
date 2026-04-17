@@ -10,6 +10,7 @@ import 'log_service.dart';
 import '../announcement_page.dart';
 import '../todo_list/todo_list_page.dart';
 import '../constants.dart';
+import '../rent_plan/staff/rent_plan_detail_page.dart';
 
 
 @pragma('vm:entry-point')
@@ -151,6 +152,15 @@ class NotificationService {
       navigatorKey?.currentState?.push(
         MaterialPageRoute(builder: (context) => const TodoListPage()),
       );
+    } else if (data['type'] == 'rental_order' || data.containsKey('rental_id')) {
+      final id = int.tryParse(data['rental_id'].toString());
+      if (id != null) {
+        navigatorKey?.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => RentPlanDetailPage(rentalId: id),
+          ),
+        );
+      }
     }
   }
 

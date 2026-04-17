@@ -162,7 +162,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.grey[300],
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -212,7 +214,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                         fontSize: 14,
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.12),
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -233,7 +235,11 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                       child: Text(
                         info.releaseNotes ??
                             'announcement.no_description_available'.tr(context),
-                        style: const TextStyle(fontSize: 14, height: 1.6),
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.6,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -302,7 +308,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : Colors.grey[300],
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -363,14 +371,18 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                             height: 1.6,
                             color: Theme.of(
                               context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.25),
+                            ).colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                         ),
                         const SizedBox(height: 16),
                       ],
                       Text(
                         'main.update_desc'.tr(context),
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
                       ),
                       const SizedBox(height: 24),
                     ],

@@ -59,7 +59,7 @@
         "bank_branch": "Bank Branch",
         "amount": "Amount",
         "select_account": "Select Account",
-        "attachment_proof": "Attachment Proof",
+        "attachment_proof": "Attachment Proof (optional)",
         "choose_file_hint": "Choose file / scan receipt...",
         "estimated_total": "Estimated Total",
         "save_account": "Save Account",

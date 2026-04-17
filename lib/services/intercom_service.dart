@@ -70,4 +70,49 @@ class IntercomService {
       throw Exception('Failed to load intercom history');
     }
   }
+
+  Future<List<dynamic>> getIntercomPresets() async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/intercom_presets?user_id=$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+      if (result['status'] == true) {
+        return result['data'] ?? [];
+      }
+      return [];
+    } else {
+      throw Exception('Failed to load intercom presets');
+    }
+  }
+
+  Future<Map<String, dynamic>> addIntercomPreset(String message, {String icon = '💬'}) async {
+    final userDataString = await storage.read(key: 'user_data');
+    final userData = json.decode(userDataString ?? '{}');
+    final userId = userData['id'] ?? userData['user_id'];
+
+    if (userId == null) throw Exception('User ID not found');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/intercom_add_preset'),
+      body: {
+        'user_id': userId.toString(),
+        'message': message,
+        'icon': icon,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to add intercom preset');
+    }
+  }
 }

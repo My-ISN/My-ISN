@@ -582,7 +582,7 @@ class _JobDeskPageState extends State<JobDeskPage> {
                 onPressed: _showAddJobDeskSheet,
                 backgroundColor: _defaultPrimaryColor,
                 foregroundColor: Colors.white,
-                icon: const Icon(Icons.add_rounded),
+                icon: const Icon(Icons.assignment_rounded),
                 label: Text(
                   'job_desk.add_job_desk'.tr(context),
                   style: const TextStyle(fontWeight: FontWeight.bold),

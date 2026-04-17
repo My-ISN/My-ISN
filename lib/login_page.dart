@@ -60,7 +60,10 @@ class _LoginPageState extends State<LoginPage> {
     final identifier = _identifierController.text.trim();
     final password = _passwordController.text.trim();
 
+    if (identifier.isEmpty || password.isEmpty) {
       context.showWarningSnackBar('login.fill_all_fields'.tr(context));
+      return;
+    }
 
     FocusScope.of(context).unfocus();
 

@@ -26,7 +26,10 @@ class SearchableDropdown extends StatelessWidget {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return InkWell(
-      onTap: () => _showSearchOptions(context),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        _showSearchOptions(context);
+      },
       borderRadius: BorderRadius.circular(20),
       child: IgnorePointer(
         child: TextFormField(
@@ -218,6 +221,7 @@ class _SearchPickerModalState extends State<_SearchPickerModal> {
                     color: Colors.grey,
                   ),
                   onTap: () {
+                    FocusScope.of(context).unfocus();
                     widget.onSelected(opt['id']!);
                     Navigator.pop(context);
                   },

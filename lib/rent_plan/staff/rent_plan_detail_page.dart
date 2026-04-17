@@ -45,6 +45,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   final _namaPerusahaanController = TextEditingController();
   final _npwpController = TextEditingController();
   final _whatsappController = TextEditingController();
+  final _emergencyContactController = TextEditingController();
   final _lamaSewaController = TextEditingController();
   final _totalLaptopController = TextEditingController();
   final _notesController = TextEditingController();
@@ -459,6 +460,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     _namaPerusahaanController.text = _rentalData!['nama_perusahaan'] ?? '';
     _npwpController.text = _rentalData!['npwp'] ?? '';
     _whatsappController.text = _rentalData!['whatsapp'] ?? '';
+    _emergencyContactController.text = _rentalData!['emergency_contact_number'] ?? '';
     _lamaSewaController.text = (_rentalData!['lama_sewa'] ?? '0').toString();
     _totalLaptopController.text = (_rentalData!['total_laptop'] ?? '0')
         .toString();
@@ -723,6 +725,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       'notes': _notesController.text,
       'tipe_pengiriman': _selectedShippingId,
       'invoice_date': _invoiceDateController.text,
+      'emergency_contact_number': _emergencyContactController.text,
 
       // Address
       'provinsi_ktp': _selectedProvinceKtp,
@@ -831,6 +834,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     _extLamaSewaController.dispose();
     _extDiskonController.dispose();
     _extNotesController.dispose();
+    _emergencyContactController.dispose();
     super.dispose();
   }
 
@@ -1400,6 +1404,12 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 'rent_plan.full_name'.tr(context),
                 controller: _namaPribadiController,
                 icon: Icons.badge_rounded,
+                onChanged: (value) {
+                  _namaPribadiController.value = TextEditingValue(
+                    text: value.toUpperCase(),
+                    selection: _namaPribadiController.selection,
+                  );
+                },
               ),
               const SizedBox(height: 16),
               _buildTextField(
@@ -1413,6 +1423,12 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 'rent_plan.company_name'.tr(context),
                 controller: _namaPerusahaanController,
                 icon: Icons.business_rounded,
+                onChanged: (value) {
+                  _namaPerusahaanController.value = TextEditingValue(
+                    text: value.toUpperCase(),
+                    selection: _namaPerusahaanController.selection,
+                  );
+                },
               ),
               const SizedBox(height: 16),
               _buildTextField(
@@ -1427,6 +1443,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               controller: _whatsappController,
               icon: Icons.phone_android_rounded,
               keyboardType: TextInputType.phone,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              'Nomor Keluarga (Darurat)',
+              controller: _emergencyContactController,
+              icon: Icons.contact_phone_rounded,
+              keyboardType: TextInputType.phone,
+              hint: 'Contoh: 08123456789',
             ),
           ],
         ),
@@ -1564,6 +1588,13 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             ),
             const SizedBox(height: 16),
             _buildShippingDropdown(),
+            const SizedBox(height: 16),
+            _buildTextField(
+              'Biaya Administrasi',
+              controller: TextEditingController(text: 'Rp 7.000'),
+              enabled: false,
+              icon: Icons.admin_panel_settings_rounded,
+            ),
             const SizedBox(height: 16),
             _buildTextField(
               'rent_plan.notes'.tr(context),
@@ -1966,8 +1997,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           _buildRowTwoFields(
             'rent_plan.whatsapp'.tr(context),
             _rentalData!['whatsapp'] ?? _rentalData!['renter_contact'] ?? '-',
-            '',
-            '',
+            'Nomor Keluarga (Darurat)',
+            _rentalData!['emergency_contact_number'] ?? '-',
           ),
           _buildRowTwoFields(
             'rent_plan.ktp_address'.tr(context),
@@ -2103,6 +2134,19 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 ),
               ],
             ),
+          ),
+          _buildRowTwoFields(
+            'Biaya Ongkir',
+            currencyFormat.format(
+              double.tryParse(
+                    _rentalData!['biaya_kirim']?.toString() ?? '0',
+                  ) ??
+                  0,
+            ),
+            'Biaya Administrasi',
+            'Rp 7.000',
+            valColor1: Colors.blue,
+            valColor2: Colors.green,
           ),
           _buildRowTwoFields(
             'rent_plan.payment_status'.tr(context),
@@ -2704,13 +2748,13 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     // FALLBACK URL for local files
     const String localBaseUrl = '${AppConstants.baseUrl}/uploads/rentals/';
 
-    // Helper to get image URL (prefers Local Server over GDrive)
+    // Helper to get image URL (prefers Local Server over GDrive for stability)
     String getImgUrl(
       String? gdriveId,
       String? localFileName, {
       bool isJaminan = false,
     }) {
-      // 1. Try local file first
+      // 1. Try local file first for stability
       if (localFileName != null && localFileName.isNotEmpty) {
         return '$localBaseUrl$localFileName';
       }

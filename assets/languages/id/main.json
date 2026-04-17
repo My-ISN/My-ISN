@@ -47,7 +47,8 @@
         "logout_confirm_msg": "Apakah Anda yakin ingin keluar dari akun Anda?",
         "status": "Status",
         "edit": "Edit",
-        "exit_again": "Tekan sekali lagi untuk keluar"
+        "exit_again": "Tekan sekali lagi untuk keluar",
+        "yes_exit": "Ya, Keluar"
     },
     "time": {
         "ago": "lalu",

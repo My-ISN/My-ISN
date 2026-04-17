@@ -72,6 +72,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   final _npwpController = TextEditingController();
   final _notesController = TextEditingController();
   final _whatsappController = TextEditingController();
+  final _emergencyContactController = TextEditingController();
 
   // Files
   File? _fileKtp;
@@ -134,6 +135,9 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
             _namaLengkapController.text =
                 '${widget.userData['first_name']} ${widget.userData['last_name'] ?? ''}'
                     .trim();
+          }
+          if (widget.userData['emergency_contact_number'] != null) {
+            _emergencyContactController.text = widget.userData['emergency_contact_number'].toString();
           }
         }
 
@@ -237,6 +241,17 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     });
   }
 
+  Future<void> _fetchCustomerInfo(String userId) async {
+    final response = await _rentPlanService.getCustomerInfo(int.parse(userId));
+    if (response['status'] == true) {
+      final data = response['data'];
+      setState(() {
+        _whatsappController.text = data['whatsapp'] ?? '';
+        _emergencyContactController.text = data['emergency_contact_number'] ?? '';
+      });
+    }
+  }
+
   Future<void> _pickFile(dynamic key) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
@@ -285,13 +300,11 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   double get _totalPrice {
     double total = 0;
     for (var row in _itemRows) {
-      double price = (row['price'] is num)
-          ? (row['price'] as num).toDouble()
-          : 0.0;
+      double price = (row['price'] ?? 0).toDouble();
       int qty = row['qty'] ?? 1;
       total += (price * qty * _lamaSewa);
     }
-    return total + _shippingCostAmount;
+    return total + _shippingCostAmount + 7000; // Add biaya administrasi
   }
 
   Future<void> _submitForm() async {
@@ -398,6 +411,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         'jaminan_ids': json.encode(_selectedJaminanIds.values.toList()),
         'biaya_kirim': _shippingCostAmount.toString(),
         'tipe_pengiriman': _tipePengiriman,
+        'emergency_contact_number': _emergencyContactController.text,
       };
 
       Map<String, String> files = {
@@ -437,12 +451,104 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     }
   }
 
+  void _showBackConfirmation() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Icon(
+              Icons.warning_rounded,
+              color: Colors.orange,
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'rent_plan.discard_confirm_title'.tr(context),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'rent_plan.discard_confirm_msg'.tr(context),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'main.cancel'.tr(context),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close sheet
+                      Navigator.pop(context); // Go back
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text('main.yes_exit'.tr(context)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showAgreementPopup() {
     if (!_formKey.currentState!.validate()) return;
 
     // Check required files based on jenisSewa
     if (_jenisSewa == 'pribadi' && _fileKtp == null) {
-      context.showWarningSnackBar('rent_plan.validation.ktp_required'.tr(context));
+      context.showWarningSnackBar(
+        'rent_plan.validation.ktp_required'.tr(context),
+      );
       return;
     }
 
@@ -486,7 +592,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
             return Container(
               height: MediaQuery.of(context).size.height * 0.85,
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(24),
                 ),
@@ -494,18 +600,20 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               child: Column(
                 children: [
                   // Handle
-                  Container(
-                    margin: const EdgeInsets.only(top: 12),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 12),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
                   // Header
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
                     child: Row(
                       children: [
                         Container(
@@ -528,7 +636,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                             'rent_plan.agreement.title'.tr(context),
                             style: TextStyle(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w900,
                               color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
@@ -543,26 +651,43 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                         horizontal: 24,
                         vertical: 4,
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.arrow_downward,
-                            size: 14,
-                            color: Colors.orange,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'rent_plan.agreement.scroll_to_bottom'.tr(context),
-                            style: const TextStyle(
-                              color: Colors.orange,
-                              fontSize: 12,
-                              fontStyle: FontStyle.italic,
-                            ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ],
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.arrow_downward_rounded,
+                                size: 18,
+                                color: Colors.orange,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'rent_plan.agreement.scroll_to_bottom'.tr(
+                                    context,
+                                  ),
+                                  style: const TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  // Agreement text (scrollable)
+                  // Agreement content (scrollable)
                   Expanded(
                     child: SingleChildScrollView(
                       controller: scrollController,
@@ -574,23 +699,29 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                             Text(
                               agreement['title'] ?? '',
                               style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w900,
                                 fontSize: 16,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 12),
                             Text(
                               agreement['content'] ??
                                   agreement['description'] ??
                                   '',
                               style: TextStyle(
                                 fontSize: 14,
-                                height: 1.6,
+                                height: 1.8,
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.onSurface.withOpacity(0.8),
+                                ).colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
+                            const SizedBox(height: 24),
+                            if (agreement != _agreements.last)
+                              Divider(
+                                height: 1,
+                                color: Colors.grey.withValues(alpha: 0.1),
+                              ),
                             const SizedBox(height: 24),
                           ],
                         ],
@@ -599,77 +730,107 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                   ),
                   // Checkbox + Button (bottom fixed)
                   Container(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      border: Border(
-                        top: BorderSide(color: Colors.grey.withOpacity(0.15)),
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          offset: const Offset(0, -10),
+                          blurRadius: 20,
+                        ),
+                      ],
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(24),
                       ),
                     ),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         InkWell(
                           onTap: hasScrolledToBottom
                               ? () =>
                                     setSheetState(() => hasAgreed = !hasAgreed)
                               : null,
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                value: hasAgreed,
-                                onChanged: hasScrolledToBottom
-                                    ? (v) => setSheetState(
-                                        () => hasAgreed = v ?? false,
-                                      )
-                                    : null,
-                                activeColor: Theme.of(
-                                  context,
-                                ).colorScheme.primary,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  'rent_plan.agreement.agree_checkbox'.tr(
-                                    context,
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: hasScrolledToBottom
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface
-                                        : Colors.grey,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: Checkbox(
+                                    value: hasAgreed,
+                                    onChanged: hasScrolledToBottom
+                                        ? (v) => setSheetState(
+                                              () => hasAgreed = v ?? false,
+                                            )
+                                        : null,
+                                    activeColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'rent_plan.agreement.agree_checkbox'.tr(
+                                      context,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: hasScrolledToBottom
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 16),
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: hasAgreed && hasScrolledToBottom
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: (hasAgreed && hasScrolledToBottom)
                                 ? () {
                                     Navigator.pop(context);
                                     _submitForm();
                                   }
                                 : null,
-                            icon: const Icon(Icons.check_circle_outline),
-                            label: Text(
-                              'rent_plan.create_order_now'.tr(context),
-                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: hasAgreed && hasScrolledToBottom
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.grey[300],
-                              foregroundColor: hasAgreed && hasScrolledToBottom
-                                  ? Colors.white
-                                  : Colors.grey,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: Colors.grey[300],
+                              disabledForegroundColor: Colors.grey,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                               elevation: 0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.check_circle_rounded),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'rent_plan.create_order_now'.tr(context),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -691,11 +852,23 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: SecondaryAppBar(title: 'rent_plan.add_new_order'.tr(context)),
-      body: Form(
-        key: _formKey,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (didPop) return;
+        _showBackConfirmation();
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: SecondaryAppBar(
+          title: 'rent_plan.add_new_order'.tr(context),
+          onBackPressed: _showBackConfirmation,
+        ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Form(
+          key: _formKey,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
           children: [
@@ -732,16 +905,8 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                     onSelected: (val) {
                       setState(() {
                         _selectedCustomerId = val;
-                        final customer = _customers.firstWhere(
-                          (c) => c['user_id'].toString() == val,
-                          orElse: () => null,
-                        );
-                        if (customer != null &&
-                            customer['contact_number'] != null) {
-                          _whatsappController.text = customer['contact_number']
-                              .toString();
-                        }
                       });
+                      _fetchCustomerInfo(val);
                     },
                     placeholder: 'rent_plan.select_customer'.tr(context),
                   ),
@@ -752,6 +917,14 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                   controller: _whatsappController,
                   icon: Icons.phone_rounded,
                   keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'Nomor Keluarga (Darurat)',
+                  controller: _emergencyContactController,
+                  icon: Icons.contact_phone_rounded,
+                  keyboardType: TextInputType.phone,
+                  hint: 'Contoh: 08123456789',
                 ),
               ],
             ),
@@ -809,6 +982,12 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                     'rent_plan.full_name'.tr(context),
                     controller: _namaLengkapController,
                     icon: Icons.badge_rounded,
+                    onChanged: (value) {
+                      _namaLengkapController.value = TextEditingValue(
+                        text: value.toUpperCase(),
+                        selection: _namaLengkapController.selection,
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(
@@ -822,6 +1001,12 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                     'rent_plan.company_name'.tr(context),
                     controller: _namaPerusahaanController,
                     icon: Icons.business_rounded,
+                    onChanged: (value) {
+                      _namaPerusahaanController.value = TextEditingValue(
+                        text: value.toUpperCase(),
+                        selection: _namaPerusahaanController.selection,
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(
@@ -912,6 +1097,13 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                 _buildShippingDropdown(),
                 const SizedBox(height: 16),
                 _buildTextField(
+                  'Biaya Administrasi',
+                  controller: TextEditingController(text: 'Rp 7.000'),
+                  enabled: false,
+                  icon: Icons.admin_panel_settings_rounded,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
                   'rent_plan.additional_notes'.tr(context),
                   controller: _notesController,
                   maxLines: 3,
@@ -924,7 +1116,9 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
           ],
         ),
       ),
+      ),
       bottomSheet: _buildBottomAction(),
+      ),
     );
   }
 

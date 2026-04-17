@@ -148,6 +148,16 @@ class RentPlanService {
     }
   }
 
+  Future<Map<String, dynamic>> getCustomerInfo(int userId) async {
+    try {
+      final url = Uri.parse('$baseUrl/get_customer_info?user_id=$userId');
+      final response = await http.get(url);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> storeRentPlan(
     Map<String, String> body,
     Map<String, String> files,

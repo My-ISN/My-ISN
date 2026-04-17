@@ -236,6 +236,10 @@
         "delete_confirm_title": "Delete Rental?",
         "delete_confirm_msg": "Are you sure you want to permanently delete this rental data? Deleted data cannot be recovered.",
         "delete_success": "Rental data deleted successfully",
-        "delete_failed": "Failed to delete rental data"
+        "delete_failed": "Failed to delete rental data",
+        "discard_confirm_title": "Cancel Order?",
+        "discard_confirm_msg": "Your changes will not be saved if you go back. Are you sure you want to discard?",
+        "notification_new_order_title": "Rental Order Successfully Created",
+        "notification_new_order_msg": "Order #{order_no} has been successfully issued. Please check details for next steps."
     }
 }

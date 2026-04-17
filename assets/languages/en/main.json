@@ -47,7 +47,8 @@
         "logout_confirm_msg": "Are you sure you want to logout from your account?",
         "status": "Status",
         "edit": "Edit",
-        "exit_again": "Press again to exit"
+        "exit_again": "Press again to exit",
+        "yes_exit": "Yes, Exit"
     },
     "time": {
         "ago": "ago",
