@@ -31,10 +31,21 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
   ];
   bool _isSaving = false;
 
+  // Team Mode State
+  String _viewMode = 'personal'; // 'personal' or 'team'
+  String? _selectedEmployeeId;
+  String? _selectedEmployeeName;
+
   @override
   void initState() {
     super.initState();
     if (widget.initialData != null) {
+      if (widget.initialData!['target_user_id'] != null) {
+        _viewMode = 'team';
+        _selectedEmployeeId = widget.initialData!['target_user_id'].toString();
+        _selectedEmployeeName = widget.initialData!['target_user_name']?.toString();
+      }
+
       final estimate = widget.initialData!['estimate'];
       final items = widget.initialData!['items'] as List?;
 
@@ -55,6 +66,69 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
         }
       }
     }
+
+    // Auto-fetch todos for the selected date
+    _fetchAndAutoAddTodos(_selectedDate);
+  }
+
+  bool _hasPermission(String resource) {
+    final userData = widget.userData;
+    if (userData['role_access'] == '1' || userData['role_resources'] == 'all') {
+      return true;
+    }
+    final String resources = userData['role_resources'] ?? '';
+    final List<String> resourceList = resources.split(',');
+    return resourceList.contains(resource);
+  }
+
+  Future<void> _fetchAndAutoAddTodos(DateTime date) async {
+    final dateStr = date.toIso8601String().split('T')[0];
+    // Use selected employee ID if in team mode, otherwise use current user ID
+    final String targetUserId = (_viewMode == 'team' && _selectedEmployeeId != null)
+        ? _selectedEmployeeId!
+        : (widget.userData['id'] ?? widget.userData['user_id']).toString();
+
+    final url = '${AppConstants.baseUrl}/get_todos?user_id=$targetUserId&date=$dateStr';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['status'] == true) {
+          final List<dynamic> todos = result['data'] ?? [];
+          if (todos.isEmpty) return;
+
+          setState(() {
+            for (var todo in todos) {
+              final String itemName = (todo['item_name'] ?? '').toString();
+              if (itemName.isEmpty) continue;
+
+              // Check if item already exists in the list to prevent duplicates
+              bool exists = _itemControllers.any(
+                (c) => c.text.trim().toLowerCase() == itemName.toLowerCase(),
+              );
+              if (exists) continue;
+
+              // Find first empty controller or add new one
+              bool added = false;
+              for (var controller in _itemControllers) {
+                if (controller.text.trim().isEmpty) {
+                  controller.text = itemName;
+                  added = true;
+                  break;
+                }
+              }
+
+              if (!added) {
+                _itemControllers.add(TextEditingController(text: itemName));
+              }
+            }
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error auto-fetching todos: $e');
+    }
   }
 
   Future<void> _saveLog() async {
@@ -70,9 +144,12 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
 
     setState(() => _isSaving = true);
     try {
+      final String targetUserId = (_viewMode == 'team' && _selectedEmployeeId != null)
+          ? _selectedEmployeeId!
+          : (widget.userData['id'] ?? widget.userData['user_id']).toString();
+
       final Map<String, String> body = {
-        'user_id': (widget.userData['id'] ?? widget.userData['user_id'])
-            .toString(),
+        'user_id': targetUserId,
         'date': _selectedDate.toIso8601String().split('T')[0],
         'items': json.encode(items),
       };
@@ -262,6 +339,47 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_viewMode == 'team' && _selectedEmployeeName != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: _primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: _primaryColor.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline_rounded, color: _primaryColor, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'work_log.summary_team'.tr(context),
+                            style: TextStyle(
+                              color: _primaryColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          Text(
+                            _selectedEmployeeName!,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
             const SizedBox(height: 12),
 
             // Date Picker
@@ -296,6 +414,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                 );
                 if (date != null) {
                   setState(() => _selectedDate = date);
+                  _fetchAndAutoAddTodos(date);
                 }
               },
               child: Container(
@@ -356,11 +475,11 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildQuickAddButton(
+                  /* _buildQuickAddButton(
                     onTap: _showTodoPicker,
                     icon: Icons.playlist_add_check_rounded,
                     label: 'work_log.from_todo_list'.tr(context),
-                  ),
+                  ), */
                   _buildQuickAddButton(
                     onTap: _showJobDeskPicker,
                     icon: Icons.assignment_outlined,

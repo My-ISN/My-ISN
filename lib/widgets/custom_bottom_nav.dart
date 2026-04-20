@@ -71,6 +71,10 @@ class _CustomBottomNavState extends State<CustomBottomNav> {
               'label': 'main.xin_dashboard'.tr(context),
             },
             {
+              'icon': Icons.receipt_long_rounded,
+              'label': 'main.xin_transaction'.tr(context),
+            },
+            {
               'icon': Icons.house_rounded,
               'label': 'main.xin_rent_plan'.tr(context),
             },

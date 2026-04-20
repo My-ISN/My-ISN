@@ -114,6 +114,7 @@
         "process_extension": "PROCESS EXTENSION",
         "duration_required": "Extension duration is required",
         "upload_guarantee_file": "Please upload guarantee file",
+        "deposit_no_upload": "Deposit guarantee does not require a file upload.",
         "extension_success": "Extension requested successfully",
         "extension_failed": "Failed to request extension",
         "renter_data": "Renter Data",

@@ -11,6 +11,7 @@ import '../widgets/custom_snackbar.dart';
 import '../widgets/period_filter_widget.dart';
 import 'create_work_log_page.dart';
 import '../widgets/pagination_header.dart';
+import '../todo_list/widgets/todo_filter_bar.dart';
 
 class WorkLogPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -26,6 +27,12 @@ class _WorkLogPageState extends State<WorkLogPage> {
   bool _isLoading = true;
   bool _isStatsLoading = true;
   List<dynamic> _logs = [];
+
+  // Team Mode State
+  String _viewMode = 'personal'; // 'personal' or 'team'
+  String? _selectedEmployeeId;
+  List<dynamic> _employees = [];
+  bool _isEmployeesLoading = false;
 
   // Stats
   int _completedItems = 0;
@@ -66,6 +73,7 @@ class _WorkLogPageState extends State<WorkLogPage> {
     _selectedMonth = DateTime.now().month.toString().padLeft(2, '0');
     _selectedYear = DateTime.now().year.toString();
 
+    _initializeTeamMode();
     _fetchStats();
     if (_hasPermission('mobile_worklog_view')) {
       _fetchLogs();
@@ -88,9 +96,13 @@ class _WorkLogPageState extends State<WorkLogPage> {
     if (!mounted) return;
     setState(() => _isStatsLoading = true);
     try {
+      final String targetUserId = (_viewMode == 'team' && _selectedEmployeeId != null)
+          ? _selectedEmployeeId!
+          : (widget.userData['id'] ?? widget.userData['user_id']).toString();
+
       final response = await http.get(
         Uri.parse(
-          '${AppConstants.baseUrl}/get_worklog_stats?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&month=$_selectedMonth&year=$_selectedYear',
+          '${AppConstants.baseUrl}/get_worklog_stats?user_id=$targetUserId&month=$_selectedMonth&year=$_selectedYear',
         ),
       );
 
@@ -115,10 +127,14 @@ class _WorkLogPageState extends State<WorkLogPage> {
     if (!mounted) return;
     setState(() => _isLoading = true);
     try {
+      final String targetUserId = (_viewMode == 'team' && _selectedEmployeeId != null)
+          ? _selectedEmployeeId!
+          : (widget.userData['id'] ?? widget.userData['user_id']).toString();
+
       final offset = (targetPage - 1) * _selectedLimit;
       final response = await http.get(
         Uri.parse(
-          '${AppConstants.baseUrl}/get_worklog_list?user_id=${widget.userData['id'] ?? widget.userData['user_id']}&page=$targetPage&limit=$_selectedLimit&offset=$offset&month=$_selectedMonth&year=$_selectedYear',
+          '${AppConstants.baseUrl}/get_worklog_list?user_id=$targetUserId&page=$targetPage&limit=$_selectedLimit&offset=$offset&month=$_selectedMonth&year=$_selectedYear',
         ),
       );
 
@@ -141,6 +157,33 @@ class _WorkLogPageState extends State<WorkLogPage> {
 
   int get _totalPages => (_totalCount / _selectedLimit).ceil();
 
+  void _initializeTeamMode() {
+    if (_hasPermission('mobile_todo_team')) {
+      _fetchEmployees();
+    }
+  }
+
+  Future<void> _fetchEmployees() async {
+    if (!mounted) return;
+    setState(() => _isEmployeesLoading = true);
+    try {
+      final companyId = widget.userData['company_id'] ?? 2;
+      final url = '${AppConstants.baseUrl}/get_employees?company_id=$companyId&limit=500';
+      final response = await http.get(Uri.parse(url));
+      final data = json.decode(response.body);
+
+      if (data['status'] == true) {
+        setState(() {
+          _employees = data['data'];
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching employees: $e');
+    } finally {
+      if (mounted) setState(() => _isEmployeesLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,8 +201,51 @@ class _WorkLogPageState extends State<WorkLogPage> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                child: _buildStatsCard(context),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Column(
+                  children: [
+                    _buildStatsCard(context),
+                    const SizedBox(height: 16),
+                    if (_hasPermission('mobile_todo_team'))
+                      TodoFilterBar(
+                        viewMode: _viewMode,
+                        onViewModeChanged: (mode) {
+                          if (_viewMode == mode) return;
+                          setState(() {
+                            _viewMode = mode;
+                            _currentPage = 1;
+                            _logs = [];
+                          });
+
+                          if (mode == 'team') {
+                            if (_selectedEmployeeId != null) {
+                              _fetchStats();
+                              _fetchLogs();
+                            } else {
+                              setState(() => _isLoading = false);
+                            }
+                          } else {
+                            _fetchStats();
+                            _fetchLogs();
+                          }
+                        },
+                        employees: _employees,
+                        selectedEmployeeId: _selectedEmployeeId,
+                        onEmployeeSelected: (val) {
+                          if (val.isNotEmpty) {
+                            setState(() {
+                              _selectedEmployeeId = val;
+                              _currentPage = 1;
+                            });
+                            _fetchStats();
+                            _fetchLogs();
+                          }
+                        },
+                        isEmployeesLoading: _isEmployeesLoading,
+                        primaryColor: _primaryColor,
+                      ),
+                  ],
+                ),
               ),
             ),
             SliverToBoxAdapter(
@@ -286,8 +372,23 @@ class _WorkLogPageState extends State<WorkLogPage> {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        CreateWorkLogPage(userData: widget.userData),
+                    builder: (context) => CreateWorkLogPage(
+                      userData: widget.userData,
+                      initialData: _viewMode == 'team' && _selectedEmployeeId != null
+                          ? {
+                              'target_user_id': _selectedEmployeeId,
+                              'target_user_name': (() {
+                                  final emp = _employees.firstWhere(
+                                    (e) => e['user_id'].toString() == _selectedEmployeeId,
+                                    orElse: () => null,
+                                  );
+                                  return emp != null
+                                      ? '${emp['first_name']} ${emp['last_name'] ?? ''}'.trim()
+                                      : null;
+                                })(),
+                            }
+                          : null,
+                    ),
                   ),
                 );
                 if (result == true) {
@@ -415,7 +516,18 @@ class _WorkLogPageState extends State<WorkLogPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'work_log.my_summary'.tr(context),
+                        _viewMode == 'personal'
+                            ? 'work_log.my_summary'.tr(context)
+                            : (() {
+                                final emp = _employees.firstWhere(
+                                  (e) => e['user_id'].toString() == _selectedEmployeeId,
+                                  orElse: () => null,
+                                );
+                                final name = emp != null
+                                    ? '${emp['first_name']} ${emp['last_name'] ?? ''}'.trim()
+                                    : 'Team';
+                                return '${'work_log.summary'.tr(context)} $name';
+                              })(),
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,

@@ -1,0 +1,17 @@
+{
+  "reports": {
+    "title": "Reports",
+    "monthly_net_income": "Net Income (Monthly)",
+    "yearly_net_income": "Net Income (Yearly)",
+    "monthly_expense": "Expense (Monthly)",
+    "monthly_deposit": "Deposit (Monthly)",
+    "cat_online": "Online Sales",
+    "cat_personal": "Personal Rent",
+    "cat_company": "Company Rent",
+    "payroll_this_month": "Payroll (This Month)",
+    "payroll_report": "Monthly Payroll Report",
+    "chart_label": "Last 6 Months Payroll Statistics",
+    "financial_summary": "Financial Summary",
+    "income_by_category": "Income by Category"
+  }
+}

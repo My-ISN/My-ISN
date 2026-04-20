@@ -5,8 +5,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import '../../../constants.dart';
+import 'package:provider/provider.dart';
 import '../../../localization/app_localizations.dart';
 import '../../../widgets/connectivity_wrapper.dart';
+import '../../../providers/cart_provider.dart';
+import '../pages/product_detail_page.dart';
+import '../pages/cart_page.dart';
 
 class CustomerDashboardContent extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -258,8 +262,9 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                     searchOpacity: searchOpacity,
                     onProfileTap: () => Scaffold.of(context).openEndDrawer(),
                     onCartTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Keranjang akan segera hadir!')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CartPage()),
                       );
                     },
                   ),
@@ -269,8 +274,9 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                   profilePhoto: widget.userData['profile_photo']?.toString(),
                   onProfileTap: () => Scaffold.of(context).openEndDrawer(),
                   onCartTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Keranjang akan segera hadir!')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CartPage()),
                     );
                   },
                 ),
@@ -302,15 +308,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.5,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            'dashboard.see_all'.tr(context) == 'dashboard.see_all' 
-                                ? 'Lihat Semua' 
-                                : 'dashboard.see_all'.tr(context),
-                            style: TextStyle(color: _getActiveColor(), fontSize: 13),
                           ),
                         ),
                       ],
@@ -436,12 +433,46 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
               opacity: iconOpacity,
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: onCartTap,
-                    icon: Icon(Icons.shopping_cart_outlined, 
-                      color: Theme.of(context).hintColor, size: 20),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                  Consumer<CartProvider>(
+                    builder: (context, cart, child) {
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          IconButton(
+                            onPressed: onCartTap,
+                            icon: Icon(Icons.shopping_cart_outlined, 
+                              color: Theme.of(context).hintColor, size: 20),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                          if (cart.itemCount > 0)
+                            Positioned(
+                              right: -6,
+                              top: -6,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 14,
+                                  minHeight: 14,
+                                ),
+                                child: Text(
+                                  '${cart.itemCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(width: 12),
                   IconButton(
@@ -943,7 +974,17 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
     final sold = int.tryParse((p['total_sold'] ?? 0).toString()) ?? 0;
 
     return GestureDetector(
-      onTap: () => _showProductSpecs(context, p),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailPage(
+              product: Map<String, dynamic>.from(p),
+              isRental: _tabController.index == 0,
+            ),
+          ),
+        );
+      },
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
@@ -1107,132 +1148,6 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
     );
   }
 
-  void _showProductSpecs(BuildContext context, Map p) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.85,
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: CachedNetworkImage(
-                          imageUrl: '${AppConstants.serverRoot}/uploads/products/${p['gambar']}',
-                          height: 250,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                p['nama_laptop'] ?? '',
-                                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                p['tipe_laptop'] ?? 'Notebook',
-                                style: TextStyle(color: Colors.grey[500], fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            'Rp ${_formatPrice(double.tryParse(p['harga_sewa_ke_1'].toString()) ?? 0)}',
-                            style: const TextStyle(
-                              color: Color(0xFF7E57C2),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Spesifikasi',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildSpecTile(Icons.memory_rounded, 'Processor', p['procesor']),
-                    _buildSpecTile(Icons.memory_rounded, 'RAM', p['ram']),
-                    _buildSpecTile(Icons.storage_rounded, 'Storage', p['hdd']),
-                    _buildSpecTile(Icons.display_settings_rounded, 'VGA', p['vga']),
-                    _buildSpecTile(Icons.screenshot_rounded, 'Screen', p['layar']),
-                    const SizedBox(height: 100), // Space for button
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSpecTile(IconData icon, String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, size: 22, color: const Color(0xFF7E57C2)),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-              Text(
-                value ?? '-',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -1343,11 +1258,45 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _buildTopIcon(
-              context, 
-              icon: Icons.shopping_cart_outlined, 
-              onTap: onCartTap,
-              searchOpacity: 0.0, 
+            Consumer<CartProvider>(
+              builder: (context, cart, child) {
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildTopIcon(
+                      context, 
+                      icon: Icons.shopping_cart_outlined, 
+                      onTap: onCartTap,
+                      searchOpacity: 0.0, 
+                    ),
+                    if (cart.itemCount > 0)
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${cart.itemCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
             const SizedBox(width: 12),
             _buildTopIcon(

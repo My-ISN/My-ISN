@@ -19,6 +19,7 @@ import '../quicksend/quick_send_page.dart';
 import '../job_desk/job_desk_page.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../reports/reports_page.dart';
 
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -120,6 +121,29 @@ class _SideDrawerState extends State<SideDrawer> {
                 ),
                 _buildMenuItem(
                   context,
+                  icon: Icons.receipt_long_outlined,
+                  title: 'main.xin_transaction'.tr(context),
+                  isActive: widget.activePage == 'transaction',
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (widget.onTabSelected != null) {
+                      widget.onTabSelected!(1);
+                    } else if (widget.activePage != 'transaction') {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DashboardPage(
+                            userData: widget.userData,
+                            initialIndex: 1,
+                          ),
+                        ),
+                        (route) => false,
+                      );
+                    }
+                  },
+                ),
+                _buildMenuItem(
+                  context,
                   icon: isCustomer
                       ? Icons.house_outlined
                       : Icons.calendar_today_outlined,
@@ -131,29 +155,18 @@ class _SideDrawerState extends State<SideDrawer> {
                       : widget.activePage == 'attendance',
                   onTap: () {
                     Navigator.pop(context);
+                    int targetIndex = isCustomer ? 2 : 1;
                     if (widget.onTabSelected != null) {
-                      widget.onTabSelected!(1);
-                    } else if (isCustomer) {
-                      if (widget.activePage != 'rent_plan') {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DashboardPage(
-                              userData: widget.userData,
-                              initialIndex: 1,
-                            ),
-                          ),
-                          (route) => false,
-                        );
-                      }
+                      widget.onTabSelected!(targetIndex);
                     } else {
-                      if (widget.activePage != 'attendance') {
+                      String targetPage = isCustomer ? 'rent_plan' : 'attendance';
+                      if (widget.activePage != targetPage) {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
                             builder: (context) => DashboardPage(
                               userData: widget.userData,
-                              initialIndex: 1,
+                              initialIndex: targetIndex,
                             ),
                           ),
                           (route) => false,
@@ -196,7 +209,7 @@ class _SideDrawerState extends State<SideDrawer> {
                     final bool hasPayroll = _hasPermission(
                       'mobile_payroll_enable',
                     );
-                    int profileIndex = isCustomer ? 2 : (hasPayroll ? 3 : 2);
+                    int profileIndex = isCustomer ? 3 : (hasPayroll ? 3 : 2);
 
                     if (widget.onTabSelected != null) {
                       widget.onTabSelected!(profileIndex);
@@ -223,6 +236,7 @@ class _SideDrawerState extends State<SideDrawer> {
                   'mobile_employees_enable',
                   'mobile_worklog_enable',
                   'mobile_jobdesk_view',
+                  'mobile_reports_enable',
                 ]))
                   _buildExpandableSection(
                     context,
@@ -317,6 +331,25 @@ class _SideDrawerState extends State<SideDrawer> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => WorkLogPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (_hasPermission('mobile_reports_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.analytics_outlined,
+                          title: 'reports.title'.tr(context),
+                          isActive: widget.activePage == 'reports',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ReportsPage(
                                   userData: widget.userData,
                                 ),
                               ),
@@ -604,7 +637,7 @@ class _SideDrawerState extends State<SideDrawer> {
             widget.userData['user_role_id'] == 21 ||
             widget.userData['user_role_id'] == '21';
         final bool hasPayroll = _hasPermission('mobile_payroll_enable');
-        int profileIndex = isCustomer ? 2 : (hasPayroll ? 3 : 2);
+        int profileIndex = isCustomer ? 3 : (hasPayroll ? 3 : 2);
 
         if (widget.onTabSelected != null) {
           widget.onTabSelected!(profileIndex);

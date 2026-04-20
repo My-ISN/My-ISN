@@ -9,6 +9,7 @@ class SearchableDropdown extends StatelessWidget {
   final IconData? icon;
   final bool required;
   final String? placeholder;
+  final bool enabled;
 
   const SearchableDropdown({
     super.key,
@@ -19,6 +20,7 @@ class SearchableDropdown extends StatelessWidget {
     this.icon,
     this.required = true,
     this.placeholder,
+    this.enabled = true,
   });
 
   @override
@@ -26,15 +28,23 @@ class SearchableDropdown extends StatelessWidget {
     bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return InkWell(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-        _showSearchOptions(context);
-      },
+      onTap: enabled
+          ? () {
+              FocusScope.of(context).unfocus();
+              _showSearchOptions(context);
+            }
+          : null,
       borderRadius: BorderRadius.circular(20),
       child: IgnorePointer(
         child: TextFormField(
           controller: TextEditingController(text: value),
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: enabled
+                ? null
+                : Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+          ),
           decoration: InputDecoration(
             labelText: required ? '$label *' : label,
             labelStyle: TextStyle(
@@ -45,12 +55,14 @@ class SearchableDropdown extends StatelessWidget {
             prefixIcon: Icon(
               icon ?? Icons.search_rounded,
               size: 18,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: enabled ? 0.6 : 0.3),
             ),
-            suffixIcon: Icon(
-              Icons.arrow_drop_down_rounded,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+            suffixIcon: enabled
+                ? Icon(
+                    Icons.arrow_drop_down_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : null,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),
               borderSide: BorderSide(

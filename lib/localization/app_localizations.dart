@@ -37,6 +37,7 @@ class AppLocalizations {
       'job_desk',
       'quicksend',
       'aibot',
+      'reports',
     ];
 
     _localizedStrings = {};

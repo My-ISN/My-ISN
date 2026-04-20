@@ -1,0 +1,17 @@
+{
+  "reports": {
+    "title": "Laporan",
+    "monthly_net_income": "Keuntungan Bersih (Bulanan)",
+    "yearly_net_income": "Keuntungan Bersih (Tahunan)",
+    "monthly_expense": "Pengeluaran (Bulanan)",
+    "monthly_deposit": "Deposit (Bulanan)",
+    "cat_online": "Penjualan Online",
+    "cat_personal": "Sewa Pribadi",
+    "cat_company": "Perusahaan",
+    "payroll_this_month": "Payroll (Bulan Ini)",
+    "payroll_report": "Laporan Payroll Bulanan",
+    "chart_label": "Statistik Payroll 6 Bulan Terakhir",
+    "financial_summary": "Ringkasan Finansial",
+    "income_by_category": "Pendapatan Per Kategori"
+  }
+}

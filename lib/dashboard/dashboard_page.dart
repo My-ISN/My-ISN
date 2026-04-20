@@ -9,7 +9,6 @@ import '../widgets/custom_app_bar.dart';
 
 import '../widgets/side_drawer.dart';
 import '../profile/profile_page.dart';
-import '../login_page.dart';
 import '../attendance_page.dart';
 import '../payroll/payroll_page.dart';
 import '../localization/app_localizations.dart';
@@ -24,6 +23,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../rent_plan/client/rent_plan_page.dart' as client_rp;
 import 'staff/widgets/staff_dashboard_content.dart';
 import 'client/widgets/customer_dashboard_content.dart';
+import 'client/pages/transaction_page.dart';
 import '../services/heartbeat_service.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -657,6 +657,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     final List<Widget> pages = isCustomer
         ? [
             _buildHomeContent(),
+            TransactionPage(userData: user),
             client_rp.RentPlanPage(userData: user, isTab: true),
             ProfilePage(userData: user, isTab: true),
           ]
@@ -675,29 +676,17 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     // Determine activePage for Drawer
     String activePage = '';
     if (isCustomer) {
-      switch (_currentIndex) {
-        case 0:
-          activePage = 'dashboard';
-          break;
-        case 1:
-          activePage = 'rent_plan';
-          break;
-        case 2:
-          activePage = 'invoice';
-          break;
-        case 3:
-          activePage = 'profile';
-          break;
-      }
+      activePage = ['dashboard', 'transaction', 'rent_plan', 'profile'][_currentIndex];
     } else {
-      if (_currentIndex == 0) {
-        activePage = 'dashboard';
-      } else if (_currentIndex == 1)
-        activePage = 'attendance';
-      else if (hasPayroll && _currentIndex == 2)
-        activePage = 'payroll';
-      else if (_currentIndex == (hasPayroll ? 3 : 2))
-        activePage = 'profile';
+      final List<String> staffPages = [
+        'dashboard', 
+        'attendance', 
+        if (hasPayroll) 'payroll', 
+        'profile'
+      ];
+      if (_currentIndex < staffPages.length) {
+        activePage = staffPages[_currentIndex];
+      }
     }
 
     return PopScope(

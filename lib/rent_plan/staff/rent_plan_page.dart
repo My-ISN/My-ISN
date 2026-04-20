@@ -186,16 +186,7 @@ class _RentPlanPageState extends State<RentPlanPage>
           const Color primaryPurple = Color(0xFF7E57C2);
 
           Future<void> handlePayment() async {
-            debugPrint(
-              'Payment button clicked. Method: $selectedMethod, Bank: $selectedBank',
-            );
             if (isProcessing) return;
-
-            if (selectedMethod == 'transfer' && selectedBank == null) {
-              context.showWarningSnackBar('rent_plan.payment.select_bank_first'.tr(context));
-              return;
-            }
-
             setSheetState(() => isProcessing = true);
 
             try {
@@ -241,268 +232,245 @@ class _RentPlanPageState extends State<RentPlanPage>
             }
           }
 
+          final double totalAmount = double.tryParse(rental['grand_total']?.toString() ?? '0') ?? 0;
+          final currencyFormat = NumberFormat.currency(
+            locale: 'id_ID',
+            symbol: 'Rp ',
+            decimalDigits: 0,
+          );
+
           return Container(
-            height: MediaQuery.of(context).size.height * 0.9,
+            height: MediaQuery.of(context).size.height * 0.85,
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
+                top: Radius.circular(32),
               ),
             ),
             child: Column(
               children: [
-                // Header (Purple Gradient)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 20,
-                  ),
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [primaryPurple, Color(0xFF9575CD)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(24),
+                // Modern Drag Handle
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                ),
+
+                // Header section inspired by Rent Agreement & AI Bot
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: _primaryColor.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.payment_rounded,
-                          color: Colors.white,
-                          size: 20,
+                        child: Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: _primaryColor,
+                          size: 28,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
-                        child: Text(
-                          'rent_plan.payment.create_flip_link'.tr(context),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'rent_plan.payment.create_flip_link'.tr(context),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            Text(
+                              rental['customer_name'] ?? rental['nama_pribadi'] ?? rental['nama_perusahaan'] ?? '-',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                        onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
 
+                const Divider(height: 32, thickness: 1),
+
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Invoice Summary Card
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                _primaryColor,
+                                _primaryColor.withValues(alpha: 0.8),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _primaryColor.withValues(alpha: 0.3),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    rental['invoice_number'] ?? '#INV-UNKNOWN',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(alpha: 0.7),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    currencyFormat.format(totalAmount),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: const Icon(
+                                  Icons.receipt_long_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
                         Text(
                           'rent_plan.payment.payment_method'.tr(context),
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Colors.grey,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 15,
+                            letterSpacing: 0.5,
                           ),
                         ),
                         const SizedBox(height: 16),
 
-                        // Payment Method Selection
+                        // Modern Payment Method Selection
                         Row(
                           children: [
-                            // Transfer / QRIS
                             Expanded(
                               child: _buildPaymentMethodCard(
                                 title: 'rent_plan.payment.transfer_qris'.tr(context),
                                 subtitle: 'rent_plan.payment.transfer_qris_subtitle'.tr(context),
                                 isActive: selectedMethod == 'transfer',
-                                onTap: () => setSheetState(
-                                  () => selectedMethod = 'transfer',
-                                ),
-                                icon: Icons.account_balance_rounded,
+                                onTap: () => setSheetState(() => selectedMethod = 'transfer'),
+                                icon: Icons.qr_code_scanner_rounded,
                               ),
                             ),
                             const SizedBox(width: 16),
-                            // Tunai (Cash)
                             Expanded(
                               child: _buildPaymentMethodCard(
                                 title: 'rent_plan.payment.cash'.tr(context),
                                 subtitle: 'rent_plan.payment.cash_subtitle'.tr(context),
                                 isActive: selectedMethod == 'cash',
-                                onTap: () => setSheetState(
-                                  () => selectedMethod = 'cash',
-                                ),
-                                icon: Icons.money_rounded,
+                                onTap: () => setSheetState(() => selectedMethod = 'cash'),
+                                icon: Icons.payments_rounded,
                               ),
                             ),
                           ],
                         ),
 
-                        if (selectedMethod == 'transfer') ...[
-                          const SizedBox(height: 24),
-                          Text(
-                            'rent_plan.payment.select_bank_wallet'.tr(context),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Colors.grey,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Bank Grid
-                          GridView.count(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            crossAxisCount: 2,
-                            childAspectRatio: 2.8,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            children: [
-                              _buildBankItem(
-                                'Bank BCA',
-                                Icons.account_balance,
-                                selectedBank == 'bca',
-                                () => setSheetState(() => selectedBank = 'bca'),
-                              ),
-                              _buildBankItem(
-                                'Bank Mandiri',
-                                Icons.account_balance,
-                                selectedBank == 'mandiri',
-                                () => setSheetState(
-                                  () => selectedBank = 'mandiri',
-                                ),
-                              ),
-                              _buildBankItem(
-                                'Bank BNI',
-                                Icons.account_balance,
-                                selectedBank == 'bni',
-                                () => setSheetState(() => selectedBank = 'bni'),
-                              ),
-                              _buildBankItem(
-                                'Bank BRI',
-                                Icons.account_balance,
-                                selectedBank == 'bri',
-                                () => setSheetState(() => selectedBank = 'bri'),
-                              ),
-                              _buildBankItem(
-                                'rent_plan.payment.qris_all'.tr(context),
-                                Icons.qr_code_scanner_rounded,
-                                selectedBank == 'qris',
-                                () =>
-                                    setSheetState(() => selectedBank = 'qris'),
-                              ),
-                              _buildBankItem(
-                                'rent_plan.payment.gopay_dana'.tr(context),
-                                Icons.account_balance_wallet_rounded,
-                                selectedBank == 'ewallet',
-                                () => setSheetState(
-                                  () => selectedBank = 'ewallet',
-                                ),
-                              ),
-                              _buildBankItem(
-                                'rent_plan.payment.shopeepay'.tr(context),
-                                Icons.account_balance_wallet_rounded,
-                                selectedBank == 'shopeepay',
-                                () => setSheetState(
-                                  () => selectedBank = 'shopeepay',
-                                ),
-                              ),
-                              _buildBankItem(
-                                'rent_plan.payment.crypto_credit_card'.tr(context),
-                                Icons.credit_card_rounded,
-                                selectedBank == 'cc',
-                                () => setSheetState(() => selectedBank = 'cc'),
-                              ),
-                            ],
-                          ),
-                        ],
-
                         const SizedBox(height: 32),
 
-                        // WhatsApp Info
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.phone_iphone_rounded,
-                              color: primaryPurple,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              rental['whatsapp'] ?? '-',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: Colors.green.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Row(
+                        // Safety and Info Section
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
                                 children: [
-                                  Icon(
-                                    Icons.check_circle_rounded,
-                                    color: Colors.green[600],
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'rent_plan.payment.whatsapp_active'.tr(context),
-                                    style: TextStyle(
-                                      color: Colors.green[600],
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
+                                  Icon(Icons.shield_rounded, color: Colors.green[600], size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'rent_plan.payment.flip_safety_info'.tr(context),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.shield_outlined,
-                              color: primaryPurple.withValues(alpha: 0.5),
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'rent_plan.payment.flip_safety_info'.tr(context),
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 11,
+                              if (rental['whatsapp'] != null) ...[
+                                const SizedBox(height: 12),
+                                const Divider(),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Icon(Icons.chat_rounded, color: Colors.green[600], size: 20),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      rental['whatsapp'],
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      'rent_plan.payment.whatsapp_active'.tr(context),
+                                      style: TextStyle(
+                                        color: Colors.green[600],
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                          ],
+                              ],
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -510,76 +478,52 @@ class _RentPlanPageState extends State<RentPlanPage>
                   ),
                 ),
 
-                // Bottom Actions
+                // Premium Fixed Bottom Button
                 Container(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
-                    border: Border(
-                      top: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
-                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        offset: const Offset(0, -5),
+                        blurRadius: 10,
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 14,
-                          ),
-                          backgroundColor: Colors.grey[200],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          'main.cancel'.tr(context),
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
                       Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: isProcessing
-                              ? null
-                              : () => handlePayment(),
-                          icon: isProcessing
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Icon(
-                                  selectedMethod == 'transfer'
-                                      ? Icons.link_rounded
-                                      : Icons.check_circle_rounded,
-                                ),
-                          label: Text(
-                            isProcessing
-                                ? (selectedMethod == 'transfer'
-                                      ? 'rent_plan.payment.preparing_link'.tr(context)
-                                      : 'rent_plan.payment.processing'.tr(context))
-                                : (selectedMethod == 'transfer'
-                                      ? 'rent_plan.payment.create_send_link'.tr(context)
-                                      : 'rent_plan.payment.confirm_cash'.tr(context)),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryPurple,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: isProcessing ? null : () => handlePayment(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _primaryColor,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
-                            elevation: isProcessing ? 0 : 8,
-                            shadowColor: primaryPurple.withValues(alpha: 0.4),
+                            child: isProcessing
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 3,
+                                    ),
+                                  )
+                                : Text(
+                                    selectedMethod == 'transfer'
+                                        ? 'rent_plan.payment.create_send_link'.tr(context)
+                                        : 'rent_plan.payment.confirm_cash'.tr(context),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -1106,7 +1050,24 @@ class _RentPlanPageState extends State<RentPlanPage>
                     _buildStatusPill(status, statusColor),
                     Row(
                       children: [
-                        if (status.toLowerCase() != 'completed') ...[
+                        if ((rental['status_pembayaran'] ?? '') == 'sudah') ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.check_circle_outline,
+                              color: Colors.green,
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ] else if (status.toLowerCase() != 'completed') ...[
                           Material(
                             color: Colors.transparent,
                             child: InkWell(

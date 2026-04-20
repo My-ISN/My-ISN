@@ -14,6 +14,7 @@ import 'package:foxgeen_mobile/profile/profile_page.dart';
 import 'package:foxgeen_mobile/dashboard/dashboard_page.dart';
 import 'package:foxgeen_mobile/quicksend/quick_send_page.dart';
 import 'package:foxgeen_mobile/job_desk/job_desk_page.dart';
+import 'package:foxgeen_mobile/reports/reports_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -169,6 +170,14 @@ class MenuRegistry {
           pageBuilder: (context, user) =>
               DashboardPage(userData: user, initialIndex: 2),
         ),
+      AppModule(
+        titleKey: 'dashboard.quick_menu_reports',
+        icon: Icons.analytics_rounded,
+        color: const Color(0xFF7E57C2),
+        permission: 'mobile_reports_enable',
+        categoryKey: 'side_drawer.work',
+        pageBuilder: (context, user) => ReportsPage(userData: user),
+      ),
     ];
   }
 }

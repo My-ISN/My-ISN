@@ -15,6 +15,7 @@ import 'localization/app_localizations.dart';
 import 'providers/language_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/quick_menu_provider.dart';
+import 'providers/cart_provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -54,6 +55,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => languageProvider),
         ChangeNotifierProvider(create: (_) => themeProvider),
         ChangeNotifierProvider(create: (_) => quickMenuProvider),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: MyApp(initialUserData: userData),
     ),

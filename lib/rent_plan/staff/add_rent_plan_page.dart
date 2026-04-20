@@ -11,7 +11,8 @@ import '../../widgets/custom_snackbar.dart';
 
 class AddRentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
-  const AddRentPlanPage({super.key, required this.userData});
+  final List<dynamic>? initialItems; // Can be List<CartItem> or List<Map>
+  const AddRentPlanPage({super.key, required this.userData, this.initialItems});
 
   @override
   State<AddRentPlanPage> createState() => _AddRentPlanPageState();
@@ -142,6 +143,42 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         }
 
         _isLoadingData = false;
+
+        // Process initial items if provided
+        if (widget.initialItems != null && widget.initialItems!.isNotEmpty) {
+          _itemRows.clear();
+          for (var item in widget.initialItems!) {
+            // Find laptop in _laptops list to get its ID
+            final foundLaptop = _laptops.firstWhere(
+              (l) => l['id'].toString() == item.id.toString() || l['kode_laptop'] == item.id,
+              orElse: () => null,
+            );
+
+            if (foundLaptop != null) {
+              _itemRows.add({
+                'laptop_id': foundLaptop['id'].toString(),
+                'qty': item.quantity,
+                'price': item.price,
+                'is_rental': item.isRental,
+              });
+            }
+          }
+          
+          if (_itemRows.isEmpty) {
+            _itemRows.add({'laptop_id': null, 'qty': 1, 'price': 0});
+          }
+        }
+
+        // Auto-select "DEPOSIT" for jaminan 1
+        try {
+          final depositJaminan = _jaminanPribadi.firstWhere(
+            (j) => j['category_name'].toString().toUpperCase().contains('DEPOSIT'),
+            orElse: () => null,
+          );
+          if (depositJaminan != null) {
+            _selectedJaminanIds[1] = depositJaminan['constants_id'].toString();
+          }
+        } catch (_) {}
       });
     } else {
       if (mounted) {
@@ -302,7 +339,13 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     for (var row in _itemRows) {
       double price = (row['price'] ?? 0).toDouble();
       int qty = row['qty'] ?? 1;
-      total += (price * qty * _lamaSewa);
+      bool isRental = row['is_rental'] ?? true; // Default to true if not specified
+      
+      if (isRental) {
+        total += (price * qty * _lamaSewa);
+      } else {
+        total += (price * qty); // Purchase item is one-time cost
+      }
     }
     return total + _shippingCostAmount + 7000; // Add biaya administrasi
   }
@@ -318,11 +361,31 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     int jaminanCount = _selectedJaminanIds.entries
         .where((e) => e.key <= minJaminan && e.value != null)
         .length;
-    int jaminanFileCount = _fileJaminan.entries
-        .where((e) => e.key <= minJaminan && e.value != null)
-        .length;
 
-    if (jaminanCount < minJaminan || jaminanFileCount < minJaminan) {
+    // Check files, but ALLOW "DEPOSIT" to have no file
+    List<dynamic> baseOptions = _jenisSewa == 'pribadi'
+        ? _jaminanPribadi
+        : _jaminanPerusahaan;
+
+    int validJaminanCount = 0;
+    for (int i = 1; i <= minJaminan; i++) {
+      final id = _selectedJaminanIds[i];
+      if (id == null) continue;
+
+      final file = _fileJaminan[i];
+      final jType = baseOptions.firstWhere(
+        (j) => j['constants_id'].toString() == id,
+        orElse: () => null,
+      );
+      bool isDeposit = jType != null &&
+          jType['category_name'].toString().toUpperCase().contains('DEPOSIT');
+
+      if (isDeposit || file != null) {
+        validJaminanCount++;
+      }
+    }
+
+    if (jaminanCount < minJaminan || validJaminanCount < minJaminan) {
       context.showWarningSnackBar(
         'rent_plan.validation.guarantee_min'.tr(
           context,
@@ -1713,7 +1776,8 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
                   },
                 )
                 .toList(),
-            onSelected: (val) {
+            enabled: index != 1,
+            onSelected: index == 1 ? (_) {} : (val) {
               setState(() {
                 _selectedJaminanIds[index] = val;
               });
@@ -1721,12 +1785,56 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
             placeholder: '${'rent_plan.select_guarantee'.tr(context)} $index',
           ),
           if (_selectedJaminanIds[index] != null) ...[
-            const SizedBox(height: 12),
-            _buildFileUploadTile(
-              '${'rent_plan.guarantee_file'.tr(context)} $index',
-              _fileJaminan[index],
-              () => _pickFile(index),
-              icon: Icons.upload_file_rounded,
+            // Hide upload tile if jaminan is DEPOSIT
+            Builder(
+              builder: (context) {
+                final selectedJaminan = baseOptions.firstWhere(
+                  (j) => j['constants_id'].toString() == _selectedJaminanIds[index],
+                  orElse: () => null,
+                );
+                final isDeposit = selectedJaminan != null &&
+                    selectedJaminan['category_name'].toString().toUpperCase().contains('DEPOSIT');
+
+                if (isDeposit) {
+                  return Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: Colors.blue, size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'rent_plan.deposit_no_upload'.tr(context),
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    _buildFileUploadTile(
+                      '${'rent_plan.guarantee_file'.tr(context)} $index',
+                      _fileJaminan[index],
+                      () => _pickFile(index),
+                      icon: Icons.upload_file_rounded,
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ],

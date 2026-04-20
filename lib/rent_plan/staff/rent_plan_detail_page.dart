@@ -303,6 +303,29 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
               _selectedShippingId = tp;
             }
           }
+
+          // Auto-select "DEPOSIT" for jaminan 1
+          try {
+            final isPribadi = (_rentalData!['jenis_sewa'] ?? 'pribadi')
+                    .toString()
+                    .toLowerCase() ==
+                'pribadi';
+            final baseOptions = isPribadi ? _jaminanPribadi : _jaminanPerusahaan;
+            final depositJaminan = baseOptions.firstWhere(
+              (j) => j['category_name']
+                  .toString()
+                  .toUpperCase()
+                  .contains('DEPOSIT'),
+              orElse: () => null,
+            );
+            if (depositJaminan != null) {
+              final depositId = (depositJaminan['constants_id'] ??
+                      depositJaminan['id'])
+                  .toString();
+              _selectedJaminanIds[1] = depositId;
+              _selectedExtJaminanIdsMap[1] = depositId;
+            }
+          } catch (_) {}
         });
       }
     }
@@ -1063,7 +1086,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   },
                 )
                 .toList(),
-            onSelected: (val) {
+            enabled: index != 1,
+            onSelected: index == 1 ? (_) {} : (val) {
               setState(() {
                 _selectedExtJaminanIdsMap[index] = val;
               });
@@ -1071,12 +1095,55 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             placeholder: '${'rent_plan.select_guarantee'.tr(context)} $index',
           ),
           if (_selectedExtJaminanIdsMap[index] != null) ...[
-            const SizedBox(height: 12),
-            _buildFileUploadTile(
-              '${'rent_plan.guarantee_file'.tr(context)} $index',
-              _extFileJaminanMap[index],
-              () => _pickExtFile(index),
-              icon: Icons.upload_file_rounded,
+            Builder(
+              builder: (context) {
+                final selectedJaminan = baseOptions.firstWhere(
+                  (j) => (j['constants_id']?.toString() ?? j['id']?.toString()) == _selectedExtJaminanIdsMap[index],
+                  orElse: () => null,
+                );
+                final isDeposit = selectedJaminan != null &&
+                    selectedJaminan['category_name'].toString().toUpperCase().contains('DEPOSIT');
+
+                if (isDeposit) {
+                  return Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: Colors.blue, size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'rent_plan.deposit_no_upload'.tr(context),
+                            style: const TextStyle(
+                              color: Colors.blue,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    _buildFileUploadTile(
+                      '${'rent_plan.guarantee_file'.tr(context)} $index',
+                      _extFileJaminanMap[index],
+                      () => _pickExtFile(index),
+                      icon: Icons.upload_file_rounded,
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ],
@@ -1330,14 +1397,25 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       return;
     }
 
+    final baseOptions = isPribadi ? _jaminanPribadi : _jaminanPerusahaan;
+
     // Check if files are uploaded for all selected guarantees
     for (int i = 1; i <= requiredCount; i++) {
-      if (_selectedExtJaminanIdsMap[i] != null &&
-          _extFileJaminanMap[i] == null) {
-        context.showWarningSnackBar(
-          '${'rent_plan.upload_guarantee_file'.tr(context)} $i',
+      final jId = _selectedExtJaminanIdsMap[i];
+      if (jId != null) {
+        final jType = baseOptions.firstWhere(
+          (j) => (j['constants_id']?.toString() ?? j['id']?.toString()) == jId,
+          orElse: () => null,
         );
-        return;
+        final isDeposit = jType != null &&
+            jType['category_name'].toString().toUpperCase().contains('DEPOSIT');
+
+        if (!isDeposit && _extFileJaminanMap[i] == null) {
+          context.showWarningSnackBar(
+            '${'rent_plan.upload_guarantee_file'.tr(context)} $i',
+          );
+          return;
+        }
       }
     }
 
@@ -1942,7 +2020,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   },
                 )
                 .toList(),
-            onSelected: (val) {
+            enabled: index != 1,
+            onSelected: index == 1 ? (_) {} : (val) {
               setState(() {
                 _selectedJaminanIds[index] = val;
               });
@@ -1950,13 +2029,56 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             placeholder: '${'rent_plan.select_guarantee'.tr(context)} $index',
           ),
           if (_selectedJaminanIds[index] != null) ...[
-            const SizedBox(height: 12),
-            _buildFileUploadTile(
-              '${'rent_plan.guarantee_file'.tr(context)} $index',
-              _fileJaminan[index],
-              () => _pickFile(index),
-              icon: Icons.upload_file_rounded,
-              existingUrl: _rentalData!['foto_jaminan$index'],
+            Builder(
+              builder: (context) {
+                final selectedJaminan = baseOptions.firstWhere(
+                  (j) => j['constants_id'].toString() == _selectedJaminanIds[index],
+                  orElse: () => null,
+                );
+                final isDeposit = selectedJaminan != null &&
+                    selectedJaminan['category_name'].toString().toUpperCase().contains('DEPOSIT');
+
+                if (isDeposit) {
+                  return Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: Colors.blue, size: 20),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'Jaminan Deposit tidak memerlukan upload file.',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    _buildFileUploadTile(
+                      '${'rent_plan.guarantee_file'.tr(context)} $index',
+                      _fileJaminan[index],
+                      () => _pickFile(index),
+                      icon: Icons.upload_file_rounded,
+                      existingUrl: _rentalData!['foto_jaminan$index'],
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ],

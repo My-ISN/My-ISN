@@ -114,6 +114,7 @@
         "process_extension": "PROSES PERPANJANGAN",
         "duration_required": "Durasi perpanjangan wajib diisi",
         "upload_guarantee_file": "Harap unggah file jaminan",
+        "deposit_no_upload": "Jaminan Deposit tidak memerlukan upload file.",
         "extension_success": "Perpanjangan berhasil diajukan",
         "extension_failed": "Gagal mengajukan perpanjangan",
         "renter_data": "Data Penyewa",
