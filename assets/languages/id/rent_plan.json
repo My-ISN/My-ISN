@@ -246,6 +246,8 @@
         "emergency_contact": "Nomor Keluarga (Darurat)",
         "phone_hint": "Contoh: 08123456789",
         "admin_fee": "Biaya Administrasi",
+        "detailed_address": "Alamat Lengkap (Jl, No Rumah)",
+        "zipcode": "Kode Pos",
         "payment": {
             "select_bank_first": "Silakan pilih bank terlebih dahulu",
             "cannot_open_payment_link": "Tidak dapat membuka link pembayaran",

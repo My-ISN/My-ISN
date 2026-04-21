@@ -14,11 +14,13 @@ import '../../../widgets/searchable_dropdown.dart';
 class PurchaseCheckoutPage extends StatefulWidget {
   final Map<String, dynamic> userData;
   final List<CartItem> items;
+  final Map<String, dynamic>? prefilledAddress;
 
   const PurchaseCheckoutPage({
     super.key,
     required this.userData,
     required this.items,
+    this.prefilledAddress,
   });
 
   @override
@@ -54,9 +56,17 @@ class _PurchaseCheckoutPageState extends State<PurchaseCheckoutPage> {
   @override
   void initState() {
     super.initState();
-    _address1Controller = TextEditingController(text: widget.userData['address_1'] ?? '');
+    final hasPrefilled = widget.prefilledAddress != null;
+
+    _address1Controller = TextEditingController(
+        text: hasPrefilled
+            ? widget.prefilledAddress!['address_1']
+            : widget.userData['address_1'] ?? '');
     _address2Controller = TextEditingController(text: widget.userData['address_2'] ?? '');
-    _zipController = TextEditingController(text: widget.userData['zipcode'] ?? '');
+    _zipController = TextEditingController(
+        text: hasPrefilled
+            ? widget.prefilledAddress!['zipcode']
+            : widget.userData['zipcode'] ?? '');
     
     // Check if address is incomplete
     _isAddressIncomplete = (widget.userData['address_1']?.toString().isEmpty ?? true) ||
@@ -64,7 +74,16 @@ class _PurchaseCheckoutPageState extends State<PurchaseCheckoutPage> {
                            (widget.userData['state']?.toString().isEmpty ?? true) ||
                            (widget.userData['zipcode']?.toString().isEmpty ?? true);
     
-    _isEditingAddress = _isAddressIncomplete;
+    // If we have prefilled data, we consider it "editing" or "ready"
+    _isEditingAddress = _isAddressIncomplete || hasPrefilled;
+    
+    if (hasPrefilled) {
+      _selectedProvince = widget.prefilledAddress!['province_name'];
+      _selectedRegency = widget.prefilledAddress!['regency_name'];
+      _selectedDistrict = widget.prefilledAddress!['district_name'];
+      _selectedVillage = widget.prefilledAddress!['village_name'];
+    }
+
     _loadProvinces();
   }
 
@@ -229,7 +248,7 @@ class _PurchaseCheckoutPageState extends State<PurchaseCheckoutPage> {
               context.showSuccessSnackBar('Checkout berhasil. Silakan selesaikan pembayaran di Flip.');
               
               // Clear cart after successful checkout
-              context.read<CartProvider>().clear();
+                        context.read<CartProvider>().clearByType(isRental: false);
               Navigator.pop(context); // Back to cart
               Navigator.pop(context); // Back to dashboard
             } else {
@@ -241,7 +260,7 @@ class _PurchaseCheckoutPageState extends State<PurchaseCheckoutPage> {
         } else {
           // Cash flow
           context.showSuccessSnackBar('Checkout berhasil. Pesanan Anda sedang diproses.');
-          context.read<CartProvider>().clear();
+                    context.read<CartProvider>().clearByType(isRental: false);
           Navigator.pop(context);
         }
       } else {

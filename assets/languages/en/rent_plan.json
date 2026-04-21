@@ -246,6 +246,8 @@
         "emergency_contact": "Emergency Contact Number",
         "phone_hint": "Example: 08123456789",
         "admin_fee": "Administration Fee",
+        "detailed_address": "Detailed Address (Street, No)",
+        "zipcode": "Zip Code",
         "payment": {
             "select_bank_first": "Please select a bank first",
             "cannot_open_payment_link": "Cannot open payment link",

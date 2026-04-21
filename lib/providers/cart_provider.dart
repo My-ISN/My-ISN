@@ -138,6 +138,12 @@ class CartProvider with ChangeNotifier {
     }
   }
 
+  void clearByType({required bool isRental}) {
+    _items.removeWhere((item) => item.isRental == isRental);
+    _saveCart();
+    notifyListeners();
+  }
+
   void clear() {
     _items = [];
     _storage.delete(key: 'user_cart');

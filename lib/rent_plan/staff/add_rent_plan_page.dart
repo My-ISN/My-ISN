@@ -72,6 +72,8 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   final _namaPerusahaanController = TextEditingController();
   final _npwpController = TextEditingController();
   final _notesController = TextEditingController();
+  final _currentAddressController = TextEditingController();
+  final _zipCodeController = TextEditingController();
   final _whatsappController = TextEditingController();
   final _emergencyContactController = TextEditingController();
 
@@ -108,68 +110,20 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         _orderNumber = data['order_number'] ?? '';
         _customers = List<dynamic>.from(data['customers'] ?? []);
         _laptops = List<dynamic>.from(data['laptops'] ?? []);
-        // Filter out "KTP" from guarantees as it has its own field
         _jaminanPribadi = List<dynamic>.from(data['jaminan_pribadi'] ?? [])
             .where((j) => j['category_name'].toString().toUpperCase() != 'KTP')
             .toList();
-        _jaminanPerusahaan =
-            List<dynamic>.from(data['jaminan_perusahaan'] ?? [])
-                .where(
-                  (j) => j['category_name'].toString().toUpperCase() != 'KTP',
-                )
+        _jaminanPerusahaan = List<dynamic>.from(data['jaminan_perusahaan'] ?? [])
+                .where((j) => j['category_name'].toString().toUpperCase() != 'KTP')
                 .toList();
         _shippingCosts = List<dynamic>.from(data['shipping_costs'] ?? []);
         _provinces = List<dynamic>.from(data['provinces'] ?? []);
         _pricingTiers = List<dynamic>.from(data['pricing_tiers'] ?? []);
         _agreements = List<dynamic>.from(data['agreements'] ?? []);
 
-        // Auto-select for client
-        if (widget.userData['user_type'] != 'staff') {
-          _selectedCustomerId =
-              (widget.userData['user_id'] ?? widget.userData['id'] ?? '')
-                  .toString();
-          if (widget.userData['contact_number'] != null) {
-            _whatsappController.text = widget.userData['contact_number']
-                .toString();
-          }
-          if (widget.userData['first_name'] != null) {
-            _namaLengkapController.text =
-                '${widget.userData['first_name']} ${widget.userData['last_name'] ?? ''}'
-                    .trim();
-          }
-          if (widget.userData['emergency_contact_number'] != null) {
-            _emergencyContactController.text = widget.userData['emergency_contact_number'].toString();
-          }
-        }
-
         _isLoadingData = false;
 
-        // Process initial items if provided
-        if (widget.initialItems != null && widget.initialItems!.isNotEmpty) {
-          _itemRows.clear();
-          for (var item in widget.initialItems!) {
-            // Find laptop in _laptops list to get its ID
-            final foundLaptop = _laptops.firstWhere(
-              (l) => l['id'].toString() == item.id.toString() || l['kode_laptop'] == item.id,
-              orElse: () => null,
-            );
-
-            if (foundLaptop != null) {
-              _itemRows.add({
-                'laptop_id': foundLaptop['id'].toString(),
-                'qty': item.quantity,
-                'price': item.price,
-                'is_rental': item.isRental,
-              });
-            }
-          }
-          
-          if (_itemRows.isEmpty) {
-            _itemRows.add({'laptop_id': null, 'qty': 1, 'price': 0});
-          }
-        }
-
-        // Auto-select "DEPOSIT" for jaminan 1
+        // Auto-select "DEPOSIT" for jaminan 1 if available
         try {
           final depositJaminan = _jaminanPribadi.firstWhere(
             (j) => j['category_name'].toString().toUpperCase().contains('DEPOSIT'),
@@ -475,6 +429,8 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
         'biaya_kirim': _shippingCostAmount.toString(),
         'tipe_pengiriman': _tipePengiriman,
         'emergency_contact_number': _emergencyContactController.text,
+        'address_1': _currentAddressController.text,
+        'zipcode': _zipCodeController.text,
       };
 
       Map<String, String> files = {
@@ -499,7 +455,45 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
 
       if (res['status'] == true) {
         context.showSuccessSnackBar('rent_plan.success_create'.tr(context));
-        Navigator.pop(context, true);
+        
+        final String provinceName = _selectedProvinceCur != null
+            ? (_provinces.firstWhere(
+                    (p) => p['id'].toString() == _selectedProvinceCur,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '';
+        final String regencyName = _selectedRegencyCur != null
+            ? (_regenciesCur.firstWhere(
+                    (r) => r['id'].toString() == _selectedRegencyCur,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '';
+        final String districtName = _selectedDistrictCur != null
+            ? (_districtsCur.firstWhere(
+                    (d) => d['id'].toString() == _selectedDistrictCur,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '';
+        final String villageName = _selectedVillageCur != null
+            ? (_villagesCur.firstWhere(
+                    (v) => v['id'].toString() == _selectedVillageCur,
+                    orElse: () => {'name': ''},
+                  )['name'] ??
+                  '')
+            : '';
+
+        Navigator.pop(context, {
+          'success': true,
+          'address_1': _currentAddressController.text,
+          'zipcode': _zipCodeController.text,
+          'province_name': provinceName,
+          'regency_name': regencyName,
+          'district_name': districtName,
+          'village_name': villageName,
+        });
       } else {
         context.showErrorSnackBar(res['message'] ?? 'rent_plan.fail_save'.tr(context));
       }
@@ -1003,7 +997,23 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
               title: 'rent_plan.domicile_address'.tr(context),
               icon: Icons.home_rounded,
               color: Colors.teal[700]!,
-              children: [_buildRegionDropdowns(false)],
+              children: [
+                _buildRegionDropdowns(false),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'rent_plan.detailed_address'.tr(context),
+                  controller: _currentAddressController,
+                  icon: Icons.map_rounded,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  'rent_plan.zipcode'.tr(context),
+                  controller: _zipCodeController,
+                  keyboardType: TextInputType.number,
+                  icon: Icons.local_post_office_rounded,
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             _buildSection(
@@ -1370,6 +1380,8 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     _npwpController.dispose();
     _notesController.dispose();
     _whatsappController.dispose();
+    _currentAddressController.dispose();
+    _zipCodeController.dispose();
     super.dispose();
   }
 

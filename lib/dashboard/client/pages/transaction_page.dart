@@ -386,40 +386,116 @@ class _TransactionPageState extends State<TransactionPage> with SingleTickerProv
                     ),
                   ),
                   
-                  // Shipping Address
+                  // Customer Info
                   _buildDetailSection(
-                    title: 'Info Pengiriman',
+                    title: 'Informasi Pelanggan',
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.local_shipping_outlined, size: 16, color: Colors.grey),
-                            SizedBox(width: 8),
-                            Text('Kurir Pengiriman', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(item['tipe_pengiriman'] ?? 'Standar', style: const TextStyle(fontWeight: FontWeight.w500)),
-                        const Divider(height: 24),
-                        const Row(
-                          children: [
-                            Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
-                            SizedBox(width: 8),
-                            Text('Alamat Pengiriman', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
                         Text(
-                          item['nama_pribadi'] ?? widget.userData['name'] ?? 'Penerima',
+                          '${widget.userData['first_name'] ?? ''} ${widget.userData['last_name'] ?? ''}'.trim(),
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
+                        const SizedBox(height: 4),
+                        if (widget.userData['email'] != null)
+                          Row(
+                            children: [
+                              const Icon(Icons.email_outlined, size: 16, color: Colors.grey),
+                              const SizedBox(width: 8),
+                              Text(widget.userData['email'], style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                            ],
+                          ),
+                        const SizedBox(height: 4),
+                        if (widget.userData['contact_number'] != null)
+                          Row(
+                            children: [
+                              const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
+                              const SizedBox(width: 8),
+                              Text(widget.userData['contact_number'], style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Shipping Address
+                  _buildDetailSection(
+                    title: 'Alamat Pengiriman',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Recipient Name
                         Text(
-                          item['full_address'] ?? 'Alamat tidak tersedia',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                          item['nama_lengkap'] ?? 
+                          item['nama_pribadi'] ?? 
+                          '${widget.userData['first_name'] ?? ''} ${widget.userData['last_name'] ?? ''}'.trim() ?? 
+                          'Penerima',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                         ),
-                        if (item['whatsapp'] != null)
-                          Text(item['whatsapp'], style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                        const SizedBox(height: 8),
+                        
+                        // Phone Number
+                        if (item['whatsapp'] != null || item['emergency_contact_number'] != null || widget.userData['contact_number'] != null)
+                          Row(
+                            children: [
+                              const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
+                              const SizedBox(width: 8),
+                              Text(
+                                item['whatsapp'] ?? 
+                                item['emergency_contact_number'] ?? 
+                                widget.userData['contact_number'] ?? 
+                                '-',
+                                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        
+                        const SizedBox(height: 12),
+                        
+                        // Address
+                        if (item['shipping_address'] != null && item['shipping_address'].toString().isNotEmpty)
+                          Text(
+                            item['shipping_address'],
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        
+                        // Build complete address from location components
+                        Builder(
+                          builder: (context) {
+                            final locationParts = [
+                              item['shipping_village'] ?? '',
+                              item['shipping_district'] ?? '',
+                              item['shipping_city'] ?? item['regency_current_name'] ?? '',
+                              item['shipping_state'] ?? item['province_current_name'] ?? '',
+                              item['shipping_zipcode'] ?? item['zipcode'] ?? '',
+                            ].where((part) => part != null && part.toString().isNotEmpty).toList();
+                            
+                            if (locationParts.isNotEmpty) {
+                              return Text(
+                                locationParts.join(', '),
+                                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                        
+                        // Show courier info if available
+                        if (item['tipe_pengiriman'] != null) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              const Icon(Icons.local_shipping_outlined, size: 16, color: Colors.grey),
+                              const SizedBox(width: 8),
+                              Text('Kurir', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            item['tipe_pengiriman'],
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -429,15 +505,15 @@ class _TransactionPageState extends State<TransactionPage> with SingleTickerProv
                     title: 'Rincian Pembayaran',
                     child: Column(
                       children: [
-                        _buildDetailRow('Metode Pembayaran', item['metode_pembayaran'] ?? 'Transfer'),
-                        _buildDetailRow('Total Harga', NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(double.tryParse(item['sub_total_amount']?.toString() ?? '0') ?? 0)),
-                        _buildDetailRow('Biaya Kirim', NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(double.tryParse(item['biaya_kirim']?.toString() ?? '0') ?? 0)),
-                        _buildDetailRow('Biaya Administratif', NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(double.tryParse(item['admin_fee']?.toString() ?? '0') ?? 0)),
+                        _buildDetailRow('Metode Pembayaran', item['payment_method']?.toString().toUpperCase() ?? 'TRANSFER'),
+                        _buildDetailRow('Subtotal Produk', NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(double.tryParse(item['subtotal_amount']?.toString() ?? '0') ?? 0)),
+                        _buildDetailRow('Ongkos Kirim', NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(double.tryParse(item['shipping_amount']?.toString() ?? item['biaya_kirim']?.toString() ?? '0') ?? 0)),
+                        _buildDetailRow('Biaya Administratif', NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(double.tryParse(item['admin_fee']?.toString() ?? '7000') ?? 7000)),
                         const Divider(),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Total Bayar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            const Text('Grand Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                             Text(
                               NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(double.tryParse(item['grand_total']?.toString() ?? '0') ?? 0),
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.primary),

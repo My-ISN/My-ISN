@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../constants.dart';
 import '../../../providers/cart_provider.dart';
 import '../../../localization/app_localizations.dart';
-import '../../../rent_plan/staff/add_rent_plan_page.dart';
+import '../../../rent_plan/client/cart_checkout_page.dart';
 import 'purchase_checkout_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
@@ -255,18 +255,37 @@ class CartPage extends StatelessWidget {
                   if (userDataStr == null) return;
                   final userData = json.decode(userDataStr);
 
-                  if (cart.hasRentalItems) {
-                    Navigator.push(
+                  if (cart.items.isEmpty) return;
+
+                  // Check if cart has mixed items (both rental and purchase)
+                  final hasRentalItems = cart.items.any((item) => item.isRental);
+                  final hasPurchaseItems = cart.items.any((item) => !item.isRental);
+                  
+                  if (hasRentalItems && hasPurchaseItems) {
+                    // Mixed items - use unified checkout
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddRentPlanPage(
+                        builder: (context) => CartCheckoutPage(
                           userData: userData,
-                          initialItems: cart.items,
+                          items: cart.items,
+                        ),
+                      ),
+                    );
+                  } else if (hasRentalItems) {
+                    // Only rental items - use rental checkout
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CartCheckoutPage(
+                          userData: userData,
+                          items: cart.items,
                         ),
                       ),
                     );
                   } else {
-                    Navigator.push(
+                    // Only purchase items - use purchase checkout
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => PurchaseCheckoutPage(
