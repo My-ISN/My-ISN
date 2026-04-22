@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../services/rent_plan_service.dart';
@@ -64,6 +65,14 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
   List<dynamic> _regenciesCur = [], _districtsCur = [], _villagesCur = [];
   bool _isLoadingRegKtp = false, _isLoadingDistKtp = false, _isLoadingVillKtp = false;
   bool _isLoadingRegCur = false, _isLoadingDistCur = false, _isLoadingVillCur = false;
+  
+  // Cache for better performance
+  Map<String, List<dynamic>> _regencyCache = {};
+  Map<String, List<dynamic>> _districtCache = {};
+  Map<String, List<dynamic>> _villageCache = {};
+  
+  // Debounce timer
+  Timer? _debounceTimer;
 
   // Files
   File? _fileKtp, _fileNpwp, _filePo, _fileKtpPimpinan, _fileDomisiliPerusahaan;
@@ -209,6 +218,34 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
       _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
       _showBackConfirmationDialog();
+    }
+  }
+
+  // Handle system back button for PopScope
+  Future<bool> _onWillPop() async {
+    if (_currentStep > 0) {
+      _prevStep();
+      return false; // Prevent default pop
+    } else {
+      // Show confirmation dialog
+      final shouldPop = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Konfirmasi'),
+          content: const Text('Apakah Anda yakin ingin kembali? Semua perubahan yang belum disimpan akan hilang.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false), // Don't pop
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true), // Allow pop
+              child: const Text('Ya, Kembali'),
+            ),
+          ],
+        ),
+      );
+      return shouldPop ?? false; // Default to false if dialog dismissed
     }
   }
 
@@ -599,11 +636,20 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
   Widget build(BuildContext context) {
     if (_isLoadingData) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     
-    return Scaffold(
-      appBar: SecondaryAppBar(
-        title: 'Checkout',
-        onBackPressed: _prevStep,
-      ),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: SecondaryAppBar(
+          title: 'Checkout',
+          onBackPressed: _prevStep,
+        ),
       body: Form(
         key: _formKey,
         child: Column(
@@ -623,7 +669,8 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomAction(),
+        bottomNavigationBar: _buildBottomAction(),
+      ),
     );
   }
 
@@ -858,57 +905,121 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
   Widget _buildRegionDropdowns(bool isKtp) {
     return Column(
       children: [
-        SearchableDropdown(
+        _buildAddressDropdown(
           label: 'Province',
           options: _provinces.map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          value: _getNameFromList(_provinces, isKtp ? _selectedProvinceKtp : _selectedProvinceCur),
           onSelected: (val) {
             setState(() { 
               if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; 
             });
-            _loadRegencies(val, isKtp);
+            _loadRegenciesDebounced(val, isKtp);
           },
           placeholder: 'Select Province',
-          value: _getNameFromList(_provinces, isKtp ? _selectedProvinceKtp : _selectedProvinceCur),
+          isLoading: false,
         ),
         const SizedBox(height: 12),
-        SearchableDropdown(
+        _buildAddressDropdown(
           label: 'Regency/Kabupaten',
           options: (isKtp ? _regenciesKtp : _regenciesCur).map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          value: _getNameFromList(isKtp ? _regenciesKtp : _regenciesCur, isKtp ? _selectedRegencyKtp : _selectedRegencyCur),
           onSelected: (val) {
+            if (isKtp ? _isLoadingRegKtp : _isLoadingRegCur) return; // Prevent selection during loading
             setState(() { 
               if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; 
             });
             _loadDistricts(val, isKtp);
           },
-          placeholder: 'Select Regency',
-          value: _getNameFromList(isKtp ? _regenciesKtp : _regenciesCur, isKtp ? _selectedRegencyKtp : _selectedRegencyCur),
+          placeholder: (isKtp ? _isLoadingRegKtp : _isLoadingRegCur) ? 'Loading...' : 'Select Regency',
+          isLoading: isKtp ? _isLoadingRegKtp : _isLoadingRegCur,
         ),
         const SizedBox(height: 12),
-        SearchableDropdown(
+        _buildAddressDropdown(
           label: 'District',
           options: (isKtp ? _districtsKtp : _districtsCur).map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          value: _getNameFromList(isKtp ? _districtsKtp : _districtsCur, isKtp ? _selectedDistrictKtp : _selectedDistrictCur),
           onSelected: (val) {
+            if (isKtp ? _isLoadingDistKtp : _isLoadingDistCur) return; // Prevent selection during loading
             setState(() { 
               if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; 
             });
             _loadVillages(val, isKtp);
           },
-          placeholder: 'Select District',
-          value: _getNameFromList(isKtp ? _districtsKtp : _districtsCur, isKtp ? _selectedDistrictKtp : _selectedDistrictCur),
+          placeholder: (isKtp ? _isLoadingDistKtp : _isLoadingDistCur) ? 'Loading...' : 'Select District',
+          isLoading: isKtp ? _isLoadingDistKtp : _isLoadingDistCur,
         ),
         const SizedBox(height: 12),
-        SearchableDropdown(
+        _buildAddressDropdown(
           label: 'Village',
           options: (isKtp ? _villagesKtp : _villagesCur).map((p) => {'id': p['id'].toString(), 'name': p['name'].toString()}).toList(),
+          value: _getNameFromList(isKtp ? _villagesKtp : _villagesCur, isKtp ? _selectedVillageKtp : _selectedVillageCur),
           onSelected: (val) {
+            if (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) return; // Prevent selection during loading
             setState(() { 
               if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; 
             });
           },
-          placeholder: 'Select Village',
-          value: _getNameFromList(isKtp ? _villagesKtp : _villagesCur, isKtp ? _selectedVillageKtp : _selectedVillageCur),
+          placeholder: (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) ? 'Loading...' : 'Select Village',
+          isLoading: isKtp ? _isLoadingVillKtp : _isLoadingVillCur,
         ),
       ],
+    );
+  }
+
+  Widget _buildAddressDropdown({
+    required String label,
+    required List<Map<String, String>> options,
+    required String? value,
+    required Function(String) onSelected,
+    required String placeholder,
+    required bool isLoading,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: isLoading 
+              ? Theme.of(context).colorScheme.primary 
+              : Colors.grey.shade300,
+          width: isLoading ? 2 : 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+        color: isLoading 
+            ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
+            : null,
+      ),
+      child: isLoading
+          ? Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Loading $label...',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : SearchableDropdown(
+              label: label,
+              options: options,
+              onSelected: onSelected,
+              placeholder: placeholder,
+              value: value ?? '',
+            ),
     );
   }
 
@@ -1055,23 +1166,217 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
   }
 
   Future<void> _loadRegencies(String provinceId, bool isKtp) async {
-    final res = await _rentPlanService.getRegencies(provinceId);
-    setState(() { 
-      if (isKtp) _regenciesKtp = res['data']; else _regenciesCur = res['data']; 
+    // Cancel previous debounce timer
+    _debounceTimer?.cancel();
+    
+    // Check cache first
+    if (_regencyCache.containsKey(provinceId)) {
+      setState(() { 
+        if (isKtp) {
+          _regenciesKtp = _regencyCache[provinceId]!;
+          _selectedRegencyKtp = null;
+          _districtsKtp = [];
+          _selectedDistrictKtp = null;
+          _villagesKtp = [];
+          _selectedVillageKtp = null;
+        } else {
+          _regenciesCur = _regencyCache[provinceId]!;
+          _selectedRegencyCur = null;
+          _districtsCur = [];
+          _selectedDistrictCur = null;
+          _villagesCur = [];
+          _selectedVillageCur = null;
+        }
+      });
+      return;
+    }
+
+    // Set loading state and reset child selections
+    setState(() {
+      if (isKtp) {
+        _isLoadingRegKtp = true;
+        _selectedRegencyKtp = null;
+        _regenciesKtp = [];
+        _selectedDistrictKtp = null;
+        _districtsKtp = [];
+        _selectedVillageKtp = null;
+        _villagesKtp = [];
+      } else {
+        _isLoadingRegCur = true;
+        _selectedRegencyCur = null;
+        _regenciesCur = [];
+        _selectedDistrictCur = null;
+        _districtsCur = [];
+        _selectedVillageCur = null;
+        _villagesCur = [];
+      }
     });
+
+    try {
+      final res = await _rentPlanService.getRegencies(provinceId)
+          .timeout(const Duration(seconds: 10));
+      
+      if (res['status'] == true && res['data'] != null) {
+        // Save to cache
+        _regencyCache[provinceId] = res['data'];
+        
+        setState(() { 
+          if (isKtp) {
+            _regenciesKtp = res['data'];
+            _isLoadingRegKtp = false;
+          } else {
+            _regenciesCur = res['data'];
+            _isLoadingRegCur = false;
+          }
+        });
+      } else {
+        throw Exception(res['message'] ?? 'Failed to load regencies');
+      }
+    } catch (e) {
+      setState(() {
+        if (isKtp) _isLoadingRegKtp = false;
+        else _isLoadingRegCur = false;
+      });
+      
+      if (mounted) {
+        context.showErrorSnackBar('Gagal memuat data kabupaten/kota');
+      }
+    }
   }
 
   Future<void> _loadDistricts(String regencyId, bool isKtp) async {
-    final res = await _rentPlanService.getDistricts(regencyId);
-    setState(() { 
-      if (isKtp) _districtsKtp = res['data']; else _districtsCur = res['data']; 
+    // Check cache first
+    if (_districtCache.containsKey(regencyId)) {
+      setState(() { 
+        if (isKtp) {
+          _districtsKtp = _districtCache[regencyId]!;
+          _selectedDistrictKtp = null;
+          _villagesKtp = [];
+          _selectedVillageKtp = null;
+        } else {
+          _districtsCur = _districtCache[regencyId]!;
+          _selectedDistrictCur = null;
+          _villagesCur = [];
+          _selectedVillageCur = null;
+        }
+      });
+      return;
+    }
+
+    // Set loading state and reset child selections
+    setState(() {
+      if (isKtp) {
+        _isLoadingDistKtp = true;
+        _selectedDistrictKtp = null;
+        _districtsKtp = [];
+        _selectedVillageKtp = null;
+        _villagesKtp = [];
+      } else {
+        _isLoadingDistCur = true;
+        _selectedDistrictCur = null;
+        _districtsCur = [];
+        _selectedVillageCur = null;
+        _villagesCur = [];
+      }
     });
+
+    try {
+      final res = await _rentPlanService.getDistricts(regencyId)
+          .timeout(const Duration(seconds: 10));
+      
+      if (res['status'] == true && res['data'] != null) {
+        // Save to cache
+        _districtCache[regencyId] = res['data'];
+        
+        setState(() { 
+          if (isKtp) {
+            _districtsKtp = res['data'];
+            _isLoadingDistKtp = false;
+          } else {
+            _districtsCur = res['data'];
+            _isLoadingDistCur = false;
+          }
+        });
+      } else {
+        throw Exception(res['message'] ?? 'Failed to load districts');
+      }
+    } catch (e) {
+      setState(() {
+        if (isKtp) _isLoadingDistKtp = false;
+        else _isLoadingDistCur = false;
+      });
+      
+      if (mounted) {
+        context.showErrorSnackBar('Gagal memuat data kecamatan');
+      }
+    }
   }
 
   Future<void> _loadVillages(String districtId, bool isKtp) async {
-    final res = await _rentPlanService.getVillages(districtId);
-    setState(() { 
-      if (isKtp) _villagesKtp = res['data']; else _villagesCur = res['data']; 
+    // Check cache first
+    if (_villageCache.containsKey(districtId)) {
+      setState(() { 
+        if (isKtp) {
+          _villagesKtp = _villageCache[districtId]!;
+          _selectedVillageKtp = null;
+        } else {
+          _villagesCur = _villageCache[districtId]!;
+          _selectedVillageCur = null;
+        }
+      });
+      return;
+    }
+
+    // Set loading state
+    setState(() {
+      if (isKtp) {
+        _isLoadingVillKtp = true;
+        _selectedVillageKtp = null;
+        _villagesKtp = [];
+      } else {
+        _isLoadingVillCur = true;
+        _selectedVillageCur = null;
+        _villagesCur = [];
+      }
+    });
+
+    try {
+      final res = await _rentPlanService.getVillages(districtId)
+          .timeout(const Duration(seconds: 10));
+      
+      if (res['status'] == true && res['data'] != null) {
+        // Save to cache
+        _villageCache[districtId] = res['data'];
+        
+        setState(() { 
+          if (isKtp) {
+            _villagesKtp = res['data'];
+            _isLoadingVillKtp = false;
+          } else {
+            _villagesCur = res['data'];
+            _isLoadingVillCur = false;
+          }
+        });
+      } else {
+        throw Exception(res['message'] ?? 'Failed to load villages');
+      }
+    } catch (e) {
+      setState(() {
+        if (isKtp) _isLoadingVillKtp = false;
+        else _isLoadingVillCur = false;
+      });
+      
+      if (mounted) {
+        context.showErrorSnackBar('Gagal memuat data desa/kelurahan');
+      }
+    }
+  }
+
+  // Debounced version for rapid selections
+  Future<void> _loadRegenciesDebounced(String provinceId, bool isKtp) async {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _loadRegencies(provinceId, isKtp);
     });
   }
 }

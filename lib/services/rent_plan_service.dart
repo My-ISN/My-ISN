@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:io';
+import 'dart:async';
 
 import '../constants.dart';
 
@@ -121,8 +122,21 @@ class RentPlanService {
   Future<Map<String, dynamic>> getRegencies(String provinceId) async {
     try {
       final url = Uri.parse('$baseUrl/get_regencies?province_id=$provinceId');
-      final response = await http.get(url);
-      return json.decode(response.body);
+      final response = await http.get(url).timeout(
+        const Duration(seconds: 8),
+        onTimeout: () => throw TimeoutException('Connection timeout'),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data;
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } on TimeoutException {
+      return {'status': false, 'message': 'Connection timeout'};
+    } on SocketException {
+      return {'status': false, 'message': 'No internet connection'};
     } catch (e) {
       return {'status': false, 'message': e.toString()};
     }
@@ -131,8 +145,21 @@ class RentPlanService {
   Future<Map<String, dynamic>> getDistricts(String regencyId) async {
     try {
       final url = Uri.parse('$baseUrl/get_districts?regency_id=$regencyId');
-      final response = await http.get(url);
-      return json.decode(response.body);
+      final response = await http.get(url).timeout(
+        const Duration(seconds: 8),
+        onTimeout: () => throw TimeoutException('Connection timeout'),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data;
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } on TimeoutException {
+      return {'status': false, 'message': 'Connection timeout'};
+    } on SocketException {
+      return {'status': false, 'message': 'No internet connection'};
     } catch (e) {
       return {'status': false, 'message': e.toString()};
     }
@@ -141,8 +168,21 @@ class RentPlanService {
   Future<Map<String, dynamic>> getVillages(String districtId) async {
     try {
       final url = Uri.parse('$baseUrl/get_villages?district_id=$districtId');
-      final response = await http.get(url);
-      return json.decode(response.body);
+      final response = await http.get(url).timeout(
+        const Duration(seconds: 8),
+        onTimeout: () => throw TimeoutException('Connection timeout'),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data;
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } on TimeoutException {
+      return {'status': false, 'message': 'Connection timeout'};
+    } on SocketException {
+      return {'status': false, 'message': 'No internet connection'};
     } catch (e) {
       return {'status': false, 'message': e.toString()};
     }
