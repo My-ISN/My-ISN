@@ -20,6 +20,8 @@ import '../job_desk/job_desk_page.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
 import '../reports/reports_page.dart';
+import '../projects/project_list_page.dart';
+import '../tasks/task_list_page.dart';
 
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -50,7 +52,7 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'todo_list', 'employees', 'work_log', 'job_desk'].contains(
+    if (['rent_plan', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
@@ -64,7 +66,10 @@ class _SideDrawerState extends State<SideDrawer> {
   }
 
   bool _hasPermission(String resource) {
-    if (widget.userData['role_resources'] == 'all') return true;
+    if (widget.userData['role_access'] == '1' ||
+        widget.userData['role_resources'] == 'all') {
+      return true;
+    }
     final String resources = widget.userData['role_resources'] ?? '';
     final List<String> resourceList =
         resources.split(',').map((e) => e.trim()).toList();
@@ -72,7 +77,10 @@ class _SideDrawerState extends State<SideDrawer> {
   }
 
   bool _hasCategoryPermission(List<String> resources) {
-    if (widget.userData['role_resources'] == 'all') return true;
+    if (widget.userData['role_access'] == '1' ||
+        widget.userData['role_resources'] == 'all') {
+      return true;
+    }
     for (var res in resources) {
       if (_hasPermission(res)) return true;
     }
@@ -112,29 +120,6 @@ class _SideDrawerState extends State<SideDrawer> {
                           builder: (context) => DashboardPage(
                             userData: widget.userData,
                             initialIndex: 0,
-                          ),
-                        ),
-                        (route) => false,
-                      );
-                    }
-                  },
-                ),
-                _buildMenuItem(
-                  context,
-                  icon: Icons.receipt_long_outlined,
-                  title: 'main.xin_transaction'.tr(context),
-                  isActive: widget.activePage == 'transaction',
-                  onTap: () {
-                    Navigator.pop(context);
-                    if (widget.onTabSelected != null) {
-                      widget.onTabSelected!(1);
-                    } else if (widget.activePage != 'transaction') {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DashboardPage(
-                            userData: widget.userData,
-                            initialIndex: 1,
                           ),
                         ),
                         (route) => false,
@@ -237,6 +222,8 @@ class _SideDrawerState extends State<SideDrawer> {
                   'mobile_worklog_enable',
                   'mobile_jobdesk_view',
                   'mobile_reports_enable',
+                  'mobile_projects_view',
+                  'mobile_tasks_view',
                 ]))
                   _buildExpandableSection(
                     context,
@@ -375,7 +362,46 @@ class _SideDrawerState extends State<SideDrawer> {
                             );
                           },
                         ),
+                      if (_hasPermission('mobile_projects_view'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.folder_copy_outlined,
+                          title: 'main.xin_projects'.tr(context),
+                          isActive: widget.activePage == 'projects',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProjectListPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (_hasPermission('mobile_tasks_view'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.task_alt_rounded,
+                          title: 'main.xin_tasks'.tr(context),
+                          isActive: widget.activePage == 'tasks',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TaskListPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                     ],
+
                   ),
 
                 // Group: Financial

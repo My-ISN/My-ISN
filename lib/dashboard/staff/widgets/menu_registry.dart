@@ -15,6 +15,8 @@ import 'package:foxgeen_mobile/dashboard/dashboard_page.dart';
 import 'package:foxgeen_mobile/quicksend/quick_send_page.dart';
 import 'package:foxgeen_mobile/job_desk/job_desk_page.dart';
 import 'package:foxgeen_mobile/reports/reports_page.dart';
+import 'package:foxgeen_mobile/projects/project_list_page.dart';
+import 'package:foxgeen_mobile/tasks/task_list_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -177,6 +179,22 @@ class MenuRegistry {
         permission: 'mobile_reports_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => ReportsPage(userData: user),
+      ),
+      AppModule(
+        titleKey: 'Proyek',
+        icon: Icons.folder_copy_rounded,
+        color: const Color(0xFF7E57C2),
+        permission: 'mobile_projects_view',
+        categoryKey: 'side_drawer.work',
+        pageBuilder: (context, user) => ProjectListPage(userData: user),
+      ),
+      AppModule(
+        titleKey: 'Tugas',
+        icon: Icons.task_alt_rounded,
+        color: const Color(0xFF7E57C2),
+        permission: 'mobile_tasks_view',
+        categoryKey: 'side_drawer.work',
+        pageBuilder: (context, user) => TaskListPage(userData: user),
       ),
     ];
   }

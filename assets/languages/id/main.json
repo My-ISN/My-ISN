@@ -19,6 +19,8 @@
         "xin_rent_plan": "Rent Plan",
         "xin_transaction": "Transaksi",
         "xin_invoice": "Invoice",
+        "xin_projects": "Proyek",
+        "xin_tasks": "Tugas",
         "xin_confirm": "Konfirmasi",
         "xin_cancel": "Batal",
         "error_with_msg": "Kesalahan: {message}",
@@ -49,7 +51,8 @@
         "status": "Status",
         "edit": "Edit",
         "exit_again": "Tekan sekali lagi untuk keluar",
-        "yes_exit": "Ya, Keluar"
+        "yes_exit": "Ya, Keluar",
+        "try_again": "Coba Lagi"
     },
     "time": {
         "ago": "lalu",

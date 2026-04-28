@@ -38,6 +38,8 @@ class AppLocalizations {
       'quicksend',
       'aibot',
       'reports',
+      'projects',
+      'tasks',
     ];
 
     _localizedStrings = {};

@@ -317,14 +317,14 @@ class _CustomAppBarState extends State<CustomAppBar> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       if (_searchController.text.isEmpty && _historyKeys.isNotEmpty)
-                                        const Padding(
-                                          padding: EdgeInsets.only(left: 16, top: 8, bottom: 4),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
                                           child: Text(
                                             'Pencarian Terakhir',
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.grey,
+                                              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
                                             ),
                                           ),
                                         ),
@@ -544,7 +544,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                             ),
                             child: Text(
                               count > 9 ? '9+' : '$count',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 8,
                                 fontWeight: FontWeight.bold,
