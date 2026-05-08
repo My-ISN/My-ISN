@@ -734,7 +734,7 @@ class _FinancePageState extends State<FinancePage>
     }
 
     // Generate MD5 Token (Must match backend secret)
-    const String secret = 'foxgeen_mobile_transaction_secret_2024';
+    const String secret = 'myisn_mobile_transaction_secret_2024';
     final String token = md5
         .convert(utf8.encode('$transactionId$secret'))
         .toString();
@@ -953,7 +953,7 @@ class _FinancePageState extends State<FinancePage>
     }
 
     // Generate MD5 Token (Must match backend secret)
-    const String secret = 'foxgeen_mobile_transaction_secret_2024';
+    const String secret = 'myisn_mobile_transaction_secret_2024';
     final String token = md5
         .convert(utf8.encode('$accountId$secret'))
         .toString();

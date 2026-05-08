@@ -1,4 +1,4 @@
-package com.example.foxgeen_mobile
+package com.myisn
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

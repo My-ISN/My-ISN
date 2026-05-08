@@ -76,7 +76,7 @@ class NotificationService {
           ? 'notification_tone_swift_gesture' 
           : sound;
       
-      String channelId = 'foxgeen_push_channel_$soundResource';
+      String channelId = 'myisn_push_channel_$soundResource';
 
       final AndroidNotificationChannel channel = AndroidNotificationChannel(
         channelId,
@@ -121,7 +121,7 @@ class NotificationService {
         ? 'notification_tone_swift_gesture' 
         : sound;
     
-    String channelId = 'foxgeen_push_channel_$soundResource';
+    String channelId = 'myisn_push_channel_$soundResource';
 
     final AndroidNotificationChannel channel = AndroidNotificationChannel(
       channelId,
@@ -210,7 +210,7 @@ class NotificationService {
           ? 'notification_tone_swift_gesture' 
           : sound;
       
-      String channelId = 'foxgeen_push_channel_$soundResource';
+      String channelId = 'myisn_push_channel_$soundResource';
 
       // Get device info
       final deviceInfo = DeviceInfoPlugin();

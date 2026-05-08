@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "590267640125",
-    "project_id": "foxgeen-c0a20",
-    "storage_bucket": "foxgeen-c0a20.firebasestorage.app"
+    "project_number": "591860991054",
+    "project_id": "my-isn",
+    "storage_bucket": "my-isn.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:590267640125:android:2b8edcb8e5e590266c3d54",
+        "mobilesdk_app_id": "1:591860991054:android:b7aed6673313992fe8af1f",
         "android_client_info": {
-          "package_name": "com.example.foxgeen_mobile"
+          "package_name": "com.myisn"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAFfNV1VmM8E9C13QTAT8-DNGXt8ZbqnxE"
+          "current_key": "AIzaSyDGPF4lQtM5a4TjrJnGabyNSMdzg8d3Tn0"
         }
       ],
       "services": {

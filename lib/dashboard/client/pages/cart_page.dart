@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../../constants.dart';
 import '../../../providers/cart_provider.dart';
-import '../../../localization/app_localizations.dart';
 import '../../../rent_plan/client/cart_checkout_page.dart';
 import 'purchase_checkout_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -368,13 +367,16 @@ class CartPage extends StatelessWidget {
     final storage = const FlutterSecureStorage();
     final userDataStr = await storage.read(key: 'user_data');
     if (userDataStr == null) return;
+    
+    if (!context.mounted) return;
+
     final userData = json.decode(userDataStr);
 
     if (cart.items.isEmpty) return;
 
-    final hasRentalItems = cart.items.any((item) => item.isRental);
-
-    if (hasRentalItems) {
+    if (cart.hasMixedItems) {
+      _showMixedCheckoutOptions(context, cart, userData);
+    } else if (cart.hasRentalItems) {
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -389,6 +391,145 @@ class CartPage extends StatelessWidget {
         ),
       );
     }
+  }
+
+  void _showMixedCheckoutOptions(BuildContext context, CartProvider cart, dynamic userData) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Pilih Metode Checkout',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Keranjang Anda berisi item Sewa dan Beli. Silakan pilih salah satu untuk diproses sekarang.',
+              style: TextStyle(color: Colors.grey[600], fontSize: 14, height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            _buildMixedOption(
+              context: context,
+              title: 'Checkout Sewa Laptop',
+              subtitle: '${cart.items.where((i) => i.isRental).length} item sewa',
+              icon: Icons.laptop_mac_rounded,
+              color: const Color(0xFF673AB7),
+              onTap: () {
+                Navigator.pop(context);
+                if (!context.mounted) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CartCheckoutPage(
+                      userData: userData,
+                      items: cart.items.where((i) => i.isRental).toList(),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMixedOption(
+              context: context,
+              title: 'Checkout Beli Laptop',
+              subtitle: '${cart.items.where((i) => !i.isRental).length} item beli',
+              icon: Icons.shopping_bag_rounded,
+              color: const Color(0xFF009688),
+              onTap: () {
+                Navigator.pop(context);
+                if (!context.mounted) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PurchaseCheckoutPage(
+                      userData: userData,
+                      items: cart.items.where((i) => !i.isRental).toList(),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMixedOption({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+          borderRadius: BorderRadius.circular(16),
+          color: color.withValues(alpha: 0.05),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: color),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showClearConfirmation(BuildContext context, CartProvider cart) {
@@ -419,17 +560,6 @@ class CartPage extends StatelessWidget {
             child: const Text('Hapus Semua'),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showCheckoutNotice(BuildContext context, String mode, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Checkout ($mode)'),
-        content: Text(message),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
       ),
     );
   }

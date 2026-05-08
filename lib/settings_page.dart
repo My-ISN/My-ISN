@@ -401,30 +401,16 @@ class _SettingsPageState extends State<SettingsPage> {
       );
 
       if (authenticated) {
-        // Tanya password DULU sebelum set loading, agar halaman tidak jadi kosong di balik dialog
         final biometricToken = const Uuid().v4();
         const url = '${AppConstants.baseUrl}/register_biometric';
 
-        String? password = await _promptForPassword();
-        if (password == null) return; // user tekan Batal
-
-        // Baru set loading SETELAH dialog ditutup
+        // Set loading SETELAH autentikasi biometric berhasil
         setState(() => _isLoading = true);
-
-        final String identifier = (widget.userData['username']?.toString().isNotEmpty == true)
-            ? widget.userData['username'].toString()
-            : (widget.userData['email']?.toString() ?? '');
-
-        debugPrint('--- Register Biometric Debug ---');
-        debugPrint('Identifier to send: "$identifier"');
-        debugPrint('Password length: ${password.length}');
-        debugPrint('--------------------------------');
 
         final response = await http.post(
           Uri.parse(url),
           body: {
-            'identifier': identifier,
-            'password': password,
+            'user_id': widget.userData['id'].toString(),
             'biometric_token': biometricToken,
             'device_info': 'settings.device_info'.tr(context),
           },
@@ -458,127 +444,6 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<String?> _promptForPassword() async {
-    final passwordController = TextEditingController();
-    final primaryColor = Theme.of(context).colorScheme.primary;
-    bool obscureText = true;
-
-    return showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            padding: const EdgeInsets.fromLTRB(24, 20, 16, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'settings.confirm_password'.tr(context).toUpperCase(),
-                  style: TextStyle(
-                    color: primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: passwordController,
-                  obscureText: obscureText,
-                  autofocus: true,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'settings.enter_password'.tr(context),
-                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 16),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () {
-                        setModalState(() {
-                          obscureText = !obscureText;
-                        });
-                      },
-                    ),
-                  ),
-                  onSubmitted: (value) {
-                    final p = value.trim();
-                    if (p.isNotEmpty) {
-                      Navigator.pop(context, p);
-                    }
-                  },
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        side: BorderSide(color: Colors.grey.withOpacity(0.3)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'settings.cancel'.tr(context),
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () {
-                        final p = passwordController.text.trim();
-                          context.showWarningSnackBar('login.password_required'.tr(context));
-                        Navigator.pop(context, p);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'settings.confirm'.tr(context),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   Future<void> _showLanguageDialog() async {
     final languageProvider = Provider.of<LanguageProvider>(

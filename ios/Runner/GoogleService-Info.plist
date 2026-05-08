@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyC1lfGlsX7EctHvzwWNFZ-GHgsxOpmHDEU</string>
+	<string>AIzaSyCan9yiH_ygkpiOnACWxxPO5acBKAZUVMI</string>
 	<key>GCM_SENDER_ID</key>
-	<string>590267640125</string>
+	<string>591860991054</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.foxgeen.mobile</string>
+	<string>com.myisn</string>
 	<key>PROJECT_ID</key>
-	<string>foxgeen-c0a20</string>
+	<string>my-isn</string>
 	<key>STORAGE_BUCKET</key>
-	<string>foxgeen-c0a20.firebasestorage.app</string>
+	<string>my-isn.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:590267640125:ios:8ac7f2afd35d78b76c3d54</string>
+	<string>1:591860991054:ios:52b8f45b7e1764eae8af1f</string>
 </dict>
 </plist>

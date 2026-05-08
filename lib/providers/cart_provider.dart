@@ -66,6 +66,14 @@ class CartProvider with ChangeNotifier {
     return _items.any((item) => item.isRental);
   }
 
+  bool get hasPurchaseItems {
+    return _items.any((item) => !item.isRental);
+  }
+
+  bool get hasMixedItems {
+    return hasRentalItems && hasPurchaseItems;
+  }
+
   CartProvider() {
     _loadCart();
   }

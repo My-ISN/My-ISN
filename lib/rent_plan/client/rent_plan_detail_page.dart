@@ -299,7 +299,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     if (endpoint.isEmpty) return;
 
     final String secret =
-        '${widget.rentalId}foxgeen_mobile_invoice_secret_2024';
+        '${widget.rentalId}myisn_mobile_invoice_secret_2024';
     final String token = md5.convert(utf8.encode(secret)).toString();
     final url = Uri.parse(
       '${AppConstants.serverRoot}/erp/rentals/$endpoint/${widget.rentalId}?token=$token',

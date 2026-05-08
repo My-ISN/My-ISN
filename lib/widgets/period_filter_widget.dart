@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:foxgeen_mobile/localization/app_localizations.dart';
+import 'package:myisn/localization/app_localizations.dart';
 
 class PeriodFilterButton extends StatelessWidget {
   final String selectedMonth;
