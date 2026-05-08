@@ -646,50 +646,100 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
         }
       },
       child: Scaffold(
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF121212)
+            : const Color(0xFFF5F7FA),
         appBar: SecondaryAppBar(
           title: 'Checkout',
           onBackPressed: _prevStep,
         ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            _buildProgressBar(),
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  if (_hasRental) _buildRentalDocsStep() else _buildShippingStep(),
-                  if (_hasRental) _buildShippingStep() else _buildSummaryStep(),
-                  if (_hasRental) _buildSummaryStep(),
-                ],
+        body: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              _buildProgressBar(),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    if (_hasRental) _buildRentalDocsStep() else _buildShippingStep(),
+                    if (_hasRental) _buildShippingStep() else _buildSummaryStep(),
+                    if (_hasRental) _buildSummaryStep(),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
         bottomNavigationBar: _buildBottomAction(),
       ),
     );
   }
 
   Widget _buildProgressBar() {
-    int totalSteps = _hasRental ? 3 : 2;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final steps = _hasRental
+        ? ['Dokumen', 'Pengiriman', 'Ringkasan']
+        : ['Pengiriman', 'Ringkasan'];
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
       child: Row(
-        children: List.generate(totalSteps, (index) {
-          bool isActive = index <= _currentStep;
-          return Expanded(
-            child: Container(
-              height: 4,
-              margin: EdgeInsets.only(right: index == totalSteps - 1 ? 0 : 8),
-              decoration: BoxDecoration(
-                color: isActive ? Theme.of(context).colorScheme.primary : Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+        children: List.generate(steps.length * 2 - 1, (i) {
+          if (i.isOdd) {
+            final stepIdx = i ~/ 2;
+            return Expanded(
+              child: Container(
+                height: 2,
+                margin: const EdgeInsets.only(bottom: 20),
+                color: stepIdx < _currentStep ? primaryColor : Colors.grey[300],
               ),
-            ),
+            );
+          }
+          final idx = i ~/ 2;
+          final isDone = idx < _currentStep;
+          final isActive = idx == _currentStep;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: isDone || isActive ? primaryColor : Colors.transparent,
+                  border: Border.all(
+                    color: isDone || isActive ? primaryColor : Colors.grey[300]!,
+                    width: 2,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: isDone
+                      ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                      : Text(
+                          '${idx + 1}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isActive ? Colors.white : Colors.grey[400],
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                steps[idx],
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  color: isActive ? primaryColor : Colors.grey[400],
+                ),
+              ),
+            ],
           );
         }),
       ),
@@ -697,20 +747,39 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
   }
 
   Widget _buildSection({required String title, required IconData icon, required List<Widget> children}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20)],
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: isDark
+            ? null
+            : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4))],
       ),
-      padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [Icon(icon, color: Theme.of(context).colorScheme.primary), const SizedBox(width: 12), Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))]),
-          const SizedBox(height: 24),
-          ...children,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: primaryColor, size: 17),
+                ),
+                const SizedBox(width: 10),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: Colors.grey.withValues(alpha: 0.1)),
+          Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: children)),
         ],
       ),
     );
@@ -733,23 +802,85 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
   }
 
   Widget _buildFileUploadTile(String label, File? file, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(file == null ? Icons.upload_file : Icons.check_circle, color: file == null ? null : Colors.green),
-      title: Text(label),
-      subtitle: Text(file?.path.split('/').last ?? 'Tap to upload'),
+    final bool uploaded = file != null;
+    final Color color = uploaded ? Colors.green : Theme.of(context).colorScheme.primary;
+    return GestureDetector(
       onTap: onTap,
-      tileColor: Colors.grey.withOpacity(0.05),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(uploaded ? Icons.check_circle_rounded : Icons.upload_file_rounded, color: color, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: color)),
+                  const SizedBox(height: 2),
+                  Text(
+                    uploaded ? file!.path.split('/').last : 'Ketuk untuk upload file',
+                    style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: Colors.grey[400], size: 18),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildPaymentOption(String label, String value, IconData icon) {
-    bool isSelected = _paymentMethod == value;
-    return ListTile(
-      leading: Icon(icon, color: isSelected ? Theme.of(context).colorScheme.primary : null),
-      title: Text(label),
-      trailing: isSelected ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary) : null,
+    final bool isSelected = _paymentMethod == value;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return GestureDetector(
       onTap: () => setState(() => _paymentMethod = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? primaryColor.withValues(alpha: 0.05) : null,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? primaryColor : Colors.grey.withValues(alpha: 0.2),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: primaryColor, size: 18),
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14))),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: isSelected
+                  ? Icon(Icons.check_circle_rounded, color: primaryColor, key: const ValueKey('on'))
+                  : Icon(Icons.radio_button_unchecked_rounded, color: Colors.grey[300], key: const ValueKey('off')),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -780,22 +911,60 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
   }
 
   Widget _buildBottomAction() {
-    String label = _currentStep < (_hasRental ? 2 : 1) ? 'Next' : 'Process Payment';
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isLastStep = _currentStep >= (_hasRental ? 2 : 1);
+    final String label = isLastStep ? 'Proses Pembayaran' : 'Lanjutkan';
+    final IconData btnIcon = isLastStep ? Icons.payment_rounded : Icons.arrow_forward_rounded;
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -4))],
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, -6))],
       ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isLastStep) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Total Pembayaran', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                  Text(
+                    'Rp ${NumberFormat('#,###').format(_totalPrice)}',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: primaryColor),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                onPressed: _isSubmitting ? null : _nextStep,
+                icon: _isSubmitting
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Icon(btnIcon, size: 18),
+                label: _isSubmitting
+                    ? const SizedBox.shrink()
+                    : Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
         ),
-        onPressed: _isSubmitting ? null : _nextStep,
-        child: _isSubmitting 
-          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-          : Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
       ),
     );
   }
