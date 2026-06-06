@@ -407,6 +407,8 @@ class _TodoListPageState extends State<TodoListPage> {
             ? _selectedEmployeeId!
             : (_currentUserData!['id'] ?? _currentUserData!['user_id'])
                 .toString();
+    final String loggedInUserId =
+        (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
 
     // Check connectivity
     final connectivityResult = await Connectivity().checkConnectivity();
@@ -418,7 +420,11 @@ class _TodoListPageState extends State<TodoListPage> {
     try {
       final response = await http.post(
         Uri.parse('${AppConstants.baseUrl}/add_todo'),
-        body: {'user_id': targetUserId, 'description': description},
+        body: {
+          'user_id': targetUserId,
+          'logged_in_user_id': loggedInUserId,
+          'description': description
+        },
       );
 
       if (response.statusCode == 200) {
@@ -459,6 +465,8 @@ class _TodoListPageState extends State<TodoListPage> {
 
     _isSyncing = true;
     List<Map<String, dynamic>> successfullySynced = [];
+    final String loggedInUserId =
+        (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
 
     try {
       for (var todo in _pendingTodos) {
@@ -467,6 +475,7 @@ class _TodoListPageState extends State<TodoListPage> {
             Uri.parse('${AppConstants.baseUrl}/add_todo'),
             body: {
               'user_id': todo['user_id'].toString(),
+              'logged_in_user_id': loggedInUserId,
               'description': todo['description'],
             },
           );
@@ -502,15 +511,15 @@ class _TodoListPageState extends State<TodoListPage> {
 
   Future<void> _updateTodo(dynamic todoId, String description) async {
     if (_currentUserData == null) return;
-    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id'])
-        .toString();
+    final String loggedInUserId =
+        (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
 
     try {
       final response = await http.post(
         Uri.parse('${AppConstants.baseUrl}/edit_todo'),
         body: {
           'todo_item_id': todoId.toString(),
-          'user_id': userId,
+          'logged_in_user_id': loggedInUserId,
           'description': description,
         },
       );
@@ -525,15 +534,15 @@ class _TodoListPageState extends State<TodoListPage> {
 
   Future<void> _updateTodoPriority(dynamic todoId, int newPriority) async {
     if (_currentUserData == null) return;
-    final userId = (_currentUserData!['id'] ?? _currentUserData!['user_id'])
-        .toString();
+    final String loggedInUserId =
+        (_currentUserData!['id'] ?? _currentUserData!['user_id']).toString();
 
     try {
       final response = await http.post(
         Uri.parse('${AppConstants.baseUrl}/edit_todo'),
         body: {
           'todo_item_id': todoId.toString(),
-          'user_id': userId,
+          'logged_in_user_id': loggedInUserId,
           'priority': newPriority.toString(),
         },
       );
@@ -979,6 +988,18 @@ class _TodoListPageState extends State<TodoListPage> {
   void _showAddTodoDialog() {
     final TextEditingController controller = TextEditingController();
     _isListening = false;
+    
+    String assigneeName = '';
+    if (_viewMode == 'team' && _selectedEmployeeId != null) {
+      final emp = _employees.firstWhere(
+        (e) => e['user_id'].toString() == _selectedEmployeeId,
+        orElse: () => null,
+      );
+      if (emp != null) {
+        assigneeName = '${emp['first_name']} ${emp['last_name'] ?? ''}'.trim();
+      }
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1011,6 +1032,17 @@ class _TodoListPageState extends State<TodoListPage> {
                       letterSpacing: 1,
                     ),
                   ),
+                  if (assigneeName.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '${'todo_list.assign_to'.tr(context)}: $assigneeName',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   TextField(
                     controller: controller,

@@ -6,6 +6,7 @@
         "copy_task": "Copy",
         "delete_task": "Delete Task",
         "new_task_title": "Add New Task",
+        "assign_to": "Assign to",
         "task_name": "Task Name",
         "task_desc": "Task Description",
         "status": "Status",

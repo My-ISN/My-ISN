@@ -6,6 +6,7 @@
         "copy_task": "Salin",
         "delete_task": "Hapus Tugas",
         "new_task_title": "Tambah Tugas Baru",
+        "assign_to": "Ditugaskan ke",
         "task_name": "Nama Tugas",
         "task_desc": "Deskripsi Tugas",
         "status": "Status",
