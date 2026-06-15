@@ -1032,6 +1032,37 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     }
   }
 
+  Future<void> _launchWhatsApp(String phone, {String message = ''}) async {
+    // Remove leading 0 and replace with 62
+    String formattedPhone = phone.replaceAll(RegExp(r'\D'), '');
+    if (formattedPhone.startsWith('0')) {
+      formattedPhone = '62${formattedPhone.substring(1)}';
+    } else if (!formattedPhone.startsWith('62') && formattedPhone.isNotEmpty) {
+      formattedPhone = '62$formattedPhone';
+    }
+
+    final String urlString =
+        "whatsapp://send?phone=$formattedPhone&text=${Uri.encodeComponent(message)}";
+    final Uri url = Uri.parse(urlString);
+
+    try {
+      if (!await launchUrl(url)) {
+        // Fallback to web link if whatsapp app is not installed
+        final String webUrlString =
+            "https://wa.me/$formattedPhone?text=${Uri.encodeComponent(message)}";
+        final Uri webUrl = Uri.parse(webUrlString);
+        if (!await launchUrl(webUrl, mode: LaunchMode.externalApplication)) {
+          throw Exception('Could not launch WhatsApp');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error launching WhatsApp: $e');
+      if (mounted) {
+        context.showErrorSnackBar('Gagal membuka WhatsApp: ${e.toString()}');
+      }
+    }
+  }
+
   Widget _buildActiveTabContent() {
     if (_activeTab == 'EDIT') return _buildEditTab();
     if (_activeTab == 'VIEW DOKUMEN') return _buildViewDokumenTab();
@@ -2116,11 +2147,178 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                 : 'rent_plan.nik'.tr(context),
             _rentalData!['npwp'] ?? _rentalData!['nik'] ?? '-',
           ),
-          _buildRowTwoFields(
-            'rent_plan.whatsapp'.tr(context),
-            _rentalData!['whatsapp'] ?? _rentalData!['renter_contact'] ?? '-',
-            'Nomor Keluarga (Darurat)',
-            _rentalData!['emergency_contact_number'] ?? '-',
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'rent_plan.whatsapp'.tr(context),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[500],
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Builder(
+                        builder: (context) {
+                          final whatsappNum = _rentalData!['whatsapp'] ?? _rentalData!['renter_contact'] ?? '';
+                          final hasWhatsapp = whatsappNum.toString().isNotEmpty && whatsappNum.toString() != '-';
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                hasWhatsapp ? whatsappNum.toString() : '-',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                                ),
+                              ),
+                              if (hasWhatsapp) ...[
+                                const SizedBox(height: 8),
+                                InkWell(
+                                  onTap: () {
+                                    final invoice = _rentalData!['invoice_number'] ?? widget.invoiceNumber ?? '';
+                                    final msg = 'Halo, kami dari tim ISN ingin mengonfirmasi perihal rental Anda dengan invoice $invoice.';
+                                    _launchWhatsApp(whatsappNum.toString(), message: msg);
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.green.withValues(alpha: 0.2),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.chat_rounded,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Chat Client',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Nomor Keluarga (Darurat)',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[500],
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Builder(
+                        builder: (context) {
+                          final emergencyNum = _rentalData!['emergency_contact_number'] ?? '';
+                          final hasEmergency = emergencyNum.toString().isNotEmpty && emergencyNum.toString() != '-';
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                hasEmergency ? emergencyNum.toString() : '-',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                                ),
+                              ),
+                              if (hasEmergency) ...[
+                                const SizedBox(height: 8),
+                                InkWell(
+                                  onTap: () {
+                                    final invoice = _rentalData!['invoice_number'] ?? widget.invoiceNumber ?? '';
+                                    final clientName = _rentalData!['first_name'] ?? _rentalData!['nama_pribadi'] ?? _rentalData!['nama_perusahaan'] ?? '';
+                                    final msg = 'Halo, kami dari tim ISN ingin mengonfirmasi perihal rental klien atas nama $clientName dengan invoice $invoice.';
+                                    _launchWhatsApp(emergencyNum.toString(), message: msg);
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.green.withValues(alpha: 0.2),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.chat_rounded,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          'Chat WhatsApp',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
           _buildRowTwoFields(
             'rent_plan.ktp_address'.tr(context),
