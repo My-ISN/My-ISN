@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
-import '../widgets/custom_snackbar.dart';
 import '../localization/app_localizations.dart';
 import '../services/project_task_service.dart';
 import '../widgets/pagination_header.dart';

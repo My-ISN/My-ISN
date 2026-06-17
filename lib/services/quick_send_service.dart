@@ -92,9 +92,9 @@ class QuickSendService {
           'user_id': userId,
           'nama': nama,
           'no_hp': phone,
-          if (emoji != null) 'icon_emoji': emoji,
-          if (color != null) 'color': color,
-          if (template != null) 'msg_template': template,
+          'icon_emoji': ?emoji,
+          'color': ?color,
+          'msg_template': ?template,
           if (items != null) 'items': json.encode(items),
         },
       ).timeout(const Duration(seconds: 20));

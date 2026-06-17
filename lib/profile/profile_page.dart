@@ -152,8 +152,9 @@ class _ProfilePageState extends State<ProfilePage> {
         onTap: (index) {
           final bool hasPayroll = _hasPermission('mobile_payroll_enable');
           String tag = 'dashboard';
-          if (index == 1) tag = 'attendance';
-          else if (index == 2) tag = hasPayroll ? 'payroll' : 'profile';
+          if (index == 1) {
+            tag = 'attendance';
+          } else if (index == 2) tag = hasPayroll ? 'payroll' : 'profile';
           else if (index == 3) tag = 'profile';
           
           DashboardPage.switchTab(tag);

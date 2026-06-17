@@ -30,7 +30,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
   Map<String, dynamic> _stats = {};
   bool _isLoading = true;
   bool _isInitialLoad = true; // Flag for first-time loading
-  String? _error = null;
+  String? _error;
   List<dynamic> _departments = [];
   int? _selectedDepartmentId;
 

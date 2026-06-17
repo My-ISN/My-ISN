@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'connectivity_wrapper.dart';
 
 class CustomSnackBar {
   static void showSuccess(BuildContext context, String message) {

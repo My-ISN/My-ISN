@@ -8,7 +8,6 @@ import '../announcement_page.dart';
 import '../todo_list/todo_list_page.dart';
 import 'top_notification.dart';
 import '../localization/app_localizations.dart';
-import '../widgets/custom_snackbar.dart';
 import '../constants.dart';
 import '../dashboard/staff/widgets/menu_registry.dart';
 import '../dashboard/dashboard_page.dart';

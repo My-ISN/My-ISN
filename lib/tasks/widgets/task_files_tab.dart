@@ -221,7 +221,7 @@ class TaskFilesTabState extends State<TaskFilesTab> {
                 height: 220,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   height: 220,
                   color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[100],
                   child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey[400]),

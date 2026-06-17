@@ -34,8 +34,8 @@ class _AddProjectPageState extends State<AddProjectPage> {
   String _selectedPriority = '1'; // Default: Medium
   
   // Team (Assigned To)
-  List<String> _selectedTeamIds = [];
-  List<String> _selectedTeamNames = [];
+  final List<String> _selectedTeamIds = [];
+  final List<String> _selectedTeamNames = [];
   
   bool _isLoading = true;
   bool _isSubmitting = false;

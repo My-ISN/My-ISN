@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../../constants.dart';
 import '../../../providers/cart_provider.dart';
-import '../../../localization/app_localizations.dart';
 import 'cart_page.dart';
 
 class ProductDetailPage extends StatelessWidget {

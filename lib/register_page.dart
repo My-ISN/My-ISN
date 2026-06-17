@@ -10,7 +10,6 @@ import 'package:uuid/uuid.dart';
 import 'package:pinput/pinput.dart';
 import 'dart:async';
 import 'dashboard/dashboard_page.dart';
-import 'widgets/connectivity_wrapper.dart';
 import 'localization/app_localizations.dart';
 import 'constants.dart';
 

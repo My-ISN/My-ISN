@@ -31,12 +31,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
   String _selectedProjectName = '';
   
   // Assign Member
-  List<String> _selectedAssigneeIds = [];
-  List<String> _selectedAssigneeNames = [];
+  final List<String> _selectedAssigneeIds = [];
+  final List<String> _selectedAssigneeNames = [];
   
   // Team
-  List<String> _selectedTeamIds = [];
-  List<String> _selectedTeamNames = [];
+  final List<String> _selectedTeamIds = [];
+  final List<String> _selectedTeamNames = [];
   
   bool _isLoading = true;
   bool _isSubmitting = false;

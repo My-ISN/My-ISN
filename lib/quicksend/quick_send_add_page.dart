@@ -165,7 +165,7 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
                                 child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: _presets.length,
-                                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                                  separatorBuilder: (_, _) => const SizedBox(width: 8),
                                   itemBuilder: (context, index) {
                                     final hex = _presets[index];
                                     final color = Color(int.parse(hex.replaceFirst('#', '0xFF')));

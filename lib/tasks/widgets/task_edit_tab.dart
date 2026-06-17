@@ -29,11 +29,11 @@ class TaskEditTabState extends State<TaskEditTab> {
   List<dynamic> _employees = [];
   // Assign Member
   List<String> _selectedAssigneeIds = [];
-  List<String> _selectedAssigneeNames = [];
+  final List<String> _selectedAssigneeNames = [];
   
   // Team
   List<String> _selectedTeamIds = [];
-  List<String> _selectedTeamNames = [];
+  final List<String> _selectedTeamNames = [];
 
   bool _isLoading = false;
   bool _isDataLoading = true;

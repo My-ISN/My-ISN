@@ -32,7 +32,7 @@ class ProjectEditTabState extends State<ProjectEditTab> {
   String? _selectedStatus;
   
   List<String> _selectedMemberIds = [];
-  List<String> _selectedMemberNames = [];
+  final List<String> _selectedMemberNames = [];
 
   List<Map<String, dynamic>> _departments = [];
   List<Map<String, dynamic>> _employees = [];
@@ -370,7 +370,7 @@ class ProjectEditTabState extends State<ProjectEditTab> {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          value: _selectedPriority,
+          initialValue: _selectedPriority,
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black),
           decoration: InputDecoration(
             filled: true,
@@ -414,7 +414,7 @@ class ProjectEditTabState extends State<ProjectEditTab> {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          value: _selectedStatus,
+          initialValue: _selectedStatus,
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black),
           decoration: InputDecoration(
             filled: true,

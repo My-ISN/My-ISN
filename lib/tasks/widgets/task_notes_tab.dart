@@ -204,7 +204,7 @@ class TaskNotesTabState extends State<TaskNotesTab> {
                       radius: 12,
                       backgroundColor: primaryColor.withValues(alpha: 0.1),
                       backgroundImage: NetworkImage(n['profile_photo_url'] ?? ''),
-                      onBackgroundImageError: (_, __) {},
+                      onBackgroundImageError: (_, _) {},
                       child: Text(
                         n['first_name'][0],
                         style: TextStyle(color: primaryColor, fontSize: 10, fontWeight: FontWeight.bold),

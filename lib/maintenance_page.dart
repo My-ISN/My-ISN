@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'login_page.dart';
-import 'localization/app_localizations.dart';
 import 'widgets/custom_snackbar.dart';
 
 class MaintenancePage extends StatefulWidget {

@@ -9,11 +9,9 @@ import 'dart:async';
 
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
-import '../widgets/connectivity_wrapper.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
 import '../widgets/custom_snackbar.dart';
-import '../widgets/limit_dropdown_widget.dart';
 import '../widgets/pagination_header.dart';
 
 import '../widgets/searchable_dropdown.dart';

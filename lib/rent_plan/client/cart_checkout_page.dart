@@ -67,9 +67,9 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
   bool _isLoadingRegCur = false, _isLoadingDistCur = false, _isLoadingVillCur = false;
   
   // Cache for better performance
-  Map<String, List<dynamic>> _regencyCache = {};
-  Map<String, List<dynamic>> _districtCache = {};
-  Map<String, List<dynamic>> _villageCache = {};
+  final Map<String, List<dynamic>> _regencyCache = {};
+  final Map<String, List<dynamic>> _districtCache = {};
+  final Map<String, List<dynamic>> _villageCache = {};
   
   // Debounce timer
   Timer? _debounceTimer;
@@ -828,7 +828,7 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
                   Text(label, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: color)),
                   const SizedBox(height: 2),
                   Text(
-                    uploaded ? file!.path.split('/').last : 'Ketuk untuk upload file',
+                    uploaded ? file.path.split('/').last : 'Ketuk untuk upload file',
                     style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -892,7 +892,7 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
         children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text('${item.isRental ? "Rental" : "Purchase"} x ${item.quantity}${item.isRental ? " (${_lamaSewa} days)" : ""}', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            Text('${item.isRental ? "Rental" : "Purchase"} x ${item.quantity}${item.isRental ? " ($_lamaSewa days)" : ""}', style: TextStyle(fontSize: 12, color: Colors.grey)),
           ])),
           Text('Rp ${NumberFormat('#,###').format(rowTotal)}'),
         ],
@@ -1052,8 +1052,6 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
           )
           .toList(),
       onSelected: (val) {
-        if (val == null) return;
-        
         final ship = _shippingCosts.firstWhere(
           (s) => s['constants_id'].toString() == val,
           orElse: () => {},
@@ -1080,7 +1078,11 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
           value: _getNameFromList(_provinces, isKtp ? _selectedProvinceKtp : _selectedProvinceCur),
           onSelected: (val) {
             setState(() { 
-              if (isKtp) _selectedProvinceKtp = val; else _selectedProvinceCur = val; 
+              if (isKtp) {
+                _selectedProvinceKtp = val;
+              } else {
+                _selectedProvinceCur = val;
+              } 
             });
             _loadRegenciesDebounced(val, isKtp);
           },
@@ -1095,7 +1097,11 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
           onSelected: (val) {
             if (isKtp ? _isLoadingRegKtp : _isLoadingRegCur) return; // Prevent selection during loading
             setState(() { 
-              if (isKtp) _selectedRegencyKtp = val; else _selectedRegencyCur = val; 
+              if (isKtp) {
+                _selectedRegencyKtp = val;
+              } else {
+                _selectedRegencyCur = val;
+              } 
             });
             _loadDistricts(val, isKtp);
           },
@@ -1110,7 +1116,11 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
           onSelected: (val) {
             if (isKtp ? _isLoadingDistKtp : _isLoadingDistCur) return; // Prevent selection during loading
             setState(() { 
-              if (isKtp) _selectedDistrictKtp = val; else _selectedDistrictCur = val; 
+              if (isKtp) {
+                _selectedDistrictKtp = val;
+              } else {
+                _selectedDistrictCur = val;
+              } 
             });
             _loadVillages(val, isKtp);
           },
@@ -1125,7 +1135,11 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
           onSelected: (val) {
             if (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) return; // Prevent selection during loading
             setState(() { 
-              if (isKtp) _selectedVillageKtp = val; else _selectedVillageCur = val; 
+              if (isKtp) {
+                _selectedVillageKtp = val;
+              } else {
+                _selectedVillageCur = val;
+              } 
             });
           },
           placeholder: (isKtp ? _isLoadingVillKtp : _isLoadingVillCur) ? 'Loading...' : 'Select Village',
@@ -1324,8 +1338,9 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
     if (result != null) {
       setState(() {
         File file = File(result.files.single.path!);
-        if (type == 'ktp') _fileKtp = file;
-        else if (type == 'npwp') _fileNpwp = file;
+        if (type == 'ktp') {
+          _fileKtp = file;
+        } else if (type == 'npwp') _fileNpwp = file;
         else if (type == 'po') _filePo = file;
         else if (type == 'ktp_pimpinan') _fileKtpPimpinan = file;
         else if (type == 'domisili') _fileDomisiliPerusahaan = file;
@@ -1403,8 +1418,11 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
       }
     } catch (e) {
       setState(() {
-        if (isKtp) _isLoadingRegKtp = false;
-        else _isLoadingRegCur = false;
+        if (isKtp) {
+          _isLoadingRegKtp = false;
+        } else {
+          _isLoadingRegCur = false;
+        }
       });
       
       if (mounted) {
@@ -1471,8 +1489,11 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
       }
     } catch (e) {
       setState(() {
-        if (isKtp) _isLoadingDistKtp = false;
-        else _isLoadingDistCur = false;
+        if (isKtp) {
+          _isLoadingDistKtp = false;
+        } else {
+          _isLoadingDistCur = false;
+        }
       });
       
       if (mounted) {
@@ -1531,8 +1552,11 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
       }
     } catch (e) {
       setState(() {
-        if (isKtp) _isLoadingVillKtp = false;
-        else _isLoadingVillCur = false;
+        if (isKtp) {
+          _isLoadingVillKtp = false;
+        } else {
+          _isLoadingVillCur = false;
+        }
       });
       
       if (mounted) {

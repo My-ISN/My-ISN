@@ -191,7 +191,7 @@ class TaskDiscussionTabState extends State<TaskDiscussionTab> {
                   radius: 16,
                   backgroundColor: primaryColor.withValues(alpha: 0.1),
                   backgroundImage: NetworkImage(d['profile_photo_url'] ?? ''),
-                  onBackgroundImageError: (_, __) {},
+                  onBackgroundImageError: (_, _) {},
                   child: Text(
                     d['first_name'][0],
                     style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 10),
@@ -268,7 +268,7 @@ class TaskDiscussionTabState extends State<TaskDiscussionTab> {
                   radius: 16,
                   backgroundColor: primaryColor.withValues(alpha: 0.1),
                   backgroundImage: NetworkImage(d['profile_photo_url'] ?? ''),
-                  onBackgroundImageError: (_, __) {},
+                  onBackgroundImageError: (_, _) {},
                   child: Text(
                     d['first_name'][0],
                     style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 10),

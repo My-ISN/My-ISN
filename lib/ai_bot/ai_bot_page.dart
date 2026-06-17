@@ -399,7 +399,7 @@ class _AiBotPageState extends State<AiBotPage> {
                     Text('aibot.category'.tr(context), style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _selectedKategori,
+                      initialValue: _selectedKategori,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16),

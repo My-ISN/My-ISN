@@ -24,7 +24,7 @@ class TaskDetailPage extends StatefulWidget {
 class _TaskDetailPageState extends State<TaskDetailPage> {
   final ProjectTaskService _service = ProjectTaskService();
   late Task _task;
-  bool _isLoading = false;
+  final bool _isLoading = false;
   bool _isUpdating = false;
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
@@ -264,7 +264,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       CustomSnackBar.showSuccess(context, 'tasks.delete_success'.tr(context));
       Navigator.pop(context, true);
     } else {
-      CustomSnackBar.showError(context, 'tasks.delete_failed'.tr(context) + ': ${result['message']}');
+      CustomSnackBar.showError(context, '${'tasks.delete_failed'.tr(context)}: ${result['message']}');
     }
   }
 

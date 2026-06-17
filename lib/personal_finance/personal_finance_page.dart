@@ -1,9 +1,7 @@
 import '../services/finance_service.dart';
 import '../finance/widgets/finance_transaction_item.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../localization/app_localizations.dart';
@@ -14,7 +12,6 @@ import '../widgets/side_drawer.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/period_filter_widget.dart';
 import '../widgets/custom_snackbar.dart';
-import '../widgets/limit_dropdown_widget.dart';
 import '../widgets/pagination_header.dart';
 
 import 'add_personal_finance_page.dart';

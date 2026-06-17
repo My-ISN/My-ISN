@@ -189,7 +189,7 @@ class _JobDeskPageState extends State<JobDeskPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        CustomSnackBar.showError(context, 'job_desk.failed_delete'.tr(context) + ': $e');
+        CustomSnackBar.showError(context, '${'job_desk.failed_delete'.tr(context)}: $e');
       }
     }
   }
@@ -522,7 +522,7 @@ class _JobDeskPageState extends State<JobDeskPage> {
       }
     } catch (e) {
       if (mounted) {
-        CustomSnackBar.showError(context, 'job_desk.failed_save'.tr(context) + ': $e');
+        CustomSnackBar.showError(context, '${'job_desk.failed_save'.tr(context)}: $e');
       }
     }
   }

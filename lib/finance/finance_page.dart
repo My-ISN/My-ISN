@@ -16,7 +16,6 @@ import 'widgets/finance_account_item.dart';
 import 'widgets/finance_transaction_item.dart';
 import 'add_finance_data_page.dart';
 import '../widgets/custom_snackbar.dart';
-import '../widgets/limit_dropdown_widget.dart';
 import '../widgets/pagination_header.dart';
 
 class FinancePage extends StatefulWidget {

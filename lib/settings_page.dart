@@ -852,7 +852,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         trailing: Switch(
                           value: _isFingerprintEnabled,
                           onChanged: _toggleFingerprint,
-                          activeColor: Theme.of(context).colorScheme.primary,
+                          activeThumbColor: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       if (_hasToken) ...[

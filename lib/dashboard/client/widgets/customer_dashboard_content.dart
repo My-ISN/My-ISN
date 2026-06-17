@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import '../../../constants.dart';
 import 'package:provider/provider.dart';
 import '../../../localization/app_localizations.dart';
-import '../../../widgets/connectivity_wrapper.dart';
 import '../../../providers/cart_provider.dart';
 import '../pages/product_detail_page.dart';
 import '../pages/cart_page.dart';
