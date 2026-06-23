@@ -200,7 +200,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                 if (selectedMethod == 'transfer') {
                   final url = Uri.parse(result['data']['payment_url']);
                   if (await canLaunchUrl(url)) {
-                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                    await launchUrl(url, mode: LaunchMode.inAppWebView);
                     if (mounted) Navigator.pop(context);
                   } else {
                     throw 'rent_plan.payment.cannot_open_payment_link'.tr(context);

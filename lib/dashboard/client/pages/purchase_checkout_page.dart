@@ -235,7 +235,7 @@ class _PurchaseCheckoutPageState extends State<PurchaseCheckoutPage> {
           if (payRes['status'] == true && payRes['data']['payment_url'] != null) {
             final url = Uri.parse(payRes['data']['payment_url']);
             if (await canLaunchUrl(url)) {
-              await launchUrl(url, mode: LaunchMode.externalApplication);
+              await launchUrl(url, mode: LaunchMode.inAppWebView);
               context.showSuccessSnackBar('Checkout berhasil. Silakan selesaikan pembayaran di Flip.');
               context.read<CartProvider>().clearByType(isRental: false);
               Navigator.pop(context);
