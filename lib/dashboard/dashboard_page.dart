@@ -8,6 +8,7 @@ import '../widgets/custom_bottom_nav.dart';
 import '../widgets/custom_app_bar.dart';
 
 import '../widgets/side_drawer.dart';
+import '../ai_bot/ai_chat_isn_page.dart';
 import '../profile/profile_page.dart';
 import '../attendance_page.dart';
 import '../payroll/payroll_page.dart';
@@ -646,12 +647,17 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final user = _dashboardData['user'] ?? widget.userData;
     final bool isCustomer =
         user['user_type'] == 'customer' ||
         user['user_role_id'] == 21 ||
         user['user_role_id'] == '21';
     final bool hasPayroll = _hasPermission('mobile_payroll_enable');
+    
+    final String userType = (user['user_type'] ?? '').toString();
+    final String roleName = (user['role_name'] ?? '').toString().toLowerCase();
+    final bool isSuperAdmin = userType == 'super_user' || userType == 'company' || roleName == 'super admin';
 
 
     final List<Widget> pages = isCustomer
@@ -757,6 +763,34 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                   },
                 ),
               ),
+        floatingActionButton: (isSuperAdmin && _currentIndex == 0)
+            ? Container(
+                margin: const EdgeInsets.only(bottom: 10), // Sits lower (closer to bottom nav)
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AiChatIsnPage(userData: user),
+                      ),
+                    );
+                  },
+                  backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                  elevation: 1, // Thinner native shadow
+                  shape: CircleBorder(
+                    side: BorderSide(
+                      color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.15),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.memory_rounded, // CPU Icon
+                    color: Color(0xFF6A11CB), // Purple color
+                    size: 28,
+                  ),
+                ),
+              )
+            : null,
       ),
     );
   }

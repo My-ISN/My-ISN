@@ -471,6 +471,14 @@ class _CustomAppBarState extends State<CustomAppBar> {
     return AppBar(
       elevation: 0,
       automaticallyImplyLeading: widget.showBackButton,
+      shape: Border(
+        bottom: BorderSide(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white10
+              : Colors.grey.withOpacity(0.15),
+          width: 1.0,
+        ),
+      ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

@@ -372,4 +372,30 @@ class RentPlanService {
       return {'status': false, 'message': e.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> updateRentalBarcode(int rentalId, String barcode) async {
+    try {
+      final url = Uri.parse('$baseUrl/update_rental_barcode');
+      final response = await http.post(
+        url,
+        body: {
+          'rental_id': rentalId.toString(),
+          'barcode': barcode,
+        },
+      );
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getLaptopUnitByBarcode(String barcode) async {
+    try {
+      final url = Uri.parse('$baseUrl/get_laptop_unit_by_barcode?barcode=$barcode');
+      final response = await http.get(url);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
 }

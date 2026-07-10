@@ -12,7 +12,7 @@ import '../../widgets/searchable_dropdown.dart';
 import '../../localization/app_localizations.dart';
 import '../../constants.dart';
 import '../../widgets/custom_snackbar.dart';
-
+import '../../widgets/barcode_scanner_page.dart';
 import '../../widgets/secondary_app_bar.dart';
 
 class RentPlanDetailPage extends StatefulWidget {
@@ -2117,6 +2117,59 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     );
   }
 
+  Future<void> _openBarcodeScanner(BuildContext context) async {
+    final String? scannedValue = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const BarcodeScannerPage(),
+      ),
+    );
+
+    if (scannedValue != null && scannedValue.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final res = await _rentPlanService.updateRentalBarcode(widget.rentalId, scannedValue);
+
+      if (res['status'] == true) {
+        if (mounted) {
+          context.showSuccessSnackBar(res['message'] ?? 'Barcode laptop berhasil diperbarui.');
+        }
+      } else {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Row(
+                children: [
+                  Icon(Icons.error_outline_rounded, color: Colors.red, size: 28),
+                  SizedBox(width: 12),
+                  Text('Gagal Memasang', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              content: Text(res['message'] ?? 'Gagal memperbarui barcode laptop.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('OK', style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+
+      await _fetchDetail(silent: true);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   Widget _buildOverviewTab() {
     final currencyFormat = NumberFormat.currency(
       locale: 'id_ID',
@@ -2371,6 +2424,72 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             '${_rentalData!['lama_sewa'] ?? 0} ${'rent_plan.days'.tr(context)}',
             '',
             '',
+          ),
+          const Divider(height: 24, thickness: 0.5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Barcode Laptop',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _rentalData!['barcode'] != null && _rentalData!['barcode'].toString().isNotEmpty
+                              ? Colors.green.withValues(alpha: 0.1)
+                              : Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _rentalData!['barcode'] != null && _rentalData!['barcode'].toString().isNotEmpty
+                              ? _rentalData!['barcode'].toString()
+                              : 'Belum Terpasang',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: _rentalData!['barcode'] != null && _rentalData!['barcode'].toString().isNotEmpty
+                                ? Colors.green
+                                : Colors.orange,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _openBarcodeScanner(context),
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
+                label: Text(
+                  _rentalData!['barcode'] != null && _rentalData!['barcode'].toString().isNotEmpty
+                      ? 'Scan Ulang'
+                      : 'Scan Barcode',
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ],
           ),
         ]),
 
