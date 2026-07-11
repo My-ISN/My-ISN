@@ -42,8 +42,8 @@
         "notification_sound": "Suara Notifikasi",
         "select_notification_sound": "Pilih Suara Notifikasi",
         "sound_default": "Default Sistem",
-        "sound_elegant": "Elegant Notification",
-        "sound_magic": "Magic Ringtone",
-        "sound_relax": "Relax Tone"
+        "sound_elegant_notification_sound": "Elegant Notification",
+        "sound_message_ringtone_magic": "Magic Ringtone",
+        "sound_relax_message_tone": "Relax Tone"
     }
 }

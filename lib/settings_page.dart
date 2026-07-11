@@ -530,10 +530,16 @@ class _SettingsPageState extends State<SettingsPage> {
       {'id': 'default', 'label': 'settings.sound_default'},
       {
         'id': 'elegant_notification_sound',
-        'label': 'settings.sound_elegant'
+        'label': 'settings.sound_elegant_notification_sound'
       },
-      {'id': 'message_ringtone_magic', 'label': 'settings.sound_magic'},
-      {'id': 'relax_message_tone', 'label': 'settings.sound_relax'},
+      {
+        'id': 'message_ringtone_magic',
+        'label': 'settings.sound_message_ringtone_magic'
+      },
+      {
+        'id': 'relax_message_tone',
+        'label': 'settings.sound_relax_message_tone'
+      },
     ];
 
     await showModalBottomSheet(
