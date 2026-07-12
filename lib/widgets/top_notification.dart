@@ -4,12 +4,14 @@ class TopNotification extends StatefulWidget {
   final String title;
   final String message;
   final VoidCallback onTap;
+  final VoidCallback onClose;
 
   const TopNotification({
     super.key,
     required this.title,
     required this.message,
     required this.onTap,
+    required this.onClose,
   });
 
   static void show(
@@ -26,8 +28,11 @@ class TopNotification extends StatefulWidget {
         title: title,
         message: message,
         onTap: () {
-          entry.remove();
+          if (entry.mounted) entry.remove();
           onTap();
+        },
+        onClose: () {
+          if (entry.mounted) entry.remove();
         },
       ),
     );
@@ -139,7 +144,7 @@ class _TopNotificationState extends State<TopNotification>
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20, color: Colors.grey),
-                    onPressed: widget.onTap,
+                    onPressed: widget.onClose,
                   ),
                 ],
               ),

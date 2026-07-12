@@ -102,12 +102,19 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
   @override
   Widget build(BuildContext context) {
     final accountName = (widget.account['name'] ?? '').toString().toUpperCase();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetColor = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerLow
+        : Colors.white;
+    final searchFillColor = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : Colors.grey[100]!;
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.8,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: BoxDecoration(
+        color: sheetColor,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
@@ -123,7 +130,7 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -135,12 +142,12 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Share Account Access',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -156,7 +163,10 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       onPressed: () => Navigator.pop(context),
                       constraints: const BoxConstraints(),
                       padding: EdgeInsets.zero,
@@ -171,7 +181,7 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: searchFillColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
@@ -179,8 +189,15 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                 onChanged: _filterStaff,
                 decoration: InputDecoration(
                   hintText: 'Search employee...',
-                  hintStyle: TextStyle(color: Colors.grey[500], fontSize: 13),
-                  prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[500], size: 20),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                    fontSize: 13,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                    size: 20,
+                  ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -194,11 +211,19 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                 ? _buildLoadingState()
                 : _filteredStaffList.isEmpty
                     ? _buildEmptyState()
-                    : _buildStaffList(),
+                    : _buildStaffList(isDark),
           ),
           // Save Button Section
-          Padding(
+          Container(
             padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
+            decoration: BoxDecoration(
+              color: sheetColor,
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                ),
+              ),
+            ),
             child: SizedBox(
               width: double.infinity,
               height: 50,
@@ -247,18 +272,25 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline_rounded, size: 48, color: Colors.grey[400]),
+          Icon(
+            Icons.people_outline_rounded,
+            size: 48,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+          ),
           const SizedBox(height: 12),
           Text(
             'No employees found',
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              fontSize: 14,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStaffList() {
+  Widget _buildStaffList(bool isDark) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       itemCount: _filteredStaffList.length,
@@ -296,7 +328,7 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: _primaryColor.withOpacity(0.1),
+                        color: _primaryColor.withValues(alpha: 0.15),
                         width: 1.5,
                       ),
                     ),
@@ -318,10 +350,10 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                       children: [
                         Text(
                           name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         if (email.isNotEmpty)
@@ -329,7 +361,7 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                             email,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[500],
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45),
                             ),
                           ),
                       ],
@@ -338,7 +370,10 @@ class _PasswordShareSheetState extends State<PasswordShareSheet> {
                 ],
               ),
             ),
-            Divider(height: 1, color: Colors.grey[150]),
+            Divider(
+              height: 1,
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.15),
+            ),
           ],
         );
       },

@@ -134,4 +134,62 @@ class PasswordService {
       return {'status': false, 'message': e.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> savePasswordEntry({
+    required dynamic idAcc,
+    required String description,
+    required Map<String, String> fields,
+  }) async {
+    try {
+      final userId = await _getUserId();
+      if (userId == null) return {'status': false, 'message': 'User not found'};
+
+      final url = Uri.parse('$baseUrl/save_password_entry');
+      final response = await http.post(
+        url,
+        body: {
+          'user_id': userId,
+          'id_acc': idAcc.toString(),
+          'description': description,
+          'fields': json.encode(fields),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'status': false, 'message': 'Server error: ${response.statusCode}'};
+      }
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> deletePasswordEntry({
+    required dynamic idPass,
+    required dynamic idAcc,
+  }) async {
+    try {
+      final userId = await _getUserId();
+      if (userId == null) return {'status': false, 'message': 'User not found'};
+
+      final url = Uri.parse('$baseUrl/delete_password_entry');
+      final response = await http.post(
+        url,
+        body: {
+          'user_id': userId,
+          'id_pass': idPass.toString(),
+          'id_acc': idAcc.toString(),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'status': false, 'message': 'Server error: ${response.statusCode}'};
+      }
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
 }

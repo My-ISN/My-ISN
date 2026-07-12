@@ -404,7 +404,7 @@ class _SideDrawerState extends State<SideDrawer> {
                             );
                           },
                         ),
-                      if (_hasPermission('pass_account'))
+                      if (_hasPermission('mobile_pass_account'))
                         _buildMenuItem(
                           context,
                           icon: Icons.vpn_key_outlined,

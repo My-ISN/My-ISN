@@ -201,7 +201,7 @@ class MenuRegistry {
         titleKey: 'main.xin_passwords',
         icon: Icons.vpn_key_rounded,
         color: const Color(0xFF7E57C2),
-        permission: 'pass_account',
+        permission: 'mobile_pass_account',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => PasswordListPage(userData: user),
       ),

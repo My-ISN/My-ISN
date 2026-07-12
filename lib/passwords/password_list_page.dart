@@ -18,7 +18,7 @@ class PasswordListPage extends StatefulWidget {
 class _PasswordListPageState extends State<PasswordListPage> {
   final Color _primaryColor = const Color(0xFF7E57C2);
   final PasswordService _passwordService = PasswordService();
-  
+
   bool _isLoading = true;
   List<dynamic> _accounts = [];
   List<dynamic> _filteredAccounts = [];
@@ -77,6 +77,7 @@ class _PasswordListPageState extends State<PasswordListPage> {
   @override
   Widget build(BuildContext context) {
     final bool isCompany = widget.userData['user_type'] == 'company';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -100,7 +101,7 @@ class _PasswordListPageState extends State<PasswordListPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildPremiumSearchBar(),
+                  _buildSearchBar(isDark),
                 ],
               ),
             ),
@@ -109,7 +110,7 @@ class _PasswordListPageState extends State<PasswordListPage> {
                   ? _buildLoadingState()
                   : _filteredAccounts.isEmpty
                       ? _buildEmptyState()
-                      : _buildAccountList(isCompany),
+                      : _buildAccountList(isCompany, isDark),
             ),
           ],
         ),
@@ -117,14 +118,18 @@ class _PasswordListPageState extends State<PasswordListPage> {
     );
   }
 
-  Widget _buildPremiumSearchBar() {
+  Widget _buildSearchBar(bool isDark) {
+    final fillColor = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : Colors.grey[100]!;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: fillColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -135,7 +140,10 @@ class _PasswordListPageState extends State<PasswordListPage> {
         onChanged: _filterAccounts,
         decoration: InputDecoration(
           hintText: 'Search account...',
-          hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+          hintStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+            fontSize: 14,
+          ),
           prefixIcon: Icon(Icons.search_rounded, color: _primaryColor),
           suffixIcon: _searchQuery.isNotEmpty
               ? GestureDetector(
@@ -143,7 +151,10 @@ class _PasswordListPageState extends State<PasswordListPage> {
                     _searchController.clear();
                     _filterAccounts('');
                   },
-                  child: Icon(Icons.clear_rounded, color: Colors.grey[600]),
+                  child: Icon(
+                    Icons.clear_rounded,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
                 )
               : null,
           border: InputBorder.none,
@@ -168,13 +179,17 @@ class _PasswordListPageState extends State<PasswordListPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.vpn_key_outlined, size: 64, color: Colors.grey[400]),
+              Icon(
+                Icons.vpn_key_outlined,
+                size: 64,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+              ),
               const SizedBox(height: 16),
               Text(
                 'No accounts found',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -182,7 +197,10 @@ class _PasswordListPageState extends State<PasswordListPage> {
                 const SizedBox(height: 8),
                 Text(
                   'Try checking your search query or spelling',
-                  style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
                 ),
               ],
             ],
@@ -192,7 +210,11 @@ class _PasswordListPageState extends State<PasswordListPage> {
     );
   }
 
-  Widget _buildAccountList(bool isCompany) {
+  Widget _buildAccountList(bool isCompany, bool isDark) {
+    final cardColor = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerLow
+        : Colors.white;
+
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -206,15 +228,22 @@ class _PasswordListPageState extends State<PasswordListPage> {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardColor,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: isDark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+            border: isDark
+                ? Border.all(
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.15),
+                  )
+                : null,
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
@@ -240,10 +269,10 @@ class _PasswordListPageState extends State<PasswordListPage> {
                       Expanded(
                         child: Text(
                           name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),
@@ -253,7 +282,7 @@ class _PasswordListPageState extends State<PasswordListPage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: _primaryColor.withOpacity(0.1),
+                          color: _primaryColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -269,7 +298,10 @@ class _PasswordListPageState extends State<PasswordListPage> {
                   ),
                   const SizedBox(height: 12),
                   if (isCompany) ...[
-                    const Divider(height: 1),
+                    Divider(
+                      height: 1,
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -282,8 +314,8 @@ class _PasswordListPageState extends State<PasswordListPage> {
                                     : Icons.people_outline_rounded,
                                 size: 16,
                                 color: sharedStaff.isEmpty
-                                    ? Colors.grey[500]
-                                    : Colors.green[600],
+                                    ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)
+                                    : Colors.green[500],
                               ),
                               const SizedBox(width: 6),
                               Expanded(
@@ -295,9 +327,9 @@ class _PasswordListPageState extends State<PasswordListPage> {
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: sharedStaff.isEmpty
-                                        ? Colors.grey[500]
-                                        : Colors.grey[700],
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(
+                                      alpha: sharedStaff.isEmpty ? 0.4 : 0.7,
+                                    ),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -311,7 +343,7 @@ class _PasswordListPageState extends State<PasswordListPage> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: _primaryColor.withOpacity(0.08),
+                              color: _primaryColor.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -329,14 +361,14 @@ class _PasswordListPageState extends State<PasswordListPage> {
                         Icon(
                           Icons.lock_person_outlined,
                           size: 14,
-                          color: Colors.grey[500],
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                         ),
                         const SizedBox(width: 6),
                         Text(
                           'Shared with you',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[500],
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
