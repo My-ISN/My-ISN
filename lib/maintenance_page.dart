@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'services/tracking_service.dart';
 import 'login_page.dart';
 import 'widgets/custom_snackbar.dart';
 
@@ -46,6 +47,11 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
 
   Future<void> _handleLogout() async {
     // Clear all session data
+    try {
+      await TrackingService().stopSession();
+    } catch (e) {
+      debugPrint('Error stopping tracking session: $e');
+    }
     await storage.deleteAll();
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(

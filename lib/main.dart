@@ -3,8 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'dart:ui';
 import 'services/log_service.dart';
 import 'services/notification_service.dart';
+import 'services/tracking_service.dart';
 import 'login_page.dart';
 import 'dashboard/dashboard_page.dart';
 import 'widgets/connectivity_wrapper.dart';
@@ -22,6 +24,27 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Initialize Tracking Service
+  try {
+    await TrackingService().initialize();
+  } catch (e) {
+    Log.e('TrackingService initialization failed: $e');
+  }
+
+  // Setup Global Exception Handlers for App Health (Crash Tracking)
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    TrackingService().logCrash(
+      details.exceptionAsString(),
+      details.stack?.toString() ?? 'No stack trace',
+    );
+  };
+
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    TrackingService().logCrash(error.toString(), stack.toString());
+    return true;
+  };
 
   final languageProvider = LanguageProvider();
   final themeProvider = ThemeProvider();
@@ -47,6 +70,13 @@ void main() async {
 
   if (userData != null) {
     NotificationService().updateTokenOnServer(userData);
+  }
+
+  // Start tracking session (with user data if logged in, otherwise as guest)
+  try {
+    await TrackingService().startSession(userData);
+  } catch (e) {
+    Log.e('TrackingService session start failed: $e');
   }
 
   runApp(

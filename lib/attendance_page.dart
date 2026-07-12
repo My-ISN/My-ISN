@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math' as math;
+import 'services/tracking_service.dart';
 import 'localization/app_localizations.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'constants.dart';
@@ -28,6 +29,9 @@ class _AttendancePageState extends State<AttendancePage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Attendance/Presensi');
+    } catch (_) {}
     _fetchAttendance();
   }
 

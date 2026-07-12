@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../services/tracking_service.dart';
 import '../login_page.dart';
 import '../settings_page.dart';
 import '../dashboard/dashboard_page.dart';
@@ -910,6 +911,11 @@ class _SideDrawerState extends State<SideDrawer> {
                   child: ElevatedButton(
                     onPressed: () async {
                       // Perform Logout
+                      try {
+                        await TrackingService().stopSession();
+                      } catch (e) {
+                        debugPrint('Error stopping tracking session: $e');
+                      }
                       const storage = FlutterSecureStorage();
                       await storage.delete(key: 'user_data');
                       if (context.mounted) {

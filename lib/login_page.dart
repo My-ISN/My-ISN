@@ -9,6 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'dashboard/dashboard_page.dart';
 import 'register_page.dart';
 import 'services/notification_service.dart';
+import 'services/tracking_service.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'localization/app_localizations.dart';
 import 'constants.dart';
@@ -148,6 +149,13 @@ class _LoginPageState extends State<LoginPage> {
 
         // Save user data for persistence (deep linking etc)
         await storage.write(key: 'user_data', value: json.encode(data['data']));
+
+        // Start tracking session with authenticated user info
+        try {
+          await TrackingService().startSession(data['data']);
+        } catch (e) {
+          debugPrint('Failed to start tracking session: $e');
+        }
 
         // Update FCM Token
         NotificationService().updateTokenOnServer(data['data']);

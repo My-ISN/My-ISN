@@ -26,6 +26,7 @@ import 'staff/widgets/staff_dashboard_content.dart';
 import 'client/widgets/customer_dashboard_content.dart';
 import 'client/pages/transaction_page.dart';
 import '../services/heartbeat_service.dart';
+import '../services/tracking_service.dart';
 
 class DashboardPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -70,6 +71,11 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     _fetchDashboardData();
     _checkAppUpdate();
 
+    // Log current active feature/screen
+    try {
+      TrackingService().logCurrentFeature('Dashboard');
+    } catch (_) {}
+
     // Start heartbeat
     HeartbeatService().start(widget.userData);
     WidgetsBinding.instance.addObserver(this);
@@ -87,8 +93,14 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
       HeartbeatService().pause();
+      try {
+        TrackingService().syncOutbox();
+      } catch (_) {}
     } else if (state == AppLifecycleState.resumed) {
       HeartbeatService().resume();
+      try {
+        TrackingService().syncOutbox();
+      } catch (_) {}
     }
   }
 
