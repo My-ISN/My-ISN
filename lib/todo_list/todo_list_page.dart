@@ -13,7 +13,7 @@ import '../localization/app_localizations.dart';
 import '../constants.dart';
 import '../widgets/custom_snackbar.dart';
 import '../widgets/pagination_header.dart';
-
+import '../services/tracking_service.dart';
 import '../widgets/searchable_dropdown.dart';
 import 'widgets/todo_stats_card.dart';
 import 'widgets/todo_item_tile.dart';
@@ -72,6 +72,9 @@ class _TodoListPageState extends State<TodoListPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Todo List');
+    } catch (_) {}
     _initializeData();
     _initSpeech();
     _loadPendingTodos();

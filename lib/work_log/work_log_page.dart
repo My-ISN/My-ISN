@@ -12,6 +12,7 @@ import '../widgets/period_filter_widget.dart';
 import 'create_work_log_page.dart';
 import '../widgets/pagination_header.dart';
 import '../todo_list/widgets/todo_filter_bar.dart';
+import '../services/tracking_service.dart';
 
 class WorkLogPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -70,6 +71,9 @@ class _WorkLogPageState extends State<WorkLogPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Work Log');
+    } catch (_) {}
     _selectedMonth = DateTime.now().month.toString().padLeft(2, '0');
     _selectedYear = DateTime.now().year.toString();
 

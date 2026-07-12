@@ -4,6 +4,7 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 import '../services/project_task_service.dart';
+import '../services/tracking_service.dart';
 import '../widgets/pagination_header.dart';
 import '../todo_list/widgets/todo_pagination_footer.dart';
 import 'models/task_model.dart';
@@ -60,6 +61,9 @@ class _TaskListPageState extends State<TaskListPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Task List');
+    } catch (_) {}
     _fetchDepartments();
     _fetchTasks();
     _searchController.addListener(_onSearchChanged);

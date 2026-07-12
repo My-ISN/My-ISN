@@ -12,6 +12,7 @@ import 'profile_bank.dart';
 import 'profile_edit.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../services/log_service.dart';
+import '../services/tracking_service.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_bottom_nav.dart';
 import '../widgets/side_drawer.dart';
@@ -34,6 +35,9 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Profile');
+    } catch (_) {}
     _fetchProfileDetails();
   }
 
