@@ -74,6 +74,7 @@ dependencies:
   timeago: ^3.7.1
   flutter_html: ^3.0.0
   mobile_scanner: ^5.1.0
+  ota_update: ^7.1.0
 
 dev_dependencies:
   flutter_test:
