@@ -21,6 +21,7 @@
         "xin_invoice": "Invoice",
         "xin_projects": "Proyek",
         "xin_tasks": "Tugas",
+        "xin_passwords": "Password Manager",
         "xin_confirm": "Konfirmasi",
         "xin_cancel": "Batal",
         "error_with_msg": "Kesalahan: {message}",

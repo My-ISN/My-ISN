@@ -23,6 +23,7 @@ import '../constants.dart';
 import '../reports/reports_page.dart';
 import '../projects/project_list_page.dart';
 import '../tasks/task_list_page.dart';
+import '../passwords/password_list_page.dart';
 
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -53,7 +54,7 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports'].contains(
+    if (['rent_plan', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
@@ -67,7 +68,8 @@ class _SideDrawerState extends State<SideDrawer> {
   }
 
   bool _hasPermission(String resource) {
-    if (widget.userData['role_access'] == '1' ||
+    if (widget.userData['user_type'] == 'company' ||
+        widget.userData['role_access'] == '1' ||
         widget.userData['role_resources'] == 'all') {
       return true;
     }
@@ -78,7 +80,8 @@ class _SideDrawerState extends State<SideDrawer> {
   }
 
   bool _hasCategoryPermission(List<String> resources) {
-    if (widget.userData['role_access'] == '1' ||
+    if (widget.userData['user_type'] == 'company' ||
+        widget.userData['role_access'] == '1' ||
         widget.userData['role_resources'] == 'all') {
       return true;
     }
@@ -395,6 +398,25 @@ class _SideDrawerState extends State<SideDrawer> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => TaskListPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (_hasPermission('pass_account'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.vpn_key_outlined,
+                          title: 'main.xin_passwords'.tr(context),
+                          isActive: widget.activePage == 'passwords',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PasswordListPage(
                                   userData: widget.userData,
                                 ),
                               ),

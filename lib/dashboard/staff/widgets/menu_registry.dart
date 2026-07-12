@@ -17,6 +17,7 @@ import 'package:myisn/job_desk/job_desk_page.dart';
 import 'package:myisn/reports/reports_page.dart';
 import 'package:myisn/projects/project_list_page.dart';
 import 'package:myisn/tasks/task_list_page.dart';
+import 'package:myisn/passwords/password_list_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -195,6 +196,14 @@ class MenuRegistry {
         permission: 'mobile_tasks_view',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => TaskListPage(userData: user),
+      ),
+      AppModule(
+        titleKey: 'main.xin_passwords',
+        icon: Icons.vpn_key_rounded,
+        color: const Color(0xFF7E57C2),
+        permission: 'pass_account',
+        categoryKey: 'side_drawer.work',
+        pageBuilder: (context, user) => PasswordListPage(userData: user),
       ),
     ];
   }

@@ -109,7 +109,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     final userData = _dashboardData['user'] ?? widget.userData;
 
     // Admin has all permissions
-    if (userData['role_resources'] == 'all') return true;
+    if (userData['role_resources'] == 'all' || userData['user_type'] == 'company') return true;
 
     final String resources = userData['role_resources'] ?? '';
     final List<String> resourceList = resources
