@@ -9,6 +9,7 @@ import '../constants.dart';
 import '../services/log_service.dart';
 import '../widgets/connectivity_wrapper.dart';
 import '../widgets/custom_snackbar.dart';
+import '../services/tracking_service.dart';
 
 class PayrollPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -53,6 +54,9 @@ class _PayrollPageState extends State<PayrollPage>
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Payroll');
+    } catch (_) {}
     final int tabCount = _canMakePayment ? 2 : 1;
     _tabController = TabController(length: tabCount, vsync: this);
     _tabController.addListener(() {

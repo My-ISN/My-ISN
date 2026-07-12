@@ -8,6 +8,7 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../constants.dart';
 import '../widgets/custom_snackbar.dart';
+import '../services/tracking_service.dart';
 
 class ReportsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -46,6 +47,9 @@ class _ReportsPageState extends State<ReportsPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Reports');
+    } catch (_) {}
     _fetchReportData();
   }
 

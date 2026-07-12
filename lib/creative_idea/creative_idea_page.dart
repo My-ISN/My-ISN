@@ -4,6 +4,7 @@ import '../constants.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import '../services/creative_idea_service.dart';
+import '../services/tracking_service.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
@@ -41,6 +42,7 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
     _tabController = TabController(length: 2, vsync: this);
     _fetchLeaderboard();
     _fetchIdeas();
+    try { TrackingService().logCurrentFeature('Creative Idea'); } catch (_) {}
   }
 
   bool _hasPermission(String resource) {

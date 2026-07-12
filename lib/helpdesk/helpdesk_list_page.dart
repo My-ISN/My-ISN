@@ -11,6 +11,7 @@ import '../widgets/pagination_header.dart';
 
 import 'create_ticket_page.dart';
 import 'ticket_detail_page.dart';
+import '../services/tracking_service.dart';
 
 class HelpdeskListPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -39,6 +40,9 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Helpdesk');
+    } catch (_) {}
     _loadData();
   }
 

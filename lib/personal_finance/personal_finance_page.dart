@@ -13,6 +13,7 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/period_filter_widget.dart';
 import '../widgets/custom_snackbar.dart';
 import '../widgets/pagination_header.dart';
+import '../services/tracking_service.dart';
 
 import 'add_personal_finance_page.dart';
 
@@ -79,6 +80,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Personal Finance');
+    } catch (_) {}
     _selectedMonth = DateFormat('MM').format(DateTime.now());
     _selectedYear = DateFormat('yyyy').format(DateTime.now());
     _selectedReportYear = _selectedYear;

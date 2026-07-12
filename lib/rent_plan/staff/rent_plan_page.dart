@@ -11,6 +11,7 @@ import '../../localization/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/pagination_header.dart';
+import '../../services/tracking_service.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -49,6 +50,9 @@ class _RentPlanPageState extends State<RentPlanPage>
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Rent Plan');
+    } catch (_) {}
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {

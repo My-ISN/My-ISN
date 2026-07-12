@@ -11,6 +11,7 @@ import '../constants.dart';
 import 'employee_detail_page.dart';
 import 'employee_add_page.dart';
 import '../widgets/pagination_header.dart';
+import '../services/tracking_service.dart';
 
 class EmployeesPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -36,6 +37,9 @@ class _EmployeesPageState extends State<EmployeesPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Employees');
+    } catch (_) {}
     _fetchEmployees();
   }
 

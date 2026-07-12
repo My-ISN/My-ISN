@@ -3,6 +3,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../localization/app_localizations.dart';
 import '../services/ai_chat_isn_service.dart';
+import '../services/tracking_service.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_snackbar.dart';
 import '../widgets/side_drawer.dart';
@@ -36,6 +37,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
   void initState() {
     super.initState();
     _loadHistory();
+    try { TrackingService().logCurrentFeature('AI Chat ISN'); } catch (_) {}
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../localization/app_localizations.dart';
 import '../services/ai_bot_service.dart';
+import '../services/tracking_service.dart';
 import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/custom_app_bar.dart';
@@ -50,6 +51,7 @@ class _AiBotPageState extends State<AiBotPage> {
   void initState() {
     super.initState();
     _fetchKnowledge();
+    try { TrackingService().logCurrentFeature('AI Bot'); } catch (_) {}
   }
 
   @override

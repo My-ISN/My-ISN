@@ -11,6 +11,7 @@ import 'models/project_model.dart';
 import '../tasks/task_list_page.dart';
 import 'project_detail_page.dart';
 import 'add_project_page.dart';
+import '../services/tracking_service.dart';
 
 class ProjectListPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -44,6 +45,9 @@ class _ProjectListPageState extends State<ProjectListPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Projects');
+    } catch (_) {}
     _fetchData();
     _fetchDepartments();
     _searchController.addListener(_filterProjects);

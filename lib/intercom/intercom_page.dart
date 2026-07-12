@@ -7,6 +7,7 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_snackbar.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../services/tracking_service.dart';
 
 class IntercomPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -37,6 +38,9 @@ class _IntercomPageState extends State<IntercomPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Intercom');
+    } catch (_) {}
     _fetchHistory();
     _fetchPresets();
     _startRefreshTimer();

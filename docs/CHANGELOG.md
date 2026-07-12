@@ -1,96 +1,45 @@
 # Changelog
 
-## [1.3.0] - 2026-04-14
-
-### Penambahan v1.3.0
-
-- **Modul QuickSend & Job Desk**: Implementasi modul komunikasi cepat (QuickSend) dan manajemen daftar pekerjaan (Job Desk) yang terintegrasi penuh dengan sistem perizinan (RBAC).
-- **UI — Sidebar Categorization**: Pengelompokan menu pada Sidebar ke dalam kategori fungsional (Work, Financial, Support) untuk navigasi yang lebih terstruktur.
-- **UI — App Bar Search Menu**: Penambahan fitur pencarian menu langsung pada App Bar untuk akses fitur yang lebih instan.
-- **UI — Global Standardization (Flat Premium)**: Implementasi desain sistem "Flat Premium" di seluruh aplikasi. Seluruh elemen visual kini menggunakan kartu tanpa bayangan (*elevation: 0*) dengan border halus (`DividerColor.withValues(alpha: 0.08)`) untuk estetika administratif yang lebih bersih dan elit.
-- **UI — Standardisasi Radius**: Penyeragaman radius sudut (*corner radius*) sebesar **24px** pada seluruh kontainer utama dan Card untuk konsistensi visual di seluruh modul.
-- **UI — SecondaryAppBar Everywhere**: Integrasi komponen `SecondaryAppBar` di seluruh halaman detail (Payroll, Settings, Diagnosis Hub, All Menus) guna memastikan navigasi yang seragam dan profesional.
-- **Modul More Apps**: Penambahan fitur "More Apps" di Dashboard untuk mempermudah akses ke ekosistem aplikasi internal dalam satu pintu.
-
-### Perubahan v1.3.0
-
-- **AI Assistant Transformation**: Re-orientasi fungsi AI Assistant yang sebelumnya berupa sistem chat umum kini difokuskan secara eksklusif sebagai antarmuka **Knowledge Base** untuk input data dan akses informasi internal yang lebih presisi dan terarah.
-- **Modul Diagnosis — Refaktorisasi Total**: Desain ulang total modul Diagnosis (Internet, Notifikasi, Penyimpanan, Versi) dengan antarmuka berbasis *sectioned cards* dan ikonografi modern yang mendukung visi Flat Premium.
-- **UI — Dashboard Refinement**: Pembaruan visual pada widget **Quick Menu**, **Working Duration**, **My Leave**, dan **Requests** di Dashboard Staff untuk menghilangkan desain "hitam kontras" dan menggantinya dengan gaya seamless.
-- **Optimisasi — Migrasi API Flutter Modern**: Migrasi seluruh panggilan legacy `withAlpha` dan `withOpacity` ke API modern `withValues(alpha: ...)` guna memastikan kepatuhan penuh terhadap standar Flutter 3.22+.
-
-### Perbaikan v1.3.0
-
-- **Auth — Biometric Registration Stability**: Peningkatan stabilitas dan sistem logging pada proses registrasi sidik jari untuk pelacakan error yang lebih akurat.
-- **UI — Image Loading Exceptions**: Implementasi mekanisme *error handling* tangguh dan placeholder pada pemuatan gambar profil di Settings dan Profile guna mencegah crash saat kegagalan jaringan.
-- **Async Safety**: Audit dan perbaikan seluruh operasional asinkron yang melibatkan `BuildContext` dengan penambahan pengecekan `mounted`.
-
----
-
-## [1.2.1] - 2026-04-08
-
-### Perbaikan v1.2.1
-
-- **Auth — Finger Print Pasca-Migrasi Domain**: Perbaikan error `FormatException: Unexpected end of input` saat registrasi sidik jari. Disebabkan oleh fungsi `str_starts_with()` yang tidak tersedia di PHP 7.4 pada server baru; diganti dengan `substr()` yang kompatibel di semua versi PHP.
-- **Auth — Google Login Tidak Menyimpan Sesi**: Perbaikan bug di mana login via Google Sign-In tidak menyimpan data pengguna (`user_data`) ke secure storage, menyebabkan seluruh halaman yang memerlukan `user_id` (Finance, Intercom, Creative Idea, Rent Plan, dll.) menampilkan error `User ID not found`.
-
----
-
-## [1.2.0] - 2026-04-07
-
-### Penambahan v1.2.0
-
-- **Responsive Bottom Navigation**: Implementasi padding dinamis pada bar navigasi bawah yang secara otomatis menyesuaikan dengan tipe sistem navigasi (Gesture vs 3-Button).
-- **Persistent Voice-to-Text (Todo List)**: Peningkatan fitur mikrofon agar tetap aktif mendengarkan meskipun pengguna diam/berhenti bicara, hingga dimatikan secara manual atau saat menyimpan tugas.
-- **Personal Finance Global**: Transformasi modul Keuangan Pribadi menjadi fitur universal/global yang dapat diakses oleh semua pengguna tanpa filter ID.
-- **Branding Update**: Perubahan label "My Wallet" menjadi "Personal Finance" dan pembaruan ikon di seluruh Dashboard dan Side Drawer untuk refleksi identitas baru.
-
-### Perubahan v1.2.0
-
-- **UI — Bottom Bar Positioning**: Optimalisasi posisi bar navigasi pada mode 3-tombol agar lebih rendah dan terintegrasi dengan baik, serta menjaga jarak aman pada mode gestur.
-
-### Perbaikan v1.2.0
-
-- **UI — Navigation Obstruction**: Perbaikan masalah di mana bar navigasi bawah menghalangi atau terhalang oleh sistem navigasi bawaan perangkat pada kondisi tertentu.
-
-## [1.1.0] - 2026-04-06
+### [1.1.0] - 2026-07-12
 
 ### Penambahan v1.1.0
 
-- **Modul Personal Finance**: Implementasi penuh manajemen keuangan pribadi dengan standardisasi desain premium, pendataan saldo, pemasukan, dan pengeluaran yang ter-lokalisasi (ID/EN) secara komprehensif.
-- **Modul Creative Idea**: Fitur penampung ide kreatif karyawan dengan antarmuka modern yang mendukung kolaborasi internal.
-- **Helpdesk — Modul Tiket Pengaduan**: Implementasi menu Helpdesk (`Icons.support_agent_outlined`) untuk pelaporan kendala teknis dan administrasi langsung dari aplikasi mobile.
-- **Asisten AI Cerdas**: Implementasi asisten AI interaktif menggunakan **Google Gemini 1.5 Flash** untuk membantu menjawab pertanyaan seputar penyewaan laptop, stok, dan prosedur sewa secara real-time.
-- **Quick Action Pills**: Penambahan tombol aksi cepat di bagian atas keyboard Bot AI untuk pertanyaan umum (harga sewa, daftar laptop, cara sewa, dll) agar pengguna lebih mudah berinteraksi.
-- **Worklog — Seleksi dari Todo List**: Fitur pembuatan laporan kerja (*Worklog*) kini mendukung pengambilan data langsung dari tugas yang sudah selesai pada hari tersebut melalui tombol **"Pilih dari Todo List"**.
-- **Todo List — Mode Kolaborasi Tim**: Implementasi fitur peralihan antara tugas **Pribadi** dan **Tim** dengan efek animasi geser (*sliding animation*) yang modern.
-- **Todo List — Delegasi Tugas (Move Task)**: Fitur untuk memindahkan atau mendelegasikan tugas ke karyawan lain melalui menu aksi cepat, lengkap dengan antarmuka konfirmasi *Premium Bottom Sheet*.
-- **Todo List — Kontrol Izin Akses**: Integrasi sistem izin tingkat lanjut (`mobile_todo_team`) yang memungkinkan admin mengontrol akses fitur tim secara terpusat dari Dashboard ERP.
-- **Todo List — Background Pre-fetching**: Optimasi kecepatan pemuatan data karyawan sehingga dropdown pemilihan karyawan saat delegasi tugas terbuka secara instan.
+- **Sistem Telemetri & Analitik (`TrackingService`)**: Layanan penjejakan sesi, fitur (`logCurrentFeature`), performa, crash log, serta status sistem (baterai, RAM) dengan antrean offline dan sinkronisasi batch berkala ke server. Seluruh halaman utama telah diinstrumentasi (Attendance, Dashboard, Work Log, dll.).
+- **Modul Projects & Tasks**: Implementasi penuh manajemen proyek dan tugas, mencakup halaman list, detail, form tambah/edit, serta integrasi dengan `ProjectTaskService` dan RBAC.
+- **Modul Passwords**: Manajer kata sandi internal (`PasswordListPage`) dengan detail sandi dan dialog berbagi aman (`PasswordShareSheet`).
+- **Modul Reports**: Laporan terpadu (`ReportsPage`) dengan integrasi grafik visual (`fl_chart`) dan filter periode dinamis.
+- **Modul AI Chat ISN**: Chatbot AI internal khusus untuk platform ISN (`AiChatIsnPage`) yang mendukung riwayat chat dan prompt cepat.
+- **In-App Update — Progress Bar OTA**: Proses pembaruan APK dalam aplikasi kini menampilkan progress bar unduhan real-time (LinearProgressIndicator) langsung di bottom sheet.
+- **Heartbeat Service & Maintenance Mode**: Pemantauan keaktifan pengguna secara real-time yang mendeteksi maintenance mode (HTTP 503) dan mengarahkan otomatis ke `MaintenancePage`.
+- **Connectivity Wrapper**: Banner no-internet bergaya glassmorphism dengan transisi animasi ketika status koneksi berubah offline.
+- **TopNotification Widget**: Banner overlay custom di bagian atas layar untuk menampilkan pesan mendesak dengan transisi slide dan auto-dismiss.
+- **Quick Menu Customization**: Fitur baru untuk mempersonalisasi menu cepat di Dashboard (pin hingga 5 menu) dan menyimpannya di secure storage.
+- **LogService & SearchableDropdown**: Utility logging menggunakan PrettyPrinter dan widget pencarian dropdown yang reusable.
+- **Modul QuickSend & Job Desk**: Implementasi modul komunikasi cepat (QuickSend) dan manajemen daftar pekerjaan (Job Desk) terintegrasi sistem perizinan.
+- **Modul Personal Finance**: Implementasi manajemen keuangan pribadi (pemasukan, pengeluaran, saldo) dengan standardisasi desain premium dan lokalisasi multi-bahasa.
+- **Modul Creative Idea & Helpdesk**: Fitur penampung ide kreatif karyawan dan menu pengaduan tiket bantuan teknis terintegrasi native.
+- **Asisten AI Cerdas**: Chatbot interaktif menggunakan Google Gemini 1.5 Flash untuk informasi penyewaan laptop dan stok unit.
+- **Worklog Integration & Todo Collaboration**: Pembuatan worklog yang dapat ditarik langsung dari todo selesai, serta sistem todo bertipe personal/tim dengan delegasi tugas.
+- **UI — Sidebar Categorization & Radius**: Pengelompokan menu sidebar (Work, Financial, Support), standarisasi sudut membulat 24px, dan header search menu di App Bar.
+- **UI — SecondaryAppBar Everywhere**: Integrasi navigasi atas sekunder pada seluruh halaman detail dan form input.
+- **UI — Global Standardization**: Migrasi total ke gaya desain "Flat Premium" tanpa bayangan (elevation: 0) dengan garis pembatas halus.
 
 ### Perubahan v1.1.0
 
-- **Optimisasi — Modularisasi Todo List**: Refaktorisasi masif file monolitik `todo_list_page.dart` menjadi komponen widget modular (`Stats`, `Tile`, `Filter`, `Pagination`) guna meningkatkan performa pemuatan data dan kemudahan pemeliharaan kode.
-- **Optimisasi — UI Responsiveness**: Perbaikan simulasi layout pada bar filter dan navigasi menggunakan `Flexible` dan `Expanded` untuk mencegah *RenderFlex overflow* pada layar perangkat yang lebih kecil.
-- **UI — Modernisasi Masif (Visi 2026)**: Desain ulang lebih dari 50% antarmuka aplikasi dengan standar premium untuk pengalaman pengguna yang lebih intuitif dan elit.
-- **UI — Full Theme Integration (Login & Register)**: Integrasi penuh sistem tema (*Light/Dark Mode*) pada halaman modul otentikasi. Menghapus seluruh warna *hardcoded* guna memastikan kenyamanan visual yang konsisten.
-- **UI — Helpdesk Interaction Redesign**: Area input balasan tiket kini menggunakan desain premium yang identik dengan antarmuka Chat Bot AI, lengkap dengan *floating action buttons* dan *rounded containers*.
-- **UI — Standardisasi Form & Detail**: Implementasi `SecondaryAppBar` dan tata letak berbasis *sectioned cards* pada seluruh halaman Tambah/Edit (Finance, Worklog) dan Detail (Ticket, Employee, Rent Plan).
-- **UI — Branding Refinement**: Logo aplikasi pada halaman login diperbarui dengan container sirkular premium dan efek bayangan (*shadow*) yang adaptif terhadap tema.
-- **Finance — Format Amount Otomatis**: Field nominal pada form Add/Edit Income & Expense kini otomatis memformat angka dengan titik pemisah ribuan saat pengguna mengetik (contoh: `1000` → `1.000`).
-- **Finance — Default Values**: Akun 'Payer' kini otomatis terisi user yang sedang login dan 'Payment Method' default menjadi **Bank Transfer**.
-- **Todo List — Voice-to-Text Bahasa Indonesia**: Fitur pengenalan suara dikunci untuk mendeteksi **Bahasa Indonesia (`id_ID`)** demi akurasi maksimal.
-- **UI — Modern Pill Bottom Navigation**: Desain ulang total bar navigasi bawah menggunakan gaya **Modern Pill** dengan animasi *sliding width transition* yang mulus.
-- **UI — Popup Update & Changelog Premium**: Redesign total jendela notifikasi menjadi **Premium Bottom Sheet** yang seragam dengan desain sistem lainnya.
-- **UI — Rent Plan List Layout**: Perbaikan simetri pada badge status dan tombol aksi di daftar persewaan agar lebih rapi.
-- **UI — Rent Plan Long Text Handling**: Penanganan label Bahasa Indonesia yang panjang pada halaman Detail Rent Plan menggunakan teknik **ellipsis** pada label dan **flexible wrapping** pada nilai data untuk mencegah *RenderFlex* overflow.
+- **Sidebar Menu**: Modul Payroll, Announcements, Projects, Tasks, Reports, dan Passwords kini dapat diakses langsung dari Side Drawer.
+- **CustomAppBar & Todo Count**: NotificationManager kini menampilkan jumlah todo belum selesai di samping lonceng notifikasi.
+- **Optimisasi & Refaktorisasi Todo**: Pemecahan file monolitik `todo_list_page.dart` menjadi widget modular terpisah guna performa yang lebih gegas.
+- **Diagnosis Hub Refactor**: Desain ulang antarmuka diagnostic (Internet, Versi, Storage, Notifikasi) mengikuti visual Flat Premium.
+- **AI Assistant Transformation**: Pengalihan chatbot AI umum menjadi Knowledge Base yang terfokus pada data internal perusahaan.
+- **Finance Formatting**: Input nominal uang otomatis terformat dengan pemisah ribuan ketika diketik, dengan default akun payer dan metode bank transfer.
+- **Migration**: Migrasi seluruh parameter warna legacy `withAlpha` & `withOpacity` ke API modern Flutter 3.22+ `withValues()`.
 
 ### Perbaikan v1.1.0
 
-- **UI — CustomBottomNav Stability**: Perbaikan fatal error `setState() called when widget tree was locked` saat transisi navigasi antar halaman utama.
-- **UI — LoginPage Syntax Fix**: Perbaikan kesalahan struktur *widget tree* (kurung tutup) pada modul branding yang menyebabkan kegagalan build.
-- **UI — Layout Overflow Fix**: Perbaikan error `RenderFlex overflow` pada bar navigasi menggunakan `LayoutBuilder` untuk kalkulasi lebar yang presisi.
-- **Payroll Navigation**: Perbaikan tautan menu Payroll di sidebar yang sebelumnya tidak merespon saat diklik.
+- **Tracking & Async Safety**: Penanganan error telemetri dengan try-catch agar kegagalan sync tidak merusak alur aplikasi, serta audit mounted context pada operasi async.
+- **Auth & Session Fixes**: Perbaikan finger print login pasca-migrasi domain (PHP 7.4 compatibility) dan penanganan sesi Google Sign-In yang tidak tersimpan di secure storage.
+- **UI Overflow Fixes**: Perbaikan RenderFlex overflow pada navigasi bawah, rent plan label wrapping, layout bar filter, dan setup alur LoginPage.
+- **Navigation & Lifecycle**: Perbaikan navigasi error `setState() called when widget tree was locked` pada bottom nav bar dan tautan menu Payroll di sidebar yang sebelumnya tidak merespon saat diklik.
 
 ---
 

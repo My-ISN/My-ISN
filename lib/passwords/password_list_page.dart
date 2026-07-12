@@ -5,6 +5,7 @@ import '../localization/app_localizations.dart';
 import '../services/password_service.dart';
 import 'password_detail_page.dart';
 import 'password_share_sheet.dart';
+import '../services/tracking_service.dart';
 
 class PasswordListPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -28,6 +29,9 @@ class _PasswordListPageState extends State<PasswordListPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Passwords');
+    } catch (_) {}
     _fetchPasswords();
   }
 

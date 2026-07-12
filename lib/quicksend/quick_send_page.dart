@@ -4,6 +4,7 @@ import '../widgets/side_drawer.dart';
 import '../localization/app_localizations.dart';
 import 'quick_send_section.dart';
 import 'quick_send_add_page.dart';
+import '../services/tracking_service.dart';
 
 class QuickSendPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -16,6 +17,14 @@ class QuickSendPage extends StatefulWidget {
 
 class _QuickSendPageState extends State<QuickSendPage> {
   final GlobalKey<QuickSendSectionState> _sectionKey = GlobalKey<QuickSendSectionState>();
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      TrackingService().logCurrentFeature('Quick Send');
+    } catch (_) {}
+  }
 
   void _showAddModal() async {
     if (!_hasPermission('mobile_quicksend_add')) return;

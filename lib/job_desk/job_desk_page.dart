@@ -10,6 +10,7 @@ import 'models/job_desk_model.dart';
 import 'models/designation_model.dart';
 import '../widgets/searchable_dropdown.dart';
 import '../widgets/custom_snackbar.dart';
+import '../services/tracking_service.dart';
 
 class JobDeskPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -44,6 +45,9 @@ class _JobDeskPageState extends State<JobDeskPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Job Desk');
+    } catch (_) {}
     _fetchJobDesks();
   }
 

@@ -9,6 +9,7 @@ import '../../widgets/custom_app_bar.dart';
 import '../../widgets/side_drawer.dart';
 import '../../widgets/connectivity_wrapper.dart';
 import '../../widgets/custom_snackbar.dart';
+import '../../services/tracking_service.dart';
 
 class RentPlanPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -47,6 +48,9 @@ class _RentPlanPageState extends State<RentPlanPage>
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Rent Plan');
+    } catch (_) {}
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {

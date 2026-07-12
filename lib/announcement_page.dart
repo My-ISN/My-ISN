@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'localization/app_localizations.dart';
 import 'widgets/custom_app_bar.dart'; // For NotificationManager
 import 'widgets/custom_snackbar.dart';
+import 'services/tracking_service.dart';
 
 class AnnouncementPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -32,6 +33,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Announcements');
+    } catch (_) {}
     _initializeData();
   }
 

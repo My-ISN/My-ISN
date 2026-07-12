@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'localization/app_localizations.dart';
 import 'constants.dart';
+import 'services/tracking_service.dart';
 
 import 'providers/language_provider.dart';
 import 'providers/theme_provider.dart';
@@ -46,6 +47,9 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    try {
+      TrackingService().logCurrentFeature('Settings');
+    } catch (_) {}
     _loadSettings();
     _initPackageInfo();
   }

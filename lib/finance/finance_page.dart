@@ -7,6 +7,7 @@ import '../localization/app_localizations.dart';
 import '../constants.dart';
 
 import '../services/finance_service.dart';
+import '../services/tracking_service.dart';
 
 import '../widgets/custom_app_bar.dart';
 
@@ -136,6 +137,7 @@ class _FinancePageState extends State<FinancePage>
     _selectedYear = DateTime.now().year.toString();
 
     _loadData();
+    try { TrackingService().logCurrentFeature('Finance'); } catch (_) {}
   }
 
   void _handleTabSelection() {
