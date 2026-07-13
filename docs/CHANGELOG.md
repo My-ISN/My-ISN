@@ -1,8 +1,8 @@
 # Changelog
 
-### [1.1.0] - 2026-07-12
+### [1.1.1] - 2026-07-13
 
-### Penambahan v1.1.0
+### Penambahan v1.1.1
 
 - **Sistem Telemetri & Analitik (`TrackingService`)**: Layanan penjejakan sesi, fitur (`logCurrentFeature`), performa, crash log, serta status sistem (baterai, RAM) dengan antrean offline dan sinkronisasi batch berkala ke server. Seluruh halaman utama telah diinstrumentasi (Attendance, Dashboard, Work Log, dll.).
 - **Modul Projects & Tasks**: Implementasi penuh manajemen proyek dan tugas, mencakup halaman list, detail, form tambah/edit, serta integrasi dengan `ProjectTaskService` dan RBAC.
@@ -24,7 +24,7 @@
 - **UI — SecondaryAppBar Everywhere**: Integrasi navigasi atas sekunder pada seluruh halaman detail dan form input.
 - **UI — Global Standardization**: Migrasi total ke gaya desain "Flat Premium" tanpa bayangan (elevation: 0) dengan garis pembatas halus.
 
-### Perubahan v1.1.0
+### Perubahan v1.1.1
 
 - **Sidebar Menu**: Modul Payroll, Announcements, Projects, Tasks, Reports, dan Passwords kini dapat diakses langsung dari Side Drawer.
 - **CustomAppBar & Todo Count**: NotificationManager kini menampilkan jumlah todo belum selesai di samping lonceng notifikasi.
@@ -34,8 +34,9 @@
 - **Finance Formatting**: Input nominal uang otomatis terformat dengan pemisah ribuan ketika diketik, dengan default akun payer dan metode bank transfer.
 - **Migration**: Migrasi seluruh parameter warna legacy `withAlpha` & `withOpacity` ke API modern Flutter 3.22+ `withValues()`.
 
-### Perbaikan v1.1.0
+### Perbaikan v1.1.1
 
+- **In-App Update**: Perbaikan crash (keluar sendiri) saat unduhan APK mencapai 100% dan kegagalan instalasi dengan menambahkan konfigurasi FileProvider.
 - **Tracking & Async Safety**: Penanganan error telemetri dengan try-catch agar kegagalan sync tidak merusak alur aplikasi, serta audit mounted context pada operasi async.
 - **Auth & Session Fixes**: Perbaikan finger print login pasca-migrasi domain (PHP 7.4 compatibility) dan penanganan sesi Google Sign-In yang tidak tersimpan di secure storage.
 - **UI Overflow Fixes**: Perbaikan RenderFlex overflow pada navigasi bawah, rent plan label wrapping, layout bar filter, dan setup alur LoginPage.
