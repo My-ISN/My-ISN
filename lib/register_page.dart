@@ -47,7 +47,9 @@ class _RegisterPageState extends State<RegisterPage> {
   final _picker = ImagePicker();
 
   final LocalAuthentication auth = LocalAuthentication();
-  final storage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   bool _canCheckBiometrics = false;
 
   @override

@@ -1191,21 +1191,30 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     }
   }
 
-  double _calculatePriceForExtension() {
+  double _calculatePriceForExtension(int days) {
     if (_rentalData == null) return 0;
-    int units =
-        int.tryParse(_rentalData!['total_laptop']?.toString() ?? '1') ?? 1;
+    final priceGroup = _rentalData!['price_group']?.toString() ?? '';
     double price = 0;
 
-    for (var tier in _pricingTiers) {
+    final filteredTiers = _pricingTiers.where((tier) {
+      final tierGroup = tier['nama_group']?.toString() ?? '';
+      if (priceGroup.isNotEmpty) {
+        return tierGroup.toLowerCase() == priceGroup.toLowerCase();
+      }
+      return true;
+    }).toList();
+
+    var tiersToUse = filteredTiers.isNotEmpty ? filteredTiers : _pricingTiers;
+
+    for (var tier in tiersToUse) {
       int min = int.tryParse(tier['nama_harga'].toString()) ?? 0;
       int max = int.tryParse(tier['nama_harga2'].toString()) ?? 999999;
 
-      if (tier == _pricingTiers.last && units >= min) {
+      if (tier == tiersToUse.last && days >= min) {
         price = double.tryParse(tier['harga'].toString()) ?? 0;
         break;
       }
-      if (units >= min && units <= max) {
+      if (days >= min && days <= max) {
         price = double.tryParse(tier['harga'].toString()) ?? 0;
         break;
       }
@@ -1224,10 +1233,10 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         'pribadi';
 
     // Calculate price
-    final double pricePerDay = _calculatePriceForExtension();
+    final int days = int.tryParse(_extLamaSewaController.text) ?? 0;
+    final double pricePerDay = _calculatePriceForExtension(days);
     final int units =
         int.tryParse(_rentalData!['total_laptop']?.toString() ?? '1') ?? 1;
-    final int days = int.tryParse(_extLamaSewaController.text) ?? 0;
     final double totalExt = pricePerDay * days * units;
 
     return Column(

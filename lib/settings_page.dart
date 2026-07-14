@@ -33,7 +33,9 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final storage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   final LocalAuthentication auth = LocalAuthentication();
   final AudioPlayer _audioPlayer = AudioPlayer();
 

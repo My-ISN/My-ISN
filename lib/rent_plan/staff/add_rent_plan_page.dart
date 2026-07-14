@@ -267,12 +267,35 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
     if (_itemRows[index]['laptop_id'] == null) return;
     int qty = _itemRows[index]['qty'] ?? 1;
     double price = 0;
-    for (var tier in _pricingTiers) {
+
+    final selectedLaptopId = _itemRows[index]['laptop_id']?.toString();
+    var priceGroup = '';
+    if (selectedLaptopId != null) {
+      final laptop = _laptops.firstWhere(
+        (l) => l['id'].toString() == selectedLaptopId,
+        orElse: () => null,
+      );
+      if (laptop != null) {
+        priceGroup = laptop['price_group']?.toString() ?? '';
+      }
+    }
+
+    final filteredTiers = _pricingTiers.where((tier) {
+      final tierGroup = tier['nama_group']?.toString() ?? '';
+      if (priceGroup.isNotEmpty) {
+        return tierGroup.toLowerCase() == priceGroup.toLowerCase();
+      }
+      return true;
+    }).toList();
+
+    var tiersToUse = filteredTiers.isNotEmpty ? filteredTiers : _pricingTiers;
+
+    for (var tier in tiersToUse) {
       int min = int.tryParse(tier['nama_harga'].toString()) ?? 0;
       int max = int.tryParse(tier['nama_harga2'].toString()) ?? 999999;
 
       // If qty exceeds the current tier's max, but it's the last tier, use this price
-      if (tier == _pricingTiers.last && qty >= min) {
+      if (tier == tiersToUse.last && qty >= min) {
         price = double.tryParse(tier['harga'].toString()) ?? 0;
         break;
       }

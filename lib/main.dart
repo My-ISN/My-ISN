@@ -57,7 +57,9 @@ void main() async {
   }
 
   // Check login session
-  const storage = FlutterSecureStorage();
+  const storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   Map<String, dynamic>? userData;
   try {
     String? userDataString = await storage.read(key: 'user_data');

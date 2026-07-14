@@ -32,7 +32,9 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
 
   final LocalAuthentication auth = LocalAuthentication();
-  final storage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   bool _canCheckBiometrics = false;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
