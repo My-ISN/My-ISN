@@ -398,4 +398,36 @@ class RentPlanService {
       return {'status': false, 'message': e.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> getActiveRentalByBarcode(String barcode) async {
+    try {
+      final url = Uri.parse('$baseUrl/get_active_rental_by_barcode?barcode=$barcode');
+      final response = await http.get(url);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> receiveRentalLaptop({
+    required String barcode,
+    int? rentalId,
+    String? kondisi,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/receive_rental_laptop');
+      final response = await http.post(
+        url,
+        body: {
+          'barcode': barcode,
+          'rental_id': rentalId?.toString() ?? '',
+          'kondisi': kondisi ?? '',
+        },
+      );
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
 }
+

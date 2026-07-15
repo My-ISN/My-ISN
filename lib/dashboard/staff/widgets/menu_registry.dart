@@ -18,6 +18,7 @@ import 'package:myisn/reports/reports_page.dart';
 import 'package:myisn/projects/project_list_page.dart';
 import 'package:myisn/tasks/task_list_page.dart';
 import 'package:myisn/passwords/password_list_page.dart';
+import 'package:myisn/rent_plan/staff/receive_laptop_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -57,6 +58,15 @@ class MenuRegistry {
             ? client_rp.RentPlanPage(userData: user)
             : staff_rp.RentPlanPage(userData: user),
       ),
+      if (!isCustomer)
+        AppModule(
+          titleKey: 'dashboard.quick_menu_receive_laptop',
+          icon: Icons.assignment_return_rounded,
+          color: const Color(0xFFE57373),
+          permission: 'mobile_rent_plan_enable',
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => const ReceiveLaptopPage(),
+        ),
       AppModule(
         titleKey: 'dashboard.quick_menu_todo_list',
         icon: Icons.assignment_rounded,
