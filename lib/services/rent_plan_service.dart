@@ -8,7 +8,9 @@ import '../constants.dart';
 
 class RentPlanService {
   static const String baseUrl = AppConstants.baseUrl;
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   Future<Map<String, dynamic>> getRentPlans({
     String status = 'all',
@@ -429,5 +431,96 @@ class RentPlanService {
       return {'status': false, 'message': e.toString()};
     }
   }
-}
 
+  // ── Laptop Unit Management ────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getLaptopUnits({
+    String? search,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      String? userDataString = await _storage.read(key: 'user_data');
+      if (userDataString == null) {
+        return {'status': false, 'message': 'User not logged in'};
+      }
+      final userData = json.decode(userDataString);
+      final userId = userData['id'] ?? userData['user_id'];
+
+      final Map<String, String> params = {
+        'user_id': userId.toString(),
+        'limit': limit.toString(),
+        'offset': offset.toString(),
+      };
+      if (search != null && search.isNotEmpty) {
+        params['search'] = search;
+      }
+
+      final url = Uri.parse('$baseUrl/mobile_laptop_units').replace(queryParameters: params);
+      final response = await http.get(url);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyLaptopBarcode(String barcode) async {
+    try {
+      String? userDataString = await _storage.read(key: 'user_data');
+      if (userDataString == null) {
+        return {'status': false, 'message': 'User not logged in'};
+      }
+      final userData = json.decode(userDataString);
+      final userId = userData['id'] ?? userData['user_id'];
+
+      final url = Uri.parse('$baseUrl/verify_laptop_barcode');
+      final response = await http.post(
+        url,
+        body: {
+          'barcode': barcode,
+          'user_id': userId.toString(),
+        },
+      );
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> createLaptopUnitFromScan({
+    required String barcode,
+    required String laptopId,
+    required String serialNumber,
+    required String kondisi,
+    required String status,
+    required String tanggalMasuk,
+    String catatan = '',
+  }) async {
+    try {
+      String? userDataString = await _storage.read(key: 'user_data');
+      if (userDataString == null) {
+        return {'status': false, 'message': 'User not logged in'};
+      }
+      final userData = json.decode(userDataString);
+      final userId = userData['id'] ?? userData['user_id'];
+
+      final url = Uri.parse('$baseUrl/create_laptop_unit_from_scan');
+      final response = await http.post(
+        url,
+        body: {
+          'user_id': userId.toString(),
+          'barcode': barcode,
+          'laptop_id': laptopId,
+          'serial_number': serialNumber,
+          'kondisi': kondisi,
+          'status': status,
+          'tanggal_masuk': tanggalMasuk,
+          'catatan': catatan,
+        },
+      );
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+}

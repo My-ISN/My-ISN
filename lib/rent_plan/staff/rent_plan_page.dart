@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/rent_plan_service.dart';
 import 'rent_plan_detail_page.dart';
 import 'add_rent_plan_page.dart';
+import 'laptop_units_page.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
 
@@ -854,6 +855,61 @@ class _RentPlanPageState extends State<RentPlanPage>
             _stats['completed']?.toString() ?? '0',
             Colors.blue, // Changed from grey to blue for consistency
           ),
+          // ── Laptop Units Shortcut ──
+          if (_hasPermission('mobile_laptop_unit_enable'))
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LaptopUnitsPage(userData: widget.userData),
+                ),
+              ),
+              child: Card(
+                elevation: 0,
+                margin: const EdgeInsets.only(right: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(
+                    color: const Color(0xFF6A11CB).withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Container(
+                  width: 140,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.laptop_rounded, color: Colors.white, size: 22),
+                      SizedBox(height: 6),
+                      Text(
+                        'Unit Laptop',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Tap untuk buka',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

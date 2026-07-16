@@ -19,6 +19,7 @@ import 'package:myisn/projects/project_list_page.dart';
 import 'package:myisn/tasks/task_list_page.dart';
 import 'package:myisn/passwords/password_list_page.dart';
 import 'package:myisn/rent_plan/staff/receive_laptop_page.dart';
+import 'package:myisn/rent_plan/staff/laptop_units_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -66,6 +67,15 @@ class MenuRegistry {
           permission: 'mobile_rent_plan_enable',
           categoryKey: 'side_drawer.work',
           pageBuilder: (context, user) => const ReceiveLaptopPage(),
+        ),
+      if (!isCustomer)
+        AppModule(
+          titleKey: 'Unit Laptop',
+          icon: Icons.laptop_rounded,
+          color: const Color(0xFF7E57C2),
+          permission: 'mobile_laptop_unit_enable',
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => LaptopUnitsPage(userData: user),
         ),
       AppModule(
         titleKey: 'dashboard.quick_menu_todo_list',

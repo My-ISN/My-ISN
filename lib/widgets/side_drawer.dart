@@ -8,6 +8,7 @@ import '../settings_page.dart';
 import '../dashboard/dashboard_page.dart';
 import '../rent_plan/staff/rent_plan_page.dart' as staff_rp;
 import '../rent_plan/client/rent_plan_page.dart' as client_rp;
+import '../rent_plan/staff/laptop_units_page.dart';
 import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
 import '../work_log/work_log_page.dart';
@@ -55,7 +56,7 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords'].contains(
+    if (['rent_plan', 'laptop_units', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
@@ -222,6 +223,7 @@ class _SideDrawerState extends State<SideDrawer> {
                 // Group: Work / Operational
                 if (_hasCategoryPermission([
                   'mobile_rent_plan_enable',
+                  'mobile_laptop_unit_enable',
                   'mobile_todo_enable',
                   'mobile_employees_enable',
                   'mobile_worklog_enable',
@@ -259,6 +261,26 @@ class _SideDrawerState extends State<SideDrawer> {
                                     : staff_rp.RentPlanPage(
                                       userData: widget.userData,
                                     ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (!isCustomer &&
+                          _hasPermission('mobile_laptop_unit_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.laptop_outlined,
+                          title: 'Unit Laptop',
+                          isActive: widget.activePage == 'laptop_units',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LaptopUnitsPage(
+                                  userData: widget.userData,
+                                ),
                               ),
                             );
                           },
