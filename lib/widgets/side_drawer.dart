@@ -8,7 +8,8 @@ import '../settings_page.dart';
 import '../dashboard/dashboard_page.dart';
 import '../rent_plan/staff/rent_plan_page.dart' as staff_rp;
 import '../rent_plan/client/rent_plan_page.dart' as client_rp;
-import '../rent_plan/staff/laptop_units_page.dart';
+import '../rent_plan/staff/laptop_units_page.dart';                 
+import '../rent_plan/staff/receive_laptop_page.dart';
 import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
 import '../work_log/work_log_page.dart';
@@ -265,26 +266,7 @@ class _SideDrawerState extends State<SideDrawer> {
                             );
                           },
                         ),
-                      if (!isCustomer &&
-                          _hasPermission('mobile_laptop_unit_enable'))
-                        _buildMenuItem(
-                          context,
-                          icon: Icons.laptop_outlined,
-                          title: 'Unit Laptop',
-                          isActive: widget.activePage == 'laptop_units',
-                          padding: const EdgeInsets.only(left: 32, right: 12),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LaptopUnitsPage(
-                                  userData: widget.userData,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+
                       if (_hasPermission('mobile_todo_enable'))
                         ValueListenableBuilder<int>(
                           valueListenable: NotificationManager().unreadTodoCount,
@@ -440,6 +422,46 @@ class _SideDrawerState extends State<SideDrawer> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => PasswordListPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (!isCustomer &&
+                          _hasPermission('mobile_receive_laptop_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.assignment_return_outlined,
+                          title: 'dashboard.quick_menu_receive_laptop'.tr(context),
+                          isActive: widget.activePage == 'receive_laptop',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ReceiveLaptopPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (!isCustomer &&
+                          _hasPermission('mobile_laptop_unit_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.laptop_outlined,
+                          title: 'Unit Laptop',
+                          isActive: widget.activePage == 'laptop_units',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LaptopUnitsPage(
                                   userData: widget.userData,
                                 ),
                               ),

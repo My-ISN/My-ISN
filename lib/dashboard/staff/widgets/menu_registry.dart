@@ -59,24 +59,6 @@ class MenuRegistry {
             ? client_rp.RentPlanPage(userData: user)
             : staff_rp.RentPlanPage(userData: user),
       ),
-      if (!isCustomer)
-        AppModule(
-          titleKey: 'dashboard.quick_menu_receive_laptop',
-          icon: Icons.assignment_return_rounded,
-          color: const Color(0xFFE57373),
-          permission: 'mobile_rent_plan_enable',
-          categoryKey: 'side_drawer.work',
-          pageBuilder: (context, user) => const ReceiveLaptopPage(),
-        ),
-      if (!isCustomer)
-        AppModule(
-          titleKey: 'Unit Laptop',
-          icon: Icons.laptop_rounded,
-          color: const Color(0xFF7E57C2),
-          permission: 'mobile_laptop_unit_enable',
-          categoryKey: 'side_drawer.work',
-          pageBuilder: (context, user) => LaptopUnitsPage(userData: user),
-        ),
       AppModule(
         titleKey: 'dashboard.quick_menu_todo_list',
         icon: Icons.assignment_rounded,
@@ -225,6 +207,24 @@ class MenuRegistry {
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => PasswordListPage(userData: user),
       ),
+      if (!isCustomer)
+        AppModule(
+          titleKey: 'dashboard.quick_menu_receive_laptop',
+          icon: Icons.assignment_return_rounded,
+          color: const Color(0xFF7E57C2),
+          permission: 'mobile_receive_laptop_enable',
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => ReceiveLaptopPage(userData: user),
+        ),
+      if (!isCustomer)
+        AppModule(
+          titleKey: 'Unit Laptop',
+          icon: Icons.laptop_rounded,
+          color: const Color(0xFF7E57C2),
+          permission: 'mobile_laptop_unit_enable',
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => LaptopUnitsPage(userData: user),
+        ),
     ];
   }
 }

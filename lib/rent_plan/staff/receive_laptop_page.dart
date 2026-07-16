@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../services/rent_plan_service.dart';
 import '../../../widgets/secondary_app_bar.dart';
+import '../../../widgets/custom_app_bar.dart';
+import '../../../widgets/side_drawer.dart';
 import '../../../widgets/custom_snackbar.dart';
 import '../../../widgets/barcode_scanner_page.dart';
 import '../../../localization/app_localizations.dart';
 
 class ReceiveLaptopPage extends StatefulWidget {
-  const ReceiveLaptopPage({super.key});
+  final Map<String, dynamic> userData;
+  const ReceiveLaptopPage({super.key, required this.userData});
 
   @override
   State<ReceiveLaptopPage> createState() => _ReceiveLaptopPageState();
@@ -186,9 +189,12 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: SecondaryAppBar(
-        title: 'dashboard.quick_menu_receive_laptop'.tr(context),
+      appBar: CustomAppBar(
+        userData: widget.userData,
+        showBackButton: false,
+        title: 'My ISN',
       ),
+      endDrawer: SideDrawer(userData: widget.userData, activePage: 'receive_laptop'),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
