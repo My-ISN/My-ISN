@@ -16,6 +16,7 @@ import '../work_log/work_log_page.dart';
 import '../finance/finance_page.dart';
 import '../helpdesk/helpdesk_list_page.dart';
 import '../ai_bot/ai_bot_page.dart';
+import '../ai_bot/ai_chat_isn_page.dart';
 import '../creative_idea/creative_idea_page.dart';
 import '../personal_finance/personal_finance_page.dart';
 import '../intercom/intercom_page.dart';
@@ -27,6 +28,7 @@ import '../reports/reports_page.dart';
 import '../projects/project_list_page.dart';
 import '../tasks/task_list_page.dart';
 import '../passwords/password_list_page.dart';
+import '../crm/crm_page.dart';
 
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -57,13 +59,13 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'laptop_units', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords'].contains(
+    if (['rent_plan', 'laptop_units', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords', 'crm'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
     } else if (['finance', 'my_wallet'].contains(widget.activePage)) {
       _expandedSections['financial'] = true;
-    } else if (['helpdesk', 'ai_bot', 'creative_idea', 'intercom', 'quicksend'].contains(
+    } else if (['helpdesk', 'ai_bot', 'ai_chat_isn', 'creative_idea', 'intercom', 'quicksend'].contains(
       widget.activePage,
     )) {
       _expandedSections['support'] = true;
@@ -232,6 +234,7 @@ class _SideDrawerState extends State<SideDrawer> {
                   'mobile_reports_enable',
                   'mobile_projects_view',
                   'mobile_tasks_view',
+                  'mobile_crm_enable',
                 ]))
                   _buildExpandableSection(
                     context,
@@ -428,6 +431,25 @@ class _SideDrawerState extends State<SideDrawer> {
                             );
                           },
                         ),
+                      if (_hasPermission('mobile_crm_enable') || _hasPermission('crm_leads1'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.campaign_outlined,
+                          title: 'CRM',
+                          isActive: widget.activePage == 'crm',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CrmPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       if (!isCustomer &&
                           _hasPermission('mobile_receive_laptop_enable'))
                         _buildMenuItem(
@@ -573,6 +595,24 @@ class _SideDrawerState extends State<SideDrawer> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => AiBotPage(
+                              userData: widget.userData,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.assistant_rounded,
+                      title: 'ISN Assistant',
+                      isActive: widget.activePage == 'ai_chat_isn',
+                      padding: const EdgeInsets.only(left: 32, right: 12),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AiChatIsnPage(
                               userData: widget.userData,
                             ),
                           ),

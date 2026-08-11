@@ -8,6 +8,7 @@ import 'package:myisn/finance/finance_page.dart';
 import 'package:myisn/personal_finance/personal_finance_page.dart';
 import 'package:myisn/helpdesk/helpdesk_list_page.dart';
 import 'package:myisn/ai_bot/ai_bot_page.dart';
+import 'package:myisn/ai_bot/ai_chat_isn_page.dart';
 import 'package:myisn/creative_idea/creative_idea_page.dart';
 import 'package:myisn/intercom/intercom_page.dart';
 import 'package:myisn/profile/profile_page.dart';
@@ -20,6 +21,7 @@ import 'package:myisn/tasks/task_list_page.dart';
 import 'package:myisn/passwords/password_list_page.dart';
 import 'package:myisn/rent_plan/staff/receive_laptop_page.dart';
 import 'package:myisn/rent_plan/staff/laptop_units_page.dart';
+import 'package:myisn/crm/crm_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -131,6 +133,13 @@ class MenuRegistry {
         pageBuilder: (context, user) => AiBotPage(userData: user),
       ),
       AppModule(
+        titleKey: 'dashboard.quick_menu_isn_assistant',
+        icon: Icons.assistant_rounded,
+        color: const Color(0xFF6A11CB),
+        categoryKey: 'side_drawer.support',
+        pageBuilder: (context, user) => AiChatIsnPage(userData: user),
+      ),
+      AppModule(
         titleKey: 'dashboard.quick_menu_helpdesk',
         icon: Icons.support_agent_rounded,
         color: const Color(0xFF7E57C2),
@@ -206,6 +215,14 @@ class MenuRegistry {
         permission: 'mobile_pass_account',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => PasswordListPage(userData: user),
+      ),
+      AppModule(
+        titleKey: 'dashboard.quick_menu_crm',
+        icon: Icons.campaign_rounded,
+        color: const Color(0xFF7E57C2),
+        permission: 'mobile_crm_enable',
+        categoryKey: 'side_drawer.work',
+        pageBuilder: (context, user) => CrmPage(userData: user),
       ),
       if (!isCustomer)
         AppModule(

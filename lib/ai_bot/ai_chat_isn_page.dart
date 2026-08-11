@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../localization/app_localizations.dart';
 import '../services/ai_chat_isn_service.dart';
 import '../services/tracking_service.dart';
@@ -17,10 +18,18 @@ class AiChatIsnPage extends StatefulWidget {
   State<AiChatIsnPage> createState() => _AiChatIsnPageState();
 }
 
-class _AiChatIsnPageState extends State<AiChatIsnPage> {
+class _AiChatIsnPageState extends State<AiChatIsnPage>
+    with SingleTickerProviderStateMixin {
   final AiChatIsnService _aiChatService = AiChatIsnService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+
+  // Speech-to-Text
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  bool _speechAvailable = false;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
 
   List<Map<String, dynamic>> _messages = [];
   bool _isLoading = false;
@@ -36,14 +45,46 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
   @override
   void initState() {
     super.initState();
+    _speech = stt.SpeechToText();
+    _initSpeech();
     _loadHistory();
-    try { TrackingService().logCurrentFeature('AI Chat ISN'); } catch (_) {}
+    try {
+      TrackingService().logCurrentFeature('ISN Assistant');
+    } catch (_) {}
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  Future<void> _initSpeech() async {
+    try {
+      final available = await _speech.initialize(
+        onError: (error) {
+          if (mounted) setState(() => _isListening = false);
+        },
+        onStatus: (status) {
+          if (status == 'done' || status == 'notListening') {
+            if (mounted) setState(() => _isListening = false);
+          }
+        },
+      );
+      if (mounted) setState(() => _speechAvailable = available);
+    } catch (_) {
+      if (mounted) setState(() => _speechAvailable = false);
+    }
   }
 
   @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _pulseController.dispose();
+    if (_isListening) _speech.stop();
     super.dispose();
   }
 
@@ -102,10 +143,47 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
             'created_at': DateTime.now().toIso8601String(),
           });
         } else {
-          context.showErrorSnackBar(response['message'] ?? 'Gagal memproses data.');
+          context.showErrorSnackBar(
+              response['message'] ?? 'Gagal memproses data.');
         }
       });
       _scrollToBottom();
+    }
+  }
+
+  Future<void> _toggleListening() async {
+    if (!_speechAvailable) {
+      context.showWarningSnackBar('Mikrofon tidak tersedia di perangkat ini.');
+      return;
+    }
+
+    if (_isListening) {
+      // Stop listening → send whatever was recognized
+      await _speech.stop();
+      setState(() => _isListening = false);
+      final text = _messageController.text.trim();
+      if (text.isNotEmpty) {
+        _sendMessage(text);
+      }
+    } else {
+      // Start listening
+      setState(() => _isListening = true);
+      await _speech.listen(
+        onResult: (result) {
+          if (mounted) {
+            setState(() {
+              _messageController.text = result.recognizedWords;
+              _messageController.selection = TextSelection.fromPosition(
+                TextPosition(offset: _messageController.text.length),
+              );
+            });
+          }
+        },
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 4),
+        localeId: 'id_ID',
+        listenOptions: stt.SpeechListenOptions(cancelOnError: true),
+      );
     }
   }
 
@@ -114,7 +192,8 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('main.confirm'.tr(context)),
-        content: const Text('Apakah Anda yakin ingin menghapus semua riwayat percakapan?'),
+        content: const Text(
+            'Apakah Anda yakin ingin menghapus semua riwayat percakapan?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -122,7 +201,8 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Hapus'),
           ),
         ],
@@ -137,9 +217,11 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
           _isLoading = false;
           if (response['status'] == true) {
             _messages.clear();
-            context.showSuccessSnackBar(response['message'] ?? 'Riwayat chat berhasil dikosongkan.');
+            context.showSuccessSnackBar(
+                response['message'] ?? 'Riwayat chat berhasil dikosongkan.');
           } else {
-            context.showErrorSnackBar(response['message'] ?? 'Gagal menghapus riwayat.');
+            context.showErrorSnackBar(
+                response['message'] ?? 'Gagal menghapus riwayat.');
           }
         });
       }
@@ -153,7 +235,8 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
     final firstName = widget.userData['first_name'] ?? 'Super Admin';
 
     // Greeting Message HTML
-    final greetingHtml = 'Halo, <b>$firstName</b>! Saya adalah asisten kecerdasan buatan ISN.<br>'
+    final greetingHtml =
+        'Halo, <b>$firstName</b>! Saya adalah asisten kecerdasan buatan ISN.<br>'
         'Saya memiliki akses penuh dan aman ke seluruh database HRIS. Anda bisa menanyakan apa saja, seperti data karyawan, absensi, gaji, work log, hingga status proyek/penyewaan laptop.<br><br>'
         '<i>Contoh yang bisa Anda tanyakan:</i>'
         '<ul style="margin: 4px 0; padding-left: 20px;">'
@@ -170,11 +253,12 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
         title: 'My ISN',
         extraActions: [
           Transform.translate(
-            offset: const Offset(16, 0), // Shift to align spacing with search/bell icons
+            offset: const Offset(16, 0),
             child: IconButton(
               padding: const EdgeInsets.all(8.0),
               constraints: const BoxConstraints(),
-              icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+              icon:
+                  const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
               tooltip: 'Kosongkan Chat',
               onPressed: _clearChatHistory,
             ),
@@ -193,21 +277,67 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
-                    itemCount: _messages.length + 1, // +1 for the Greeting at index 0
+                    itemCount: _messages.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return _buildGreetingBubble(greetingHtml, isDark);
                       }
-
                       final msg = _messages[index - 1];
                       final isUser = msg['role'] == 'user';
-                      return _buildMessageBubble(msg, isUser, isDark, colorScheme);
+                      return _buildMessageBubble(
+                          msg, isUser, isDark, colorScheme);
                     },
                   ),
           ),
           if (_isSending) _buildThinkingIndicator(isDark),
+          // Listening indicator
+          if (_isListening) _buildListeningIndicator(isDark),
           _buildQuickQueries(),
           _buildInputArea(isDark, colorScheme),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildListeningIndicator(bool isDark) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF2D1B6B).withOpacity(0.8)
+            : const Color(0xFFEDE7FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFF6A11CB).withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          ScaleTransition(
+            scale: _pulseAnimation,
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: const BoxDecoration(
+                color: Color(0xFF6A11CB),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Expanded(
+            child: Text(
+              'Mendengarkan... Bicara sekarang atau ketuk mikrofon lagi untuk kirim.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Color(0xFF6A11CB),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -236,7 +366,9 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                       bottomRight: Radius.circular(18),
                     ),
                     border: Border.all(
-                      color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.2),
+                      color: isDark
+                          ? Colors.white10
+                          : Colors.grey.withOpacity(0.2),
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -253,7 +385,9 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                         margin: Margins.zero,
                         padding: HtmlPaddings.zero,
                         fontSize: FontSize(13.5),
-                        color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+                        color: isDark
+                            ? Colors.white.withOpacity(0.9)
+                            : Colors.black87,
                       ),
                       "b": Style(fontWeight: FontWeight.bold),
                       "li": Style(margin: Margins.only(bottom: 4)),
@@ -262,7 +396,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Asisten AI',
+                  'ISN Assistant',
                   style: TextStyle(
                     fontSize: 10,
                     color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -276,7 +410,8 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
     );
   }
 
-  Widget _buildMessageBubble(Map<String, dynamic> msg, bool isUser, bool isDark, ColorScheme colorScheme) {
+  Widget _buildMessageBubble(Map<String, dynamic> msg, bool isUser, bool isDark,
+      ColorScheme colorScheme) {
     final String content = msg['content'] ?? '';
     final String timeStr = _formatTime(msg['created_at']);
 
@@ -290,10 +425,12 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
           const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: isUser
                       ? BoxDecoration(
                           gradient: const LinearGradient(
@@ -324,7 +461,9 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                             bottomRight: Radius.circular(18),
                           ),
                           border: Border.all(
-                            color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.2),
+                            color: isDark
+                                ? Colors.white10
+                                : Colors.grey.withOpacity(0.2),
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -350,21 +489,28 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                               margin: Margins.zero,
                               padding: HtmlPaddings.zero,
                               fontSize: FontSize(13.5),
-                              color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+                              color: isDark
+                                  ? Colors.white.withOpacity(0.9)
+                                  : Colors.black87,
                             ),
                             "b": Style(fontWeight: FontWeight.bold),
                             "li": Style(margin: Margins.only(bottom: 4)),
                             "pre": Style(
-                              backgroundColor: isDark ? Colors.grey[900] : Colors.grey[100],
+                              backgroundColor: isDark
+                                  ? Colors.grey[900]
+                                  : Colors.grey[100],
                               padding: HtmlPaddings.all(8),
-                              border: Border.all(color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.3)),
+                              border: Border.all(
+                                  color: isDark
+                                      ? Colors.white10
+                                      : Colors.grey.withOpacity(0.3)),
                             ),
                           },
                         ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isUser ? 'Anda • $timeStr' : 'Asisten AI • $timeStr',
+                  isUser ? 'Anda • $timeStr' : 'ISN Assistant • $timeStr',
                   style: TextStyle(
                     fontSize: 10,
                     color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -388,13 +534,15 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.2),
+              color:
+                  isDark ? Colors.white10 : Colors.grey.withOpacity(0.2),
               width: 1,
             ),
           ),
           child: ClipOval(
             child: CachedNetworkImage(
-              imageUrl: '${AppConstants.serverRoot}/uploads/users/thumb/$photo',
+              imageUrl:
+                  '${AppConstants.serverRoot}/uploads/users/thumb/$photo',
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(
                 color: isDark ? Colors.grey[800] : Colors.grey[200],
@@ -461,7 +609,8 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey[850] : Colors.white,
                     borderRadius: const BorderRadius.only(
@@ -471,7 +620,9 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                       bottomRight: Radius.circular(18),
                     ),
                     border: Border.all(
-                      color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.2),
+                      color: isDark
+                          ? Colors.white10
+                          : Colors.grey.withOpacity(0.2),
                     ),
                   ),
                   child: Row(
@@ -525,14 +676,17 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? const Color(0xFFB180FF) : const Color(0xFF6A11CB),
+                  color:
+                      isDark ? const Color(0xFFB180FF) : const Color(0xFF6A11CB),
                 ),
               ),
-              backgroundColor: isDark ? Colors.grey[850] : const Color(0xFFF3EBFF),
+              backgroundColor:
+                  isDark ? Colors.grey[850] : const Color(0xFFF3EBFF),
               side: BorderSide(
                 color: isDark ? Colors.white10 : const Color(0xFFE8DBFF),
               ),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               onPressed: () => _sendMessage(query),
             ),
           );
@@ -554,13 +708,61 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
       ),
       child: Row(
         children: [
+          // Voice button
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: _isListening
+                  ? const Color(0xFF6A11CB)
+                  : (isDark ? Colors.grey[800] : Colors.grey[100]),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _isListening
+                    ? const Color(0xFF6A11CB)
+                    : (isDark
+                        ? Colors.white12
+                        : Colors.grey.withOpacity(0.3)),
+                width: 1.5,
+              ),
+              boxShadow: _isListening
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF6A11CB).withOpacity(0.4),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                      )
+                    ]
+                  : [],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: _toggleListening,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Icon(
+                    _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+                    color: _isListening
+                        ? Colors.white
+                        : (isDark ? Colors.white60 : Colors.grey[600]),
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Text field
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 color: isDark ? Colors.grey[800] : Colors.grey[100],
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.2),
+                  color: isDark
+                      ? Colors.white10
+                      : Colors.grey.withOpacity(0.2),
                   width: 1.5,
                 ),
               ),
@@ -568,10 +770,18 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
                 controller: _messageController,
                 textCapitalization: TextCapitalization.sentences,
                 style: const TextStyle(fontSize: 14),
-                decoration: const InputDecoration(
-                  hintText: 'Ketik pertanyaan database Anda...',
-                  hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: InputDecoration(
+                  hintText: _isListening
+                      ? 'Mendengarkan...'
+                      : 'Ketik pertanyaan database Anda...',
+                  hintStyle: TextStyle(
+                    fontSize: 13,
+                    color: _isListening
+                        ? const Color(0xFF6A11CB)
+                        : Colors.grey,
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: InputBorder.none,
                 ),
                 onSubmitted: _sendMessage,
@@ -579,6 +789,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage> {
             ),
           ),
           const SizedBox(width: 8),
+          // Send button
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
