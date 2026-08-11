@@ -59,7 +59,10 @@ class TrackingService {
 
     try {
       final deviceInfo = DeviceInfoPlugin();
-      if (Platform.isAndroid) {
+      if (kIsWeb) {
+        osName = 'Web';
+        deviceModel = 'Browser';
+      } else if (Platform.isAndroid) {
         final androidInfo = await deviceInfo.androidInfo;
         deviceId = androidInfo.id;
         deviceModel = '${androidInfo.brand} ${androidInfo.model}';
@@ -264,6 +267,7 @@ class TrackingService {
   }
 
   Future<void> _saveQueuesToDisk() async {
+    if (kIsWeb) return;
     try {
       final file = await _outboxFile;
       final data = {
@@ -277,6 +281,7 @@ class TrackingService {
   }
 
   Future<void> _loadQueuesFromDisk() async {
+    if (kIsWeb) return;
     try {
       final file = await _outboxFile;
       if (await file.exists()) {
