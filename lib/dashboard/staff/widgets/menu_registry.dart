@@ -21,6 +21,7 @@ import 'package:myisn/tasks/task_list_page.dart';
 import 'package:myisn/passwords/password_list_page.dart';
 import 'package:myisn/rent_plan/staff/receive_laptop_page.dart';
 import 'package:myisn/rent_plan/staff/laptop_units_page.dart';
+import 'package:myisn/rent_plan/staff/scan_laptop_detail_page.dart';
 import 'package:myisn/crm/crm_page.dart';
 
 class AppModule {
@@ -241,6 +242,15 @@ class MenuRegistry {
           permission: 'mobile_laptop_unit_enable',
           categoryKey: 'side_drawer.work',
           pageBuilder: (context, user) => LaptopUnitsPage(userData: user),
+        ),
+      if (!isCustomer)
+        AppModule(
+          titleKey: 'dashboard.quick_menu_scan_barcode_laptop',
+          icon: Icons.qr_code_scanner_rounded,
+          color: const Color(0xFF7E57C2),
+          permission: 'mobile_scan_barcode_enable',
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => ScanLaptopDetailPage(userData: user),
         ),
     ];
   }

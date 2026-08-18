@@ -523,4 +523,54 @@ class RentPlanService {
       return {'status': false, 'message': e.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> getLaptopDetailScan(String barcode) async {
+    try {
+      String? userDataString = await _storage.read(key: 'user_data');
+      String userId = '';
+      if (userDataString != null) {
+        final userData = json.decode(userDataString);
+        userId = (userData['id'] ?? userData['user_id'] ?? '').toString();
+      }
+
+      final url = Uri.parse('$baseUrl/get_laptop_detail_scan?barcode=$barcode&user_id=$userId');
+      final response = await http.get(url);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateLaptopDamageNotes({
+    required String barcode,
+    int? unitId,
+    String? kondisi,
+    String? status,
+    String? catatan,
+  }) async {
+    try {
+      String? userDataString = await _storage.read(key: 'user_data');
+      if (userDataString == null) {
+        return {'status': false, 'message': 'User not logged in'};
+      }
+      final userData = json.decode(userDataString);
+      final userId = userData['id'] ?? userData['user_id'];
+
+      final url = Uri.parse('$baseUrl/update_laptop_damage_notes');
+      final response = await http.post(
+        url,
+        body: {
+          'user_id': userId.toString(),
+          'barcode': barcode,
+          'unit_id': unitId?.toString() ?? '',
+          'kondisi': kondisi ?? '',
+          'status': status ?? '',
+          'catatan': catatan ?? '',
+        },
+      );
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
 }

@@ -5,6 +5,7 @@ import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/side_drawer.dart';
 import 'scan_verify_barcode_page.dart';
+import 'scan_laptop_detail_page.dart';
 
 class LaptopUnitsPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -478,56 +479,82 @@ class _LaptopUnitsPageState extends State<LaptopUnitsPage> {
         statusColor = const Color(0xFF2ED8B6);
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Barcode: ${unit['barcode'] ?? '-'}',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'monospace',
-                ),
+    return InkWell(
+      onTap: () {
+        if (unit['barcode'] != null && unit['barcode'].toString().isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ScanLaptopDetailPage(
+                userData: widget.userData,
+                initialBarcode: unit['barcode'].toString(),
               ),
-              _verifiedChip(isVerified),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'SN: ${unit['serial_number'] ?? '-'}',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-              fontSize: 11,
             ),
-          ),
-          if (unit['catatan'] != null && unit['catatan'].toString().trim().isNotEmpty && unit['catatan'] != '--') ...[
+          ).then((_) => _loadUnits(reset: true));
+        }
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Barcode: ${unit['barcode'] ?? '-'}',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                _verifiedChip(isVerified),
+              ],
+            ),
             const SizedBox(height: 2),
             Text(
-              'Catatan: ${unit['catatan']}',
+              'SN: ${unit['serial_number'] ?? '-'}',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 fontSize: 11,
-                fontStyle: FontStyle.italic,
               ),
             ),
-          ],
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              _chip(status, statusColor),
-              const SizedBox(width: 6),
-              _chip(kondisi, kondisi == 'Baru' ? Colors.green : Colors.orange),
+            if (unit['catatan'] != null && unit['catatan'].toString().trim().isNotEmpty && unit['catatan'] != '--') ...[
+              const SizedBox(height: 2),
+              Text(
+                'Catatan: ${unit['catatan']}',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 8),
-          Divider(height: 1, color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.04) : Theme.of(context).dividerColor.withValues(alpha: 0.05)),
-        ],
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    _chip(status, statusColor),
+                    const SizedBox(width: 6),
+                    _chip(kondisi, kondisi == 'Baru' ? Colors.green : Colors.orange),
+                  ],
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 12,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Divider(height: 1, color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.04) : Theme.of(context).dividerColor.withValues(alpha: 0.05)),
+          ],
+        ),
       ),
     );
   }

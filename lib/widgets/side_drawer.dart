@@ -10,6 +10,7 @@ import '../rent_plan/staff/rent_plan_page.dart' as staff_rp;
 import '../rent_plan/client/rent_plan_page.dart' as client_rp;
 import '../rent_plan/staff/laptop_units_page.dart';                 
 import '../rent_plan/staff/receive_laptop_page.dart';
+import '../rent_plan/staff/scan_laptop_detail_page.dart';
 import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
 import '../work_log/work_log_page.dart';
@@ -59,7 +60,7 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'laptop_units', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords', 'crm'].contains(
+    if (['rent_plan', 'laptop_units', 'scan_laptop_barcode', 'receive_laptop', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords', 'crm'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
@@ -227,6 +228,7 @@ class _SideDrawerState extends State<SideDrawer> {
                 if (_hasCategoryPermission([
                   'mobile_rent_plan_enable',
                   'mobile_laptop_unit_enable',
+                  'mobile_scan_barcode_enable',
                   'mobile_todo_enable',
                   'mobile_employees_enable',
                   'mobile_worklog_enable',
@@ -484,6 +486,26 @@ class _SideDrawerState extends State<SideDrawer> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => LaptopUnitsPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (!isCustomer &&
+                          _hasPermission('mobile_scan_barcode_enable'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.qr_code_scanner_outlined,
+                          title: 'dashboard.quick_menu_scan_barcode_laptop'.tr(context),
+                          isActive: widget.activePage == 'scan_laptop_barcode',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ScanLaptopDetailPage(
                                   userData: widget.userData,
                                 ),
                               ),
