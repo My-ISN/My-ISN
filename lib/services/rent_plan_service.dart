@@ -573,4 +573,84 @@ class RentPlanService {
       return {'status': false, 'message': e.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> getChecklistTemplates() async {
+    try {
+      final url = Uri.parse('$baseUrl/get_checklist_templates');
+      final response = await http.get(url);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getTemplateIndicators({int? templateId}) async {
+    try {
+      String param = templateId != null ? '?template_id=$templateId' : '';
+      final url = Uri.parse('$baseUrl/get_template_indicators$param');
+      final response = await http.get(url);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> submitLaptopInspection({
+    required String barcode,
+    int? unitId,
+    int? templateId,
+    int? rentalId,
+    String? namaTemplate,
+    String? namaProyek,
+    String? overallStatus,
+    String? kondisiUnitSetelah,
+    String? catatanUmum,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    try {
+      String? userDataString = await _storage.read(key: 'user_data');
+      String userId = '';
+      String inspectorName = 'Staff Pemeriksa';
+      if (userDataString != null) {
+        final userData = json.decode(userDataString);
+        userId = (userData['id'] ?? userData['user_id'] ?? '').toString();
+        inspectorName = (userData['first_name'] ?? userData['name'] ?? userData['username'] ?? 'Staff Pemeriksa').toString();
+        if (userData['last_name'] != null && userData['last_name'].toString().isNotEmpty) {
+          inspectorName += ' ${userData['last_name']}';
+        }
+      }
+
+      final url = Uri.parse('$baseUrl/submit_laptop_inspection');
+      final response = await http.post(
+        url,
+        body: {
+          'barcode': barcode,
+          'unit_id': unitId?.toString() ?? '',
+          'template_id': templateId?.toString() ?? '',
+          'rental_id': rentalId?.toString() ?? '',
+          'nama_template': namaTemplate ?? '',
+          'nama_proyek': namaProyek ?? '',
+          'user_id': userId,
+          'inspected_by_name': inspectorName,
+          'overall_status': overallStatus ?? 'Pass',
+          'kondisi_unit_setelah': kondisiUnitSetelah ?? 'Baik',
+          'catatan_umum': catatanUmum ?? '',
+          'items': json.encode(items),
+        },
+      );
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getLaptopInspectionHistory(String barcode, {int? unitId}) async {
+    try {
+      final url = Uri.parse('$baseUrl/get_laptop_inspection_history?barcode=$barcode&unit_id=${unitId ?? ''}');
+      final response = await http.get(url);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
 }
