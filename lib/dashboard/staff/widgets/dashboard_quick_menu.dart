@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../localization/app_localizations.dart';
 import '../../../widgets/custom_app_bar.dart'; // For NotificationManager
-import '../../../widgets/connectivity_wrapper.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/quick_menu_provider.dart';
 import 'menu_registry.dart';
@@ -112,11 +111,6 @@ class DashboardQuickMenu extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _buildDynamicQuickMenu(context, menuItems),
-        ValueListenableBuilder<double>(
-          valueListenable: ConnectivityStatus.bottomPadding,
-          builder: (context, padding, _) =>
-              SizedBox(height: padding.clamp(0.0, double.infinity)),
-        ),
       ],
     );
   }
