@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.2.0] - 2026-08-20
+
+### Penambahan v1.2.0
+
+- **Modul CRM (Customer Relationship Management)**: Implementasi penuh modul CRM (`CrmPage` & `CrmService`) untuk pengelolaan pipeline prospek (Leads), pelacakan tahapan deal (*Prospect, Qualified, Proposal, Won, Lost*), riwayat interaksi pelanggan, pencatatan log follow-up, serta filter pencarian data pelanggan.
+- **Laptop Inspection & Checklist Scanner (`ScanLaptopDetailPage`)**: Fitur inspeksi mendalam unit laptop berbasis pemindaian barcode dengan form checklist multi-kategori (Kondisi Fisik, Layar, Keyboard, Audio & Mic, Port & Konektivitas, Performa & Baterai), kalkulasi otomatis penilaian grade (Grade A, B, C, D), dan penyimpanan riwayat inspeksi ke backend.
+- **Modul Penerimaan Laptop (`ReceiveLaptopPage`)**: Fitur pengembalian dan penerimaan unit sewa laptop dengan scanner barcode kamera dan input manual, dilengkapi verifikasi status rental aktif, seleksi kondisi unit (Bagus/Rusak), serta input catatan pengembalian.
+- **Modul Master Unit Laptop (`LaptopUnitsPage`)**: Manajemen inventaris seluruh unit laptop untuk staff dengan filter status (Tersedia, Disewa, Maintenance, dll.), pencarian nomor seri (SN) / kode unit laptop, dan visualisasi detail unit.
+- **Modul Verifikasi Barcode Rental (`ScanVerifyBarcodePage`)**: Pemindaian dan verifikasi barcode unit laptop secara real-time saat penyiapan dan checkout unit sewa laptop ke pelanggan.
+- **Kustomisasi Tata Letak Dashboard Staff**: Fitur pengaturan urutan kartu dashboard staff (*Customizable & Reorderable Dashboard Cards*) dengan antarmuka drag-and-drop, penyimpanan urutan kartu secara persisten di secure storage, dan fitur reset ke susunan default.
+
+### Perubahan v1.2.0
+
+- **Integrasi Side Navigation Drawer & Menu Registry**: Pendaftaran modul baru (CRM, Receive Laptop, Laptop Units, Scan Barcode, AI Chat) ke dalam drawer navigasi dan registri menu dashboard dengan hak akses staff serta dukungan lokalisasi (ID/EN).
+- **Penyempurnaan AI Chat ISN (`AiChatIsnPage`)**: Pembaruan antarmuka chatbot AI dengan visualisasi pesan yang lebih rapi, perenderan format teks markdown, saran prompt kontekstual, dan penataan riwayat percakapan.
+- **Optimasi Layanan Notifikasi (`NotificationService`)**: Pembaruan penanganan local notification background dispatch, refresh token FCM, konfigurasi channel notifikasi, dan penyelarasan opsi tampilan foreground notification.
+- **Keamanan Penyimpanan Kredensial (`FlutterSecureStorage`)**: Peningkatan enkripsi data penyimpanan lokal menggunakan `AndroidOptions(encryptedSharedPreferences: true)` pada modul Login, Register, Main, Maintenance, dan Settings.
+
+### Perbaikan v1.2.0
+
+- **Kalkulasi Tier Harga Sewa & Perpanjangan**: Perbaikan logika perhitungan tier harga laptop pada form Tambah Rent Plan dan Perpanjang Sewa (Rent Extend) agar menghitung durasi hari secara presisi serta mencocokkan kelompok harga (`price_group`) unit laptop yang dipilih.
+- **Heartbeat & Session Cleanup**: Penghentian layanan heartbeat secara bersih saat pengguna melakukan logout guna mencegah background polling yang tidak diperlukan dan kebocoran sesi.
+- **Lifecycle & Tracking Error Safety**: Peningkatan stabilitas lifecycle pada pelacakan sesi dan sinkronisasi aktivitas pengguna.
+
+---
+
 ### [1.1.1] - 2026-07-13
 
 ### Penambahan v1.1.1
