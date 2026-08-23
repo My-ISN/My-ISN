@@ -82,12 +82,15 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  String? get _currentUserId => (widget.userData['id'] ?? widget.userData['user_id'] ?? widget.userData['sup_user_id'])?.toString();
+
   // ---------------------------------------------------------------------------
   // FETCH METHODS
   // ---------------------------------------------------------------------------
   Future<void> _fetchLeads({int page = 1}) async {
     setState(() => _isLoadingLeads = true);
     final result = await _crmService.getLeads(
+      userId: _currentUserId,
       page: page,
       search: _leadSearchController.text.trim(),
       categoryId: _selectedLeadCategory,
@@ -111,6 +114,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   Future<void> _fetchCustomers({int page = 1}) async {
     setState(() => _isLoadingCustomers = true);
     final result = await _crmService.getCustomers(
+      userId: _currentUserId,
       page: page,
       search: _customerSearchController.text.trim(),
       customerType: _selectedCustomerType,
@@ -132,6 +136,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   Future<void> _fetchCompetitors({int page = 1}) async {
     setState(() => _isLoadingCompetitors = true);
     final result = await _crmService.getCompetitors(
+      userId: _currentUserId,
       page: page,
       search: _competitorSearchController.text.trim(),
       typeCategory: _selectedCompetitorType,
@@ -436,10 +441,14 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildLeadCard(Map<String, dynamic> item) {
+  Widget _buildLeadCard(dynamic rawItem) {
+    final Map<String, dynamic> item = rawItem is Map<String, dynamic>
+        ? rawItem
+        : Map<String, dynamic>.from(rawItem as Map);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final status = item['status'] ?? 'Lead Baru';
     final statusColor = _getStatusColor(status);
+    final leadId = int.tryParse(item['lead_id']?.toString() ?? '0') ?? 0;
 
     return Container(
       decoration: BoxDecoration(
@@ -458,7 +467,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _showLeadDetailModal(int.parse(item['lead_id'].toString())),
+          onTap: () => _showLeadDetailModal(item),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -483,17 +492,74 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                           Text(
                             item['client_name'] ?? '-',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           if ((item['company_name'] ?? '').isNotEmpty) ...[
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 3),
                             Text(
                               item['company_name'],
                               style: TextStyle(fontSize: 13, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ],
                       ),
                     ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert_rounded, size: 20, color: Colors.grey),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onSelected: (val) {
+                        if (val == 'detail') {
+                          _showLeadDetailModal(item);
+                        } else if (val == 'edit') {
+                          _showLeadFormModal(item);
+                        } else if (val == 'delete') {
+                          _deleteLeadWithConfirm(leadId);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'detail',
+                          child: Row(
+                            children: [
+                              Icon(Icons.visibility_outlined, size: 18, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text('Detail Lead'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+                              SizedBox(width: 8),
+                              Text('Edit Lead'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Hapus Lead', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
@@ -505,6 +571,18 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                         style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11),
                       ),
                     ),
+                    if ((item['category_name'] ?? '').isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _primaryColor.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          item['category_name'],
+                          style: TextStyle(fontSize: 11, color: _primaryColor, fontWeight: FontWeight.w600),
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -523,19 +601,6 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                       const SizedBox(width: 4),
                       Text(item['city'], style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                     ],
-                    const Spacer(),
-                    if ((item['category_name'] ?? '').isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: _primaryColor.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          item['category_name'],
-                          style: TextStyle(fontSize: 10, color: _primaryColor, fontWeight: FontWeight.w600),
-                        ),
-                      ),
                   ],
                 ),
               ],
@@ -649,10 +714,14 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildCustomerCard(Map<String, dynamic> item) {
+  Widget _buildCustomerCard(dynamic rawItem) {
+    final Map<String, dynamic> item = rawItem is Map<String, dynamic>
+        ? rawItem
+        : Map<String, dynamic>.from(rawItem as Map);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final status = item['status'] ?? 'Active';
     final type = item['customer_type'] ?? 'Customer Baru';
+    final customerId = int.tryParse(item['customer_id']?.toString() ?? '0') ?? 0;
 
     return Container(
       decoration: BoxDecoration(
@@ -671,7 +740,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _showCustomerDetailModal(int.parse(item['customer_id'].toString())),
+          onTap: () => _showCustomerDetailModal(item),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -696,17 +765,74 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                           Text(
                             item['client_name'] ?? '-',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           if ((item['company_name'] ?? '').isNotEmpty) ...[
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 3),
                             Text(
                               item['company_name'],
                               style: TextStyle(fontSize: 13, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ],
                       ),
                     ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert_rounded, size: 20, color: Colors.grey),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onSelected: (val) {
+                        if (val == 'detail') {
+                          _showCustomerDetailModal(item);
+                        } else if (val == 'edit') {
+                          _showCustomerFormModal(item);
+                        } else if (val == 'delete') {
+                          _deleteCustomerWithConfirm(customerId);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'detail',
+                          child: Row(
+                            children: [
+                              Icon(Icons.visibility_outlined, size: 18, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text('Detail Pelanggan'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+                              SizedBox(width: 8),
+                              Text('Edit Pelanggan'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Hapus Pelanggan', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
@@ -722,15 +848,8 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                         ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                const Divider(height: 1),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
@@ -740,11 +859,23 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                         style: const TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.w600),
                       ),
                     ),
-                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 1),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
                     if ((item['contact_number'] ?? '').isNotEmpty) ...[
                       Icon(Icons.phone_outlined, size: 14, color: Colors.grey[500]),
                       const SizedBox(width: 4),
                       Text(item['contact_number'], style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                      const SizedBox(width: 12),
+                    ],
+                    if ((item['city'] ?? '').isNotEmpty) ...[
+                      Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+                      const SizedBox(width: 4),
+                      Text(item['city'], style: TextStyle(fontSize: 12, color: Colors.grey[600])),
                     ],
                   ],
                 ),
@@ -860,10 +991,14 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget _buildCompetitorCard(Map<String, dynamic> item) {
+  Widget _buildCompetitorCard(dynamic rawItem) {
+    final Map<String, dynamic> item = rawItem is Map<String, dynamic>
+        ? rawItem
+        : Map<String, dynamic>.from(rawItem as Map);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final type = item['type_category'] ?? 'kompetitor';
     final rating = item['google_rating']?.toString() ?? '0.0';
+    final competitorId = int.tryParse(item['competitor_id']?.toString() ?? '0') ?? 0;
 
     return Container(
       decoration: BoxDecoration(
@@ -882,7 +1017,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _showCompetitorDetailModal(int.parse(item['competitor_id'].toString())),
+          onTap: () => _showCompetitorDetailModal(item),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -907,17 +1042,74 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                           Text(
                             item['name'] ?? '-',
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           if ((item['business_category'] ?? '').isNotEmpty) ...[
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 3),
                             Text(
                               item['business_category'],
-                              style: TextStyle(fontSize: 12, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                              style: TextStyle(fontSize: 13, color: isDark ? Colors.grey[400] : Colors.grey[600]),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ],
                       ),
                     ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert_rounded, size: 20, color: Colors.grey),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onSelected: (val) {
+                        if (val == 'detail') {
+                          _showCompetitorDetailModal(item);
+                        } else if (val == 'edit') {
+                          _showCompetitorFormModal(item);
+                        } else if (val == 'delete') {
+                          _deleteCompetitorWithConfirm(competitorId);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'detail',
+                          child: Row(
+                            children: [
+                              Icon(Icons.visibility_outlined, size: 18, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Text('Detail Data'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 18, color: Colors.orange),
+                              SizedBox(width: 8),
+                              Text('Edit Data'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline_rounded, size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Hapus Data', style: TextStyle(color: Colors.red)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
@@ -1118,7 +1310,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                           'status': selectedStatus,
                           'category_id': selectedCategory ?? '0',
                           'notes': notesCtrl.text.trim(),
-                        });
+                        }, userId: _currentUserId);
                         if (mounted) {
                           Navigator.pop(modalContext);
                           if (res['status'] == true) {
@@ -1141,116 +1333,202 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  void _showLeadDetailModal(int leadId) async {
-    final detail = await _crmService.getLeadDetail(leadId);
-    if (!mounted || detail['status'] != true) return;
-    final lead = detail['lead'];
-    final followups = List<Map<String, dynamic>>.from(detail['followups'] ?? []);
+  Future<void> _deleteLeadWithConfirm(int leadId, [BuildContext? modalContext]) async {
+    final confirm = await _showConfirmDialog('Hapus Lead', 'Yakin ingin menghapus data lead ini secara permanen?');
+    if (confirm == true) {
+      final res = await _crmService.deleteLead(leadId, userId: _currentUserId);
+      if (mounted) {
+        if (modalContext != null && modalContext.mounted) {
+          Navigator.pop(modalContext);
+        }
+        if (res['status'] == true) {
+          context.showSuccessSnackBar(res['message'] ?? 'Lead berhasil dihapus.');
+          _fetchLeads();
+        } else {
+          context.showErrorSnackBar(res['message'] ?? 'Gagal menghapus lead.');
+        }
+      }
+    }
+  }
+
+  void _showLeadDetailModal(dynamic rawLead) {
+    final Map<String, dynamic> initialLead = rawLead is Map<String, dynamic>
+        ? rawLead
+        : Map<String, dynamic>.from(rawLead as Map);
+    final leadId = int.tryParse(initialLead['lead_id']?.toString() ?? '0') ?? 0;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        height: MediaQuery.of(modalContext).size.height * 0.85,
-        decoration: BoxDecoration(
-          color: Theme.of(modalContext).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2))),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(lead['client_name'] ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      builder: (modalContext) => StatefulBuilder(
+        builder: (modalContext, setModalState) {
+          return FutureBuilder<Map<String, dynamic>>(
+            future: _crmService.getLeadDetail(leadId, userId: _currentUserId),
+            builder: (context, snapshot) {
+              final lead = (snapshot.hasData && snapshot.data!['status'] == true && snapshot.data!['lead'] != null)
+                  ? Map<String, dynamic>.from(snapshot.data!['lead'] as Map)
+                  : initialLead;
+              final followups = (snapshot.hasData && snapshot.data!['status'] == true)
+                  ? List<Map<String, dynamic>>.from(snapshot.data!['followups'] ?? [])
+                  : <Map<String, dynamic>>[];
+              final status = lead['status'] ?? 'Lead Baru';
+              final statusColor = _getStatusColor(status);
+
+              return Container(
+                height: MediaQuery.of(modalContext).size.height * 0.85,
+                decoration: BoxDecoration(
+                  color: Theme.of(modalContext).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.edit_rounded, color: Colors.blue),
-                  onPressed: () {
-                    Navigator.pop(modalContext);
-                    _showLeadFormModal(lead);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-                  onPressed: () async {
-                    final confirm = await _showConfirmDialog('Hapus Lead', 'Yakin menghapus lead ini?');
-                    if (confirm == true) {
-                      final res = await _crmService.deleteLead(leadId);
-                      if (mounted) {
-                        Navigator.pop(modalContext);
-                        if (res['status'] == true) {
-                          context.showSuccessSnackBar('Lead dihapus.');
-                          _fetchLeads();
-                        }
-                      }
-                    }
-                  },
-                ),
-              ],
-            ),
-            const Divider(),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildDetailRow('Perusahaan', lead['company_name']),
-                  _buildDetailRow('Telepon / WA', lead['contact_number']),
-                  _buildDetailRow('Email', lead['email']),
-                  _buildDetailRow('Kota', lead['city']),
-                  _buildDetailRow('Status', lead['status']),
-                  _buildDetailRow('Kategori', lead['category_name']),
-                  _buildDetailRow('Catatan', lead['notes']),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Riwayat Follow Up', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      TextButton.icon(
-                        icon: const Icon(Icons.add_rounded, size: 18),
-                        label: const Text('Follow Up'),
-                        onPressed: () {
-                          Navigator.pop(modalContext);
-                          _showAddLeadFollowupModal(leadId);
-                        },
-                      ),
-                    ],
-                  ),
-                  if (followups.isEmpty)
-                    const Padding(padding: EdgeInsets.all(16), child: Text('Belum ada riwayat follow up.', style: TextStyle(color: Colors.grey)))
-                  else
-                    ...followups.map((f) => Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2))),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(f['followup_notes'] ?? '', style: const TextStyle(fontSize: 13)),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${f['first_name'] ?? 'Staff'} • ${f['followup_date'] ?? ''}',
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                              Text(lead['client_name'] ?? '-', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              if ((lead['company_name'] ?? '').isNotEmpty)
+                                Text(lead['company_name'], style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            status,
+                            style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Action Buttons (Edit & Hapus)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue.withValues(alpha: 0.12),
+                              foregroundColor: Colors.blue,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.blue.withValues(alpha: 0.4)),
+                              ),
+                            ),
+                            icon: const Icon(Icons.edit_rounded, size: 18),
+                            label: const Text('Edit Lead', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            onPressed: () {
+                              Navigator.pop(modalContext);
+                              _showLeadFormModal(lead);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.withValues(alpha: 0.12),
+                              foregroundColor: Colors.red,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.red.withValues(alpha: 0.4)),
+                              ),
+                            ),
+                            icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                            label: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            onPressed: () => _deleteLeadWithConfirm(leadId, modalContext),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 24),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          _buildDetailRow('Perusahaan', lead['company_name']),
+                          _buildDetailRow('Telepon / WA', lead['contact_number']),
+                          _buildDetailRow('Email', lead['email']),
+                          _buildDetailRow('Kota', lead['city']),
+                          _buildDetailRow('Alamat', lead['address']),
+                          _buildDetailRow('Status', lead['status']),
+                          _buildDetailRow('Kategori', lead['category_name']),
+                          _buildDetailRow('Catatan', lead['notes']),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  'Riwayat Follow Up',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              TextButton.icon(
+                                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8)),
+                                icon: const Icon(Icons.add_rounded, size: 18),
+                                label: const Text('Tambah'),
+                                onPressed: () {
+                                  Navigator.pop(modalContext);
+                                  _showAddLeadFollowupModal(leadId);
+                                },
                               ),
                             ],
                           ),
-                        )),
-                ],
-              ),
-            ),
-          ],
-        ),
+                          if (snapshot.connectionState == ConnectionState.waiting)
+                            const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+                          else if (followups.isEmpty)
+                            const Padding(padding: EdgeInsets.all(16), child: Text('Belum ada riwayat follow up.', style: TextStyle(color: Colors.grey)))
+                          else
+                            ...followups.map((f) => Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(f['followup_notes'] ?? '', style: const TextStyle(fontSize: 13)),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${f['first_name'] ?? 'Staff'} • ${f['followup_date'] ?? ''}',
+                                        style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                )),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
+
 
   void _showAddLeadFollowupModal(int leadId) {
     final notesCtrl = TextEditingController();
@@ -1301,6 +1579,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                     leadId: leadId,
                     followupNotes: notesCtrl.text.trim(),
                     newStatus: newStatus,
+                    userId: _currentUserId,
                   );
                   if (mounted) {
                     Navigator.pop(modalContext);
@@ -1387,311 +1666,468 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     onPressed: () async {
-                      if (clientNameCtrl.text.trim().isEmpty) return;
-                      final res = await _crmService.saveCustomer({
-                        if (isEdit) 'customer_id': cust['customer_id'].toString(),
-                        'client_name': clientNameCtrl.text.trim(),
-                        'company_name': companyNameCtrl.text.trim(),
-                        'contact_number': contactCtrl.text.trim(),
-                        'email': emailCtrl.text.trim(),
-                        'city': cityCtrl.text.trim(),
-                        'address': addressCtrl.text.trim(),
-                        'customer_type': selectedType,
-                        'notes': notesCtrl.text.trim(),
-                      });
-                      if (mounted) {
-                        Navigator.pop(modalContext);
-                        if (res['status'] == true) {
-                          context.showSuccessSnackBar(res['message'] ?? 'Berhasil!');
-                          _fetchCustomers();
+                        final res = await _crmService.saveCustomer({
+                          if (isEdit) 'customer_id': cust['customer_id'].toString(),
+                          'client_name': clientNameCtrl.text.trim(),
+                          'company_name': companyNameCtrl.text.trim(),
+                          'contact_number': contactCtrl.text.trim(),
+                          'email': emailCtrl.text.trim(),
+                          'city': cityCtrl.text.trim(),
+                          'address': addressCtrl.text.trim(),
+                          'customer_type': selectedType,
+                          'notes': notesCtrl.text.trim(),
+                        }, userId: _currentUserId);
+                        if (mounted) {
+                          Navigator.pop(modalContext);
+                          if (res['status'] == true) {
+                            context.showSuccessSnackBar(res['message'] ?? 'Berhasil!');
+                            _fetchCustomers();
+                          }
                         }
-                      }
-                    },
-                    child: Text(isEdit ? 'Update Pelanggan' : 'Simpan Pelanggan', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      },
+                      child: Text(isEdit ? 'Update Pelanggan' : 'Simpan Pelanggan', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showCustomerDetailModal(int customerId) async {
-    final detail = await _crmService.getCustomerDetail(customerId);
-    if (!mounted || detail['status'] != true) return;
-    final cust = detail['customer'];
-    final followups = List<Map<String, dynamic>>.from(detail['followups'] ?? []);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        height: MediaQuery.of(modalContext).size.height * 0.85,
-        decoration: BoxDecoration(
-          color: Theme.of(modalContext).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: Text(cust['client_name'] ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                IconButton(
-                  icon: const Icon(Icons.edit_rounded, color: Colors.blue),
-                  onPressed: () {
-                    Navigator.pop(modalContext);
-                    _showCustomerFormModal(cust);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-                  onPressed: () async {
-                    final confirm = await _showConfirmDialog('Hapus Pelanggan', 'Yakin menghapus pelanggan ini?');
-                    if (confirm == true) {
-                      final res = await _crmService.deleteCustomer(customerId);
-                      if (mounted) {
-                        Navigator.pop(modalContext);
-                        if (res['status'] == true) {
-                          context.showSuccessSnackBar('Pelanggan dihapus.');
-                          _fetchCustomers();
-                        }
-                      }
-                    }
-                  },
-                ),
-              ],
-            ),
-            const Divider(),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildDetailRow('Perusahaan', cust['company_name']),
-                  _buildDetailRow('Telepon', cust['contact_number']),
-                  _buildDetailRow('Email', cust['email']),
-                  _buildDetailRow('Tipe', cust['customer_type']),
-                  _buildDetailRow('Kota', cust['city']),
-                  _buildDetailRow('Alamat', cust['address']),
-                  _buildDetailRow('Catatan', cust['notes']),
-                  const SizedBox(height: 16),
-                  const Text('Riwayat Follow Up', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  const SizedBox(height: 8),
-                  if (followups.isEmpty)
-                    const Text('Belum ada riwayat follow up.', style: TextStyle(color: Colors.grey))
-                  else
-                    ...followups.map((f) => Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(f['followup_notes'] ?? '', style: const TextStyle(fontSize: 13)),
-                              const SizedBox(height: 4),
-                              Text('${f['first_name'] ?? 'Staff'} • ${f['followup_date'] ?? ''}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                            ],
-                          ),
-                        )),
                 ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
+      );
+    }
+
+  Future<void> _deleteCustomerWithConfirm(int customerId, [BuildContext? modalContext]) async {
+    final confirm = await _showConfirmDialog('Hapus Pelanggan', 'Yakin ingin menghapus data pelanggan ini?');
+    if (confirm == true) {
+      final res = await _crmService.deleteCustomer(customerId, userId: _currentUserId);
+      if (mounted) {
+        if (modalContext != null && modalContext.mounted) {
+          Navigator.pop(modalContext);
+        }
+        if (res['status'] == true) {
+          context.showSuccessSnackBar(res['message'] ?? 'Pelanggan berhasil dihapus.');
+          _fetchCustomers();
+        } else {
+          context.showErrorSnackBar(res['message'] ?? 'Gagal menghapus pelanggan.');
+        }
+      }
+    }
   }
 
-  // --- COMPETITOR FORM & DETAILS ---
-  void _showCompetitorFormModal([Map<String, dynamic>? comp]) {
-    final isEdit = comp != null;
-    final nameCtrl = TextEditingController(text: comp?['name'] ?? '');
-    final categoryCtrl = TextEditingController(text: comp?['business_category'] ?? '');
-    final cityCtrl = TextEditingController(text: comp?['city'] ?? '');
-    final addressCtrl = TextEditingController(text: comp?['address'] ?? '');
-    final descCtrl = TextEditingController(text: comp?['description'] ?? '');
-    final waCtrl = TextEditingController(text: comp?['whatsapp'] ?? '');
-    final websiteCtrl = TextEditingController(text: comp?['website'] ?? '');
-    String selectedType = comp?['type_category'] ?? 'kompetitor';
+  void _showCustomerDetailModal(dynamic rawCust) {
+    final Map<String, dynamic> initialCust = rawCust is Map<String, dynamic>
+        ? rawCust
+        : Map<String, dynamic>.from(rawCust as Map);
+    final customerId = int.tryParse(initialCust['customer_id']?.toString() ?? '0') ?? 0;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (modalContext) => StatefulBuilder(
-        builder: (modalContext, setModalState) => Container(
-          height: MediaQuery.of(modalContext).size.height * 0.85,
-          decoration: BoxDecoration(
-            color: Theme.of(modalContext).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(modalContext).viewInsets.bottom + 20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)))),
-                const SizedBox(height: 16),
-                Text(isEdit ? 'Edit Data Kompetitor' : 'Tambah Kompetitor / Partner', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Nama Kompetitor / Partner *')),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: selectedType,
-                  decoration: const InputDecoration(labelText: 'Tipe Data'),
-                  items: const [
-                    DropdownMenuItem(value: 'kompetitor', child: Text('Kompetitor')),
-                    DropdownMenuItem(value: 'partner', child: Text('Partner / Mitra')),
-                    DropdownMenuItem(value: 'prospek', child: Text('Prospek')),
-                    DropdownMenuItem(value: 'customer', child: Text('Customer Base')),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) setModalState(() => selectedType = val);
-                  },
+        builder: (modalContext, setModalState) {
+          return FutureBuilder<Map<String, dynamic>>(
+            future: _crmService.getCustomerDetail(customerId, userId: _currentUserId),
+            builder: (context, snapshot) {
+              final cust = (snapshot.hasData && snapshot.data!['status'] == true && snapshot.data!['customer'] != null)
+                  ? Map<String, dynamic>.from(snapshot.data!['customer'] as Map)
+                  : initialCust;
+              final followups = (snapshot.hasData && snapshot.data!['status'] == true)
+                  ? List<Map<String, dynamic>>.from(snapshot.data!['followups'] ?? [])
+                  : <Map<String, dynamic>>[];
+              final status = cust['status'] ?? 'Active';
+              final type = cust['customer_type'] ?? 'Customer Baru';
+
+              return Container(
+                height: MediaQuery.of(modalContext).size.height * 0.85,
+                decoration: BoxDecoration(
+                  color: Theme.of(modalContext).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
-                const SizedBox(height: 12),
-                TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: 'Bidang Usaha')),
-                const SizedBox(height: 12),
-                TextField(controller: cityCtrl, decoration: const InputDecoration(labelText: 'Kota')),
-                const SizedBox(height: 12),
-                TextField(controller: addressCtrl, decoration: const InputDecoration(labelText: 'Alamat')),
-                const SizedBox(height: 12),
-                TextField(controller: waCtrl, decoration: const InputDecoration(labelText: 'WhatsApp')),
-                const SizedBox(height: 12),
-                TextField(controller: websiteCtrl, decoration: const InputDecoration(labelText: 'Website')),
-                const SizedBox(height: 12),
-                TextField(controller: descCtrl, maxLines: 3, decoration: const InputDecoration(labelText: 'Deskripsi / Observasi')),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)))),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(cust['client_name'] ?? '-', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              if ((cust['company_name'] ?? '').isNotEmpty)
+                                Text(cust['company_name'], style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: (status == 'Active' ? Colors.green : Colors.grey).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            status,
+                            style: TextStyle(
+                              color: status == 'Active' ? Colors.green : Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    onPressed: () async {
-                      if (nameCtrl.text.trim().isEmpty) return;
-                      final res = await _crmService.saveCompetitor({
-                        if (isEdit) 'competitor_id': comp['competitor_id'].toString(),
-                        'name': nameCtrl.text.trim(),
-                        'type_category': selectedType,
-                        'business_category': categoryCtrl.text.trim(),
-                        'city': cityCtrl.text.trim(),
-                        'address': addressCtrl.text.trim(),
-                        'whatsapp': waCtrl.text.trim(),
-                        'website': websiteCtrl.text.trim(),
-                        'description': descCtrl.text.trim(),
-                      });
-                      if (mounted) {
-                        Navigator.pop(modalContext);
-                        if (res['status'] == true) {
-                          context.showSuccessSnackBar(res['message'] ?? 'Berhasil!');
-                          _fetchCompetitors();
-                        }
-                      }
-                    },
-                    child: Text(isEdit ? 'Update Data' : 'Simpan Data', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
+                    const SizedBox(height: 12),
+                    // Action Buttons (Edit & Hapus)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue.withValues(alpha: 0.12),
+                              foregroundColor: Colors.blue,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.blue.withValues(alpha: 0.4)),
+                              ),
+                            ),
+                            icon: const Icon(Icons.edit_rounded, size: 18),
+                            label: const Text('Edit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            onPressed: () {
+                              Navigator.pop(modalContext);
+                              _showCustomerFormModal(cust);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.withValues(alpha: 0.12),
+                              foregroundColor: Colors.red,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.red.withValues(alpha: 0.4)),
+                              ),
+                            ),
+                            icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                            label: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            onPressed: () => _deleteCustomerWithConfirm(customerId, modalContext),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 24),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          _buildDetailRow('Perusahaan', cust['company_name']),
+                          _buildDetailRow('Telepon', cust['contact_number']),
+                          _buildDetailRow('Email', cust['email']),
+                          _buildDetailRow('Tipe', type),
+                          _buildDetailRow('Kota', cust['city']),
+                          _buildDetailRow('Alamat', cust['address']),
+                          _buildDetailRow('Catatan', cust['notes']),
+                          const SizedBox(height: 16),
+                          const Text('Riwayat Follow Up', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          const SizedBox(height: 8),
+                          if (snapshot.connectionState == ConnectionState.waiting)
+                            const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+                          else if (followups.isEmpty)
+                            const Text('Belum ada riwayat follow up.', style: TextStyle(color: Colors.grey))
+                          else
+                            ...followups.map((f) => Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(f['followup_notes'] ?? '', style: const TextStyle(fontSize: 13)),
+                                      const SizedBox(height: 4),
+                                      Text('${f['first_name'] ?? 'Staff'} • ${f['followup_date'] ?? ''}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                    ],
+                                  ),
+                                )),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }
 
-  void _showCompetitorDetailModal(int competitorId) async {
-    final detail = await _crmService.getCompetitorDetail(competitorId);
-    if (!mounted || detail['status'] != true) return;
-    final comp = detail['competitor'];
-    final logs = List<Map<String, dynamic>>.from(detail['logs'] ?? []);
+    // --- COMPETITOR FORM & DETAILS ---
+    void _showCompetitorFormModal([Map<String, dynamic>? comp]) {
+      final isEdit = comp != null;
+      final nameCtrl = TextEditingController(text: comp?['name'] ?? '');
+      final categoryCtrl = TextEditingController(text: comp?['business_category'] ?? '');
+      final cityCtrl = TextEditingController(text: comp?['city'] ?? '');
+      final addressCtrl = TextEditingController(text: comp?['address'] ?? '');
+      final descCtrl = TextEditingController(text: comp?['description'] ?? '');
+      final waCtrl = TextEditingController(text: comp?['whatsapp'] ?? '');
+      final websiteCtrl = TextEditingController(text: comp?['website'] ?? '');
+      String selectedType = comp?['type_category'] ?? 'kompetitor';
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (modalContext) => StatefulBuilder(
+          builder: (modalContext, setModalState) => Container(
+            height: MediaQuery.of(modalContext).size.height * 0.85,
+            decoration: BoxDecoration(
+              color: Theme.of(modalContext).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(modalContext).viewInsets.bottom + 20),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)))),
+                  const SizedBox(height: 16),
+                  Text(isEdit ? 'Edit Data Kompetitor' : 'Tambah Kompetitor / Partner', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Nama Kompetitor / Partner *')),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedType,
+                    decoration: const InputDecoration(labelText: 'Tipe Data'),
+                    items: const [
+                      DropdownMenuItem(value: 'kompetitor', child: Text('Kompetitor')),
+                      DropdownMenuItem(value: 'partner', child: Text('Partner / Mitra')),
+                      DropdownMenuItem(value: 'prospek', child: Text('Prospek')),
+                      DropdownMenuItem(value: 'customer', child: Text('Customer Base')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setModalState(() => selectedType = val);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: 'Bidang Usaha')),
+                  const SizedBox(height: 12),
+                  TextField(controller: cityCtrl, decoration: const InputDecoration(labelText: 'Kota')),
+                  const SizedBox(height: 12),
+                  TextField(controller: addressCtrl, decoration: const InputDecoration(labelText: 'Alamat')),
+                  const SizedBox(height: 12),
+                  TextField(controller: waCtrl, decoration: const InputDecoration(labelText: 'WhatsApp')),
+                  const SizedBox(height: 12),
+                  TextField(controller: websiteCtrl, decoration: const InputDecoration(labelText: 'Website')),
+                  const SizedBox(height: 12),
+                  TextField(controller: descCtrl, maxLines: 3, decoration: const InputDecoration(labelText: 'Deskripsi / Observasi')),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      onPressed: () async {
+                        if (nameCtrl.text.trim().isEmpty) return;
+                        final res = await _crmService.saveCompetitor({
+                          if (isEdit) 'competitor_id': comp['competitor_id'].toString(),
+                          'name': nameCtrl.text.trim(),
+                          'type_category': selectedType,
+                          'business_category': categoryCtrl.text.trim(),
+                          'city': cityCtrl.text.trim(),
+                          'address': addressCtrl.text.trim(),
+                          'whatsapp': waCtrl.text.trim(),
+                          'website': websiteCtrl.text.trim(),
+                          'description': descCtrl.text.trim(),
+                        }, userId: _currentUserId);
+                        if (mounted) {
+                          Navigator.pop(modalContext);
+                          if (res['status'] == true) {
+                            context.showSuccessSnackBar(res['message'] ?? 'Berhasil!');
+                            _fetchCompetitors();
+                          }
+                        }
+                      },
+                      child: Text(isEdit ? 'Update Data' : 'Simpan Data', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+  Future<void> _deleteCompetitorWithConfirm(int competitorId, [BuildContext? modalContext]) async {
+    final confirm = await _showConfirmDialog('Hapus Kompetitor', 'Yakin ingin menghapus data kompetitor / partner ini?');
+    if (confirm == true) {
+      final res = await _crmService.deleteCompetitor(competitorId, userId: _currentUserId);
+      if (mounted) {
+        if (modalContext != null && modalContext.mounted) {
+          Navigator.pop(modalContext);
+        }
+        if (res['status'] == true) {
+          context.showSuccessSnackBar(res['message'] ?? 'Data berhasil dihapus.');
+          _fetchCompetitors();
+        } else {
+          context.showErrorSnackBar(res['message'] ?? 'Gagal menghapus data.');
+        }
+      }
+    }
+  }
+
+  void _showCompetitorDetailModal(dynamic rawComp) {
+    final Map<String, dynamic> initialComp = rawComp is Map<String, dynamic>
+        ? rawComp
+        : Map<String, dynamic>.from(rawComp as Map);
+    final competitorId = int.tryParse(initialComp['competitor_id']?.toString() ?? '0') ?? 0;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (modalContext) => Container(
-        height: MediaQuery.of(modalContext).size.height * 0.85,
-        decoration: BoxDecoration(
-          color: Theme.of(modalContext).scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: Text(comp['name'] ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                IconButton(
-                  icon: const Icon(Icons.edit_rounded, color: Colors.blue),
-                  onPressed: () {
-                    Navigator.pop(modalContext);
-                    _showCompetitorFormModal(comp);
-                  },
+      builder: (modalContext) => StatefulBuilder(
+        builder: (modalContext, setModalState) {
+          return FutureBuilder<Map<String, dynamic>>(
+            future: _crmService.getCompetitorDetail(competitorId, userId: _currentUserId),
+            builder: (context, snapshot) {
+              final comp = (snapshot.hasData && snapshot.data!['status'] == true && snapshot.data!['competitor'] != null)
+                  ? Map<String, dynamic>.from(snapshot.data!['competitor'] as Map)
+                  : initialComp;
+              final logs = (snapshot.hasData && snapshot.data!['status'] == true)
+                  ? List<Map<String, dynamic>>.from(snapshot.data!['logs'] ?? [])
+                  : <Map<String, dynamic>>[];
+              final type = comp['type_category'] ?? 'kompetitor';
+
+              return Container(
+                height: MediaQuery.of(modalContext).size.height * 0.85,
+                decoration: BoxDecoration(
+                  color: Theme.of(modalContext).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
-                  onPressed: () async {
-                    final confirm = await _showConfirmDialog('Hapus Competitor', 'Yakin menghapus data ini?');
-                    if (confirm == true) {
-                      final res = await _crmService.deleteCompetitor(competitorId);
-                      if (mounted) {
-                        Navigator.pop(modalContext);
-                        if (res['status'] == true) {
-                          context.showSuccessSnackBar('Data dihapus.');
-                          _fetchCompetitors();
-                        }
-                      }
-                    }
-                  },
-                ),
-              ],
-            ),
-            const Divider(),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildDetailRow('Tipe Data', (comp['type_category'] ?? '').toString().toUpperCase()),
-                  _buildDetailRow('Bidang Usaha', comp['business_category']),
-                  _buildDetailRow('Kota', comp['city']),
-                  _buildDetailRow('Alamat', comp['address']),
-                  _buildDetailRow('WhatsApp', comp['whatsapp']),
-                  _buildDetailRow('Website', comp['website']),
-                  _buildDetailRow('Deskripsi', comp['description']),
-                  const SizedBox(height: 16),
-                  const Text('Log Aktivitas / Observasi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  const SizedBox(height: 8),
-                  if (logs.isEmpty)
-                    const Text('Belum ada log observasi.', style: TextStyle(color: Colors.grey))
-                  else
-                    ...logs.map((l) => Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('${l['action_type']} - ${l['notes'] ?? ''}', style: const TextStyle(fontSize: 13)),
-                              const SizedBox(height: 4),
-                              Text('${l['first_name'] ?? 'User'} • ${l['created_at'] ?? ''}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                            ],
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)))),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(comp['name'] ?? '-', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _getCompetitorTypeColor(type).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        )),
-                ],
-              ),
-            ),
-          ],
-        ),
+                          child: Text(
+                            type.toUpperCase(),
+                            style: TextStyle(
+                              color: _getCompetitorTypeColor(type),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Action Buttons (Edit & Hapus)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue.withValues(alpha: 0.12),
+                              foregroundColor: Colors.blue,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.blue.withValues(alpha: 0.4)),
+                              ),
+                            ),
+                            icon: const Icon(Icons.edit_rounded, size: 18),
+                            label: const Text('Edit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            onPressed: () {
+                              Navigator.pop(modalContext);
+                              _showCompetitorFormModal(comp);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.withValues(alpha: 0.12),
+                              foregroundColor: Colors.red,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.red.withValues(alpha: 0.4)),
+                              ),
+                            ),
+                            icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                            label: const Text('Hapus', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            onPressed: () => _deleteCompetitorWithConfirm(competitorId, modalContext),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 24),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          _buildDetailRow('Tipe Data', (comp['type_category'] ?? '').toString().toUpperCase()),
+                          _buildDetailRow('Bidang Usaha', comp['business_category']),
+                          _buildDetailRow('Kota', comp['city']),
+                          _buildDetailRow('Alamat', comp['address']),
+                          _buildDetailRow('WhatsApp', comp['whatsapp']),
+                          _buildDetailRow('Website', comp['website']),
+                          _buildDetailRow('Deskripsi', comp['description']),
+                          const SizedBox(height: 16),
+                          const Text('Log Aktivitas / Observasi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          const SizedBox(height: 8),
+                          if (snapshot.connectionState == ConnectionState.waiting)
+                            const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+                          else if (logs.isEmpty)
+                            const Text('Belum ada log observasi.', style: TextStyle(color: Colors.grey))
+                          else
+                            ...logs.map((l) => Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('${l['action_type']} - ${l['notes'] ?? ''}', style: const TextStyle(fontSize: 13)),
+                                      const SizedBox(height: 4),
+                                      Text('${l['first_name'] ?? 'User'} • ${l['created_at'] ?? ''}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                    ],
+                                  ),
+                                )),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
