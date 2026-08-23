@@ -259,16 +259,22 @@ class _TodoListPageState extends State<TodoListPage> {
     try {
       final companyId = _currentUserData?['company_id']?.toString() ?? '';
       final url = '${AppConstants.baseUrl}/get_shortcut_employees?company_id=$companyId';
+      debugPrint('[SHORTCUT] URL: $url');
       final response = await http.get(Uri.parse(url));
+      debugPrint('[SHORTCUT] Status: ${response.statusCode}');
+      debugPrint('[SHORTCUT] Body: ${response.body}');
       final data = json.decode(response.body);
 
       if (data['status'] == true && mounted) {
+        debugPrint('[SHORTCUT] Data count: ${(data['data'] as List?)?.length}');
         setState(() {
           _shortcutEmployees = data['data'] ?? [];
         });
+      } else {
+        debugPrint('[SHORTCUT] status false or not mounted, data: $data');
       }
     } catch (e) {
-      debugPrint('Error fetching shortcut employees: $e');
+      debugPrint('[SHORTCUT] Error: $e');
     }
   }
 
