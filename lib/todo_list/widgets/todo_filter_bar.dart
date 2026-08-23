@@ -6,6 +6,7 @@ class TodoFilterBar extends StatelessWidget {
   final String viewMode;
   final Function(String) onViewModeChanged;
   final List<dynamic> employees;
+  final List<dynamic> shortcutEmployees;
   final String? selectedEmployeeId;
   final Function(String) onEmployeeSelected;
   final bool isEmployeesLoading;
@@ -16,6 +17,7 @@ class TodoFilterBar extends StatelessWidget {
     required this.viewMode,
     required this.onViewModeChanged,
     required this.employees,
+    this.shortcutEmployees = const [],
     this.selectedEmployeeId,
     required this.onEmployeeSelected,
     required this.isEmployeesLoading,
@@ -27,12 +29,119 @@ class TodoFilterBar extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildViewModePills(context, isDark),
+        if (shortcutEmployees.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _buildShortcutChips(context, isDark),
+        ],
         if (viewMode == 'team') ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _buildEmployeeDropdown(context, isDark),
         ],
+      ],
+    );
+  }
+
+  Widget _buildShortcutChips(BuildContext context, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.bolt_rounded, size: 15, color: Colors.amber[700]),
+            const SizedBox(width: 4),
+            Text(
+              'SHORTCUT RECENT',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.6,
+                color: isDark ? Colors.grey[400] : Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: shortcutEmployees.map((sc) {
+              final isSelected = (viewMode == 'team') && (selectedEmployeeId == sc['user_id'].toString());
+              final name = (sc['first_name'] ?? sc['name'] ?? '').toString();
+              final incomplete = int.tryParse(sc['incomplete_todo']?.toString() ?? '0') ?? 0;
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      if (viewMode != 'team') {
+                        onViewModeChanged('team');
+                      }
+                      onEmployeeSelected(sc['user_id'].toString());
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? primaryColor
+                            : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.withValues(alpha: 0.12)),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isSelected
+                              ? primaryColor
+                              : (isDark ? Colors.white12 : Colors.grey.withValues(alpha: 0.25)),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            name.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected
+                                  ? Colors.white
+                                  : (isDark ? Colors.white70 : Colors.black87),
+                            ),
+                          ),
+                          if (incomplete > 0) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Colors.white.withValues(alpha: 0.3)
+                                    : Colors.red.withValues(alpha: 0.85),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '$incomplete',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
       ],
     );
   }

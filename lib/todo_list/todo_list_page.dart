@@ -62,6 +62,7 @@ class _TodoListPageState extends State<TodoListPage> {
   String _viewMode = 'personal'; // 'personal' or 'team'
   String? _selectedEmployeeId;
   List<dynamic> _employees = [];
+  List<dynamic> _shortcutEmployees = [];
   bool _isEmployeesLoading = false;
 
   // Offline Sync State
@@ -110,6 +111,7 @@ class _TodoListPageState extends State<TodoListPage> {
       _currentUserData = widget.userData;
       _fetchTodos();
       _fetchEmployees(); // Pre-fetch in background
+      _fetchShortcutEmployees();
       _markAsSeen();
     } else {
       const storage = FlutterSecureStorage();
@@ -121,6 +123,7 @@ class _TodoListPageState extends State<TodoListPage> {
           });
           _fetchTodos();
           _fetchEmployees();
+          _fetchShortcutEmployees();
           _markAsSeen();
         }
       } else {
@@ -164,8 +167,14 @@ class _TodoListPageState extends State<TodoListPage> {
 
   bool _hasPermission(String resource) {
     if (_currentUserData == null) return false;
+    final userType = _currentUserData!['user_type']?.toString().toLowerCase() ?? '';
+    final level = _currentUserData!['level']?.toString().toLowerCase() ?? '';
     if (_currentUserData!['role_access'] == '1' ||
-        _currentUserData!['role_resources'] == 'all') {
+        _currentUserData!['role_resources'] == 'all' ||
+        userType == 'company' ||
+        userType == 'super_user' ||
+        level == 'company' ||
+        level == 'super_user') {
       return true;
     }
     final String resources = _currentUserData!['role_resources'] ?? '';
@@ -226,28 +235,40 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Future<void> _fetchEmployees() async {
-    if (_employees.isNotEmpty) return; // Only fetch once
     setState(() => _isEmployeesLoading = true);
     try {
-      final companyId = _currentUserData?['company_id'] ?? 2;
+      final companyId = _currentUserData?['company_id']?.toString() ?? '';
       final url =
           '${AppConstants.baseUrl}/get_employees?company_id=$companyId&limit=500';
       final response = await http.get(Uri.parse(url));
       final data = json.decode(response.body);
 
-      if (data['status'] == true) {
+      if (data['status'] == true && mounted) {
         setState(() {
-          _employees = data['data'];
-          // Filter to remove current user from team list? No, keep it or auto-select.
-          if (_selectedEmployeeId == null && _employees.isNotEmpty) {
-            // Don't auto-select yet to avoid confusion
-          }
+          _employees = data['data'] ?? [];
         });
       }
     } catch (e) {
       debugPrint('Error fetching employees: $e');
     } finally {
-      setState(() => _isEmployeesLoading = false);
+      if (mounted) setState(() => _isEmployeesLoading = false);
+    }
+  }
+
+  Future<void> _fetchShortcutEmployees() async {
+    try {
+      final companyId = _currentUserData?['company_id']?.toString() ?? '';
+      final url = '${AppConstants.baseUrl}/get_shortcut_employees?company_id=$companyId';
+      final response = await http.get(Uri.parse(url));
+      final data = json.decode(response.body);
+
+      if (data['status'] == true && mounted) {
+        setState(() {
+          _shortcutEmployees = data['data'] ?? [];
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching shortcut employees: $e');
     }
   }
 
@@ -1169,8 +1190,9 @@ class _TodoListPageState extends State<TodoListPage> {
         onRefresh: () async {
           _currentPage = 1;
           await _fetchTodos();
-          if (_viewMode == 'team') {
+          if (_viewMode == 'team' || _hasPermission('mobile_todo_team')) {
             await _fetchEmployees();
+            await _fetchShortcutEmployees();
           }
         },
         color: _primaryColor,
@@ -1204,6 +1226,9 @@ class _TodoListPageState extends State<TodoListPage> {
                           });
 
                           if (mode == 'team') {
+                            if (_employees.isEmpty) {
+                              _fetchEmployees();
+                            }
                             if (_selectedEmployeeId != null) {
                               _fetchTodos();
                             } else {
@@ -1214,10 +1239,12 @@ class _TodoListPageState extends State<TodoListPage> {
                           }
                         },
                         employees: _employees,
+                        shortcutEmployees: _shortcutEmployees,
                         selectedEmployeeId: _selectedEmployeeId,
                         onEmployeeSelected: (val) {
                           if (val.isNotEmpty) {
                             setState(() {
+                              _viewMode = 'team';
                               _selectedEmployeeId = val;
                               _currentPage = 1;
                             });
