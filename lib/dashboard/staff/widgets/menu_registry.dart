@@ -23,6 +23,7 @@ import 'package:myisn/rent_plan/staff/receive_laptop_page.dart';
 import 'package:myisn/rent_plan/staff/laptop_units_page.dart';
 import 'package:myisn/rent_plan/staff/scan_laptop_detail_page.dart';
 import 'package:myisn/crm/crm_page.dart';
+import 'package:myisn/reminder/reminder_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -69,6 +70,13 @@ class MenuRegistry {
         permission: 'mobile_todo_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => TodoListPage(userData: user),
+      ),
+      AppModule(
+        titleKey: 'dashboard.quick_menu_reminder',
+        icon: Icons.alarm_rounded,
+        color: const Color(0xFF7E57C2),
+        categoryKey: 'side_drawer.work',
+        pageBuilder: (context, user) => ReminderPage(userData: user),
       ),
       AppModule(
         titleKey: 'dashboard.quick_menu_work_log',

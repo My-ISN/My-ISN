@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../widgets/barcode_scanner_page.dart';
 import '../../../widgets/secondary_app_bar.dart';
 import '../../../widgets/custom_snackbar.dart';

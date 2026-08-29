@@ -30,6 +30,7 @@ import '../projects/project_list_page.dart';
 import '../tasks/task_list_page.dart';
 import '../passwords/password_list_page.dart';
 import '../crm/crm_page.dart';
+import '../reminder/reminder_page.dart';
 
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -60,7 +61,7 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'laptop_units', 'scan_laptop_barcode', 'receive_laptop', 'todo_list', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords', 'crm'].contains(
+    if (['rent_plan', 'laptop_units', 'scan_laptop_barcode', 'receive_laptop', 'todo_list', 'reminder', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords', 'crm'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
@@ -300,6 +301,29 @@ class _SideDrawerState extends State<SideDrawer> {
                             );
                           },
                         ),
+                      _buildMenuItem(
+                        context,
+                        icon: Icons.alarm_outlined,
+                        title: 'dashboard.quick_menu_reminder'.tr(context) != 'dashboard.quick_menu_reminder'
+                            ? 'dashboard.quick_menu_reminder'.tr(context)
+                            : 'Reminder',
+                        isActive: widget.activePage == 'reminder',
+                        padding: const EdgeInsets.only(
+                          left: 32,
+                          right: 12,
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ReminderPage(
+                                userData: widget.userData,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                       if (_hasPermission('mobile_employees_enable'))
                         _buildMenuItem(
                           context,

@@ -32,7 +32,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   bool _isLoadingLeads = true;
   final TextEditingController _leadSearchController = TextEditingController();
   String _selectedLeadStatus = 'all';
-  String _selectedLeadCategory = 'all';
+  final String _selectedLeadCategory = 'all';
   int _leadPage = 1;
   int _leadTotalPages = 1;
 
@@ -40,7 +40,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   List<dynamic> _customers = [];
   bool _isLoadingCustomers = true;
   final TextEditingController _customerSearchController = TextEditingController();
-  String _selectedCustomerStatus = 'all';
+  final String _selectedCustomerStatus = 'all';
   String _selectedCustomerType = 'all';
   int _customerPage = 1;
   int _customerTotalPages = 1;

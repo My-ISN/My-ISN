@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'log_service.dart';
 import '../announcement_page.dart';
 import '../todo_list/todo_list_page.dart';
+import '../reminder/reminder_page.dart';
 import '../constants.dart';
 import '../rent_plan/staff/rent_plan_detail_page.dart';
 
@@ -166,6 +167,11 @@ class NotificationService {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const TodoListPage()),
+      );
+    } else if (type == 'reminder') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ReminderPage()),
       );
     } else if (type == 'rental_agreement' && targetId != null) {
       final rentId = int.tryParse(targetId.toString());

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../services/rent_plan_service.dart';
-import '../../../widgets/secondary_app_bar.dart';
 import '../../../widgets/custom_app_bar.dart';
 import '../../../widgets/side_drawer.dart';
 import '../../../widgets/custom_snackbar.dart';
 import '../../../widgets/barcode_scanner_page.dart';
-import '../../../localization/app_localizations.dart';
 
 class ReceiveLaptopPage extends StatefulWidget {
   final Map<String, dynamic> userData;

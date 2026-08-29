@@ -39,9 +39,7 @@ class TrackingService {
   // Start tracking session
   Future<void> startSession(Map<String, dynamic>? userData) async {
     _userData = userData;
-    if (_sessionId == null) {
-      _sessionId = _uuid.v4();
-    }
+    _sessionId ??= _uuid.v4();
 
     // Capture battery start level
     int? batteryStart;
