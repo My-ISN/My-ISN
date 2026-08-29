@@ -167,7 +167,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
   List<AppModule> _filteredModules = [];
   bool _isSearchOpen = false;
   
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AppConstants.kAndroidOptions,
+  );
   List<String> _historyKeys = [];
 
   @override

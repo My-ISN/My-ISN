@@ -44,7 +44,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
       _currentUserData = widget.userData;
       _fetchAnnouncements();
     } else {
-      const storage = FlutterSecureStorage();
+      const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
       final userDataStr = await storage.read(key: 'user_data');
       if (userDataStr != null) {
         if (mounted) {

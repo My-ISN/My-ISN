@@ -364,7 +364,9 @@ class CartPage extends StatelessWidget {
   }
 
   Future<void> _handleCheckout(BuildContext context, CartProvider cart) async {
-    final storage = const FlutterSecureStorage();
+    final storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
     final userDataStr = await storage.read(key: 'user_data');
     if (userDataStr == null) return;
     

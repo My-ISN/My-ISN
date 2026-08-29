@@ -5,7 +5,9 @@ import '../constants.dart';
 
 class ProjectTaskService {
   static const String baseUrl = AppConstants.baseUrl;
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   Future<Map<String, dynamic>> getProjects({int? limit, int? page, String? search, int? departmentId}) async {
     try {

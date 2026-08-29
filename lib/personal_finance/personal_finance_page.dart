@@ -40,7 +40,9 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     symbol: 'Rp ',
     decimalDigits: 0,
   );
-  final storage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage(
+    aOptions: AppConstants.kAndroidOptions,
+  );
   final FinanceService _financeService = FinanceService();
 
   // Transaction State

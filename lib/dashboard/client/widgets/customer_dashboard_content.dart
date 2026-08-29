@@ -54,7 +54,9 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
   bool _isSearchActive = false;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   List<String> _searchHistory = [];
   List<String> _searchSuggestions = [];

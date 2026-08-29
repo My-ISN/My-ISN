@@ -114,7 +114,7 @@ class _TodoListPageState extends State<TodoListPage> {
       _fetchShortcutEmployees();
       _markAsSeen();
     } else {
-      const storage = FlutterSecureStorage();
+      const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
       final userDataStr = await storage.read(key: 'user_data');
       if (userDataStr != null) {
         if (mounted) {
@@ -133,7 +133,7 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Future<void> _loadPendingTodos() async {
-    const storage = FlutterSecureStorage();
+    const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
     final jsonStr = await storage.read(key: 'pending_todos');
     if (jsonStr != null) {
       try {
@@ -147,7 +147,7 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Future<void> _savePendingTodos() async {
-    const storage = FlutterSecureStorage();
+    const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
     await storage.write(key: 'pending_todos', value: json.encode(_pendingTodos));
   }
 

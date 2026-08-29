@@ -4,7 +4,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class QuickMenuProvider extends ChangeNotifier {
   static const String _storageKey = 'custom_quick_menu_v1';
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   
   List<String>? _pinnedKeys;
 

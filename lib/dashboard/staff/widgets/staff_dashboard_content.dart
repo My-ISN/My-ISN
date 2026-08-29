@@ -31,7 +31,9 @@ class _StaffDashboardContentState extends State<StaffDashboardContent> {
   static const String _storageKey = 'staff_dashboard_cards_order';
   static const List<String> _defaultOrder = ['welcome', 'stats', 'quick_menu'];
 
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   List<String> _cardOrder = List.from(_defaultOrder);
   bool _isLoadingOrder = true;
 

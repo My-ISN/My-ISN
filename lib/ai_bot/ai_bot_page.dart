@@ -19,7 +19,9 @@ class AiBotPage extends StatefulWidget {
 
 class _AiBotPageState extends State<AiBotPage> {
   final AiBotService _aiService = AiBotService();
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   // List State
   List<dynamic> _knowledgeList = [];

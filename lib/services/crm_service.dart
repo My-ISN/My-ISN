@@ -5,7 +5,9 @@ import '../constants.dart';
 
 class CrmService {
   static const String baseUrl = AppConstants.baseUrl;
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AppConstants.kAndroidOptions,
+  );
 
   Future<String?> _getUserId() async {
     try {

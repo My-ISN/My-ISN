@@ -6,7 +6,9 @@ import '../constants.dart';
 
 class CreativeIdeaService {
   static const String baseUrl = AppConstants.baseUrl;
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   Future<Map<String, dynamic>> _getUserData() async {
     String? userDataString = await _storage.read(key: 'user_data');

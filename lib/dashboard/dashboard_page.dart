@@ -53,7 +53,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   Map<String, dynamic> _dashboardData = {};
   Map<String, dynamic> _customerDashboardData = {};
   int _currentIndex = 0;
-  final storage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage(
+    aOptions: AppConstants.kAndroidOptions,
+  );
   DateTime? _lastBackPressTime;
   bool _isSearchActive = false;
 

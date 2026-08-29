@@ -73,7 +73,7 @@ class NotificationService {
         Log.d("Message data: ${message.data}");
         
         // Get the latest channel to ensure correct sound
-        const storage = FlutterSecureStorage();
+        const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
         String? sound = await storage.read(key: 'notification_sound');
         
         String soundResource = (sound == null || sound == 'default') 
@@ -107,7 +107,7 @@ class NotificationService {
       // 8. Listen for token refresh
       _fcm.onTokenRefresh.listen((newToken) async {
         Log.i("FCM Token Refreshed: $newToken");
-        const storage = FlutterSecureStorage();
+        const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
         String? userDataString = await storage.read(key: 'user_data');
         if (userDataString != null) {
           final userData = json.decode(userDataString);
@@ -121,7 +121,7 @@ class NotificationService {
 
   Future<void> createChannel() async {
     if (kIsWeb) return;
-    const storage = FlutterSecureStorage();
+    const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
     String? sound = await storage.read(key: 'notification_sound');
     
     // Default to swift gesture if nothing is selected or 'default' is chosen
@@ -220,7 +220,7 @@ class NotificationService {
       if (userId == null) return;
 
       // Get current channel ID
-      const storage = FlutterSecureStorage();
+      const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
       String? sound = await storage.read(key: 'notification_sound');
       
       String soundResource = (sound == null || sound == 'default') 

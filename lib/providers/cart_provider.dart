@@ -48,7 +48,9 @@ class CartItem {
 
 class CartProvider with ChangeNotifier {
   List<CartItem> _items = [];
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   List<CartItem> get items => [..._items];
 

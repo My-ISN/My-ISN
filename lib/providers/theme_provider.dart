@@ -3,7 +3,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
 
   ThemeMode get themeMode => _themeMode;
 

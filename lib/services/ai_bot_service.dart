@@ -6,15 +6,22 @@ import '../constants.dart';
 
 class AiBotService {
   static const String baseUrl = AppConstants.baseUrl;
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    aOptions: AppConstants.kAndroidOptions,
+  );
 
   Future<String?> _getUserId() async {
-    String? userDataString = await _storage.read(key: 'user_data');
-    if (userDataString != null) {
+    try {
+      String? userDataString = await _storage.read(key: 'user_data');
+      if (userDataString == null) return null;
       final userData = json.decode(userDataString);
-      return (userData['id'] ?? userData['user_id']).toString();
+      if (userData is Map) {
+        return (userData['id'] ?? userData['user_id'] ?? userData['sup_user_id'])?.toString();
+      }
+      return null;
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
   Future<Map<String, dynamic>> sendMessage(String message) async {
