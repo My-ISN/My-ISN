@@ -36,7 +36,6 @@ class _ReminderPageState extends State<ReminderPage> {
     'active': 0,
   };
 
-  bool _isStatsExpanded = true;
   String _currentFilter = 'all'; // 'all', 'today', 'upcoming', 'completed'
   final TextEditingController _searchController = TextEditingController();
   Timer? _searchDebounce;
@@ -920,10 +919,7 @@ class _ReminderPageState extends State<ReminderPage> {
     final int completedCount = _stats['completed'] ?? 0;
     final int todayCount = _stats['today'] ?? 0;
     final int upcomingCount = _stats['upcoming'] ?? 0;
-    final int activeCount = _stats['active'] ?? (totalCount - completedCount);
 
-    final double progress =
-        totalCount > 0 ? (completedCount / totalCount).clamp(0.0, 1.0) : 0.0;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -947,192 +943,6 @@ class _ReminderPageState extends State<ReminderPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // STATS CARD (Harmonious with TodoStatsCard)
-                    Card(
-                      elevation: 0,
-                      margin: EdgeInsets.zero,
-                      color: isDark
-                          ? theme.primaryColor.withValues(alpha: 0.05)
-                          : theme.cardColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        side: BorderSide(
-                          color: theme.dividerColor.withValues(alpha: 0.08),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          InkWell(
-                            onTap: () => setState(
-                              () => _isStatsExpanded = !_isStatsExpanded,
-                            ),
-                            borderRadius: BorderRadius.circular(18),
-                            child: Padding(
-                              padding: const EdgeInsets.all(18),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Ringkasan Pengingat',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 17,
-                                          letterSpacing: -0.4,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        'Akumulasi Status Pengingat',
-                                        style: TextStyle(
-                                          color: _primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: _primaryColor.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      _isStatsExpanded
-                                          ? Icons.expand_less_rounded
-                                          : Icons.expand_more_rounded,
-                                      color: _primaryColor,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          AnimatedSize(
-                            duration: const Duration(milliseconds: 280),
-                            curve: Curves.easeInOut,
-                            child: _isStatsExpanded
-                                ? Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      20,
-                                      0,
-                                      20,
-                                      18,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            children: [
-                                              _buildStatMiniRow(
-                                                'Total Pengingat',
-                                                totalCount.toString(),
-                                                Colors.blueAccent,
-                                              ),
-                                              const SizedBox(height: 10),
-                                              _buildStatMiniRow(
-                                                'Hari Ini',
-                                                todayCount.toString(),
-                                                Colors.orangeAccent,
-                                              ),
-                                              const SizedBox(height: 10),
-                                              _buildStatMiniRow(
-                                                'Mendatang',
-                                                upcomingCount.toString(),
-                                                _primaryColor,
-                                              ),
-                                              const SizedBox(height: 10),
-                                              _buildStatMiniRow(
-                                                'Selesai',
-                                                completedCount.toString(),
-                                                Colors.green,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 18),
-                                        TweenAnimationBuilder<double>(
-                                          tween: Tween<double>(
-                                            begin: 0,
-                                            end: progress,
-                                          ),
-                                          duration: const Duration(
-                                            milliseconds: 1000,
-                                          ),
-                                          curve: Curves.easeOutQuart,
-                                          builder: (context, value, child) {
-                                            return Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                SizedBox(
-                                                  width: 86,
-                                                  height: 86,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    value: value,
-                                                    strokeWidth: 9,
-                                                    backgroundColor: theme
-                                                        .dividerColor
-                                                        .withValues(alpha: 0.1),
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation<
-                                                            Color>(
-                                                      _primaryColor,
-                                                    ),
-                                                    strokeCap: StrokeCap.round,
-                                                  ),
-                                                ),
-                                                Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Text(
-                                                      '${(value * 100).toInt()}%',
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 17,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      'SELESAI',
-                                                      style: TextStyle(
-                                                        fontSize: 8,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: theme
-                                                            .colorScheme
-                                                            .onSurface
-                                                            .withValues(
-                                                              alpha: 0.45,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
                     // SEARCH BAR
                     Container(
                       height: 46,
@@ -1260,32 +1070,7 @@ class _ReminderPageState extends State<ReminderPage> {
     );
   }
 
-  Widget _buildStatMiniRow(String label, String value, Color color) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildFilterChip(String key, String label, IconData icon) {
     final bool isSelected = _currentFilter == key;
@@ -1464,7 +1249,10 @@ class _ReminderPageState extends State<ReminderPage> {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Row(
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           // Date badge
                           Container(
@@ -1518,8 +1306,7 @@ class _ReminderPageState extends State<ReminderPage> {
                           ),
 
                           // Time badge if available
-                          if (formattedTime.isNotEmpty) ...[
-                            const SizedBox(width: 6),
+                          if (formattedTime.isNotEmpty)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -1553,10 +1340,10 @@ class _ReminderPageState extends State<ReminderPage> {
                                 ],
                               ),
                             ),
+
                           // Creator badge if available
                           if (item['first_name'] != null &&
-                              item['first_name'].toString().isNotEmpty) ...[
-                            const SizedBox(width: 6),
+                              item['first_name'].toString().isNotEmpty)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -1590,7 +1377,6 @@ class _ReminderPageState extends State<ReminderPage> {
                                 ],
                               ),
                             ),
-                          ],
                         ],
                       ),
                     ],
