@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.2.2] - 2026-08-29
+
+### Penambahan v1.2.2
+
+- **Modul Pengingat Staf (Reminder Module)**:
+  - Implementasi penuh antarmuka `ReminderPage` dan `ReminderService` untuk pencatatan pengingat kerja yang digunakan oleh seluruh staf.
+  - Form pembuatan pengingat cepat dengan 2 field ringkas: **Nama Pengingat** dan **Waktu Pengingat** (Tanggal wajib dengan *Quick Date Chips*, Jam opsional).
+  - Fitur **Voice-to-Text (STT)** interaktif berbahasa Indonesia dengan indikator visual perekaman aktif untuk pendiktean pengingat secara instan.
+  - **Broadcast Push Notification FCM**: Setiap pengingat baru yang dibuat langsung disiarkan secara otomatis ke seluruh perangkat staf aktif.
+  - **Penjadwal Jatuh Tempo (Cron & CLI Spark)**: Pengecekan otomatis reminder jatuh tempo via `php spark reminder:check` dan endpoint `check_due_reminders` untuk mengirimkan notifikasi saat jam pengingat tiba.
+  - Desain kartu pengingat terintegrasi dengan filter kategori (*Semua, Hari Ini, Mendatang, Selesai*), pencarian teks instan, circular status toggle, badge informasi pembuat pengingat, dan gesture *swipe-to-delete*.
+
+### Perbaikan v1.2.2
+
+- **Standardisasi Penyimpanan Kredensial (`FlutterSecureStorage`)**:
+  - Penyeragaman seluruh inisialisasi `FlutterSecureStorage` di seluruh service (`FinanceService`, `IntercomService`, `CrmService`, `AiBotService`, `PasswordService`, `QuickSendService`, dll.) dan widget UI agar konsisten menggunakan `AndroidOptions(encryptedSharedPreferences: true)`.
+  - Mengatasi masalah sesi terputus (*"User not logged in"*, *"Exception: User ID not found"*, dan layar kosong pada beberapa modul).
+- **Perbaikan Login Biometrik & Sidik Jari**:
+  - Penyempurnaan `AuthController::login_biometric()` dengan melengkapi join tabel profil dan role pengguna (`user_type`, `user_role_id`, `role_name`, `department_id`, dll.) agar identik dengan login kata sandi normal.
+  - Menyelaraskan penyimpanan `biometric_token` sehingga sidik jari tetap terdaftar dan langsung dapat digunakan kembali setelah logout.
+- **Peningkatan Error Handling pada Service**:
+  - Mengganti pelemparan exception tak tertangani pada service menjadi penanganan respon error yang *graceful* agar UI tidak mengalami *unhandled crash*.
+- **Penyelarasan UI & Kontras Mode Gelap (Dark Mode)**:
+  - Memperbaiki kontras teks dan angka pada dialog *Time Picker* dan *Date Picker* di mode gelap menggunakan `ColorScheme.dark` dan `TimePickerThemeData` dengan teks putih terang.
+  - Mengganti layout badge pengingat dari `Row` menjadi `Wrap` untuk mencegah *RenderFlex overflow* pada layar HP dengan lebar terbatas.
+  - Penyeragaman header `CustomAppBar` dengan judul standar `MY ISN`.
+
+---
+
 ## [1.2.0] - 2026-08-20
 
 ### Penambahan v1.2.0

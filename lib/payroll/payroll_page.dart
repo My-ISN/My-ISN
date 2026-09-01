@@ -1257,6 +1257,11 @@ class _PayrollPageState extends State<PayrollPage>
                 'commission_label',
                 'commission_amount',
               ),
+              ..._buildDynamicRows(
+                data['other_payments'],
+                'other_payment_label',
+                'other_payment_amount',
+              ),
               const SizedBox(height: 24),
 
               if (data['statutory_deductions'] != null &&
