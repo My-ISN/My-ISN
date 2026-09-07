@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/crm_service.dart';
 import '../services/tracking_service.dart';
 import '../widgets/custom_app_bar.dart';
@@ -591,9 +592,26 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                 Row(
                   children: [
                     if ((item['contact_number'] ?? '').isNotEmpty) ...[
-                      Icon(Icons.phone_outlined, size: 14, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
-                      Text(item['contact_number'], style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _openWhatsApp(item['contact_number']),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.phone_outlined, size: 14, color: Color(0xFF25D366)),
+                            const SizedBox(width: 4),
+                            Text(
+                              item['contact_number'],
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF25D366),
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(width: 12),
                     ],
                     if ((item['city'] ?? '').isNotEmpty) ...[
@@ -867,9 +885,26 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                 Row(
                   children: [
                     if ((item['contact_number'] ?? '').isNotEmpty) ...[
-                      Icon(Icons.phone_outlined, size: 14, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
-                      Text(item['contact_number'], style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _openWhatsApp(item['contact_number']),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.phone_outlined, size: 14, color: Color(0xFF25D366)),
+                            const SizedBox(width: 4),
+                            Text(
+                              item['contact_number'],
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF25D366),
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(width: 12),
                     ],
                     if ((item['city'] ?? '').isNotEmpty) ...[
@@ -1132,6 +1167,29 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                 const SizedBox(height: 10),
                 Row(
                   children: [
+                    if ((item['whatsapp'] ?? '').isNotEmpty) ...[
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _openWhatsApp(item['whatsapp']),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.phone_outlined, size: 14, color: Color(0xFF25D366)),
+                            const SizedBox(width: 4),
+                            Text(
+                              item['whatsapp'],
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF25D366),
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
                     if ((item['city'] ?? '').isNotEmpty) ...[
                       Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
                       const SizedBox(width: 4),
@@ -1463,7 +1521,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                       child: ListView(
                         children: [
                           _buildDetailRow('Perusahaan', lead['company_name']),
-                          _buildDetailRow('Telepon / WA', lead['contact_number']),
+                          _buildDetailRow('Telepon / WA', lead['contact_number'], onTap: () => _openWhatsApp(lead['contact_number'])),
                           _buildDetailRow('Email', lead['email']),
                           _buildDetailRow('Kota', lead['city']),
                           _buildDetailRow('Alamat', lead['address']),
@@ -1828,7 +1886,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                       child: ListView(
                         children: [
                           _buildDetailRow('Perusahaan', cust['company_name']),
-                          _buildDetailRow('Telepon', cust['contact_number']),
+                          _buildDetailRow('Telepon / WA', cust['contact_number'], onTap: () => _openWhatsApp(cust['contact_number'])),
                           _buildDetailRow('Email', cust['email']),
                           _buildDetailRow('Tipe', type),
                           _buildDetailRow('Kota', cust['city']),
@@ -2095,8 +2153,8 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                           _buildDetailRow('Bidang Usaha', comp['business_category']),
                           _buildDetailRow('Kota', comp['city']),
                           _buildDetailRow('Alamat', comp['address']),
-                          _buildDetailRow('WhatsApp', comp['whatsapp']),
-                          _buildDetailRow('Website', comp['website']),
+                          _buildDetailRow('WhatsApp', comp['whatsapp'], onTap: () => _openWhatsApp(comp['whatsapp'])),
+                          _buildDetailRow('Website', comp['website'], onTap: () => _openWebUrl(comp['website']), valueColor: Colors.blue),
                           _buildDetailRow('Deskripsi', comp['description']),
                           const SizedBox(height: 16),
                           const Text('Log Aktivitas / Observasi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
@@ -2135,18 +2193,96 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   // ---------------------------------------------------------------------------
   // HELPER WIDGETS
   // ---------------------------------------------------------------------------
-  Widget _buildDetailRow(String label, dynamic value) {
+  Widget _buildDetailRow(String label, dynamic value, {VoidCallback? onTap, Color? valueColor}) {
     if (value == null || value.toString().trim().isEmpty) return const SizedBox.shrink();
+    final effectiveColor = valueColor ?? (onTap != null ? const Color(0xFF25D366) : null);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 110, child: Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13))),
-          Expanded(child: Text(value.toString(), style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13))),
+          Expanded(
+            child: onTap != null
+                ? InkWell(
+                    onTap: onTap,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            value.toString(),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                              color: effectiveColor,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.open_in_new_rounded, size: 14, color: effectiveColor),
+                      ],
+                    ),
+                  )
+                : Text(
+                    value.toString(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                      color: effectiveColor,
+                    ),
+                  ),
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _openWhatsApp(String? phone) async {
+    if (phone == null || phone.trim().isEmpty) return;
+    String cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanPhone.startsWith('0')) {
+      cleanPhone = '62${cleanPhone.substring(1)}';
+    } else if (cleanPhone.startsWith('8')) {
+      cleanPhone = '62$cleanPhone';
+    }
+    if (cleanPhone.isEmpty) {
+      if (mounted) context.showErrorSnackBar('Nomor telepon tidak valid');
+      return;
+    }
+
+    final Uri waUri = Uri.parse('https://wa.me/$cleanPhone');
+    try {
+      if (await canLaunchUrl(waUri)) {
+        await launchUrl(waUri, mode: LaunchMode.externalApplication);
+      } else {
+        final launched = await launchUrl(waUri, mode: LaunchMode.externalApplication);
+        if (!launched && mounted) {
+          context.showErrorSnackBar('Tidak dapat membuka WhatsApp');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showErrorSnackBar('Tidak dapat membuka WhatsApp: $e');
+      }
+    }
+  }
+
+  Future<void> _openWebUrl(String? urlStr) async {
+    if (urlStr == null || urlStr.trim().isEmpty) return;
+    String formattedUrl = urlStr.trim();
+    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = 'https://$formattedUrl';
+    }
+    final Uri uri = Uri.parse(formattedUrl);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
   }
 
   Widget _buildEmptyState(String msg) {

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math' show min;
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
@@ -82,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
             Uri.parse(url),
             body: {'identifier': identifier, 'password': password},
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 503) {
         final data = json.decode(response.body);
@@ -101,22 +104,13 @@ class _LoginPageState extends State<LoginPage> {
       try {
         data = json.decode(response.body);
       } catch (e) {
-        debugPrint('Failed to decode JSON. Raw response: ${response.body}');
+        // Server mengembalikan non-JSON (HTML error page, PHP warning, dsb.)
+        final preview = response.body.substring(0, min(300, response.body.length));
+        debugPrint('Non-JSON response [${response.statusCode}]: $preview');
         if (!mounted) return;
-
-        // Special handling for maintenance mode on decode failure
-        if (response.statusCode == 503) {
-          final decodedData = json.decode(response.body);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MaintenancePage(message: decodedData['message']),
-            ),
-          );
-          return;
-        }
-
-        context.showErrorSnackBar('login.server_error'.tr(context));
+        context.showErrorSnackBar(
+          'Gagal membaca respons server (${response.statusCode}). Coba lagi nanti.',
+        );
         return;
       }
 
@@ -173,9 +167,20 @@ class _LoginPageState extends State<LoginPage> {
         if (!mounted) return;
         context.showErrorSnackBar(data['message'] ?? 'login.login_failed'.tr(context));
       }
-    } catch (e) {
+    } on TimeoutException {
       if (!mounted) return;
-        context.showErrorSnackBar('login.conn_error'.tr(context));
+      context.showErrorSnackBar(
+        'Koneksi timeout. Periksa jaringan dan coba lagi.',
+      );
+    } on SocketException {
+      if (!mounted) return;
+      context.showErrorSnackBar(
+        'Tidak dapat terhubung ke server. Periksa koneksi internet.',
+      );
+    } catch (e) {
+      debugPrint('Login error: $e');
+      if (!mounted) return;
+      context.showErrorSnackBar('login.conn_error'.tr(context));
     } finally {
       if (mounted) {
         setState(() {

@@ -23,20 +23,8 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint('Firebase.initializeApp failed or skipped: $e');
-  }
 
-  // Initialize Tracking Service
-  try {
-    await TrackingService().initialize();
-  } catch (e) {
-    Log.e('TrackingService initialization failed: $e');
-  }
-
-  // Setup Global Exception Handlers for App Health (Crash Tracking)
+  // Setup Global Exception Handlers — harus dilakukan sebelum inisialisasi lain
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     TrackingService().logCrash(
@@ -44,29 +32,51 @@ void main() async {
       details.stack?.toString() ?? 'No stack trace',
     );
   };
-
   PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
     TrackingService().logCrash(error.toString(), stack.toString());
     return true;
   };
 
+  // Jalankan Firebase + TrackingService + NotificationService secara PARALEL
+  // untuk mengurangi waktu startup (sebelumnya sequential ~5-15 detik)
+  await Future.wait([
+    Future(() async {
+      try {
+        await Firebase.initializeApp();
+      } catch (e) {
+        debugPrint('Firebase.initializeApp failed or skipped: $e');
+      }
+    }),
+    Future(() async {
+      try {
+        await TrackingService().initialize();
+      } catch (e) {
+        Log.e('TrackingService initialization failed: $e');
+      }
+    }),
+    Future(() async {
+      try {
+        await NotificationService().initialize(navigatorKey);
+      } catch (e) {
+        Log.e('Notification initialization failed: $e');
+      }
+    }),
+  ]);
+
   final languageProvider = LanguageProvider();
   final themeProvider = ThemeProvider();
   final quickMenuProvider = QuickMenuProvider();
 
-  try {
-    await NotificationService().initialize(navigatorKey);
-  } catch (e) {
-    Log.e('Notification initialization failed: $e');
-  }
-
-  // Check login session
+  // Baca session login dengan timeout agar tidak blocking terlalu lama
+  // FlutterSecureStorage di Android bisa lambat terutama setelah restart perangkat
   const storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
   );
   Map<String, dynamic>? userData;
   try {
-    String? userDataString = await storage.read(key: 'user_data');
+    final userDataString = await storage
+        .read(key: 'user_data')
+        .timeout(const Duration(seconds: 4));
     if (userDataString != null) {
       userData = json.decode(userDataString);
     }
@@ -74,15 +84,13 @@ void main() async {
     Log.e('Error reading stored user data: $e');
   }
 
+  // startSession dan updateToken dijalankan di background — tidak perlu diawait
+  // agar runApp() terpanggil secepat mungkin
+  TrackingService().startSession(userData).catchError((e) {
+    Log.e('TrackingService session start failed: $e');
+  });
   if (userData != null) {
     NotificationService().updateTokenOnServer(userData);
-  }
-
-  // Start tracking session (with user data if logged in, otherwise as guest)
-  try {
-    await TrackingService().startSession(userData);
-  } catch (e) {
-    Log.e('TrackingService session start failed: $e');
   }
 
   runApp(

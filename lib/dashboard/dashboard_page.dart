@@ -321,7 +321,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       final url =
           '${AppConstants.baseUrl}/get_dashboard_data?user_id=$userId';
 
-      final response = await http.get(Uri.parse(url));
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 503) {
         final data = json.decode(response.body);
@@ -337,7 +339,16 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         return;
       }
 
-      final data = json.decode(response.body);
+      dynamic data;
+      try {
+        data = json.decode(response.body);
+      } catch (_) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          context.showErrorSnackBar('Server sedang sibuk. Silakan tarik untuk menyegarkan.');
+        }
+        return;
+      }
 
       if (data['status'] == true) {
         if (mounted) {
@@ -379,7 +390,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       final url =
           '${AppConstants.baseUrl}/get_customer_dashboard?user_id=$userId';
 
-      final response = await http.get(Uri.parse(url));
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 503) {
         final data = json.decode(response.body);
@@ -395,7 +408,15 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         return;
       }
 
-      final data = json.decode(response.body);
+      dynamic data;
+      try {
+        data = json.decode(response.body);
+      } catch (_) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+        return;
+      }
 
       if (data['status'] == true) {
         if (mounted) {

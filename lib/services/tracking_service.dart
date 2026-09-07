@@ -109,9 +109,9 @@ class TrackingService {
       debugPrint('TrackingService: Error registering session: $e');
     }
 
-    // Start periodic sync timer (every 30 seconds)
+    // Start periodic sync timer (setiap 2 menit agar hemat koneksi server & baterai)
     _syncTimer?.cancel();
-    _syncTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    _syncTimer = Timer.periodic(const Duration(minutes: 2), (timer) {
       syncOutbox();
     });
 
