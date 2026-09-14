@@ -413,7 +413,7 @@ class RentPlanService {
 
   Future<Map<String, dynamic>> receiveRentalLaptop({
     required String barcode,
-    int? rentalId,
+    dynamic rentalId,
     String? kondisi,
   }) async {
     try {
@@ -584,7 +584,7 @@ class RentPlanService {
     }
   }
 
-  Future<Map<String, dynamic>> getTemplateIndicators({int? templateId}) async {
+  Future<Map<String, dynamic>> getTemplateIndicators({dynamic templateId}) async {
     try {
       String param = templateId != null ? '?template_id=$templateId' : '';
       final url = Uri.parse('$baseUrl/get_template_indicators$param');
@@ -597,9 +597,9 @@ class RentPlanService {
 
   Future<Map<String, dynamic>> submitLaptopInspection({
     required String barcode,
-    int? unitId,
-    int? templateId,
-    int? rentalId,
+    dynamic unitId,
+    dynamic templateId,
+    dynamic rentalId,
     String? namaTemplate,
     String? namaProyek,
     String? overallStatus,
