@@ -415,17 +415,81 @@ class RentPlanService {
     required String barcode,
     dynamic rentalId,
     String? kondisi,
+    List<File>? photos,
+    File? video,
   }) async {
     try {
       final url = Uri.parse('$baseUrl/receive_rental_laptop');
-      final response = await http.post(
-        url,
-        body: {
-          'barcode': barcode,
-          'rental_id': rentalId?.toString() ?? '',
-          'kondisi': kondisi ?? '',
-        },
+
+      // Use MultipartRequest to support file uploads
+      final request = http.MultipartRequest('POST', url);
+      request.fields['barcode'] = barcode;
+      request.fields['rental_id'] = rentalId?.toString() ?? '';
+      request.fields['kondisi'] = kondisi ?? '';
+
+      // Attach photos (named photo_0, photo_1, ...)
+      if (photos != null && photos.isNotEmpty) {
+        for (int i = 0; i < photos.length; i++) {
+          request.files.add(
+            await http.MultipartFile.fromPath('photo_$i', photos[i].path),
+          );
+        }
+        request.fields['photo_count'] = photos.length.toString();
+      }
+
+      // Attach video (optional)
+      if (video != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('video_file', video.path),
+        );
+      }
+
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 60),
       );
+      final response = await http.Response.fromStream(streamedResponse);
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> sendRentalLaptop({
+    required String barcode,
+    dynamic rentalId,
+    String? catatan,
+    List<File>? photos,
+    File? video,
+  }) async {
+    try {
+      final url = Uri.parse('$baseUrl/send_rental_laptop');
+
+      final request = http.MultipartRequest('POST', url);
+      request.fields['barcode'] = barcode;
+      request.fields['rental_id'] = rentalId?.toString() ?? '';
+      request.fields['catatan'] = catatan ?? '';
+
+      // Attach photos (named photo_0, photo_1, ...)
+      if (photos != null && photos.isNotEmpty) {
+        for (int i = 0; i < photos.length; i++) {
+          request.files.add(
+            await http.MultipartFile.fromPath('photo_$i', photos[i].path),
+          );
+        }
+        request.fields['photo_count'] = photos.length.toString();
+      }
+
+      // Attach video (optional)
+      if (video != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('video_file', video.path),
+        );
+      }
+
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 60),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
       return json.decode(response.body);
     } catch (e) {
       return {'status': false, 'message': e.toString()};

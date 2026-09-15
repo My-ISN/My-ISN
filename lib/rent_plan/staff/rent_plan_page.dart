@@ -4,6 +4,8 @@ import '../../services/rent_plan_service.dart';
 import 'rent_plan_detail_page.dart';
 import 'add_rent_plan_page.dart';
 import 'laptop_units_page.dart';
+import 'send_laptop_page.dart';
+import 'receive_laptop_page.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
 
@@ -900,6 +902,122 @@ class _RentPlanPageState extends State<RentPlanPage>
                       ),
                       Text(
                         'Tap untuk buka',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          // ── Kirim Laptop Shortcut ──
+          if (_hasPermission('mobile_send_laptop_enable'))
+            GestureDetector(
+              onTap: () async {
+                final res = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SendLaptopPage(userData: widget.userData),
+                  ),
+                );
+                if (res == true) _fetchRentPlans();
+              },
+              child: Card(
+                elevation: 0,
+                margin: const EdgeInsets.only(right: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(
+                    color: const Color(0xFF2575FC).withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Container(
+                  width: 140,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2575FC), Color(0xFF00C6FF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.local_shipping_rounded, color: Colors.white, size: 22),
+                      SizedBox(height: 6),
+                      Text(
+                        'Kirim Laptop',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Foto Serah Terima',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          // ── Terima Laptop Shortcut ──
+          if (_hasPermission('mobile_receive_laptop_enable'))
+            GestureDetector(
+              onTap: () async {
+                final res = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ReceiveLaptopPage(userData: widget.userData),
+                  ),
+                );
+                if (res == true) _fetchRentPlans();
+              },
+              child: Card(
+                elevation: 0,
+                margin: const EdgeInsets.only(right: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(
+                    color: const Color(0xFF2ECC71).withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Container(
+                  width: 140,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.assignment_return_rounded, color: Colors.white, size: 22),
+                      SizedBox(height: 6),
+                      Text(
+                        'Terima Laptop',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Foto Pengembalian',
                         style: TextStyle(
                           fontSize: 10,
                           color: Colors.white70,

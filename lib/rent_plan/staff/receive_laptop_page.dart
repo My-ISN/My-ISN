@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../services/rent_plan_service.dart';
 import '../../../widgets/custom_app_bar.dart';
 import '../../../widgets/side_drawer.dart';
@@ -18,12 +20,18 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
   final RentPlanService _rentPlanService = RentPlanService();
   final TextEditingController _barcodeController = TextEditingController();
   final FocusNode _barcodeFocus = FocusNode();
+  final ImagePicker _imagePicker = ImagePicker();
 
   bool _isLoading = false;
   bool _isSubmitting = false;
   Map<String, dynamic>? _laptopData;
   Map<String, dynamic>? _activeRental;
-  String _returnCondition = 'Bagus'; // Default return condition
+  String _returnCondition = 'Bagus';
+
+  // ── Media State ──────────────────────────────────────────────────────────────
+  List<XFile> _capturedPhotos = [];
+  XFile? _capturedVideo;
+  static const int _maxPhotos = 5;
 
   @override
   void dispose() {
@@ -32,6 +40,7 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
     super.dispose();
   }
 
+  // ── Barcode Scan ──────────────────────────────────────────────────────────────
   Future<void> _scanBarcode() async {
     _barcodeFocus.unfocus();
     final String? scannedValue = await Navigator.push<String>(
@@ -84,12 +93,200 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
     }
   }
 
+  // ── Media Capture ────────────────────────────────────────────────────────────
+
+  void _showPhotoSourceSheet() {
+    if (_capturedPhotos.length >= _maxPhotos) {
+      context.showErrorSnackBar('Maksimal $_maxPhotos foto. Hapus foto lama dulu.');
+      return;
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E2026) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Pilih Sumber Foto',
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMediaSourceButton(
+                    icon: Icons.camera_alt_rounded,
+                    label: 'Kamera',
+                    color: const Color(0xFF7E57C2),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickPhoto(ImageSource.camera);
+                    },
+                    isDark: isDark,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMediaSourceButton(
+                    icon: Icons.photo_library_rounded,
+                    label: 'Galeri',
+                    color: Colors.teal,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickPhoto(ImageSource.gallery);
+                    },
+                    isDark: isDark,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showVideoSourceSheet() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E2026) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[400],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Pilih Sumber Video',
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMediaSourceButton(
+                    icon: Icons.videocam_rounded,
+                    label: 'Rekam Video',
+                    color: Colors.redAccent,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickVideo(ImageSource.camera);
+                    },
+                    isDark: isDark,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMediaSourceButton(
+                    icon: Icons.video_library_rounded,
+                    label: 'Galeri',
+                    color: Colors.orange,
+                    onTap: () {
+                      Navigator.pop(context);
+                      _pickVideo(ImageSource.gallery);
+                    },
+                    isDark: isDark,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickPhoto(ImageSource source) async {
+    try {
+      final XFile? photo = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 1280,
+        maxHeight: 1280,
+      );
+      if (photo != null && mounted) {
+        setState(() {
+          _capturedPhotos.add(photo);
+        });
+      }
+    } catch (e) {
+      if (mounted) context.showErrorSnackBar('Gagal mengambil foto: $e');
+    }
+  }
+
+  Future<void> _pickVideo(ImageSource source) async {
+    try {
+      final XFile? video = await _imagePicker.pickVideo(
+        source: source,
+        maxDuration: const Duration(minutes: 3),
+      );
+      if (video != null && mounted) {
+        setState(() {
+          _capturedVideo = video;
+        });
+      }
+    } catch (e) {
+      if (mounted) context.showErrorSnackBar('Gagal mengambil video: $e');
+    }
+  }
+
+  void _removePhoto(int index) {
+    setState(() {
+      _capturedPhotos.removeAt(index);
+    });
+  }
+
+  void _removeVideo() {
+    setState(() {
+      _capturedVideo = null;
+    });
+  }
+
+  // ── Process Receive ──────────────────────────────────────────────────────────
+
   Future<void> _processReceive() async {
     if (_laptopData == null) return;
     final barcode = _barcodeController.text.trim();
     final rentalId = _activeRental?['rental_id'];
 
-    // Show Dialog Confirmation
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -138,15 +335,18 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
 
     if (confirm != true) return;
 
-    setState(() {
-      _isSubmitting = true;
-    });
+    setState(() { _isSubmitting = true; });
 
     try {
+      final List<File> photoFiles = _capturedPhotos.map((x) => File(x.path)).toList();
+      final File? videoFile = _capturedVideo != null ? File(_capturedVideo!.path) : null;
+
       final res = await _rentPlanService.receiveRentalLaptop(
         barcode: barcode,
         rentalId: rentalId,
         kondisi: _returnCondition,
+        photos: photoFiles.isNotEmpty ? photoFiles : null,
+        video: videoFile,
       );
 
       if (res['status'] == true) {
@@ -165,9 +365,7 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
+        setState(() { _isSubmitting = false; });
       }
     }
   }
@@ -178,8 +376,12 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
       _laptopData = null;
       _activeRental = null;
       _returnCondition = 'Bagus';
+      _capturedPhotos = [];
+      _capturedVideo = null;
     });
   }
+
+  // ── Build ────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -255,26 +457,48 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
 
               // ── Laptop & Rental details ──
               if (!_isLoading && _laptopData != null) ...[
-                // Laptop info Card
                 _buildSectionHeader('Detail Laptop', Icons.laptop_rounded),
                 const SizedBox(height: 8),
                 _buildLaptopInfoCard(isDark),
                 const SizedBox(height: 24),
 
-                // Renter/Rental Info Card
                 if (_activeRental != null) ...[
                   _buildSectionHeader('Detail Penyewa Aktif', Icons.person_rounded),
                   const SizedBox(height: 8),
                   _buildRenterInfoCard(isDark),
                   const SizedBox(height: 24),
 
-                  // Return condition ChoiceChips
                   _buildSectionHeader('Kondisi Laptop Saat Kembali', Icons.rule_rounded),
                   const SizedBox(height: 12),
                   _buildConditionSelector(isDark),
+                  const SizedBox(height: 28),
+
+                  // ── FOTO PENYEWA ──────────────────────────────────────────
+                  _buildSectionHeader(
+                    'Foto Penyewa (${_capturedPhotos.length}/$_maxPhotos)',
+                    Icons.camera_alt_rounded,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ambil foto penyewa sebagai dokumentasi penerimaan laptop.',
+                    style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildPhotoGrid(isDark),
+                  const SizedBox(height: 24),
+
+                  // ── VIDEO (OPSIONAL) ──────────────────────────────────────
+                  _buildSectionHeader('Video Kondisi Laptop (Opsional)', Icons.videocam_rounded),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Rekam video singkat kondisi laptop saat dikembalikan (maks. 3 menit).',
+                    style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildVideoSection(isDark),
                   const SizedBox(height: 32),
 
-                  // Receive Button
+                  // ── Receive Button ──────────────────────────────────────────
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -287,19 +511,29 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: _isSubmitting
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : Text(
-                              'Terima Laptop',
-                              style: GoogleFonts.outfit(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.check_circle_outline_rounded, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Terima Laptop',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
                             ),
                     ),
                   ),
                 ] else ...[
-                  // If not currently rented
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -356,6 +590,8 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
     );
   }
 
+  // ── Widget Helpers ───────────────────────────────────────────────────────────
+
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
@@ -371,6 +607,219 @@ class _ReceiveLaptopPageState extends State<ReceiveLaptopPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMediaSourceButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: GoogleFonts.outfit(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhotoGrid(bool isDark) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        // Existing photo thumbnails
+        ..._capturedPhotos.asMap().entries.map((entry) {
+          final index = entry.key;
+          final xfile = entry.value;
+          return _buildPhotoThumbnail(index, xfile, isDark);
+        }),
+
+        // Add photo button (shown if below max)
+        if (_capturedPhotos.length < _maxPhotos)
+          GestureDetector(
+            onTap: _showPhotoSourceSheet,
+            child: Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF7E57C2).withValues(alpha: 0.12)
+                    : const Color(0xFF7E57C2).withValues(alpha: 0.07),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFF7E57C2).withValues(alpha: 0.4),
+                  width: 1.5,
+                  strokeAlign: BorderSide.strokeAlignInside,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.add_a_photo_rounded, color: Color(0xFF7E57C2), size: 28),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tambah Foto',
+                    style: GoogleFonts.outfit(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF7E57C2),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoThumbnail(int index, XFile xfile, bool isDark) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.file(
+            File(xfile.path),
+            width: 90,
+            height: 90,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: () => _removePhoto(index),
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close_rounded, color: Colors.white, size: 14),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVideoSection(bool isDark) {
+    if (_capturedVideo != null) {
+      final fileName = _capturedVideo!.path.split('/').last;
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.orange.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.videocam_rounded, color: Colors.orange, size: 28),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Video Dipilih',
+                    style: GoogleFonts.outfit(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange[700],
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    fileName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      fontSize: 11,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              onPressed: _removeVideo,
+              icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 22),
+              tooltip: 'Hapus Video',
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: _showVideoSourceSheet,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.04)
+              : Colors.grey[100],
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark ? Colors.white12 : Colors.grey[300]!,
+            style: BorderStyle.solid,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.videocam_off_rounded, size: 32, color: Colors.grey[400]),
+            const SizedBox(height: 8),
+            Text(
+              'Tap untuk merekam / pilih video',
+              style: GoogleFonts.outfit(
+                fontSize: 13,
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Opsional — maks. 3 menit',
+              style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[400]),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
