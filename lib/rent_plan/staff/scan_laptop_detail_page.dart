@@ -557,7 +557,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
 
     return Scaffold(
       appBar: SecondaryAppBar(
-        title: 'Scan Barcode Laptop',
+        title: 'Maintenance Laptop',
         actions: [
           IconButton(
             icon: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white),

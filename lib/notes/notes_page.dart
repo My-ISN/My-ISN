@@ -10,6 +10,9 @@ import '../services/tracking_service.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/confirm_delete_bottom_sheet.dart';
+import 'note_editor_page.dart';
+import 'note_detail_page.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Note model
@@ -47,6 +50,29 @@ class NoteItem {
         authorName: m['author_name'],
         sharedByName: m['shared_by_name'],
         updatedAt: m['updated_at'],
+      );
+
+  NoteItem copyWith({
+    int? noteId,
+    String? title,
+    String? text,
+    String? color,
+    bool? isPinned,
+    bool? isShared,
+    String? authorName,
+    String? sharedByName,
+    String? updatedAt,
+  }) =>
+      NoteItem(
+        noteId: noteId ?? this.noteId,
+        title: title ?? this.title,
+        text: text ?? this.text,
+        color: color ?? this.color,
+        isPinned: isPinned ?? this.isPinned,
+        isShared: isShared ?? this.isShared,
+        authorName: authorName ?? this.authorName,
+        sharedByName: sharedByName ?? this.sharedByName,
+        updatedAt: updatedAt ?? this.updatedAt,
       );
 }
 
@@ -180,26 +206,12 @@ class _NotesPageState extends State<NotesPage> {
       context.showErrorSnackBar('Anda tidak memiliki izin untuk menghapus catatan');
       return;
     }
-    final confirm = await showDialog<bool>(
+    final confirm = await showConfirmDeleteBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Hapus Catatan', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        content: Text(
-          note.isShared
-              ? 'Catatan ini akan dihapus dari daftar Anda (bukan catatan milik orang lain).'
-              : 'Catatan "${note.title.isEmpty ? '(tanpa judul)' : note.title}" akan dihapus permanen.',
-          style: GoogleFonts.poppins(fontSize: 14),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
+      title: 'Hapus Catatan',
+      message: note.isShared
+          ? 'Catatan ini akan dihapus dari daftar Anda (bukan catatan milik orang lain).'
+          : 'Catatan "${note.title.isEmpty ? '(tanpa judul)' : note.title}" akan dihapus permanen.',
     );
 
     if (confirm != true || !mounted) return;
@@ -215,7 +227,7 @@ class _NotesPageState extends State<NotesPage> {
     }
   }
 
-  // ── Add / Edit bottom sheet ─────────────────────────────────────────────
+  // ── Open Editor (Full Page) ───────────────────────────────────────────────
   Future<void> _openEditor({NoteItem? note}) async {
     if (note != null && note.isShared) {
       context.showErrorSnackBar('Anda tidak bisa mengedit catatan milik orang lain');
@@ -226,153 +238,38 @@ class _NotesPageState extends State<NotesPage> {
       return;
     }
 
-    final titleCtrl = TextEditingController(text: note?.title ?? '');
-    final textCtrl = TextEditingController(text: note?.text ?? '');
-    String selectedColor = note?.color ?? '#ffffff';
-    final formKey = GlobalKey<FormState>();
-    bool isSaving = false;
-
-    final colors = [
-      '#ffffff', '#fef9c3', '#dcfce7', '#dbeafe',
-      '#fce7f3', '#ede9fe', '#ffedd5', '#f1f5f9',
-    ];
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            left: 20, right: 20,
-            top: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-          ),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Handle
-                Center(child: Container(
-                  width: 40, height: 4,
-                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
-                )),
-                const SizedBox(height: 16),
-
-                Text(
-                  note == null ? 'Catatan Baru' : 'Edit Catatan',
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-
-                // Color picker
-                SizedBox(
-                  height: 36,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: colors.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (_, i) {
-                      final c = colors[i];
-                      final colorVal = Color(int.parse('FF${c.substring(1)}', radix: 16));
-                      final isSelected = selectedColor == c;
-                      return GestureDetector(
-                        onTap: () => setModalState(() => selectedColor = c),
-                        child: Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            color: colorVal,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected ? const Color(0xFF7E57C2) : Colors.grey.shade300,
-                              width: isSelected ? 2.5 : 1,
-                            ),
-                          ),
-                          child: isSelected
-                              ? const Icon(Icons.check, size: 16, color: Color(0xFF7E57C2))
-                              : null,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Title
-                TextFormField(
-                  controller: titleCtrl,
-                  style: GoogleFonts.poppins(fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: 'Judul (opsional)',
-                    hintStyle: GoogleFonts.poppins(color: Colors.grey),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Text
-                TextFormField(
-                  controller: textCtrl,
-                  maxLines: 6,
-                  style: GoogleFonts.poppins(fontSize: 14),
-                  validator: (val) => (val == null || val.trim().isEmpty) ? 'Isi catatan tidak boleh kosong' : null,
-                  decoration: InputDecoration(
-                    hintText: 'Tulis catatan Anda...',
-                    hintStyle: GoogleFonts.poppins(color: Colors.grey),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF7E57C2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: isSaving
-                        ? null
-                        : () async {
-                            if (!formKey.currentState!.validate()) return;
-                            setModalState(() => isSaving = true);
-
-                            final res = await _service.saveNote(
-                              userId: _userId,
-                              noteId: note?.noteId,
-                              title: titleCtrl.text.trim(),
-                              text: textCtrl.text.trim(),
-                              color: selectedColor,
-                            );
-
-                            if (ctx.mounted) {
-                              Navigator.pop(ctx);
-                              if (res['status'] == true) {
-                                if (mounted) {
-                                  context.showSuccessSnackBar(res['message'] ?? 'Catatan disimpan');
-                                  _fetchNotes(silent: true);
-                                }
-                              } else {
-                                if (mounted) context.showErrorSnackBar(res['message'] ?? 'Gagal menyimpan');
-                              }
-                            }
-                          },
-                    child: isSaving
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : Text('Simpan Catatan', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NoteEditorPage(
+          userId: _userId,
+          note: note,
         ),
       ),
     );
+
+    if (result == true && mounted) {
+      _fetchNotes(silent: true);
+    }
+  }
+
+  // ── Open Preview Detail (Full Page) ───────────────────────────────────────
+  Future<void> _openDetail(NoteItem note) async {
+    await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NoteDetailPage(
+          note: note,
+          userId: _userId,
+          canEdit: _canAdd && !note.isShared,
+          canDelete: _canDelete,
+        ),
+      ),
+    );
+
+    if (mounted) {
+      _fetchNotes(silent: true);
+    }
   }
 
   // ── Build ────────────────────────────────────────────────────────────────
@@ -384,7 +281,6 @@ class _NotesPageState extends State<NotesPage> {
     return Scaffold(
       appBar: CustomAppBar(
         userData: _currentUserData ?? {},
-        showBackButton: true,
         title: 'My ISN',
       ),
       endDrawer: SideDrawer(
@@ -527,6 +423,7 @@ class _NotesPageState extends State<NotesPage> {
                         isDark: isDark,
                         canEdit: _canAdd,
                         canDelete: _canDelete,
+                        onTap: () => _openDetail(_pinned[i]),
                         onEdit: () => _openEditor(note: _pinned[i]),
                         onDelete: () => _deleteNote(_pinned[i]),
                         onTogglePin: () => _togglePin(_pinned[i]),
@@ -562,6 +459,7 @@ class _NotesPageState extends State<NotesPage> {
                         isDark: isDark,
                         canEdit: _canAdd,
                         canDelete: _canDelete,
+                        onTap: () => _openDetail(_others[i]),
                         onEdit: () => _openEditor(note: _others[i]),
                         onDelete: () => _deleteNote(_others[i]),
                         onTogglePin: () => _togglePin(_others[i]),
@@ -590,6 +488,7 @@ class _NoteCard extends StatelessWidget {
   final bool isDark;
   final bool canEdit;
   final bool canDelete;
+  final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onTogglePin;
@@ -599,6 +498,7 @@ class _NoteCard extends StatelessWidget {
     required this.isDark,
     this.canEdit = true,
     this.canDelete = true,
+    required this.onTap,
     required this.onEdit,
     required this.onDelete,
     required this.onTogglePin,
@@ -614,6 +514,23 @@ class _NoteCard extends StatelessWidget {
 
   bool _isDarkColor(Color c) => c.computeLuminance() < 0.4;
 
+  String _stripHtml(String html) {
+    if (html.isEmpty) return '';
+    return html
+        .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), ' ')
+        .replaceAll(RegExp(r'</p>', caseSensitive: false), ' ')
+        .replaceAll(RegExp(r'</li>', caseSensitive: false), ' ')
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
   @override
   Widget build(BuildContext context) {
     final bgColor = isDark ? const Color(0xFF2A2A2A) : _parseColor(note.color);
@@ -621,7 +538,7 @@ class _NoteCard extends StatelessWidget {
     final onBgMuted = onBg.withAlpha(153);
 
     return GestureDetector(
-      onTap: onEdit,
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: bgColor,
@@ -722,7 +639,7 @@ class _NoteCard extends StatelessWidget {
                     ],
                     Expanded(
                       child: Text(
-                        note.text,
+                        _stripHtml(note.text),
                         maxLines: note.title.isNotEmpty ? 4 : 6,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(fontSize: 12, color: onBgMuted, height: 1.4),

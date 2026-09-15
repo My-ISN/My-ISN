@@ -661,7 +661,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                   ),
                   child: const Icon(
                     Icons.memory_rounded, // CPU Icon
-                    color: Color(0xFF6A11CB), // Purple color
+                    color: Color(0xFF7E57C2), // Purple color
                     size: 28,
                   ),
                 ),

@@ -6,6 +6,7 @@ import '../services/tracking_service.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/confirm_delete_bottom_sheet.dart';
 
 class CrmPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -592,24 +593,36 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                 Row(
                   children: [
                     if ((item['contact_number'] ?? '').isNotEmpty) ...[
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => _openWhatsApp(item['contact_number']),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.phone_outlined, size: 14, color: Color(0xFF25D366)),
-                            const SizedBox(width: 4),
-                            Text(
-                              item['contact_number'],
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF25D366),
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _openWhatsApp(item['contact_number']),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF25D366).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFF25D366).withValues(alpha: 0.35),
                               ),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.chat_bubble_rounded, size: 13, color: Color(0xFF25D366)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  item['contact_number'],
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF1E7E34),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -885,24 +898,36 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                 Row(
                   children: [
                     if ((item['contact_number'] ?? '').isNotEmpty) ...[
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => _openWhatsApp(item['contact_number']),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.phone_outlined, size: 14, color: Color(0xFF25D366)),
-                            const SizedBox(width: 4),
-                            Text(
-                              item['contact_number'],
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF25D366),
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _openWhatsApp(item['contact_number']),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF25D366).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFF25D366).withValues(alpha: 0.35),
                               ),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.chat_bubble_rounded, size: 13, color: Color(0xFF25D366)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  item['contact_number'],
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF1E7E34),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -1168,24 +1193,36 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                 Row(
                   children: [
                     if ((item['whatsapp'] ?? '').isNotEmpty) ...[
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => _openWhatsApp(item['whatsapp']),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.phone_outlined, size: 14, color: Color(0xFF25D366)),
-                            const SizedBox(width: 4),
-                            Text(
-                              item['whatsapp'],
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF25D366),
-                                fontWeight: FontWeight.w600,
-                                decoration: TextDecoration.underline,
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _openWhatsApp(item['whatsapp']),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF25D366).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: const Color(0xFF25D366).withValues(alpha: 0.35),
                               ),
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.chat_bubble_rounded, size: 13, color: Color(0xFF25D366)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  item['whatsapp'],
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF1E7E34),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -2195,6 +2232,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   // ---------------------------------------------------------------------------
   Widget _buildDetailRow(String label, dynamic value, {VoidCallback? onTap, Color? valueColor}) {
     if (value == null || value.toString().trim().isEmpty) return const SizedBox.shrink();
+    final isWhatsApp = label.toLowerCase().contains('wa') || label.toLowerCase().contains('telepon') || label.toLowerCase().contains('whatsapp');
     final effectiveColor = valueColor ?? (onTap != null ? const Color(0xFF25D366) : null);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -2206,23 +2244,40 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
             child: onTap != null
                 ? InkWell(
                     onTap: onTap,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            value.toString(),
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                              color: effectiveColor,
-                              decoration: TextDecoration.underline,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: isWhatsApp ? const Color(0xFF25D366).withValues(alpha: 0.12) : null,
+                        borderRadius: BorderRadius.circular(8),
+                        border: isWhatsApp ? Border.all(color: const Color(0xFF25D366).withValues(alpha: 0.35)) : null,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isWhatsApp) ...[
+                            const Icon(Icons.chat_bubble_rounded, size: 14, color: Color(0xFF25D366)),
+                            const SizedBox(width: 6),
+                          ],
+                          Flexible(
+                            child: Text(
+                              value.toString(),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                color: isWhatsApp ? const Color(0xFF1E7E34) : effectiveColor,
+                                decoration: isWhatsApp ? null : TextDecoration.underline,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.open_in_new_rounded, size: 14, color: effectiveColor),
-                      ],
+                          const SizedBox(width: 6),
+                          Icon(
+                            isWhatsApp ? Icons.open_in_new_rounded : Icons.open_in_new_rounded,
+                            size: 13,
+                            color: isWhatsApp ? const Color(0xFF25D366) : effectiveColor,
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 : Text(
@@ -2247,24 +2302,32 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
     } else if (cleanPhone.startsWith('8')) {
       cleanPhone = '62$cleanPhone';
     }
-    if (cleanPhone.isEmpty) {
-      if (mounted) context.showErrorSnackBar('Nomor telepon tidak valid');
+    if (cleanPhone.length < 5) {
+      if (mounted) context.showErrorSnackBar('Nomor WhatsApp tidak valid');
       return;
     }
 
-    final Uri waUri = Uri.parse('https://wa.me/$cleanPhone');
+    final Uri waAppUri = Uri.parse('whatsapp://send?phone=$cleanPhone');
+    final Uri waWebUri = Uri.parse('https://wa.me/$cleanPhone');
+
     try {
-      if (await canLaunchUrl(waUri)) {
-        await launchUrl(waUri, mode: LaunchMode.externalApplication);
+      if (await canLaunchUrl(waAppUri)) {
+        await launchUrl(waAppUri, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(waWebUri)) {
+        await launchUrl(waWebUri, mode: LaunchMode.externalApplication);
       } else {
-        final launched = await launchUrl(waUri, mode: LaunchMode.externalApplication);
+        final launched = await launchUrl(waWebUri, mode: LaunchMode.externalApplication);
         if (!launched && mounted) {
           context.showErrorSnackBar('Tidak dapat membuka WhatsApp');
         }
       }
     } catch (e) {
-      if (mounted) {
-        context.showErrorSnackBar('Tidak dapat membuka WhatsApp: $e');
+      try {
+        await launchUrl(waWebUri, mode: LaunchMode.externalApplication);
+      } catch (_) {
+        if (mounted) {
+          context.showErrorSnackBar('Tidak dapat membuka WhatsApp: $e');
+        }
       }
     }
   }
@@ -2353,20 +2416,10 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   }
 
   Future<bool?> _showConfirmDialog(String title, String message) {
-    return showDialog<bool>(
+    return showConfirmDeleteBottomSheet(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Batal')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
+      title: title,
+      message: message,
     );
   }
 }

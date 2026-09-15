@@ -145,7 +145,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_isn_assistant',
         icon: Icons.assistant_rounded,
-        color: const Color(0xFF6A11CB),
+        color: const Color(0xFF7E57C2),
         categoryKey: 'side_drawer.support',
         pageBuilder: (context, user) => AiChatIsnPage(userData: user),
       ),

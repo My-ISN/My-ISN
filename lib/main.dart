@@ -37,16 +37,15 @@ void main() async {
     return true;
   };
 
-  // Jalankan Firebase + TrackingService + NotificationService secara PARALEL
-  // untuk mengurangi waktu startup (sebelumnya sequential ~5-15 detik)
+  // Inisialisasi Firebase terlebih dahulu agar FirebaseMessaging siap digunakan
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase.initializeApp failed or skipped: $e');
+  }
+
+  // Jalankan TrackingService + NotificationService setelah Firebase siap
   await Future.wait([
-    Future(() async {
-      try {
-        await Firebase.initializeApp();
-      } catch (e) {
-        debugPrint('Firebase.initializeApp failed or skipped: $e');
-      }
-    }),
     Future(() async {
       try {
         await TrackingService().initialize();

@@ -8,9 +8,9 @@ import 'dart:async';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_snackbar.dart';
+import '../widgets/confirm_delete_bottom_sheet.dart';
 import '../services/reminder_service.dart';
 import '../services/tracking_service.dart';
-import '../localization/app_localizations.dart';
 
 class ReminderPage extends StatefulWidget {
   final Map<String, dynamic>? userData;
@@ -168,50 +168,10 @@ class _ReminderPageState extends State<ReminderPage> {
   }
 
   Future<void> _deleteReminder(int reminderId, String title) async {
-    final confirm = await showDialog<bool>(
+    final confirm = await showConfirmDeleteBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
-            const SizedBox(width: 8),
-            Text(
-              'main.delete'.tr(context) != 'main.delete'
-                  ? 'Hapus Pengingat'
-                  : 'Hapus Pengingat',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Text('Yakin ingin menghapus reminder "$title"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              'main.cancel'.tr(context) != 'main.cancel'
-                  ? 'main.cancel'.tr(context)
-                  : 'Batal',
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 0,
-            ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              'main.delete'.tr(context) != 'main.delete'
-                  ? 'main.delete'.tr(context)
-                  : 'Hapus',
-            ),
-          ),
-        ],
-      ),
+      title: 'Hapus Pengingat',
+      message: 'Yakin ingin menghapus reminder "$title"?',
     );
 
     if (confirm == true) {
