@@ -9,8 +9,7 @@ import '../dashboard/dashboard_page.dart';
 import '../rent_plan/staff/rent_plan_page.dart' as staff_rp;
 import '../rent_plan/client/rent_plan_page.dart' as client_rp;
 import '../rent_plan/staff/laptop_units_page.dart';                 
-import '../rent_plan/staff/receive_laptop_page.dart';
-import '../rent_plan/staff/send_laptop_page.dart';
+import '../rent_plan/staff/serah_terima_laptop_page.dart';
 import '../rent_plan/staff/scan_laptop_detail_page.dart';
 import '../todo_list/todo_list_page.dart';
 import '../employees/employees_page.dart';
@@ -498,39 +497,20 @@ class _SideDrawerState extends State<SideDrawer> {
                           },
                         ),
                       if (!isCustomer &&
-                          _hasPermission('mobile_send_laptop_enable'))
+                          (_hasPermission('mobile_send_laptop_enable') ||
+                              _hasPermission('mobile_receive_laptop_enable')))
                         _buildMenuItem(
                           context,
-                          icon: Icons.local_shipping_outlined,
-                          title: 'dashboard.quick_menu_send_laptop'.tr(context),
-                          isActive: widget.activePage == 'send_laptop',
+                          icon: Icons.swap_horiz_rounded,
+                          title: 'dashboard.quick_menu_serah_terima_laptop'.tr(context),
+                          isActive: widget.activePage == 'serah_terima_laptop',
                           padding: const EdgeInsets.only(left: 32, right: 12),
                           onTap: () {
                             Navigator.pop(context);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => SendLaptopPage(
-                                  userData: widget.userData,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      if (!isCustomer &&
-                          _hasPermission('mobile_receive_laptop_enable'))
-                        _buildMenuItem(
-                          context,
-                          icon: Icons.assignment_return_outlined,
-                          title: 'dashboard.quick_menu_receive_laptop'.tr(context),
-                          isActive: widget.activePage == 'receive_laptop',
-                          padding: const EdgeInsets.only(left: 32, right: 12),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ReceiveLaptopPage(
+                                builder: (context) => SerahTerimaLaptopPage(
                                   userData: widget.userData,
                                 ),
                               ),

@@ -415,8 +415,10 @@ class RentPlanService {
     required String barcode,
     dynamic rentalId,
     String? kondisi,
-    List<File>? photos,
-    File? video,
+    dynamic photos,
+    dynamic video,
+    String? notes,
+    String? catatan,
   }) async {
     try {
       final url = Uri.parse('$baseUrl/receive_rental_laptop');
@@ -426,22 +428,31 @@ class RentPlanService {
       request.fields['barcode'] = barcode;
       request.fields['rental_id'] = rentalId?.toString() ?? '';
       request.fields['kondisi'] = kondisi ?? '';
+      request.fields['catatan'] = notes ?? catatan ?? '';
 
       // Attach photos (named photo_0, photo_1, ...)
-      if (photos != null && photos.isNotEmpty) {
-        for (int i = 0; i < photos.length; i++) {
-          request.files.add(
-            await http.MultipartFile.fromPath('photo_$i', photos[i].path),
-          );
+      if (photos != null) {
+        int photoIdx = 0;
+        for (var item in photos) {
+          final String path = item is String ? item : item.path;
+          if (path.isNotEmpty) {
+            request.files.add(
+              await http.MultipartFile.fromPath('photo_$photoIdx', path),
+            );
+            photoIdx++;
+          }
         }
-        request.fields['photo_count'] = photos.length.toString();
+        request.fields['photo_count'] = photoIdx.toString();
       }
 
       // Attach video (optional)
       if (video != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('video_file', video.path),
-        );
+        final String vPath = video is String ? video : video.path;
+        if (vPath.isNotEmpty) {
+          request.files.add(
+            await http.MultipartFile.fromPath('video_file', vPath),
+          );
+        }
       }
 
       final streamedResponse = await request.send().timeout(
@@ -458,8 +469,9 @@ class RentPlanService {
     required String barcode,
     dynamic rentalId,
     String? catatan,
-    List<File>? photos,
-    File? video,
+    String? notes,
+    dynamic photos,
+    dynamic video,
   }) async {
     try {
       final url = Uri.parse('$baseUrl/send_rental_laptop');
@@ -467,23 +479,31 @@ class RentPlanService {
       final request = http.MultipartRequest('POST', url);
       request.fields['barcode'] = barcode;
       request.fields['rental_id'] = rentalId?.toString() ?? '';
-      request.fields['catatan'] = catatan ?? '';
+      request.fields['catatan'] = notes ?? catatan ?? '';
 
       // Attach photos (named photo_0, photo_1, ...)
-      if (photos != null && photos.isNotEmpty) {
-        for (int i = 0; i < photos.length; i++) {
-          request.files.add(
-            await http.MultipartFile.fromPath('photo_$i', photos[i].path),
-          );
+      if (photos != null) {
+        int photoIdx = 0;
+        for (var item in photos) {
+          final String path = item is String ? item : item.path;
+          if (path.isNotEmpty) {
+            request.files.add(
+              await http.MultipartFile.fromPath('photo_$photoIdx', path),
+            );
+            photoIdx++;
+          }
         }
-        request.fields['photo_count'] = photos.length.toString();
+        request.fields['photo_count'] = photoIdx.toString();
       }
 
       // Attach video (optional)
       if (video != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('video_file', video.path),
-        );
+        final String vPath = video is String ? video : video.path;
+        if (vPath.isNotEmpty) {
+          request.files.add(
+            await http.MultipartFile.fromPath('video_file', vPath),
+          );
+        }
       }
 
       final streamedResponse = await request.send().timeout(

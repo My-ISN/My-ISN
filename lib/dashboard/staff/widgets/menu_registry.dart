@@ -19,8 +19,7 @@ import 'package:myisn/reports/reports_page.dart';
 import 'package:myisn/projects/project_list_page.dart';
 import 'package:myisn/tasks/task_list_page.dart';
 import 'package:myisn/passwords/password_list_page.dart';
-import 'package:myisn/rent_plan/staff/receive_laptop_page.dart';
-import 'package:myisn/rent_plan/staff/send_laptop_page.dart';
+import 'package:myisn/rent_plan/staff/serah_terima_laptop_page.dart';
 import 'package:myisn/rent_plan/staff/laptop_units_page.dart';
 import 'package:myisn/rent_plan/staff/scan_laptop_detail_page.dart';
 import 'package:myisn/crm/crm_page.dart';
@@ -245,21 +244,12 @@ class MenuRegistry {
       ),
       if (!isCustomer)
         AppModule(
-          titleKey: 'dashboard.quick_menu_send_laptop',
-          icon: Icons.local_shipping_rounded,
-          color: const Color(0xFF2575FC),
+          titleKey: 'dashboard.quick_menu_serah_terima_laptop',
+          icon: Icons.swap_horiz_rounded,
+          color: const Color(0xFF7E57C2),
           permission: 'mobile_send_laptop_enable',
           categoryKey: 'side_drawer.work',
-          pageBuilder: (context, user) => SendLaptopPage(userData: user),
-        ),
-      if (!isCustomer)
-        AppModule(
-          titleKey: 'dashboard.quick_menu_receive_laptop',
-          icon: Icons.assignment_return_rounded,
-          color: const Color(0xFF7E57C2),
-          permission: 'mobile_receive_laptop_enable',
-          categoryKey: 'side_drawer.work',
-          pageBuilder: (context, user) => ReceiveLaptopPage(userData: user),
+          pageBuilder: (context, user) => SerahTerimaLaptopPage(userData: user),
         ),
       if (!isCustomer)
         AppModule(

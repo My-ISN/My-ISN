@@ -14,6 +14,8 @@ import '../../constants.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/barcode_scanner_page.dart';
 import '../../widgets/secondary_app_bar.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'serah_terima_laptop_page.dart';
 
 class RentPlanDetailPage extends StatefulWidget {
   final int rentalId;
@@ -110,6 +112,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
 
   final List<String> _menuTabs = [
     'OVERVIEW',
+    'SERAH TERIMA',
     'EDIT',
     'RENTAL EXTEND',
     'INVOICE',
@@ -974,6 +977,8 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
     switch (tab) {
       case 'OVERVIEW':
         return 'rent_plan.overview'.tr(context);
+      case 'SERAH TERIMA':
+        return 'SERAH TERIMA LAPTOP';
       case 'EDIT':
         return 'rent_plan.edit'.tr(context);
       case 'RENTAL EXTEND':
@@ -1064,12 +1069,284 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   }
 
   Widget _buildActiveTabContent() {
+    if (_activeTab == 'SERAH TERIMA') return _buildSerahTerimaTab();
     if (_activeTab == 'EDIT') return _buildEditTab();
     if (_activeTab == 'VIEW DOKUMEN') return _buildViewDokumenTab();
     if (_activeTab == 'OVERVIEW') return _buildOverviewTab();
     if (_activeTab == 'HUTANG') return _buildHutangTab();
     if (_activeTab == 'RENTAL EXTEND') return _buildRentalExtendTab();
     return _buildPlaceholderTab();
+  }
+
+  Widget _buildSerahTerimaTab() {
+    if (_rentalData == null) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final String status = _rentalData!['status']?.toString() ?? '-';
+    final String tanggalKirim = _rentalData!['tanggal_kirim']?.toString() ?? '-';
+    final dynamic rawFotoKirim = _rentalData!['foto_kirim'];
+    List<String> existingPhotos = [];
+
+    if (rawFotoKirim != null) {
+      if (rawFotoKirim is String && rawFotoKirim.isNotEmpty) {
+        try {
+          final decoded = json.decode(rawFotoKirim);
+          if (decoded is List) {
+            existingPhotos = decoded.map((e) => e.toString()).toList();
+          } else {
+            existingPhotos = [rawFotoKirim];
+          }
+        } catch (_) {
+          existingPhotos = [rawFotoKirim];
+        }
+      } else if (rawFotoKirim is List) {
+        existingPhotos = rawFotoKirim.map((e) => e.toString()).toList();
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── 1. KARTU INSTRUKSI FOTO PENYEWA ──
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDark
+                  ? [const Color(0xFF311B92).withValues(alpha: 0.6), const Color(0xFF4527A0).withValues(alpha: 0.6)]
+                  : [const Color(0xFFF3E5F5), const Color(0xFFEDE7F6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF7E57C2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Instruksi Foto Serah Terima',
+                      style: GoogleFonts.outfit(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF4A148C),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              _buildKirimInstructionRow('1', 'Ambil foto penyewa sedang memegang laptop saat serah terima.', isDark),
+              const SizedBox(height: 8),
+              _buildKirimInstructionRow('2', 'Pastikan wajah penyewa dan kondisi fisik unit laptop tampak jelas.', isDark),
+              const SizedBox(height: 8),
+              _buildKirimInstructionRow('3', 'Foto ini disimpan sebagai bukti serah terima sah pengiriman sewa.', isDark),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // ── 2. STATUS PENGIRIMAN SAAT INI ──
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E2026) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isDark ? Colors.white12 : Colors.grey[200]!),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Status Order',
+                    style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      status.toUpperCase(),
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 20),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today_rounded, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text('Tanggal Kirim: ', style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[600])),
+                  Text(tanggalKirim != '-' ? tanggalKirim : 'Belum dikirim', style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // ── 3. FOTO DOKUMENTASI TERLAMPIR ──
+        if (existingPhotos.isNotEmpty) ...[
+          Text(
+            'Dokumentasi Serah Terima (${existingPhotos.length} Foto)',
+            style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+            ),
+            itemCount: existingPhotos.length,
+            itemBuilder: (_, idx) {
+              final path = existingPhotos[idx];
+              final fullUrl = path.startsWith('http') ? path : '${AppConstants.serverRoot}/$path';
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: fullUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  errorWidget: (_, __, ___) => const Icon(Icons.broken_image_rounded, color: Colors.grey),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+        ],
+
+        // ── 4. TOMBOL AKSI SERAH TERIMA TERPADU ──
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.local_shipping_rounded, size: 20),
+                  label: Text(
+                    'Kirim Laptop',
+                    style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7E57C2),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 2,
+                  ),
+                  onPressed: () async {
+                    final res = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SerahTerimaLaptopPage(
+                          initialRental: _rentalData,
+                          initialTab: 0,
+                        ),
+                      ),
+                    );
+                    if (res == true) _fetchDetail();
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.archive_rounded, size: 20),
+                  label: Text(
+                    'Terima Laptop',
+                    style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5E35B1),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 2,
+                  ),
+                  onPressed: () async {
+                    final res = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SerahTerimaLaptopPage(
+                          initialRental: _rentalData,
+                          initialTab: 1,
+                        ),
+                      ),
+                    );
+                    if (res == true) _fetchDetail();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildKirimInstructionRow(String number, String text, bool isDark) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 18,
+          height: 18,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0xFF7E57C2).withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            number,
+            style: GoogleFonts.outfit(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF7E57C2),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.outfit(
+              fontSize: 13,
+              color: isDark ? Colors.white70 : const Color(0xFF1E293B),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildExtJaminanSelector(int index) {

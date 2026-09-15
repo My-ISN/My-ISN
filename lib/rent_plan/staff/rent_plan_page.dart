@@ -4,8 +4,7 @@ import '../../services/rent_plan_service.dart';
 import 'rent_plan_detail_page.dart';
 import 'add_rent_plan_page.dart';
 import 'laptop_units_page.dart';
-import 'send_laptop_page.dart';
-import 'receive_laptop_page.dart';
+import 'serah_terima_laptop_page.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/custom_app_bar.dart';
 
@@ -912,14 +911,15 @@ class _RentPlanPageState extends State<RentPlanPage>
                 ),
               ),
             ),
-          // ── Kirim Laptop Shortcut ──
-          if (_hasPermission('mobile_send_laptop_enable'))
+          // ── Serah Terima Laptop Shortcut ──
+          if (_hasPermission('mobile_send_laptop_enable') ||
+              _hasPermission('mobile_receive_laptop_enable'))
             GestureDetector(
               onTap: () async {
                 final res = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => SendLaptopPage(userData: widget.userData),
+                    builder: (_) => SerahTerimaLaptopPage(userData: widget.userData),
                   ),
                 );
                 if (res == true) _fetchRentPlans();
@@ -930,16 +930,16 @@ class _RentPlanPageState extends State<RentPlanPage>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                   side: BorderSide(
-                    color: const Color(0xFF2575FC).withValues(alpha: 0.25),
+                    color: const Color(0xFF7E57C2).withValues(alpha: 0.25),
                   ),
                 ),
                 child: Container(
-                  width: 140,
+                  width: 145,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF2575FC), Color(0xFF00C6FF)],
+                      colors: [Color(0xFF7E57C2), Color(0xFF5E35B1)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -948,10 +948,10 @@ class _RentPlanPageState extends State<RentPlanPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.local_shipping_rounded, color: Colors.white, size: 22),
+                      Icon(Icons.swap_horiz_rounded, color: Colors.white, size: 22),
                       SizedBox(height: 6),
                       Text(
-                        'Kirim Laptop',
+                        'Serah Terima',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.white,
@@ -959,65 +959,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                         ),
                       ),
                       Text(
-                        'Foto Serah Terima',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          // ── Terima Laptop Shortcut ──
-          if (_hasPermission('mobile_receive_laptop_enable'))
-            GestureDetector(
-              onTap: () async {
-                final res = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ReceiveLaptopPage(userData: widget.userData),
-                  ),
-                );
-                if (res == true) _fetchRentPlans();
-              },
-              child: Card(
-                elevation: 0,
-                margin: const EdgeInsets.only(right: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  side: BorderSide(
-                    color: const Color(0xFF2ECC71).withValues(alpha: 0.25),
-                  ),
-                ),
-                child: Container(
-                  width: 140,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.assignment_return_rounded, color: Colors.white, size: 22),
-                      SizedBox(height: 6),
-                      Text(
-                        'Terima Laptop',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        'Foto Pengembalian',
+                        'Kirim & Terima Unit',
                         style: TextStyle(
                           fontSize: 10,
                           color: Colors.white70,
@@ -1262,6 +1204,46 @@ class _RentPlanPageState extends State<RentPlanPage>
                                 ),
                                 child: const Icon(
                                   Icons.payment_rounded,
+                                  color: Color(0xFF7E57C2),
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        if ((_hasPermission('mobile_send_laptop_enable') ||
+                                _hasPermission('mobile_receive_laptop_enable')) &&
+                            status.toLowerCase() != 'completed' &&
+                            status.toLowerCase() != 'cancelled') ...[
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () async {
+                                final res = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SerahTerimaLaptopPage(
+                                      userData: widget.userData,
+                                      initialRental: rental,
+                                      initialTab: 0,
+                                    ),
+                                  ),
+                                );
+                                if (res == true) _fetchRentPlans();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.swap_horiz_rounded,
                                   color: Color(0xFF7E57C2),
                                   size: 18,
                                 ),
