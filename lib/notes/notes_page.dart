@@ -104,6 +104,24 @@ class _NotesPageState extends State<NotesPage> {
     }
   }
 
+  bool _hasPermission(String resource) {
+    final ud = _currentUserData ?? widget.userData ?? {};
+    if (ud['role_resources'] == 'all' || ud['user_type'] == 'company') return true;
+    final String resources = ud['role_resources'] ?? '';
+    final list = resources.split(',').map((e) => e.trim()).toList();
+    return list.contains(resource);
+  }
+
+  bool get _canAdd =>
+      _hasPermission('mobile_notes_add') ||
+      _hasPermission('mobile_notes_enable') ||
+      _hasPermission('notes');
+
+  bool get _canDelete =>
+      _hasPermission('mobile_notes_delete') ||
+      _hasPermission('mobile_notes_enable') ||
+      _hasPermission('notes');
+
   int get _userId {
     final ud = _currentUserData;
     if (ud == null) return 0;
@@ -158,6 +176,10 @@ class _NotesPageState extends State<NotesPage> {
 
   // ── Delete ──────────────────────────────────────────────────────────────
   Future<void> _deleteNote(NoteItem note) async {
+    if (!_canDelete) {
+      context.showErrorSnackBar('Anda tidak memiliki izin untuk menghapus catatan');
+      return;
+    }
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -197,6 +219,10 @@ class _NotesPageState extends State<NotesPage> {
   Future<void> _openEditor({NoteItem? note}) async {
     if (note != null && note.isShared) {
       context.showErrorSnackBar('Anda tidak bisa mengedit catatan milik orang lain');
+      return;
+    }
+    if (!_canAdd) {
+      context.showErrorSnackBar('Anda tidak memiliki izin untuk menambah atau mengedit catatan');
       return;
     }
 
@@ -365,12 +391,14 @@ class _NotesPageState extends State<NotesPage> {
         userData: _currentUserData ?? {},
         activePage: 'notes',
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openEditor(),
-        backgroundColor: const Color(0xFF7E57C2),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: Text('Catatan Baru', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600)),
-      ),
+      floatingActionButton: _canAdd
+          ? FloatingActionButton.extended(
+              onPressed: () => _openEditor(),
+              backgroundColor: const Color(0xFF7E57C2),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: Text('Catatan Baru', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600)),
+            )
+          : null,
       body: RefreshIndicator(
         color: const Color(0xFF7E57C2),
         onRefresh: _fetchNotes,
@@ -497,6 +525,8 @@ class _NotesPageState extends State<NotesPage> {
                       (_, i) => _NoteCard(
                         note: _pinned[i],
                         isDark: isDark,
+                        canEdit: _canAdd,
+                        canDelete: _canDelete,
                         onEdit: () => _openEditor(note: _pinned[i]),
                         onDelete: () => _deleteNote(_pinned[i]),
                         onTogglePin: () => _togglePin(_pinned[i]),
@@ -530,6 +560,8 @@ class _NotesPageState extends State<NotesPage> {
                       (_, i) => _NoteCard(
                         note: _others[i],
                         isDark: isDark,
+                        canEdit: _canAdd,
+                        canDelete: _canDelete,
                         onEdit: () => _openEditor(note: _others[i]),
                         onDelete: () => _deleteNote(_others[i]),
                         onTogglePin: () => _togglePin(_others[i]),
@@ -556,6 +588,8 @@ class _NotesPageState extends State<NotesPage> {
 class _NoteCard extends StatelessWidget {
   final NoteItem note;
   final bool isDark;
+  final bool canEdit;
+  final bool canDelete;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onTogglePin;
@@ -563,6 +597,8 @@ class _NoteCard extends StatelessWidget {
   const _NoteCard({
     required this.note,
     required this.isDark,
+    this.canEdit = true,
+    this.canDelete = true,
     required this.onEdit,
     required this.onDelete,
     required this.onTogglePin,
@@ -633,7 +669,7 @@ class _NoteCard extends StatelessWidget {
                     if (val == 'delete') onDelete();
                   },
                   itemBuilder: (_) => [
-                    if (!note.isShared)
+                    if (!note.isShared && canEdit)
                       PopupMenuItem(
                         value: 'edit',
                         child: Row(children: [
@@ -652,15 +688,16 @@ class _NoteCard extends StatelessWidget {
                               style: GoogleFonts.poppins(fontSize: 13)),
                         ]),
                       ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(children: [
-                        const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent),
-                        const SizedBox(width: 8),
-                        Text(note.isShared ? 'Hapus dari daftar' : 'Hapus',
-                            style: GoogleFonts.poppins(fontSize: 13, color: Colors.redAccent)),
-                      ]),
-                    ),
+                    if (canDelete)
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(children: [
+                          const Icon(Icons.delete_outline, size: 16, color: Colors.redAccent),
+                          const SizedBox(width: 8),
+                          Text(note.isShared ? 'Hapus dari daftar' : 'Hapus',
+                              style: GoogleFonts.poppins(fontSize: 13, color: Colors.redAccent)),
+                        ]),
+                      ),
                   ],
                 ),
               ],

@@ -24,6 +24,7 @@ import 'package:myisn/rent_plan/staff/laptop_units_page.dart';
 import 'package:myisn/rent_plan/staff/scan_laptop_detail_page.dart';
 import 'package:myisn/crm/crm_page.dart';
 import 'package:myisn/reminder/reminder_page.dart';
+import 'package:myisn/notes/notes_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -224,6 +225,14 @@ class MenuRegistry {
         permission: 'mobile_pass_account',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => PasswordListPage(userData: user),
+      ),
+      AppModule(
+        titleKey: 'Notes',
+        icon: Icons.sticky_note_2_rounded,
+        color: const Color(0xFF7E57C2),
+        permission: 'mobile_notes_enable',
+        categoryKey: 'side_drawer.work',
+        pageBuilder: (context, user) => NotesPage(userData: user),
       ),
       AppModule(
         titleKey: 'dashboard.quick_menu_crm',

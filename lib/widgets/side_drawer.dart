@@ -458,24 +458,25 @@ class _SideDrawerState extends State<SideDrawer> {
                             );
                           },
                         ),
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.sticky_note_2_outlined,
-                        title: 'Notes',
-                        isActive: widget.activePage == 'notes',
-                        padding: const EdgeInsets.only(left: 32, right: 12),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => NotesPage(
-                                userData: widget.userData,
+                      if (_hasPermission('mobile_notes_enable') || _hasPermission('mobile_notes_view') || _hasPermission('notes'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.sticky_note_2_outlined,
+                          title: 'Notes',
+                          isActive: widget.activePage == 'notes',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NotesPage(
+                                  userData: widget.userData,
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                            );
+                          },
+                        ),
                       if (_hasPermission('mobile_crm_enable') || _hasPermission('crm_leads1'))
                         _buildMenuItem(
                           context,
