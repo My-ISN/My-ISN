@@ -19,10 +19,13 @@ import 'providers/theme_provider.dart';
 import 'providers/quick_menu_provider.dart';
 import 'providers/cart_provider.dart';
 
+import 'services/system_ui_service.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemUiService.hideNavigationBar();
 
   // Setup Global Exception Handlers — harus dilakukan sebelum inisialisasi lain
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -117,6 +120,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'My ISN Mobile',
       navigatorKey: navigatorKey,
+      navigatorObservers: [AppRouteObserver()],
       debugShowCheckedModeBanner: false,
       locale: languageProvider.locale,
       supportedLocales: const [Locale('id', ''), Locale('en', '')],
