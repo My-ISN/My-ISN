@@ -49,20 +49,13 @@ class DashboardQuickMenu extends StatelessWidget {
       displayModules = allPermitted;
     }
 
-    const int maxVisible = 5;
-    // Show 'More' if we have more than 6 total permitted, 
-    // OR if the user has pinned a subset of their permitted modules.
-    final bool showMore = (pinnedKeys != null && pinnedKeys.isNotEmpty)
-        ? allPermitted.length > displayModules.length
-        : allPermitted.length > maxVisible + 1;
+    // Show 'More' if user has permitted modules not currently in displayModules
+    final bool showMore = allPermitted.length > displayModules.length;
 
     final List<Widget> menuItems = [];
 
-    // Take up to 5 if showing more, else show all displayModules
-    final int displayCount = showMore ? maxVisible : displayModules.length;
-
-    for (int i = 0; i < displayCount; i++) {
-      if (i >= displayModules.length) break;
+    // Tampilkan SEMUA displayModules tanpa dibatasi 5 (unlimited)
+    for (int i = 0; i < displayModules.length; i++) {
       final m = displayModules[i];
       menuItems.add(_buildMenuWidget(context, m, user));
     }
@@ -102,10 +95,41 @@ class DashboardQuickMenu extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            Icon(
-              Icons.auto_awesome_rounded,
-              size: 16,
-              color: Colors.grey[400],
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AllMenusPage(
+                      userData: user,
+                      hasPermission: hasPermission,
+                    ),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'dashboard.edit'.tr(context),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

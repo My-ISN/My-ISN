@@ -35,7 +35,7 @@ class _AllMenusPageState extends State<AllMenusPage> {
     setState(() {
       if (_tempPinnedKeys!.contains(key)) {
         _tempPinnedKeys!.remove(key);
-      } else if (_tempPinnedKeys!.length < 5) {
+      } else {
         _tempPinnedKeys!.add(key);
       }
     });
@@ -232,12 +232,7 @@ class _AllMenusPageState extends State<AllMenusPage> {
         : Provider.of<QuickMenuProvider>(context, listen: false)
             .isPinned(m.titleKey);
 
-    final bool isMaxReached =
-        _isEditing && !isPinned && _tempPinnedKeys!.length >= 5;
-
-    return Opacity(
-      opacity: isMaxReached ? 0.3 : 1.0,
-      child: InkWell(
+    return InkWell(
         onTap: () {
           if (_isEditing) {
             _togglePinned(m.titleKey);
@@ -320,7 +315,7 @@ class _AllMenusPageState extends State<AllMenusPage> {
                   ),
                 ),
               )
-            else if (_isEditing && !isMaxReached)
+            else if (_isEditing)
               Positioned(
                 top: 8,
                 right: 8,
@@ -332,7 +327,6 @@ class _AllMenusPageState extends State<AllMenusPage> {
               ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

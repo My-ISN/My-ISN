@@ -26,7 +26,7 @@ class QuickMenuProvider extends ChangeNotifier {
     } else {
       if (_pinnedKeys!.contains(key)) {
         _pinnedKeys!.remove(key);
-      } else if (_pinnedKeys!.length < 5) {
+      } else {
         _pinnedKeys!.add(key);
       }
     }
