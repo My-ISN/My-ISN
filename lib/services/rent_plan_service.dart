@@ -423,12 +423,24 @@ class RentPlanService {
     try {
       final url = Uri.parse('$baseUrl/receive_rental_laptop');
 
-      // Use MultipartRequest to support file uploads
       final request = http.MultipartRequest('POST', url);
       request.fields['barcode'] = barcode;
       request.fields['rental_id'] = rentalId?.toString() ?? '';
       request.fields['kondisi'] = kondisi ?? '';
       request.fields['catatan'] = notes ?? catatan ?? '';
+
+      // Kirim identitas kurir yang melakukan scan
+      try {
+        String? userDataString = await _storage.read(key: 'user_data');
+        if (userDataString != null) {
+          final userData = json.decode(userDataString);
+          final userId = userData['id'] ?? userData['user_id'];
+          if (userId != null) {
+            request.fields['kurir_id'] = userId.toString();
+            request.fields['user_id'] = userId.toString();
+          }
+        }
+      } catch (_) {}
 
       // Attach photos (named photo_0, photo_1, ...)
       if (photos != null) {
@@ -480,6 +492,19 @@ class RentPlanService {
       request.fields['barcode'] = barcode;
       request.fields['rental_id'] = rentalId?.toString() ?? '';
       request.fields['catatan'] = notes ?? catatan ?? '';
+
+      // Kirim identitas kurir yang melakukan scan
+      try {
+        String? userDataString = await _storage.read(key: 'user_data');
+        if (userDataString != null) {
+          final userData = json.decode(userDataString);
+          final userId = userData['id'] ?? userData['user_id'];
+          if (userId != null) {
+            request.fields['kurir_id'] = userId.toString();
+            request.fields['user_id'] = userId.toString();
+          }
+        }
+      } catch (_) {}
 
       // Attach photos (named photo_0, photo_1, ...)
       if (photos != null) {
