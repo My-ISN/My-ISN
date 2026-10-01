@@ -13,6 +13,7 @@ import '../todo_list/todo_list_page.dart';
 import '../reminder/reminder_page.dart';
 import '../constants.dart';
 import '../rent_plan/staff/rent_plan_detail_page.dart';
+import '../payroll/payroll_page.dart';
 
 
 @pragma('vm:entry-point')
@@ -146,7 +147,7 @@ class NotificationService {
         ?.createNotificationChannel(channel);
   }
 
-  void _handleNotificationClick(Map<String, dynamic> data) {
+  Future<void> _handleNotificationClick(Map<String, dynamic> data) async {
     Log.i("Notification clicked with data: $data");
     
     final context = navigatorKey?.currentContext;
@@ -173,6 +174,16 @@ class NotificationService {
         context,
         MaterialPageRoute(builder: (context) => const ReminderPage()),
       );
+    } else if (type == 'payroll') {
+      const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+      final userDataStr = await storage.read(key: 'user_data');
+      final userData = userDataStr != null ? json.decode(userDataStr) as Map<String, dynamic> : <String, dynamic>{};
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PayrollPage(userData: userData)),
+        );
+      }
     } else if (type == 'rental_agreement' && targetId != null) {
       final rentId = int.tryParse(targetId.toString());
       if (rentId != null) {
