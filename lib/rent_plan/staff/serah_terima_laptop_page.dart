@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -47,7 +46,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
   bool _kirimSubmitting = false;
   Map<String, dynamic>? _kirimSelectedRental;
   List<dynamic> _kirimSearchResults = [];
-  List<XFile> _kirimPhotos = [];
+  final List<XFile> _kirimPhotos = [];
   XFile? _kirimVideo;
 
   // ══════════════════════════════════════════════════════════════════════════════
@@ -63,7 +62,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
   String _terimaKondisi = 'Bagus';
   bool _kelengkapanCharger = true;
   bool _kelengkapanTas = true;
-  List<XFile> _terimaPhotos = [];
+  final List<XFile> _terimaPhotos = [];
   XFile? _terimaVideo;
 
   static const int _maxPhotos = 5;
@@ -363,6 +362,10 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final barcode = _terimaLaptopData!['barcode'] ?? _terimaBarcodeCtrl.text.trim();
     final laptopName = _terimaLaptopData!['nama_laptop'] ?? 'Unit Laptop';
+    final rental = _terimaActiveRental;
+    final rentalId = rental?['rental_id'];
+    final tipePengiriman = (rental?['tipe_pengiriman'] ?? '').toString();
+    final isJemputIncluded = tipePengiriman.toLowerCase().contains('jemput');
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -386,6 +389,40 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             Text('• Kondisi: $_terimaKondisi', style: GoogleFonts.outfit(color: _purplePrimary, fontWeight: FontWeight.bold)),
             Text('• Kelengkapan: ${_kelengkapanCharger ? "Charger ADA" : "Charger TIDAK ADA"}, ${_kelengkapanTas ? "Tas ADA" : "Tas TIDAK ADA"}', style: GoogleFonts.outfit(fontSize: 12)),
             Text('• Foto: ${_terimaPhotos.length} foto bukti terlampir', style: GoogleFonts.outfit(color: _purplePrimary)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isJemputIncluded ? Colors.green.withValues(alpha: 0.12) : Colors.amber.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isJemputIncluded ? Colors.green.withValues(alpha: 0.4) : Colors.orange.withValues(alpha: 0.4),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    isJemputIncluded ? Icons.check_circle_outline : Icons.info_outline,
+                    size: 18,
+                    color: isJemputIncluded ? Colors.green[700] : Colors.orange[800],
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      isJemputIncluded
+                          ? 'Ongkir Jemput: Rp 25.000 masuk ke kurir (Sudah termasuk paket Antar & Jemput).'
+                          : 'Ongkir Jemput: Rp 25.000 masuk ke kurir & otomatis dipotong dari deposit penyewa (karena opsi sewa hanya Antar Saja).',
+                      style: GoogleFonts.outfit(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isJemputIncluded ? Colors.green[800] : Colors.orange[900],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         actions: [
@@ -417,6 +454,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
 
       final res = await _rentPlanService.receiveRentalLaptop(
         barcode: barcode,
+        rentalId: rentalId,
         kondisi: _terimaKondisi,
         photos: _terimaPhotos,
         video: _terimaVideo,
@@ -1196,6 +1234,53 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
           if (rental != null && rental['invoice_number'] != null) ...[
             const SizedBox(height: 4),
             Text('• Invoice: ${rental['invoice_number']}', style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[600])),
+          ],
+          if (rental != null && rental['tipe_pengiriman'] != null && rental['tipe_pengiriman'].toString() != '-') ...[
+            const SizedBox(height: 4),
+            Text('• Tipe Kirim: ${rental['tipe_pengiriman']}', style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 6),
+            if (!rental['tipe_pengiriman'].toString().toLowerCase().contains('jemput'))
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 15, color: Colors.orange[800]),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Opsi Antar Saja: Ongkir jemput Rp 25.000 akan otomatis dipotong dari deposit.',
+                        style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.orange[900]),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 15, color: Colors.green[700]),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Paket Antar & Jemput: Sudah lunas ongkos kirim & jemput.',
+                        style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.green[800]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ],
       ),
