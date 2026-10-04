@@ -560,8 +560,8 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
         'district_ktp_name': _getNameFromList(_districtsKtp, _selectedDistrictKtp),
         'village_ktp_name': _getNameFromList(_villagesKtp, _selectedVillageKtp),
         // Domisili Address
-        'address_1': _currentAddressController.text ?? '',
-        'zipcode': _zipCodeController.text ?? '',
+        'address_1': _currentAddressController.text,
+        'zipcode': _zipCodeController.text,
         'province_current_name': _getNameFromList(_provinces, _selectedProvinceCur),
         'regency_current_name': _getNameFromList(_regenciesCur, _selectedRegencyCur),
         'district_current_name': _getNameFromList(_districtsCur, _selectedDistrictCur),
@@ -575,7 +575,7 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
         'tipe_pengiriman': _tipePengiriman,
         'admin_fee': '7000',
         'payment_method': _paymentMethod,
-        'emergency_contact_number': _emergencyContactController.text ?? '',
+        'emergency_contact_number': _emergencyContactController.text,
         // Add flags for mixed orders
         'is_mixed_order': (hasRentalItems && hasPurchaseItems).toString(),
         'is_sale': hasPurchaseItems ? '1' : '0',

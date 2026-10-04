@@ -71,16 +71,6 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
     _fetchAndAutoAddTodos(_selectedDate);
   }
 
-  bool _hasPermission(String resource) {
-    final userData = widget.userData;
-    if (userData['role_access'] == '1' || userData['role_resources'] == 'all') {
-      return true;
-    }
-    final String resources = userData['role_resources'] ?? '';
-    final List<String> resourceList = resources.split(',');
-    return resourceList.contains(resource);
-  }
-
   Future<void> _fetchAndAutoAddTodos(DateTime date) async {
     final dateStr = date.toIso8601String().split('T')[0];
     // Use selected employee ID if in team mode, otherwise use current user ID
@@ -189,14 +179,6 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
         _itemControllers.removeAt(index);
       });
     }
-  }
-
-  void _showTodoPicker() {
-    _showQuickAddPicker(
-      title: 'work_log.select_todo'.tr(context),
-      endpoint: '/get_todos',
-      isTodo: true,
-    );
   }
 
   void _showJobDeskPicker() {
@@ -475,11 +457,6 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  /* _buildQuickAddButton(
-                    onTap: _showTodoPicker,
-                    icon: Icons.playlist_add_check_rounded,
-                    label: 'work_log.from_todo_list'.tr(context),
-                  ), */
                   _buildQuickAddButton(
                     onTap: _showJobDeskPicker,
                     icon: Icons.assignment_outlined,

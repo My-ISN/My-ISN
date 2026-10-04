@@ -22,7 +22,6 @@ class TaskNotesTabState extends State<TaskNotesTab> {
   
   List<dynamic> _notes = [];
   bool _isLoading = true;
-  bool _isSending = false;
 
   @override
   void initState() {
@@ -63,11 +62,9 @@ class TaskNotesTabState extends State<TaskNotesTab> {
     final note = text ?? noteController.text;
     if (note.trim().isEmpty) return;
     
-    setState(() => _isSending = true);
     final result = await _service.addTaskNote(widget.taskId, note.trim());
     
     if (mounted) {
-      setState(() => _isSending = false);
       if (result['status'] == true) {
         if (text == null) noteController.clear();
         _fetchNotes();

@@ -3,7 +3,6 @@ import '../localization/app_localizations.dart';
 import '../services/ai_bot_service.dart';
 import '../services/tracking_service.dart';
 import 'dart:async';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/custom_app_bar.dart';
 import '../widgets/side_drawer.dart';
 import '../widgets/custom_snackbar.dart';
@@ -19,10 +18,6 @@ class AiBotPage extends StatefulWidget {
 
 class _AiBotPageState extends State<AiBotPage> {
   final AiBotService _aiService = AiBotService();
-  final _storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
-
   // List State
   List<dynamic> _knowledgeList = [];
   bool _isFetching = false;
@@ -364,7 +359,6 @@ class _AiBotPageState extends State<AiBotPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
           final colorScheme = Theme.of(context).colorScheme;
           
           return Container(
@@ -504,7 +498,6 @@ class _AiBotPageState extends State<AiBotPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(

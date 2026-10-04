@@ -273,7 +273,6 @@ class _JobDeskPageState extends State<JobDeskPage> {
 
   void _showAddJobDeskSheet() {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     // Reset form
     _titleController.clear();

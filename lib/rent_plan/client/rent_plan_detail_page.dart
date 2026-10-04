@@ -28,7 +28,6 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
   bool _isLoading = true;
   String _activeTab = 'OVERVIEW';
   Map<String, dynamic>? _rentalData;
-  Map<String, dynamic>? _debtData;
 
   final List<String> _menuTabs = [
     'OVERVIEW',
@@ -52,8 +51,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
       if (mounted) {
         setState(() {
           _rentalData = response['data']['rental'];
-          _debtData = response['data']['debt'];
-          _isLoading = false;
+            _isLoading = false;
         });
       }
     } else {

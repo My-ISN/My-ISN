@@ -21,7 +21,6 @@ class TaskTodoTabState extends State<TaskTodoTab> {
   
   List<dynamic> _todos = [];
   bool _isLoading = true;
-  bool _isSending = false;
   
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
@@ -131,11 +130,9 @@ class TaskTodoTabState extends State<TaskTodoTab> {
   Future<void> addTodoItem(String text) async {
     if (text.trim().isEmpty) return;
     
-    setState(() => _isSending = true);
     final result = await _service.addProjectTodo(widget.taskId, text.trim());
     
     if (mounted) {
-      setState(() => _isSending = false);
       if (result['status'] == true) {
         _fetchTodos();
       } else {

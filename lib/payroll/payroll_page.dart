@@ -46,8 +46,6 @@ class _PayrollPageState extends State<PayrollPage>
   String? _selectedAccountId;
   Map<String, dynamic>? _previewData;
   bool _isActionLoading = false;
-  bool _isStaffLoading = true;
-  String? _staffErrorMessage;
   final TextEditingController _commentController = TextEditingController();
   Future<Map<String, dynamic>>? _payslipFuture;
 
@@ -102,27 +100,15 @@ class _PayrollPageState extends State<PayrollPage>
   }
 
   Future<void> _fetchStaffList() async {
-    setState(() {
-      _isStaffLoading = true;
-      _staffErrorMessage = null;
-    });
     try {
       final userId = widget.userData['user_id'] ?? widget.userData['id'];
       Log.i('Fetching staff for user: $userId');
-      if (userId == null) {
-        setState(() {
-          _isStaffLoading = false;
-          _staffErrorMessage =
-              "Kesalahan: ID Pengguna tidak ditemukan (Silakan Logout & Login kembali)";
-        });
-        return;
-      }
-      String? responseBody;
+      if (userId == null) return;
       try {
         final url =
             '${AppConstants.baseUrl}/get_payroll_staff_list?user_id=$userId';
         final response = await http.get(Uri.parse(url));
-        responseBody = response.body;
+        final responseBody = response.body;
 
         if (responseBody.trim().isEmpty) {
           throw Exception("Server memberikan respon kosong");
@@ -132,30 +118,10 @@ class _PayrollPageState extends State<PayrollPage>
         if (data['status'] == true && mounted) {
           setState(() {
             _staffList = data['data'];
-            _isStaffLoading = false;
-          });
-        } else {
-          setState(() {
-            _isStaffLoading = false;
-            _staffErrorMessage =
-                data['message'] ?? "Gagal mengambil data staff";
           });
         }
       } catch (e) {
         Log.e('Error fetching staff: $e');
-        if (mounted) {
-          String errorMsg = "Kesalahan koneksi: $e";
-          if (e is FormatException && responseBody != null) {
-            final snippet = responseBody.length > 100
-                ? responseBody.substring(0, 100)
-                : responseBody;
-            errorMsg += "\nRespon Server: $snippet";
-          }
-          setState(() {
-            _isStaffLoading = false;
-            _staffErrorMessage = errorMsg;
-          });
-        }
       }
     } catch (e) {
       Log.e('Global error fetching staff: $e');

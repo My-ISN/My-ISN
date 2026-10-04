@@ -23,7 +23,6 @@ class TaskDiscussionTabState extends State<TaskDiscussionTab> {
   
   List<dynamic> _discussions = [];
   bool _isLoading = true;
-  bool _isSending = false;
 
   @override
   void initState() {
@@ -64,11 +63,9 @@ class TaskDiscussionTabState extends State<TaskDiscussionTab> {
     final comment = text ?? commentController.text;
     if (comment.trim().isEmpty) return;
     
-    setState(() => _isSending = true);
     final result = await _service.addTaskDiscussion(widget.taskId, comment.trim());
     
     if (mounted) {
-      setState(() => _isSending = false);
       if (result['status'] == true) {
         if (text == null) commentController.clear();
         _fetchDiscussions();

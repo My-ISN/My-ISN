@@ -1889,7 +1889,6 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
   }
 
   Widget _buildItemRow(int index) {
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

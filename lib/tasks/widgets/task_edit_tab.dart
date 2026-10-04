@@ -35,8 +35,6 @@ class TaskEditTabState extends State<TaskEditTab> {
   List<String> _selectedTeamIds = [];
   final List<String> _selectedTeamNames = [];
 
-  bool _isLoading = false;
-  bool _isDataLoading = true;
   
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
@@ -113,7 +111,6 @@ class TaskEditTabState extends State<TaskEditTab> {
       if (mounted) {
         setState(() {
           _employees = result['data'] ?? [];
-          _isDataLoading = false;
           
           // Match names for current IDs
           _selectedAssigneeNames.clear();
@@ -134,7 +131,6 @@ class TaskEditTabState extends State<TaskEditTab> {
         });
       }
     } else {
-      if (mounted) setState(() => _isDataLoading = false);
     }
   }
 
@@ -305,7 +301,6 @@ class TaskEditTabState extends State<TaskEditTab> {
   Future<void> saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
     
-    setState(() => _isLoading = true);
     final result = await _service.updateTaskDetails({
       'task_id': widget.task.id,
       'task_name': _nameController.text,
@@ -319,7 +314,6 @@ class TaskEditTabState extends State<TaskEditTab> {
     });
     
     if (mounted) {
-      setState(() => _isLoading = false);
       if (result['status'] == true) {
         CustomSnackBar.showSuccess(context, 'tasks.update_success'.tr(context));
         widget.onUpdated();

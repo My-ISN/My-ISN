@@ -189,7 +189,6 @@ class _RentPlanPageState extends State<RentPlanPage>
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) {
-          const Color primaryPurple = Color(0xFF7E57C2);
 
           Future<void> handlePayment() async {
             if (isProcessing) return;
@@ -611,53 +610,6 @@ class _RentPlanPageState extends State<RentPlanPage>
               subtitle,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBankItem(
-    String name,
-    IconData icon,
-    bool isActive,
-    VoidCallback onTap,
-  ) {
-    const Color primaryPurple = Color(0xFF7E57C2);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        decoration: BoxDecoration(
-          color: isActive
-              ? primaryPurple.withValues(alpha: 0.05)
-              : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isActive ? primaryPurple : Colors.grey.withValues(alpha: 0.15),
-            width: isActive ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isActive ? primaryPurple : Colors.indigo[300],
-              size: 18,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                name,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                  color: isActive ? primaryPurple : null,
-                ),
-              ),
             ),
           ],
         ),

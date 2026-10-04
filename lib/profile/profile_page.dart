@@ -93,8 +93,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final basic = _profileData['basic_info'] ?? {};
-
     Widget content = _isLoading
         ? const Center(child: CircularProgressIndicator())
         : RefreshIndicator(

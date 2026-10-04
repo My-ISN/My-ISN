@@ -24,7 +24,6 @@ class TaskDetailPage extends StatefulWidget {
 class _TaskDetailPageState extends State<TaskDetailPage> {
   final ProjectTaskService _service = ProjectTaskService();
   late Task _task;
-  final bool _isLoading = false;
   bool _isUpdating = false;
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
@@ -516,7 +515,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   }
 
   Widget _buildHeaderCard() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -632,12 +630,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         children: [
                           _buildDateInfo(
                             'tasks.start_date'.tr(context),
-                            _task.startDate ?? '-',
+                            _task.startDate,
                             Icons.calendar_today_rounded,
                           ),
                           _buildDateInfo(
                             'tasks.end_date'.tr(context),
-                            _task.endDate ?? '-',
+                            _task.endDate,
                             Icons.event_available_rounded,
                           ),
                         ],

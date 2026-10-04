@@ -153,19 +153,6 @@ class _TaskListPageState extends State<TaskListPage> {
     }
   }
 
-  String _getStatusText(String status) {
-    switch (status) {
-      case '0': return 'tasks.not_started'.tr(context);
-      case '1': return 'tasks.in_progress'.tr(context);
-      case '2': return 'tasks.completed'.tr(context);
-      case '3': return 'tasks.cancelled'.tr(context);
-      case '4': return 'tasks.on_hold'.tr(context);
-      default: return 'Unknown';
-    }
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

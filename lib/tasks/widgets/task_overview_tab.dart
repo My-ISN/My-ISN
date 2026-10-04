@@ -34,8 +34,6 @@ class TaskOverviewTab extends StatelessWidget {
       }
     } catch (_) {}
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

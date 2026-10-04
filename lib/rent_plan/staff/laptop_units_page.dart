@@ -27,7 +27,6 @@ class _LaptopUnitsPageState extends State<LaptopUnitsPage> {
   bool _isLoading = true;
   bool _isLoadingMore = false;
   bool _hasMore = true;
-  int _total = 0;
   static const int _limit = 20;
   Timer? _debounce;
 
@@ -118,8 +117,7 @@ class _LaptopUnitsPageState extends State<LaptopUnitsPage> {
         if (res['status'] == true) {
           final list = List<Map<String, dynamic>>.from(res['data'] ?? []);
           _units = list;
-          _total = res['total'] ?? 0;
-          _hasMore = list.length >= _limit;
+              _hasMore = list.length >= _limit;
           _groupUnits();
         } else {
           context.showErrorSnackBar(

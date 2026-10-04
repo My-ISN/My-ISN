@@ -37,7 +37,6 @@ class ProjectEditTabState extends State<ProjectEditTab> {
   List<Map<String, dynamic>> _departments = [];
   List<Map<String, dynamic>> _employees = [];
   bool _isLoadingData = true;
-  bool _isSaving = false;
 
   @override
   void initState() {
@@ -87,7 +86,6 @@ class ProjectEditTabState extends State<ProjectEditTab> {
   Future<void> saveProject() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSaving = true);
     final data = {
       'project_id': widget.project['project_id'],
       'title': _titleController.text,
@@ -105,7 +103,6 @@ class ProjectEditTabState extends State<ProjectEditTab> {
 
     final result = await _service.updateProjectDetails(data);
     if (mounted) {
-      setState(() => _isSaving = false);
       if (result['status'] == true) {
         CustomSnackBar.showSuccess(context, 'projects.update_success'.tr(context));
         widget.onUpdate();
