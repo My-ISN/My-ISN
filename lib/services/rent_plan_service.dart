@@ -419,6 +419,7 @@ class RentPlanService {
     dynamic video,
     String? notes,
     String? catatan,
+    dynamic kurirId,
   }) async {
     try {
       final url = Uri.parse('$baseUrl/receive_rental_laptop');
@@ -430,17 +431,22 @@ class RentPlanService {
       request.fields['catatan'] = notes ?? catatan ?? '';
 
       // Kirim identitas kurir yang melakukan scan
-      try {
-        String? userDataString = await _storage.read(key: 'user_data');
-        if (userDataString != null) {
-          final userData = json.decode(userDataString);
-          final userId = userData['id'] ?? userData['user_id'];
-          if (userId != null) {
-            request.fields['kurir_id'] = userId.toString();
-            request.fields['user_id'] = userId.toString();
+      if (kurirId != null && kurirId.toString().isNotEmpty && kurirId.toString() != '0') {
+        request.fields['kurir_id'] = kurirId.toString();
+        request.fields['user_id'] = kurirId.toString();
+      } else {
+        try {
+          String? userDataString = await _storage.read(key: 'user_data');
+          if (userDataString != null) {
+            final userData = json.decode(userDataString);
+            final userId = userData['id'] ?? userData['user_id'];
+            if (userId != null) {
+              request.fields['kurir_id'] = userId.toString();
+              request.fields['user_id'] = userId.toString();
+            }
           }
-        }
-      } catch (_) {}
+        } catch (_) {}
+      }
 
       // Attach photos (named photo_0, photo_1, ...)
       if (photos != null) {
@@ -484,6 +490,7 @@ class RentPlanService {
     String? notes,
     dynamic photos,
     dynamic video,
+    dynamic kurirId,
   }) async {
     try {
       final url = Uri.parse('$baseUrl/send_rental_laptop');
@@ -494,17 +501,22 @@ class RentPlanService {
       request.fields['catatan'] = notes ?? catatan ?? '';
 
       // Kirim identitas kurir yang melakukan scan
-      try {
-        String? userDataString = await _storage.read(key: 'user_data');
-        if (userDataString != null) {
-          final userData = json.decode(userDataString);
-          final userId = userData['id'] ?? userData['user_id'];
-          if (userId != null) {
-            request.fields['kurir_id'] = userId.toString();
-            request.fields['user_id'] = userId.toString();
+      if (kurirId != null && kurirId.toString().isNotEmpty && kurirId.toString() != '0') {
+        request.fields['kurir_id'] = kurirId.toString();
+        request.fields['user_id'] = kurirId.toString();
+      } else {
+        try {
+          String? userDataString = await _storage.read(key: 'user_data');
+          if (userDataString != null) {
+            final userData = json.decode(userDataString);
+            final userId = userData['id'] ?? userData['user_id'];
+            if (userId != null) {
+              request.fields['kurir_id'] = userId.toString();
+              request.fields['user_id'] = userId.toString();
+            }
           }
-        }
-      } catch (_) {}
+        } catch (_) {}
+      }
 
       // Attach photos (named photo_0, photo_1, ...)
       if (photos != null) {

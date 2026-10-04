@@ -248,12 +248,14 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
 
     setState(() => _kirimSubmitting = true);
     try {
+      final courierUserId = widget.userData?['id'] ?? widget.userData?['user_id'];
       final res = await _rentPlanService.sendRentalLaptop(
         rentalId: rentalId,
         barcode: _kirimBarcodeCtrl.text.trim(),
         photos: _kirimPhotos,
         video: _kirimVideo,
         notes: _kirimNotesCtrl.text.trim(),
+        kurirId: courierUserId,
       );
 
       if (res['status'] == true) {
@@ -452,6 +454,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
         'Kelengkapan: Charger ${_kelengkapanCharger ? "Lengkap" : "Tidak Ada"}, Tas ${_kelengkapanTas ? "Lengkap" : "Tidak Ada"}',
       ].join(' | ');
 
+      final courierUserId = widget.userData?['id'] ?? widget.userData?['user_id'];
       final res = await _rentPlanService.receiveRentalLaptop(
         barcode: barcode,
         rentalId: rentalId,
@@ -459,6 +462,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
         photos: _terimaPhotos,
         video: _terimaVideo,
         notes: combinedNotes,
+        kurirId: courierUserId,
       );
 
       if (res['status'] == true) {
@@ -1111,7 +1115,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _kirimSearchResults.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, index) => const SizedBox(height: 8),
       itemBuilder: (ctx, idx) {
         final r = _kirimSearchResults[idx];
         final name = _getRenterName(r);
