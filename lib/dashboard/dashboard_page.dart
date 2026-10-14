@@ -132,7 +132,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     // 1. Check for newer version (Update Popup)
     final updateInfo = await VersionCheckService.checkForUpdate();
     if (updateInfo != null && mounted) {
-      _showUpdateDialog(updateInfo);
+      await _showUpdateDialog(updateInfo);
       return; // If update available, don't show changelog yet
     }
 
@@ -301,8 +301,8 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     );
   }
 
-  void _showUpdateDialog(AppUpdateInfo updateInfo) {
-    showModalBottomSheet(
+  Future<void> _showUpdateDialog(AppUpdateInfo updateInfo) async {
+    final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       isDismissible: !updateInfo.isForceUpdate,
@@ -316,6 +316,12 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         child: UpdateDialogContent(updateInfo: updateInfo),
       ),
     );
+
+    // Catat pilihan "Nanti" supaya dialog tidak muncul lagi di setiap
+    // pembukaan aplikasi (versi yang lebih baru tetap ditampilkan).
+    if (result != 'update' && !updateInfo.isForceUpdate) {
+      await VersionCheckService.markAsDismissed(updateInfo);
+    }
   }
 
   Future<void> _fetchDashboardData() async {
