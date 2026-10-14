@@ -1,0 +1,93 @@
+name: Preview Web (GitHub Pages)
+
+# Tujuan: pemilik bisa MELIHAT aplikasi langsung di browser (tanpa memasang
+# APK ke HP) setiap kali kode di-push. Hasil `flutter build web` diterbitkan
+# ke GitHub Pages.
+#
+# Catatan Pages: workflow ini memakai `actions/configure-pages` dengan
+# `enablement: true`, yang mencoba MENGAKTIFKAN GitHub Pages otomatis
+# (Settings -> Pages -> Source: GitHub Actions). Bila langkah itu ditolak
+# oleh GitHub, pemilik cukup melakukan satu klik: Settings -> Pages ->
+# Source: "GitHub Actions", lalu jalankan ulang workflow ini.
+
+on:
+  push:
+    branches: [main, feat/preview-web, feat/cekupdate-hris]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-preview
+  cancel-in-progress: true
+
+jobs:
+  build-web:
+    name: Build Flutter Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter 3.41.9 (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.9
+          channel: stable
+          cache: true
+
+      - name: Ambil dependensi
+        run: flutter pub get
+
+      - name: Info toolchain (bukti versi)
+        run: |
+          set -x
+          flutter --version
+          dart --version
+
+      - name: Build web (release, base-href /My-ISN/)
+        run: |
+          set -x
+          flutter build web --release --no-tree-shake-icons --base-href "/My-ISN/"
+
+      - name: Ringkasan berkas hasil build
+        if: always()
+        run: |
+          set -x
+          ls -la build/web 2>/dev/null | head -20
+          du -sh build/web 2>/dev/null || true
+
+      - name: Simpan build web sebagai artifact (cadangan)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-preview-hasil
+          retention-days: 14
+          if-no-files-found: warn
+          path: build/web
+
+      - name: Siapkan GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Unggah artifact Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy-web:
+    name: Terbitkan ke GitHub Pages
+    needs: build-web
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy ke GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
