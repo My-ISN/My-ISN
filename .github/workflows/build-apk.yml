@@ -10,7 +10,10 @@ name: Build APK & AAB
 
 on:
   push:
-    branches: [main]
+    # `feat/cekupdate-hris` ditambahkan sementara agar build verifikasi bisa
+    # dijalankan lewat push cabang (tanpa Flutter/Java lokal). Hapus cabang ini
+    # dari daftar setelah PR digabung ke main bila tidak diperlukan lagi.
+    branches: [main, feat/cekupdate-hris]
   workflow_dispatch:
 
 permissions:

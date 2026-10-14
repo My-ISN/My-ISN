@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ota_update/ota_update.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../localization/app_localizations.dart';
+import '../services/log_service.dart';
 import '../services/version_check_service.dart';
 
 class UpdateDialogContent extends StatefulWidget {
@@ -29,18 +31,58 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
     super.dispose();
   }
 
-  Future<void> _startUpdate() async {
-    final String url = widget.updateInfo.downloadLink;
-    final bool isApk = url.toLowerCase().contains('.apk');
+  /// Membuka tautan pembaruan dari JSON.
+  ///
+  /// Bila tautan menuju Google Play, skema `market://` dicoba lebih dulu supaya
+  /// halaman aplikasi langsung dibuka di aplikasi Play Store; bila tidak
+  /// tersedia, URL asli dari JSON yang dipakai.
+  Future<bool> _openUpdateLink(String url) async {
+    if (url.contains('play.google.com') || url.startsWith('market://')) {
+      try {
+        final packageInfo = await PackageInfo.fromPlatform();
+        final marketUri = Uri.parse(
+          'market://details?id=${packageInfo.packageName}',
+        );
+        if (await canLaunchUrl(marketUri)) {
+          return await launchUrl(
+            marketUri,
+            mode: LaunchMode.externalApplication,
+          );
+        }
+      } catch (e) {
+        Log.w('UpdateDialog: gagal membuka market:// : $e');
+      }
+    }
 
-    if (!isApk) {
-      // Fallback for Play Store or external links
+    try {
       final Uri uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        return await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-      if (mounted) {
-        Navigator.pop(context);
+    } catch (e) {
+      Log.w('UpdateDialog: gagal membuka tautan pembaruan: $e');
+    }
+    return false;
+  }
+
+  Future<void> _startUpdate() async {
+    // `tautan` dari JSON versi terbaru.
+    final String url = widget.updateInfo.downloadLink.trim();
+    if (url.isEmpty) {
+      setState(() => _errorMessage =
+          'Tautan pembaruan belum tersedia. Silakan coba lagi nanti.');
+      return;
+    }
+
+    // Tautan non-APK (mis. halaman Google Play) -> buka lewat Play Store/browser.
+    if (!url.toLowerCase().contains('.apk')) {
+      final bool opened = await _openUpdateLink(url);
+      if (!mounted) return;
+      if (opened) {
+        Navigator.pop(context, 'update');
+      } else {
+        setState(() => _errorMessage =
+            'Tidak dapat membuka tautan pembaruan. Silakan coba lagi.');
       }
       return;
     }
@@ -76,7 +118,7 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
             case OtaStatus.ALREADY_RUNNING_ERROR:
               setState(() {
                 _isDownloading = false;
-                _errorMessage = 'Update process already running.';
+                _errorMessage = 'Proses pembaruan sedang berjalan.';
               });
               break;
             case OtaStatus.PERMISSION_NOT_GRANTED_ERROR:
@@ -127,6 +169,7 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final String versionLabel = widget.updateInfo.version.split('+')[0];
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
@@ -185,14 +228,15 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
                 children: [
                   if (!_isDownloading) ...[
                     Text(
-                      '${'main.new_version'.tr(context)}: ${widget.updateInfo.version.split('+')[0]}',
+                      '${'main.new_version'.tr(context)}: $versionLabel',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    if (widget.updateInfo.releaseNotes != null) ...[
+                    const SizedBox(height: 12),
+                    if (widget.updateInfo.releaseNotes != null &&
+                        widget.updateInfo.releaseNotes!.trim().isNotEmpty) ...[
                       Text(
                         'announcement.whats_new'.tr(context),
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -310,10 +354,11 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
             child: Row(
               children: [
                 if (!_isDownloading) ...[
+                  // Tombol "Nanti" hanya muncul bila update tidak wajib.
                   if (!widget.updateInfo.isForceUpdate) ...[
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.pop(context, 'later'),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           side: BorderSide(
