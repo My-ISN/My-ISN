@@ -11,7 +11,7 @@ class DiagnosisHubPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFF7E57C2);
+    const Color primaryColor = Color(0xFFFF9A2E);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: SecondaryAppBar(title: 'diagnosis.title'.tr(context)),

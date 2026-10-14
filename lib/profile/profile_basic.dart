@@ -48,12 +48,12 @@ class ProfileBasicPage extends StatelessWidget {
               icon: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.edit_rounded,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                   size: 20,
                 ),
               ),
@@ -90,7 +90,7 @@ class ProfileBasicPage extends StatelessWidget {
                   const Icon(
                     Icons.badge_rounded,
                     size: 20,
-                    color: Color(0xFF7E57C2),
+                    color: Color(0xFFFF9A2E),
                   ),
                 ),
               _buildInfoRow(
@@ -102,7 +102,7 @@ class ProfileBasicPage extends StatelessWidget {
                 const Icon(
                   Icons.people_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -112,7 +112,7 @@ class ProfileBasicPage extends StatelessWidget {
                 const Icon(
                   Icons.cake_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -122,7 +122,7 @@ class ProfileBasicPage extends StatelessWidget {
                 const Icon(
                   Icons.favorite_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -132,7 +132,7 @@ class ProfileBasicPage extends StatelessWidget {
                 const Icon(
                   Icons.mosque_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -142,7 +142,7 @@ class ProfileBasicPage extends StatelessWidget {
                 const Icon(
                   Icons.bloodtype_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -152,7 +152,7 @@ class ProfileBasicPage extends StatelessWidget {
                 const Icon(
                   Icons.flag_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -162,7 +162,7 @@ class ProfileBasicPage extends StatelessWidget {
                 const Icon(
                   Icons.home_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -172,7 +172,7 @@ class ProfileBasicPage extends StatelessWidget {
                 const Icon(
                   Icons.location_city_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
                 last: true,
               ),
@@ -233,7 +233,7 @@ class ProfileBasicPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: icon,

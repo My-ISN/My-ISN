@@ -56,7 +56,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_rent_plan',
         icon: Icons.house_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_rent_plan_enable',
         categoryKey: 'side_drawer.work',
         tabTag: isCustomer ? 'rent_plan' : null,
@@ -67,7 +67,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_todo_list',
         icon: Icons.assignment_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_todo_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => TodoListPage(userData: user),
@@ -75,14 +75,14 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_reminder',
         icon: Icons.alarm_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => ReminderPage(userData: user),
       ),
       AppModule(
         titleKey: 'dashboard.quick_menu_work_log',
         icon: Icons.assignment_turned_in_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_worklog_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => WorkLogPage(userData: user),
@@ -90,7 +90,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_quicksend',
         icon: Icons.send_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_quicksend_view',
         categoryKey: 'side_drawer.support',
         pageBuilder: (context, user) => QuickSendPage(userData: user),
@@ -98,7 +98,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_finance',
         icon: Icons.account_balance_wallet_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_finance_enable',
         categoryKey: 'side_drawer.financial',
         pageBuilder: (context, user) => FinancePage(userData: user),
@@ -106,7 +106,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'personal_finance.my_wallet',
         icon: Icons.payments_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_personal_finance_enable',
         categoryKey: 'side_drawer.financial',
         pageBuilder: (context, user) => PersonalFinancePage(userData: user),
@@ -114,7 +114,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_job_desk',
         icon: Icons.assignment_ind_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_jobdesk_view',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => JobDeskPage(userData: user),
@@ -122,7 +122,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_employees',
         icon: Icons.people_alt_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_employees_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => EmployeesPage(userData: user),
@@ -130,7 +130,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_creative_idea',
         icon: Icons.lightbulb_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'creative_idea',
         categoryKey: 'side_drawer.support',
         pageBuilder: (context, user) => CreativeIdeaPage(userData: user),
@@ -138,21 +138,21 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_ai_bot',
         icon: Icons.smart_toy_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         categoryKey: 'side_drawer.support',
         pageBuilder: (context, user) => AiBotPage(userData: user),
       ),
       AppModule(
         titleKey: 'dashboard.quick_menu_isn_assistant',
         icon: Icons.assistant_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         categoryKey: 'side_drawer.support',
         pageBuilder: (context, user) => AiChatIsnPage(userData: user),
       ),
       AppModule(
         titleKey: 'dashboard.quick_menu_helpdesk',
         icon: Icons.support_agent_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_helpdesk_view',
         categoryKey: 'side_drawer.support',
         pageBuilder: (context, user) => HelpdeskListPage(userData: user),
@@ -160,7 +160,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_intercom',
         icon: Icons.volume_up_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_intercom_view',
         categoryKey: 'side_drawer.support',
         pageBuilder: (context, user) => IntercomPage(userData: user),
@@ -169,7 +169,7 @@ class MenuRegistry {
         AppModule(
           titleKey: 'main.xin_attendance',
           icon: Icons.calendar_today_rounded,
-          color: const Color(0xFF7E57C2),
+          color: const Color(0xFFFF9A2E),
           categoryKey: 'main.xin_dashboard',
           tabTag: 'attendance',
           pageBuilder: (context, user) =>
@@ -178,7 +178,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'main.xin_profile',
         icon: Icons.person_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         categoryKey: 'main.xin_dashboard',
         tabTag: 'profile',
         pageBuilder: (context, user) => ProfilePage(userData: user),
@@ -187,7 +187,7 @@ class MenuRegistry {
         AppModule(
           titleKey: 'main.xin_payroll',
           icon: Icons.receipt_long_rounded,
-          color: const Color(0xFF7E57C2),
+          color: const Color(0xFFFF9A2E),
           permission: 'mobile_payroll_enable',
           categoryKey: 'main.xin_dashboard',
           tabTag: 'payroll',
@@ -197,7 +197,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_reports',
         icon: Icons.analytics_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_reports_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => ReportsPage(userData: user),
@@ -205,7 +205,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'Proyek',
         icon: Icons.folder_copy_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_projects_view',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => ProjectListPage(userData: user),
@@ -213,7 +213,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'Tugas',
         icon: Icons.task_alt_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_tasks_view',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => TaskListPage(userData: user),
@@ -221,7 +221,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'main.xin_passwords',
         icon: Icons.vpn_key_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_pass_account',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => PasswordListPage(userData: user),
@@ -229,7 +229,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'Notes',
         icon: Icons.sticky_note_2_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_notes_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => NotesPage(userData: user),
@@ -237,7 +237,7 @@ class MenuRegistry {
       AppModule(
         titleKey: 'dashboard.quick_menu_crm',
         icon: Icons.campaign_rounded,
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         permission: 'mobile_crm_enable',
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => CrmPage(userData: user),
@@ -246,7 +246,7 @@ class MenuRegistry {
         AppModule(
           titleKey: 'dashboard.quick_menu_serah_terima_laptop',
           icon: Icons.swap_horiz_rounded,
-          color: const Color(0xFF7E57C2),
+          color: const Color(0xFFFF9A2E),
           permission: 'mobile_send_laptop_enable',
           categoryKey: 'side_drawer.work',
           pageBuilder: (context, user) => SerahTerimaLaptopPage(userData: user),
@@ -255,7 +255,7 @@ class MenuRegistry {
         AppModule(
           titleKey: 'Unit Laptop',
           icon: Icons.laptop_rounded,
-          color: const Color(0xFF7E57C2),
+          color: const Color(0xFFFF9A2E),
           permission: 'mobile_laptop_unit_enable',
           categoryKey: 'side_drawer.work',
           pageBuilder: (context, user) => LaptopUnitsPage(userData: user),
@@ -264,7 +264,7 @@ class MenuRegistry {
         AppModule(
           titleKey: 'dashboard.quick_menu_scan_barcode_laptop',
           icon: Icons.qr_code_scanner_rounded,
-          color: const Color(0xFF7E57C2),
+          color: const Color(0xFFFF9A2E),
           permission: 'mobile_scan_barcode_enable',
           categoryKey: 'side_drawer.work',
           pageBuilder: (context, user) => ScanLaptopDetailPage(userData: user),

@@ -24,13 +24,13 @@ class OnProgressPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.construction_rounded,
                   size: 80,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               const SizedBox(height: 32),
@@ -60,7 +60,7 @@ class OnProgressPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7E57C2),
+                    backgroundColor: const Color(0xFFFF9A2E),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(

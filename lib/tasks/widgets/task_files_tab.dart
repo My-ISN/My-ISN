@@ -73,7 +73,7 @@ class TaskFilesTabState extends State<TaskFilesTab> {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Color(0xFF7E57C2)),
+                leading: const Icon(Icons.camera_alt, color: Color(0xFFFF9A2E)),
                 title: Text('tasks.camera'.tr(context)),
                 onTap: () {
                   Navigator.pop(context);
@@ -81,7 +81,7 @@ class TaskFilesTabState extends State<TaskFilesTab> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Color(0xFF7E57C2)),
+                leading: const Icon(Icons.photo_library, color: Color(0xFFFF9A2E)),
                 title: Text('tasks.gallery'.tr(context)),
                 onTap: () {
                   Navigator.pop(context);
@@ -116,7 +116,7 @@ class TaskFilesTabState extends State<TaskFilesTab> {
             padding: const EdgeInsets.only(bottom: 16),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: const LinearProgressIndicator(color: Color(0xFF7E57C2), backgroundColor: Color(0xFFF3E5F5)),
+              child: const LinearProgressIndicator(color: Color(0xFFFF9A2E), backgroundColor: Color(0xFFFFF2E6)),
             ),
           ),
         _buildSectionTitle(Icons.folder_shared_outlined, 'tasks.attachments_title'.tr(context)),
@@ -124,7 +124,7 @@ class TaskFilesTabState extends State<TaskFilesTab> {
             ? const Center(
                 child: Padding(
                   padding: EdgeInsets.all(40.0),
-                  child: CircularProgressIndicator(color: Color(0xFF7E57C2)),
+                  child: CircularProgressIndicator(color: Color(0xFFFF9A2E)),
                 ),
               )
             : _files.isEmpty
@@ -156,10 +156,10 @@ class TaskFilesTabState extends State<TaskFilesTab> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: const Color(0xFF7E57C2)),
+            child: Icon(icon, size: 16, color: const Color(0xFFFF9A2E)),
           ),
           const SizedBox(width: 10),
           Text(
@@ -235,12 +235,12 @@ class TaskFilesTabState extends State<TaskFilesTab> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                    color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     isImage ? Icons.image_outlined : Icons.insert_drive_file_outlined,
-                    color: const Color(0xFF7E57C2),
+                    color: const Color(0xFFFF9A2E),
                     size: 20,
                   ),
                 ),

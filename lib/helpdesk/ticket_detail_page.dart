@@ -343,7 +343,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isMe
-                          ? const Color(0xFF7E57C2)
+                          ? const Color(0xFFFF9A2E)
                           : (Theme.of(context).brightness == Brightness.dark
                               ? Colors.white10
                               : Colors.grey[200]),
@@ -453,7 +453,7 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   decoration: BoxDecoration(
                     color: isDark 
                         ? Colors.white.withValues(alpha: 0.03) 
-                        : const Color(0xFFF1F5F9),
+                        : const Color(0xFFFFF2E6),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
                       color: Theme.of(context).dividerColor.withValues(alpha: isDark ? 0.05 : 0.08),

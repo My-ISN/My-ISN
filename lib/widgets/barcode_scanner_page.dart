@@ -112,7 +112,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                               label: const Text('Coba Lagi'),
                               onPressed: () => _controller.start(),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6A11CB),
+                                backgroundColor: const Color(0xFFE5892D),
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
@@ -178,10 +178,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                               child: Container(
                                 height: 3,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF6A11CB),
+                                  color: const Color(0xFFE5892D),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF6A11CB).withValues(alpha: 0.8),
+                                      color: const Color(0xFFE5892D).withValues(alpha: 0.8),
                                       blurRadius: 8,
                                       spreadRadius: 1,
                                     ),
@@ -268,7 +268,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                       decoration: InputDecoration(
                         hintText: 'Ketik barcode manual...',
                         hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
-                        prefixIcon: const Icon(Icons.dialpad_rounded, color: Color(0xFF7E57C2), size: 20),
+                        prefixIcon: const Icon(Icons.dialpad_rounded, color: Color(0xFFFF9A2E), size: 20),
                         suffixIcon: _textController.text.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(Icons.clear_rounded, color: Colors.grey, size: 18),
@@ -291,7 +291,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7E57C2)),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFF9A2E)),
                     ),
                   ] else if (_foundUnit != null) ...[
                     const SizedBox(height: 12),
@@ -332,7 +332,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                           ElevatedButton(
                             onPressed: () => Navigator.pop(context, _textController.text.trim()),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF6A11CB),
+                              backgroundColor: const Color(0xFFE5892D),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -404,7 +404,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }) {
     const double length = 24.0;
     const double thickness = 4.0;
-    const Color color = Color(0xFF7E57C2);
+    const Color color = Color(0xFFFF9A2E);
 
     return Positioned(
       top: top, bottom: bottom, left: left, right: right,

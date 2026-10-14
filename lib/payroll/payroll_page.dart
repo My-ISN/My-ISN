@@ -217,7 +217,7 @@ class _PayrollPageState extends State<PayrollPage>
             ),
             const Icon(
               Icons.account_balance_wallet_rounded,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFFFF9A2E),
               size: 48,
             ),
             const SizedBox(height: 16),
@@ -229,7 +229,7 @@ class _PayrollPageState extends State<PayrollPage>
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -239,7 +239,7 @@ class _PayrollPageState extends State<PayrollPage>
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF7E57C2),
+                      color: Color(0xFF5F4B3D),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -290,7 +290,7 @@ class _PayrollPageState extends State<PayrollPage>
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context, true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7E57C2),
+                      backgroundColor: const Color(0xFFFF9A2E),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -384,7 +384,7 @@ class _PayrollPageState extends State<PayrollPage>
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7E57C2),
+                      backgroundColor: const Color(0xFFFF9A2E),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -645,7 +645,7 @@ class _PayrollPageState extends State<PayrollPage>
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFE5892D),
           ),
         ),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
@@ -666,7 +666,7 @@ class _PayrollPageState extends State<PayrollPage>
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: const Color(0xFF7E57C2),
+      color: const Color(0xFFFF9A2E),
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
@@ -699,12 +699,12 @@ class _PayrollPageState extends State<PayrollPage>
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                          color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
                           Icons.receipt_long,
-                          color: Color(0xFF7E57C2),
+                          color: Color(0xFFFF9A2E),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -746,7 +746,7 @@ class _PayrollPageState extends State<PayrollPage>
   Widget _buildMakePaymentTab() {
     return RefreshIndicator(
       onRefresh: _onRefresh,
-      color: const Color(0xFF7E57C2),
+      color: const Color(0xFFFF9A2E),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
@@ -859,11 +859,11 @@ class _PayrollPageState extends State<PayrollPage>
                     prefixIcon: const Icon(
                       Icons.calendar_month_rounded,
                       size: 18,
-                      color: Color(0xFF7E57C2),
+                      color: Color(0xFFFF9A2E),
                     ),
                     suffixIcon: const Icon(
                       Icons.arrow_drop_down_rounded,
-                      color: Color(0xFF7E57C2),
+                      color: Color(0xFFFF9A2E),
                     ),
                     filled: true,
                     fillColor: Theme.of(context).brightness == Brightness.dark
@@ -892,7 +892,7 @@ class _PayrollPageState extends State<PayrollPage>
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: const BorderSide(
-                        color: Color(0xFF7E57C2),
+                        color: Color(0xFFFF9A2E),
                         width: 2,
                       ),
                     ),
@@ -953,7 +953,7 @@ class _PayrollPageState extends State<PayrollPage>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF7E57C2).withValues(alpha: 0.08),
+                color: const Color(0xFFFF9A2E).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -967,7 +967,7 @@ class _PayrollPageState extends State<PayrollPage>
                     'IDR ${_formatCurrency(breakdown['net_salary'])}',
                     style: const TextStyle(
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFF7E57C2),
+                      color: Color(0xFFE5892D),
                     ),
                   ),
                 ],
@@ -1053,7 +1053,7 @@ class _PayrollPageState extends State<PayrollPage>
                 prefixIcon: const Icon(
                   Icons.chat_rounded,
                   size: 18,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
                 filled: true,
                 fillColor: Theme.of(context).brightness == Brightness.dark
@@ -1082,7 +1082,7 @@ class _PayrollPageState extends State<PayrollPage>
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(
-                    color: Color(0xFF7E57C2),
+                    color: Color(0xFFFF9A2E),
                     width: 2,
                   ),
                 ),
@@ -1096,7 +1096,7 @@ class _PayrollPageState extends State<PayrollPage>
               child: ElevatedButton(
                 onPressed: _isActionLoading ? null : _executePayment,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7E57C2),
+                  backgroundColor: const Color(0xFFFF9A2E),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1130,7 +1130,7 @@ class _PayrollPageState extends State<PayrollPage>
           return const Padding(
             padding: EdgeInsets.all(80),
             child: Center(
-              child: CircularProgressIndicator(color: Color(0xFF7E57C2)),
+              child: CircularProgressIndicator(color: Color(0xFFFF9A2E)),
             ),
           );
         }
@@ -1168,12 +1168,12 @@ class _PayrollPageState extends State<PayrollPage>
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.08),
+                        color: const Color(0xFFFF9A2E).withValues(alpha: 0.08),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.payments_rounded,
-                        color: Color(0xFF7E57C2),
+                        color: Color(0xFFFF9A2E),
                         size: 32,
                       ),
                     ),
@@ -1277,7 +1277,7 @@ class _PayrollPageState extends State<PayrollPage>
                           fontWeight: FontWeight.w900,
                           color: Theme.of(context).brightness == Brightness.dark
                               ? Colors.white
-                              : const Color(0xFF7E57C2),
+                              : const Color(0xFF5F4B3D),
                           letterSpacing: -1.0,
                         ),
                       ),
@@ -1376,7 +1376,7 @@ class _PayrollPageState extends State<PayrollPage>
         style: const TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFE5892D),
           letterSpacing: 1.1,
         ),
       ),

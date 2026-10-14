@@ -71,10 +71,10 @@ class DashboardWelcomeCard extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: const Color(0xFF7E57C2).withValues(alpha: 0.15),
+                                color: const Color(0xFFFF9A2E).withValues(alpha: 0.15),
                               ),
                             ),
                             child: Row(
@@ -82,7 +82,7 @@ class DashboardWelcomeCard extends StatelessWidget {
                               children: [
                                 const Icon(
                                   Icons.schedule_rounded,
-                                  color: Color(0xFF7E57C2),
+                                  color: Color(0xFFFF9A2E),
                                   size: 12,
                                 ),
                                 const SizedBox(width: 6),
@@ -92,7 +92,7 @@ class DashboardWelcomeCard extends StatelessWidget {
                                     args: {'shift': stats?['shift'] ?? '-'},
                                   ),
                                   style: const TextStyle(
-                                    color: Color(0xFF7E57C2),
+                                    color: Color(0xFFE5892D),
                                     fontWeight: FontWeight.bold,
                                     fontSize: 11,
                                   ),

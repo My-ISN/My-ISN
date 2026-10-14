@@ -154,7 +154,7 @@ class _StaffDashboardContentState extends State<StaffDashboardContent> {
   Color _getCardColor(String key) {
     switch (key) {
       case 'welcome':
-        return const Color(0xFF7E57C2);
+        return const Color(0xFFFF9A2E);
       case 'stats':
         return const Color(0xFF10B981);
       case 'quick_menu':

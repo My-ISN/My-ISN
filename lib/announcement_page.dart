@@ -216,7 +216,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF7E57C2),
+                      color: Color(0xFF5F4B3D),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -339,7 +339,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         title: 'announcement.title'.tr(context),
         actions: [
           IconButton(
-            icon: const Icon(Icons.done_all, color: Color(0xFF7E57C2)),
+            icon: const Icon(Icons.done_all, color: Color(0xFFFF9A2E)),
             tooltip: 'announcement.mark_all_tooltip'.tr(context),
             onPressed: () {
               showModalBottomSheet(
@@ -367,7 +367,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                       ),
                       const Icon(
                         Icons.done_all_rounded,
-                        color: Color(0xFF7E57C2),
+                        color: Color(0xFFFF9A2E),
                         size: 48,
                       ),
                       const SizedBox(height: 16),
@@ -423,7 +423,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                                 _markAllAsRead();
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF7E57C2),
+                                backgroundColor: const Color(0xFFFF9A2E),
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
@@ -610,7 +610,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: isUnread
-                                    ? const Color(0xFF7E57C2).withValues(alpha: 0.1)
+                                    ? const Color(0xFFFF9A2E).withValues(alpha: 0.1)
                                     : Colors.grey.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
@@ -619,7 +619,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                                     ? Icons.notifications_active_rounded
                                     : Icons.notifications_none_rounded,
                                 color: isUnread
-                                    ? const Color(0xFF7E57C2)
+                                    ? const Color(0xFFFF9A2E)
                                     : Colors.grey,
                                 size: 24,
                               ),
@@ -659,7 +659,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                                 width: 8,
                                 height: 8,
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFF7E57C2),
+                                  color: Color(0xFFFF9A2E),
                                   shape: BoxShape.circle,
                                 ),
                               ),

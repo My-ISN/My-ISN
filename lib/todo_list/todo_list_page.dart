@@ -32,7 +32,7 @@ class TodoListPage extends StatefulWidget {
 }
 
 class _TodoListPageState extends State<TodoListPage> {
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
   bool _isLoading = true;
   List<dynamic> _allTodos = []; // Master list for client-side pagination
   List<dynamic> _todos = []; // Current page slice

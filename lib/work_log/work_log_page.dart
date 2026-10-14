@@ -24,7 +24,7 @@ class WorkLogPage extends StatefulWidget {
 }
 
 class _WorkLogPageState extends State<WorkLogPage> {
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
   bool _isLoading = true;
   bool _isStatsLoading = true;
   List<dynamic> _logs = [];
@@ -1049,7 +1049,7 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
                             const Icon(
                               Icons.edit_outlined,
                               size: 20,
-                              color: Color(0xFF7E57C2),
+                              color: Color(0xFFFF9A2E),
                             ),
                             const SizedBox(width: 12),
                             Text('main.edit'.tr(context)),
@@ -1187,7 +1187,7 @@ class _WorkLogDetailsSheetState extends State<_WorkLogDetailsSheet> {
         Icon(
           icon,
           size: 20,
-          color: const Color(0xFF7E57C2).withValues(alpha: 0.7),
+          color: const Color(0xFFFF9A2E).withValues(alpha: 0.7),
         ),
         const SizedBox(width: 12),
         Text(

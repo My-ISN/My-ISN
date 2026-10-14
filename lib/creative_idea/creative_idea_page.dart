@@ -823,7 +823,7 @@ class _CreativeIdeaPageState extends State<CreativeIdeaPage> with SingleTickerPr
             value: 'edit',
             child: Row(
               children: [
-                const Icon(Icons.edit_outlined, size: 20, color: Color(0xFF7E57C2)),
+                const Icon(Icons.edit_outlined, size: 20, color: Color(0xFFFF9A2E)),
                 const SizedBox(width: 12),
                 Text('creative_idea.edit'.tr(context)),
               ],

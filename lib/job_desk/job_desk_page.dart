@@ -22,7 +22,7 @@ class JobDeskPage extends StatefulWidget {
 }
 
 class _JobDeskPageState extends State<JobDeskPage> {
-  final Color _defaultPrimaryColor = const Color(0xFF7E57C2);
+  final Color _defaultPrimaryColor = const Color(0xFFFF9A2E);
   bool _isLoading = true;
   List<JobDesk> _jobDesks = [];
   List<DesignationStat> _designations = [];
@@ -32,7 +32,7 @@ class _JobDeskPageState extends State<JobDeskPage> {
   // Form Controllers
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
-  String _selectedHexColor = "#673AB7";
+  String _selectedHexColor = "#FF9A2E";
   int? _formDesignationId;
 
   @override
@@ -262,7 +262,7 @@ class _JobDeskPageState extends State<JobDeskPage> {
 
   Color _getDesignationColor(String name) {
     final cleanName = name.toUpperCase();
-    if (cleanName.contains('ADMIN')) return _defaultPrimaryColor; // Use primary purple for Admin
+    if (cleanName.contains('ADMIN')) return _defaultPrimaryColor; // Pakai warna utama untuk Admin
     if (cleanName.contains('COURIER')) return const Color(0xFF90CAF9); // Soft Blue
     if (cleanName.contains('STRATEGIC')) return const Color(0xFFA5D6A7); // Soft Green
     if (cleanName.contains('IT BUDI')) return const Color(0xFFFFCC80); // Soft Orange
@@ -277,7 +277,7 @@ class _JobDeskPageState extends State<JobDeskPage> {
     // Reset form
     _titleController.clear();
     _noteController.clear();
-    _selectedHexColor = "#673AB7";
+    _selectedHexColor = "#FF9A2E";
     _formDesignationId = _selectedDesignationId != 0 ? _selectedDesignationId : null;
 
     showModalBottomSheet(
@@ -376,7 +376,7 @@ class _JobDeskPageState extends State<JobDeskPage> {
                   _buildLabel('job_desk.f_color'.tr(context)),
                   Row(
                     children: [
-                      _colorOption(setModalState, "#673AB7"), // Purple
+                      _colorOption(setModalState, "#FF9A2E"), // Oranye tema /umkm
                       _colorOption(setModalState, "#2196F3"), // Blue
                       _colorOption(setModalState, "#4CAF50"), // Green
                       _colorOption(setModalState, "#FF9800"), // Orange

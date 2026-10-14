@@ -14,7 +14,7 @@ class QuickSendCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String emoji = contact['icon_emoji'] ?? '💬';
-    final String colorHex = contact['color'] ?? '#7E57C2';
+    final String colorHex = contact['color'] ?? '#FF9A2E';
     final Color color = _parseHexColor(colorHex);
     final String name = contact['nama'] ?? 'Unknown';
     final List items = contact['items'] ?? [];
@@ -127,7 +127,7 @@ class QuickSendCard extends StatelessWidget {
     try {
       return Color(int.parse(hex.replaceFirst('#', '0xFF')));
     } catch (_) {
-      return const Color(0xFF7E57C2);
+      return const Color(0xFFFF9A2E);
     }
   }
 }

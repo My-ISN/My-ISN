@@ -22,7 +22,7 @@ class ReminderPage extends StatefulWidget {
 }
 
 class _ReminderPageState extends State<ReminderPage> {
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
   final ReminderService _reminderService = ReminderService();
 
   Map<String, dynamic>? _currentUserData;
@@ -270,7 +270,7 @@ class _ReminderPageState extends State<ReminderPage> {
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E1E2C) : theme.scaffoldBackgroundColor,
+                  color: isDark ? const Color(0xFF241F1B) : theme.scaffoldBackgroundColor,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
                   boxShadow: [
                     BoxShadow(
@@ -372,7 +372,7 @@ class _ReminderPageState extends State<ReminderPage> {
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF2A2A3C) : Colors.white,
+                          color: isDark ? const Color(0xFF2E2823) : Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: _isListening
@@ -543,7 +543,7 @@ class _ReminderPageState extends State<ReminderPage> {
                                             ? ColorScheme.dark(
                                                 primary: _primaryColor,
                                                 onPrimary: Colors.white,
-                                                surface: const Color(0xFF1E1E2C),
+                                                surface: const Color(0xFF241F1B),
                                                 onSurface: Colors.white,
                                               )
                                             : ColorScheme.light(
@@ -552,7 +552,7 @@ class _ReminderPageState extends State<ReminderPage> {
                                                 surface: Colors.white,
                                                 onSurface: Colors.black87,
                                               ),
-                                        dialogBackgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+                                        dialogBackgroundColor: isDark ? const Color(0xFF241F1B) : Colors.white,
                                       ),
                                       child: child!,
                                     );
@@ -569,7 +569,7 @@ class _ReminderPageState extends State<ReminderPage> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF2A2A3C)
+                                      ? const Color(0xFF2E2823)
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
@@ -622,9 +622,9 @@ class _ReminderPageState extends State<ReminderPage> {
                                             ? ColorScheme.dark(
                                                 primary: _primaryColor,
                                                 onPrimary: Colors.white,
-                                                surface: const Color(0xFF1E1E2C),
+                                                surface: const Color(0xFF241F1B),
                                                 onSurface: Colors.white,
-                                                surfaceContainerHighest: const Color(0xFF2A2A3C),
+                                                surfaceContainerHighest: const Color(0xFF2E2823),
                                               )
                                             : ColorScheme.light(
                                                 primary: _primaryColor,
@@ -633,17 +633,17 @@ class _ReminderPageState extends State<ReminderPage> {
                                                 onSurface: Colors.black87,
                                               ),
                                         timePickerTheme: TimePickerThemeData(
-                                          backgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+                                          backgroundColor: isDark ? const Color(0xFF241F1B) : Colors.white,
                                           hourMinuteTextColor: isDark ? Colors.white : Colors.black87,
-                                          hourMinuteColor: isDark ? const Color(0xFF2A2A3C) : Colors.grey[100],
+                                          hourMinuteColor: isDark ? const Color(0xFF2E2823) : Colors.grey[100],
                                           dayPeriodTextColor: isDark ? Colors.white : Colors.black87,
-                                          dayPeriodColor: isDark ? const Color(0xFF2A2A3C) : Colors.grey[100],
+                                          dayPeriodColor: isDark ? const Color(0xFF2E2823) : Colors.grey[100],
                                           dialTextColor: isDark ? Colors.white : Colors.black87,
                                           dialHandColor: _primaryColor,
-                                          dialBackgroundColor: isDark ? const Color(0xFF2A2A3C) : Colors.grey[100],
+                                          dialBackgroundColor: isDark ? const Color(0xFF2E2823) : Colors.grey[100],
                                           entryModeIconColor: _primaryColor,
                                         ),
-                                        dialogBackgroundColor: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+                                        dialogBackgroundColor: isDark ? const Color(0xFF241F1B) : Colors.white,
                                       ),
                                       child: child!,
                                     );
@@ -660,7 +660,7 @@ class _ReminderPageState extends State<ReminderPage> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF2A2A3C)
+                                      ? const Color(0xFF2E2823)
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
@@ -908,7 +908,7 @@ class _ReminderPageState extends State<ReminderPage> {
                       height: 46,
                       decoration: BoxDecoration(
                         color: isDark
-                            ? const Color(0xFF2A2A3C)
+                            ? const Color(0xFF2E2823)
                             : theme.cardColor,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
@@ -1142,7 +1142,7 @@ class _ReminderPageState extends State<ReminderPage> {
       child: Card(
         elevation: 0,
         margin: const EdgeInsets.only(bottom: 10),
-        color: isDark ? const Color(0xFF1E1E2C) : theme.cardColor,
+        color: isDark ? const Color(0xFF241F1B) : theme.cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(

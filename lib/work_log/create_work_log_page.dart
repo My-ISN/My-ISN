@@ -24,7 +24,7 @@ class CreateWorkLogPage extends StatefulWidget {
 }
 
 class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
   DateTime _selectedDate = DateTime.now();
   final List<TextEditingController> _itemControllers = [
     TextEditingController(),
@@ -380,7 +380,7 @@ class _CreateWorkLogPageState extends State<CreateWorkLogPage> {
                             ? ColorScheme.dark(
                                 primary: _primaryColor,
                                 onPrimary: Colors.white,
-                                surface: const Color(0xFF1E1E26), // Premium dark surface
+                                surface: const Color(0xFF241F1B), // Premium dark surface
                                 onSurface: Colors.white,
                               )
                             : ColorScheme.light(primary: _primaryColor),
@@ -627,7 +627,7 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
                   widget.isTodo
                       ? Icons.playlist_add_check_rounded
                       : Icons.assignment_outlined,
-                  color: const Color(0xFF7E57C2),
+                  color: const Color(0xFFFF9A2E),
                   size: 28,
                 ),
                 const SizedBox(width: 12),
@@ -666,7 +666,7 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF7E57C2),
+                    foregroundColor: const Color(0xFFFF9A2E),
                     padding: EdgeInsets.zero,
                   ),
                 ),
@@ -698,7 +698,7 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide(
-                    color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                    color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),
@@ -764,7 +764,7 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
                                 ? Colors.green
                                 : widget.isTodo
                                     ? Colors.grey
-                                    : const Color(0xFF7E57C2),
+                                    : const Color(0xFFFF9A2E),
                             size: 20,
                           ),
                         ),
@@ -815,7 +815,7 @@ class _QuickAddPickerState extends State<_QuickAddPicker> {
                         trailing: Icon(
                           Icons.add_circle_outline_rounded,
                           size: 22,
-                          color: const Color(0xFF7E57C2).withValues(alpha: 0.6),
+                          color: const Color(0xFFFF9A2E).withValues(alpha: 0.6),
                         ),
                         onTap: () => widget.onSelect([item['item_name'] ?? '']),
                       );

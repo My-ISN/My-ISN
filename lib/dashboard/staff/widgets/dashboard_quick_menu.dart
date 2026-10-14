@@ -66,7 +66,7 @@ class DashboardQuickMenu extends StatelessWidget {
           context,
           'dashboard.quick_menu_more'.tr(context),
           Icons.grid_view_rounded,
-          const Color(0xFF7E57C2),
+          const Color(0xFFFF9A2E),
           () {
             Navigator.push(
               context,

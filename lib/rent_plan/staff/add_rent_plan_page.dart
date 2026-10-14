@@ -1117,7 +1117,7 @@ class _AddRentPlanPageState extends State<AddRentPlanPage> {
             _buildSection(
               title: 'rent_plan.docs_guarantees'.tr(context),
               icon: Icons.verified_user_rounded,
-              color: Colors.deepPurple[700]!,
+              color: const Color(0xFFE5892D),
               children: [
                 if (_jenisSewa == 'pribadi') ...[
                   _buildFileUploadTile(

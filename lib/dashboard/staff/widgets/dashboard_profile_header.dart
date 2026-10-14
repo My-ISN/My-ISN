@@ -37,7 +37,7 @@ class DashboardProfileHeader extends StatelessWidget {
                   width: 60,
                   height: 60,
                   color: Theme.of(context).brightness == Brightness.light
-                      ? const Color(0xFFF1F5F9)
+                      ? const Color(0xFFFFF2E6)
                       : Theme.of(context).scaffoldBackgroundColor,
                   child: (user['profile_photo'] != null &&
                           user['profile_photo'].toString().isNotEmpty)

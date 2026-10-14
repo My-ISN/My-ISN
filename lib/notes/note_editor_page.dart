@@ -260,7 +260,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                         color: swatchColor,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isSelected ? const Color(0xFF7E57C2) : Colors.grey.shade400,
+                          color: isSelected ? const Color(0xFFFF9A2E) : Colors.grey.shade400,
                           width: isSelected ? 3 : 1,
                         ),
                         boxShadow: [
@@ -272,7 +272,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                         ],
                       ),
                       child: isSelected
-                          ? const Icon(Icons.check, size: 22, color: Color(0xFF7E57C2))
+                          ? const Icon(Icons.check, size: 22, color: Color(0xFFFF9A2E))
                           : null,
                     ),
                   );
@@ -369,7 +369,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
               tooltip: _isPreviewMode ? 'Mode Tulis' : 'Pratinjau Rich Text',
               icon: Icon(
                 _isPreviewMode ? Icons.edit_note : Icons.visibility_outlined,
-                color: _isPreviewMode ? const Color(0xFF7E57C2) : onBg,
+                color: _isPreviewMode ? const Color(0xFFFF9A2E) : onBg,
               ),
               onPressed: () {
                 setState(() => _isPreviewMode = !_isPreviewMode);
@@ -383,12 +383,12 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                       child: SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7E57C2)),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFF9A2E)),
                       ),
                     )
                   : IconButton(
                       tooltip: 'Simpan',
-                      icon: const Icon(Icons.check_circle_rounded, color: Color(0xFF7E57C2), size: 28),
+                      icon: const Icon(Icons.check_circle_rounded, color: Color(0xFFFF9A2E), size: 28),
                       onPressed: _saveNote,
                     ),
             ),
@@ -449,7 +449,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                                       "h3": Style(fontSize: FontSize(17), fontWeight: FontWeight.w600),
                                       "blockquote": Style(
                                         backgroundColor: onBg.withAlpha(20),
-                                        border: const Border(left: BorderSide(color: Color(0xFF7E57C2), width: 4)),
+                                        border: const Border(left: BorderSide(color: Color(0xFFFF9A2E), width: 4)),
                                         padding: HtmlPaddings.symmetric(horizontal: 12, vertical: 8),
                                         margin: Margins.symmetric(vertical: 8),
                                       ),
@@ -577,7 +577,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
         borderRadius: BorderRadius.circular(8),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Icon(icon, size: 20, color: const Color(0xFF7E57C2)),
+          child: Icon(icon, size: 20, color: const Color(0xFFFF9A2E)),
         ),
       ),
     );

@@ -31,7 +31,7 @@ class PersonalFinancePage extends StatefulWidget {
 class _PersonalFinancePageState extends State<PersonalFinancePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
   bool isLoading = true;
   bool isSummaryExpanded = false;
   Map<String, dynamic>? dashboardData;
@@ -408,7 +408,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                             const Icon(
                               Icons.edit_outlined,
                               size: 20,
-                              color: Color(0xFF7E57C2),
+                              color: Color(0xFFFF9A2E),
                             ),
                             const SizedBox(width: 12),
                             Text('finance.edit_transaction'.tr(context)),
@@ -525,7 +525,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
   }) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: const Color(0xFF7E57C2).withValues(alpha: 0.7)),
+        Icon(icon, size: 20, color: const Color(0xFFFF9A2E).withValues(alpha: 0.7)),
         const SizedBox(width: 12),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
         const Spacer(),
@@ -1234,7 +1234,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -1243,7 +1243,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                         : 'finance.this_month'.tr(context))
                     .toUpperCase(),
                 style: const TextStyle(
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFE5892D),
                   fontSize: 7.5,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.5,
@@ -1594,7 +1594,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                   Icon(
                     Icons.track_changes_rounded,
                     size: 20,
-                    color: Color(0xFF7E57C2).withValues(alpha: 0.7),
+                    color: Color(0xFFFF9A2E).withValues(alpha: 0.7),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -1776,12 +1776,12 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
                             const Icon(
                               Icons.edit_outlined,
                               size: 20,
-                              color: Color(0xFF7E57C2),
+                              color: Color(0xFFFF9A2E),
                             ),
                             const SizedBox(width: 12),
                             Text(
                               'finance.edit_budget'.tr(context),
-                              style: const TextStyle(color: Color(0xFF7E57C2)),
+                              style: const TextStyle(color: Color(0xFFE5892D)),
                             ),
                           ],
                         ),
@@ -2075,7 +2075,7 @@ class _PersonalFinancePageState extends State<PersonalFinancePage>
     if (label.isEmpty) return Colors.grey;
     final List<Color> colors = [
       Colors.blueAccent,
-      Colors.purpleAccent,
+      const Color(0xFF5F4B3D),
       Colors.pinkAccent,
       Colors.orangeAccent,
       Colors.tealAccent,

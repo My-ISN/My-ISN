@@ -219,7 +219,7 @@ class _LoginPageState extends State<LoginPage> {
             const Icon(
               Icons.fingerprint_rounded,
               size: 80,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFFFF9A2E),
             ),
             const SizedBox(height: 24),
             Text(
@@ -268,7 +268,7 @@ class _LoginPageState extends State<LoginPage> {
                       await _registerBiometric(identifier, password);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7E57C2),
+                      backgroundColor: const Color(0xFFFF9A2E),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       elevation: 0,
@@ -524,7 +524,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 300,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -566,7 +566,7 @@ class _LoginPageState extends State<LoginPage> {
                                 return const Icon(
                                   Icons.business_outlined,
                                   size: 60,
-                                  color: Color(0xFF7E57C2),
+                                  color: Color(0xFFFF9A2E),
                                 );
                               },
                             ),
@@ -631,7 +631,7 @@ class _LoginPageState extends State<LoginPage> {
                                     onChanged: (value) => setState(
                                       () => _rememberMe = value ?? false,
                                     ),
-                                    activeColor: const Color(0xFF7E57C2),
+                                    activeColor: const Color(0xFFFF9A2E),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(4),
                                     ),
@@ -658,7 +658,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: Text(
                               'login.forgot_password'.tr(context),
                               style: const TextStyle(
-                                color: Color(0xFF7E57C2),
+                                color: Color(0xFFE5892D),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
@@ -675,11 +675,11 @@ class _LoginPageState extends State<LoginPage> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7E57C2),
+                            backgroundColor: const Color(0xFFFF9A2E),
                             foregroundColor: Colors.white,
                             elevation: 4,
                             shadowColor: const Color(
-                              0xFF7E57C2,
+                              0xFFFF9A2E,
                             ).withAlpha(77),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -736,7 +736,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: Text(
                               'login.register'.tr(context),
                               style: const TextStyle(
-                                color: Color(0xFF7E57C2),
+                                color: Color(0xFFE5892D),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
@@ -849,7 +849,7 @@ class _LoginPageState extends State<LoginPage> {
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
             ? Colors.white.withValues(alpha: 0.05)
-            : const Color(0xFFF8F9FE),
+            : const Color(0xFFFFFDF9),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -868,7 +868,7 @@ class _LoginPageState extends State<LoginPage> {
           color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
         decoration: InputDecoration(
-          prefixIcon: Icon(icon, color: const Color(0xFF7E57C2), size: 22),
+          prefixIcon: Icon(icon, color: const Color(0xFFFF9A2E), size: 22),
           suffixIcon: isPassword
               ? IconButton(
                   icon: Icon(
@@ -898,7 +898,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
+            borderSide: const BorderSide(color: Color(0xFFFF9A2E), width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(
             vertical: 18,

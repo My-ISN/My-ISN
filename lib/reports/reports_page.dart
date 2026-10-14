@@ -138,7 +138,7 @@ class _ReportsPageState extends State<ReportsPage> {
           width: 4,
           height: 18,
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2),
+            color: const Color(0xFFFF9A2E),
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -213,7 +213,7 @@ class _ReportsPageState extends State<ReportsPage> {
         'reports.cat_online'.tr(context),
         _currencyFormat.format(cards['cat_online'] ?? 0),
         Icons.language,
-        const Color(0xFF7E57C2),
+        const Color(0xFFFF9A2E),
       ));
     }
 
@@ -222,7 +222,7 @@ class _ReportsPageState extends State<ReportsPage> {
         'reports.cat_personal'.tr(context),
         _currencyFormat.format(cards['cat_personal'] ?? 0),
         Icons.person_outline,
-        const Color(0xFF7E57C2),
+        const Color(0xFFFF9A2E),
       ));
     }
 
@@ -231,7 +231,7 @@ class _ReportsPageState extends State<ReportsPage> {
         'reports.cat_company'.tr(context),
         _currencyFormat.format(cards['cat_company'] ?? 0),
         Icons.business,
-        const Color(0xFF7E57C2),
+        const Color(0xFFFF9A2E),
       ));
     }
 

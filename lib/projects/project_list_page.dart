@@ -38,7 +38,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
   int _page = 1;
   int _totalCount = 0;
 
-  Color get _primaryColor => const Color(0xFF7E57C2);
+  Color get _primaryColor => const Color(0xFFFF9A2E);
 
   @override
   void initState() {
@@ -229,7 +229,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
           setState(() => _page = page);
           _fetchData();
         },
-        primaryColor: const Color(0xFF7E57C2),
+        primaryColor: const Color(0xFFFF9A2E),
       ),
     );
   }
@@ -257,7 +257,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+            ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
             : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Theme.of(context).brightness == Brightness.dark
@@ -357,7 +357,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
                         color: isSelected 
                             ? _primaryColor.withValues(alpha: 0.2)
                             : (Theme.of(context).brightness == Brightness.dark
-                                ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+                                ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
                                 : Theme.of(context).cardColor),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
@@ -397,7 +397,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+              ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Theme.of(context).brightness == Brightness.dark
@@ -442,7 +442,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+            ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
             : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Theme.of(context).brightness == Brightness.dark
@@ -536,7 +536,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
                           icon: const Icon(Icons.open_in_new, size: 18, color: Colors.white),
                           label: Text('projects.open_detail_update'.tr(context), style: const TextStyle(color: Colors.white)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7E57C2),
+                            backgroundColor: const Color(0xFFFF9A2E),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             elevation: 0,

@@ -18,7 +18,7 @@ class PasswordDetailPage extends StatefulWidget {
 }
 
 class _PasswordDetailPageState extends State<PasswordDetailPage> {
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
   final PasswordService _passwordService = PasswordService();
 
   bool _isLoading = true;

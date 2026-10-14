@@ -197,12 +197,12 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                    color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.system_update,
-                    color: Color(0xFF7E57C2),
+                    color: Color(0xFFFF9A2E),
                     size: 28,
                   ),
                 ),
@@ -301,7 +301,7 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
                             width: 80,
                             child: CircularProgressIndicator(
                               strokeWidth: 6,
-                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF7E57C2)),
+                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFF9A2E)),
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -322,7 +322,7 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
                               value: _progress / 100,
                               minHeight: 8,
                               backgroundColor: Colors.grey[200],
-                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF7E57C2)),
+                              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF9A2E)),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -382,7 +382,7 @@ class _UpdateDialogContentState extends State<UpdateDialogContent> {
                     child: ElevatedButton(
                       onPressed: _startUpdate,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF7E57C2),
+                        backgroundColor: const Color(0xFFFF9A2E),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(

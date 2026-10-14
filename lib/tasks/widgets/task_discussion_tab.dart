@@ -96,7 +96,7 @@ class TaskDiscussionTabState extends State<TaskDiscussionTab> {
             ? const Center(
                 child: Padding(
                   padding: EdgeInsets.all(40.0),
-                  child: CircularProgressIndicator(color: Color(0xFF7E57C2)),
+                  child: CircularProgressIndicator(color: Color(0xFFFF9A2E)),
                 ),
               )
             : _discussions.isEmpty
@@ -128,10 +128,10 @@ class TaskDiscussionTabState extends State<TaskDiscussionTab> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: const Color(0xFF7E57C2)),
+            child: Icon(icon, size: 16, color: const Color(0xFFFF9A2E)),
           ),
           const SizedBox(width: 10),
           Text(
@@ -172,7 +172,7 @@ class TaskDiscussionTabState extends State<TaskDiscussionTab> {
 
   Widget _buildDiscussionBubble(dynamic d, bool isMe, String timeText) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = const Color(0xFF7E57C2);
+    final primaryColor = const Color(0xFFFF9A2E);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 20),

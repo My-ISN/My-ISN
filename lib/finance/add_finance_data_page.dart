@@ -230,12 +230,12 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
           data: Theme.of(context).copyWith(
             colorScheme: isDark
                 ? const ColorScheme.dark(
-                    primary: Color(0xFF7E57C2),
+                    primary: Color(0xFFFF9A2E),
                     surface: Color(0xFF1E1E1E),
                     onSurface: Colors.white,
                   )
                 : const ColorScheme.light(
-                    primary: Color(0xFF7E57C2),
+                    primary: Color(0xFFFF9A2E),
                     onPrimary: Colors.white,
                     onSurface: Colors.black87,
                   ),
@@ -350,7 +350,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
               _buildSection(
                 title: 'finance.account_info'.tr(context),
                 icon: Icons.account_balance_rounded,
-                color: const Color(0xFF7E57C2),
+                color: const Color(0xFFFF9A2E),
                 children: [
                   _buildTextField(
                     'finance.account_title'.tr(context),
@@ -542,7 +542,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
         prefixIcon: Icon(
           icon,
           size: 18,
-          color: const Color(0xFF7E57C2).withAlpha(51),
+          color: const Color(0xFFFF9A2E).withAlpha(51),
         ),
         labelStyle: TextStyle(color: Colors.grey[600], fontSize: 13),
         border: OutlineInputBorder(
@@ -559,7 +559,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 2),
+          borderSide: const BorderSide(color: Color(0xFFFF9A2E), width: 2),
         ),
         filled: true,
         fillColor: isDark ? Colors.white.withAlpha(13) : Colors.white,
@@ -715,7 +715,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
                 const Icon(
                   Icons.event_rounded,
                   size: 16,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -756,7 +756,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _pickedFilePath != null
-                    ? const Color(0xFF7E57C2)
+                    ? const Color(0xFFFF9A2E)
                     : (isDark ? Colors.white12 : Colors.grey[200]!),
                 width: _pickedFilePath != null ? 2 : 1,
               ),
@@ -767,7 +767,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
                   (_pickedFilePath != null || _pickedFileName != null)
                       ? Icons.file_present_rounded
                       : Icons.cloud_upload_rounded,
-                  color: const Color(0xFF7E57C2),
+                  color: const Color(0xFFFF9A2E),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -863,7 +863,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFF7E57C2),
+                    color: Color(0xFF5F4B3D),
                   ),
                 ),
               ],
@@ -875,7 +875,7 @@ class _AddFinanceDataPageState extends State<AddFinanceDataPage> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleSave,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7E57C2),
+                backgroundColor: const Color(0xFFFF9A2E),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
                 ),

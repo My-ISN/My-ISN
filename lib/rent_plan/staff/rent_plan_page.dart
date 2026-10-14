@@ -550,7 +550,7 @@ class _RentPlanPageState extends State<RentPlanPage>
     required VoidCallback onTap,
     required IconData icon,
   }) {
-    const Color primaryPurple = Color(0xFF7E57C2);
+    const Color primaryBrand = Color(0xFFFF9A2E);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -560,17 +560,17 @@ class _RentPlanPageState extends State<RentPlanPage>
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isActive
-              ? primaryPurple.withValues(alpha: 0.08)
+              ? primaryBrand.withValues(alpha: 0.08)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? primaryPurple : Colors.grey.withValues(alpha: 0.2),
+            color: isActive ? primaryBrand : Colors.grey.withValues(alpha: 0.2),
             width: isActive ? 2 : 1,
           ),
           boxShadow: isActive
               ? [
                   BoxShadow(
-                    color: primaryPurple.withValues(alpha: 0.15),
+                    color: primaryBrand.withValues(alpha: 0.15),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -586,12 +586,12 @@ class _RentPlanPageState extends State<RentPlanPage>
                   isActive
                       ? Icons.radio_button_checked
                       : Icons.radio_button_off,
-                  color: isActive ? primaryPurple : Colors.grey,
+                  color: isActive ? primaryBrand : Colors.grey,
                   size: 22,
                 ),
                 Icon(
                   icon,
-                  color: isActive ? primaryPurple : Colors.grey[400],
+                  color: isActive ? primaryBrand : Colors.grey[400],
                   size: 24,
                 ),
               ],
@@ -602,7 +602,7 @@ class _RentPlanPageState extends State<RentPlanPage>
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
-                color: isActive ? primaryPurple : null,
+                color: isActive ? primaryBrand : null,
               ),
             ),
             const SizedBox(height: 4),
@@ -823,7 +823,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                   side: BorderSide(
-                    color: const Color(0xFF6A11CB).withValues(alpha: 0.25),
+                    color: const Color(0xFFE5892D).withValues(alpha: 0.25),
                   ),
                 ),
                 child: Container(
@@ -832,7 +832,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                      colors: [Color(0xFFE5892D), Color(0xFFFF9A2E)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -882,7 +882,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                   side: BorderSide(
-                    color: const Color(0xFF7E57C2).withValues(alpha: 0.25),
+                    color: const Color(0xFFFF9A2E).withValues(alpha: 0.25),
                   ),
                 ),
                 child: Container(
@@ -891,7 +891,7 @@ class _RentPlanPageState extends State<RentPlanPage>
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF7E57C2), Color(0xFF5E35B1)],
+                      colors: [Color(0xFFFF9A2E), Color(0xFFE5892D)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -1151,12 +1151,12 @@ class _RentPlanPageState extends State<RentPlanPage>
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
                                   Icons.payment_rounded,
-                                  color: Color(0xFF7E57C2),
+                                  color: Color(0xFFFF9A2E),
                                   size: 18,
                                 ),
                               ),
@@ -1191,12 +1191,12 @@ class _RentPlanPageState extends State<RentPlanPage>
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
                                   Icons.swap_horiz_rounded,
-                                  color: Color(0xFF7E57C2),
+                                  color: Color(0xFFFF9A2E),
                                   size: 18,
                                 ),
                               ),

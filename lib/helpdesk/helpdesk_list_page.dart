@@ -165,7 +165,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
       case '3':
         return Colors.deepOrange;
       case '4':
-        return Colors.purple;
+        return const Color(0xFF5F4B3D);
       default:
         return Colors.grey;
     }
@@ -323,7 +323,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                   _loadData();
                 }
               },
-              backgroundColor: const Color(0xFF7E57C2),
+              backgroundColor: const Color(0xFFFF9A2E),
               icon: const Icon(
                 Icons.support_agent_rounded,
                 color: Colors.white,
@@ -503,7 +503,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
             offset: const Offset(0, 10),
           ),
         ],
-        border: Border.all(color: const Color(0xFF7E57C2).withValues(alpha: isDark ? 0.15 : 0.1)),
+        border: Border.all(color: const Color(0xFFFF9A2E).withValues(alpha: isDark ? 0.15 : 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,7 +532,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                       Text(
                         'todo_list.general_accumulation'.tr(context),
                         style: const TextStyle(
-                          color: Color(0xFF7E57C2),
+                          color: Color(0xFF5F4B3D),
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -542,14 +542,14 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                      color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       _isStatsExpanded
                           ? Icons.expand_less_rounded
                           : Icons.expand_more_rounded,
-                      color: const Color(0xFF7E57C2),
+                      color: const Color(0xFFFF9A2E),
                       size: 20,
                     ),
                   ),
@@ -579,7 +579,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
                                     _buildStatMiniRow(
                                       'helpdesk.priority_critical'.tr(context),
                                       crit.toString(),
-                                      Colors.purple,
+                                      const Color(0xFF5F4B3D),
                                     ),
                                     const SizedBox(height: 12),
                                     _buildStatMiniRow(
@@ -711,7 +711,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
         decoration: InputDecoration(
           hintText: 'todo_list.search_hint'.tr(context),
           hintStyle: TextStyle(color: Theme.of(context).hintColor.withValues(alpha: 0.5)),
-          prefixIcon: Icon(Icons.search_rounded, color: const Color(0xFF7E57C2).withValues(alpha: 0.7)),
+          prefixIcon: Icon(Icons.search_rounded, color: const Color(0xFFFF9A2E).withValues(alpha: 0.7)),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         ),
@@ -884,11 +884,11 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2),
+            color: const Color(0xFFFF9A2E),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7E57C2).withOpacity(0.3),
+                color: const Color(0xFFFF9A2E).withOpacity(0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -937,7 +937,7 @@ class _HelpdeskListPageState extends State<HelpdeskListPage> {
           child: Icon(
             icon,
             size: 20,
-            color: onPressed != null ? const Color(0xFF7E57C2) : Colors.grey,
+            color: onPressed != null ? const Color(0xFFFF9A2E) : Colors.grey,
           ),
         ),
       ),

@@ -266,7 +266,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final String emoji = widget.contact['icon_emoji'] ?? '💬';
-    final String colorHex = widget.contact['color'] ?? '#7E57C2';
+    final String colorHex = widget.contact['color'] ?? '#FF9A2E';
     final Color color = _parseHexColor(colorHex);
     final List items = widget.contact['items'] ?? [];
     final String message = _buildMessage();
@@ -552,7 +552,7 @@ class _QuickSendModalState extends State<QuickSendModal> {
     try {
       return Color(int.parse(hex.replaceFirst('#', '0xFF')));
     } catch (_) {
-      return const Color(0xFF7E57C2);
+      return const Color(0xFFFF9A2E);
     }
   }
 }

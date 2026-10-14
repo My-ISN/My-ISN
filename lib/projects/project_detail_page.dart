@@ -34,7 +34,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     'TASKS',
   ];
 
-  Color get _primaryColor => const Color(0xFF7E57C2);
+  Color get _primaryColor => const Color(0xFFFF9A2E);
 
   bool _hasPermission(String resource) {
     if (widget.userData['role_access'] == '1' ||

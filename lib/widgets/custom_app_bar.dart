@@ -298,7 +298,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                             decoration: InputDecoration(
                               hintText: 'Cari menu...',
                               border: InputBorder.none,
-                              prefixIcon: const Icon(Icons.search, color: Color(0xFF7E57C2)),
+                              prefixIcon: const Icon(Icons.search, color: Color(0xFFFF9A2E)),
                               suffixIcon: IconButton(
                                 icon: const Icon(Icons.close),
                                 onPressed: _hideSearchOverlay,

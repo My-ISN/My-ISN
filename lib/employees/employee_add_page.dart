@@ -33,7 +33,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
   List<dynamic> _designations = [];
   List<dynamic> _shifts = [];
 
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
 
   @override
   void initState() {
@@ -257,7 +257,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.person_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildTextField(
@@ -267,7 +267,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.person_outline_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildTextField(
@@ -277,7 +277,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.badge_rounded,
           size: 18,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildTextField(
@@ -287,7 +287,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.phone_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildDropdown(
@@ -305,7 +305,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.email_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildTextField(
@@ -315,7 +315,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.alternate_email_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildTextField(
@@ -325,7 +325,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.lock_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildSectionTitle('employees.sections.work_details'.tr(context), isDark),
@@ -384,7 +384,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.payments_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildTextField(
@@ -394,7 +394,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.timer_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildDropdown(
@@ -413,7 +413,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
         prefixIcon: const Icon(
           Icons.assignment_turned_in_rounded,
           size: 20,
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFFF9A2E),
         ),
       ),
       _buildDropdown(
@@ -533,7 +533,7 @@ class _EmployeeAddPageState extends State<EmployeeAddPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
+            borderSide: const BorderSide(color: Color(0xFFFF9A2E), width: 1.5),
           ),
         ),
         validator: requiredField

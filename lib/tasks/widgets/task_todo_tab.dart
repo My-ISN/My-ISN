@@ -212,7 +212,7 @@ class TaskTodoTabState extends State<TaskTodoTab> {
                   hintText: 'tasks.todo_text'.tr(context),
                   suffixIcon: _isSpeechInitialized
                       ? IconButton(
-                          icon: Icon(_isListening ? Icons.mic : Icons.mic_none, color: _isListening ? Colors.red : const Color(0xFF7E57C2)),
+                          icon: Icon(_isListening ? Icons.mic : Icons.mic_none, color: _isListening ? Colors.red : const Color(0xFFFF9A2E)),
                           onPressed: () => _toggleListening(editController, setModalState),
                         )
                       : null,
@@ -262,7 +262,7 @@ class TaskTodoTabState extends State<TaskTodoTab> {
             ? const Center(
                 child: Padding(
                   padding: EdgeInsets.all(40.0),
-                  child: CircularProgressIndicator(color: Color(0xFF7E57C2)),
+                  child: CircularProgressIndicator(color: Color(0xFFFF9A2E)),
                 ),
               )
             : _todos.isEmpty
@@ -292,10 +292,10 @@ class TaskTodoTabState extends State<TaskTodoTab> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: const Color(0xFF7E57C2)),
+            child: Icon(icon, size: 16, color: const Color(0xFFFF9A2E)),
           ),
           const SizedBox(width: 10),
           Text(
@@ -318,9 +318,9 @@ class TaskTodoTabState extends State<TaskTodoTab> {
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+        color: const Color(0xFFFF9A2E).withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF7E57C2).withValues(alpha: 0.1)),
+        border: Border.all(color: const Color(0xFFFF9A2E).withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -332,14 +332,14 @@ class TaskTodoTabState extends State<TaskTodoTab> {
                 height: 44,
                 child: CircularProgressIndicator(
                   value: progress / 100,
-                  backgroundColor: const Color(0xFF7E57C2).withValues(alpha: 0.1),
-                  color: const Color(0xFF7E57C2),
+                  backgroundColor: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
+                  color: const Color(0xFFFF9A2E),
                   strokeWidth: 4,
                 ),
               ),
               Text(
                 '$progress%',
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF7E57C2)),
+                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFE5892D)),
               ),
             ],
           ),
@@ -395,7 +395,7 @@ class TaskTodoTabState extends State<TaskTodoTab> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isCompleted
-              ? const Color(0xFF7E57C2).withValues(alpha: 0.1)
+              ? const Color(0xFFFF9A2E).withValues(alpha: 0.1)
               : Theme.of(context).dividerColor.withValues(alpha: 0.08),
         ),
       ),
@@ -416,9 +416,9 @@ class TaskTodoTabState extends State<TaskTodoTab> {
                     height: 24,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isCompleted ? const Color(0xFF7E57C2) : Colors.transparent,
+                      color: isCompleted ? const Color(0xFFFF9A2E) : Colors.transparent,
                       border: Border.all(
-                        color: isCompleted ? const Color(0xFF7E57C2) : Colors.grey[400]!,
+                        color: isCompleted ? const Color(0xFFFF9A2E) : Colors.grey[400]!,
                         width: 2,
                       ),
                     ),
@@ -457,13 +457,13 @@ class TaskTodoTabState extends State<TaskTodoTab> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+                                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.05),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   "tasks.done_by".tr(context, args: {'name': "${t['first_name']} ${t['last_name'] ?? ''}"}),
                                   style: const TextStyle(
-                                    color: Color(0xFF7E57C2),
+                                    color: Color(0xFFE5892D),
                                     fontSize: 9,
                                     fontWeight: FontWeight.bold,
                                   ),

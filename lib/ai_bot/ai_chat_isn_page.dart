@@ -307,11 +307,11 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: isDark
-            ? const Color(0xFF2D1B6B).withOpacity(0.8)
-            : const Color(0xFFEDE7FF),
+            ? const Color(0xFF2E2823).withOpacity(0.8)
+            : const Color(0xFFFFF8F2),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFF6A11CB).withOpacity(0.3),
+          color: const Color(0xFFE5892D).withOpacity(0.3),
         ),
       ),
       child: Row(
@@ -322,7 +322,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
               width: 10,
               height: 10,
               decoration: const BoxDecoration(
-                color: Color(0xFF6A11CB),
+                color: Color(0xFFE5892D),
                 shape: BoxShape.circle,
               ),
             ),
@@ -333,7 +333,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
               'Mendengarkan... Bicara sekarang atau ketuk mikrofon lagi untuk kirim.',
               style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF6A11CB),
+                color: Color(0xFFE5892D),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -434,7 +434,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                   decoration: isUser
                       ? BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF6A11CB), Color(0xFF7E57C2)],
+                            colors: [Color(0xFFE5892D), Color(0xFFFF9A2E)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -446,7 +446,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF6A11CB).withOpacity(0.2),
+                              color: const Color(0xFFE5892D).withOpacity(0.2),
                               blurRadius: 6,
                               offset: const Offset(0, 3),
                             ),
@@ -583,13 +583,13 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
         height: 36,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFE8DBFF), Color(0xFFF3EBFF)],
+            colors: [Color(0xFFFFF2E6), Color(0xFFFFF8F2)],
           ),
           shape: BoxShape.circle,
         ),
         child: const Icon(
           Icons.smart_toy_rounded,
-          color: Color(0xFF6A11CB),
+          color: Color(0xFFE5892D),
           size: 20,
         ),
       );
@@ -677,13 +677,13 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color:
-                      isDark ? const Color(0xFFB180FF) : const Color(0xFF6A11CB),
+                      isDark ? const Color(0xFFFF9A2E) : const Color(0xFFE5892D),
                 ),
               ),
               backgroundColor:
-                  isDark ? Colors.grey[850] : const Color(0xFFF3EBFF),
+                  isDark ? Colors.grey[850] : const Color(0xFFFFF8F2),
               side: BorderSide(
-                color: isDark ? Colors.white10 : const Color(0xFFE8DBFF),
+                color: isDark ? Colors.white10 : const Color(0xFFFFF2E6),
               ),
               shape:
                   RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -713,12 +713,12 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: _isListening
-                  ? const Color(0xFF6A11CB)
+                  ? const Color(0xFFE5892D)
                   : (isDark ? Colors.grey[800] : Colors.grey[100]),
               shape: BoxShape.circle,
               border: Border.all(
                 color: _isListening
-                    ? const Color(0xFF6A11CB)
+                    ? const Color(0xFFE5892D)
                     : (isDark
                         ? Colors.white12
                         : Colors.grey.withOpacity(0.3)),
@@ -727,7 +727,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
               boxShadow: _isListening
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF6A11CB).withOpacity(0.4),
+                        color: const Color(0xFFE5892D).withOpacity(0.4),
                         blurRadius: 12,
                         spreadRadius: 2,
                       )
@@ -777,7 +777,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                   hintStyle: TextStyle(
                     fontSize: 13,
                     color: _isListening
-                        ? const Color(0xFF6A11CB)
+                        ? const Color(0xFFE5892D)
                         : Colors.grey,
                   ),
                   contentPadding:
@@ -793,7 +793,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF6A11CB), Color(0xFF7E57C2)],
+                colors: [Color(0xFFE5892D), Color(0xFFFF9A2E)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),

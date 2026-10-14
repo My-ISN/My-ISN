@@ -230,14 +230,14 @@ class _IntercomPageState extends State<IntercomPage> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7E57C2).withValues(
+                            color: const Color(0xFFFF9A2E).withValues(
                               alpha: 0.12,
                             ),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.add_comment_rounded,
-                            color: Color(0xFF7E57C2),
+                            color: Color(0xFFFF9A2E),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -270,7 +270,7 @@ class _IntercomPageState extends State<IntercomPage> {
                         filled: true,
                         fillColor: isDark
                             ? Colors.white.withValues(alpha: 0.04)
-                            : const Color(0xFFF7F7FB),
+                            : const Color(0xFFFFFDF9),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
@@ -284,7 +284,7 @@ class _IntercomPageState extends State<IntercomPage> {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(
-                            color: const Color(0xFF7E57C2).withValues(
+                            color: const Color(0xFFFF9A2E).withValues(
                               alpha: 0.4,
                             ),
                           ),
@@ -343,7 +343,7 @@ class _IntercomPageState extends State<IntercomPage> {
                                 }
                               },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF7E57C2),
+                          backgroundColor: const Color(0xFFFF9A2E),
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -409,7 +409,7 @@ class _IntercomPageState extends State<IntercomPage> {
       floatingActionButton: _hasPermission('mobile_intercom_send')
           ? FloatingActionButton.extended(
               onPressed: _showAddPresetSheet,
-              backgroundColor: const Color(0xFF7E57C2),
+              backgroundColor: const Color(0xFFFF9A2E),
               foregroundColor: Colors.white,
               icon: const Icon(Icons.speaker_notes_rounded),
               label: Text(
@@ -485,7 +485,7 @@ class _IntercomPageState extends State<IntercomPage> {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFF1F5F9),
+                      color: isDark ? Colors.white.withValues(alpha: 0.03) : const Color(0xFFFFF2E6),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
                         color: Theme.of(context).dividerColor.withValues(alpha: isDark ? 0.05 : 0.08),
@@ -510,7 +510,7 @@ class _IntercomPageState extends State<IntercomPage> {
                           ? IconButton(
                               icon: Icon(
                                 _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
-                                color: _isListening ? Colors.red : const Color(0xFF7E57C2),
+                                color: _isListening ? Colors.red : const Color(0xFFFF9A2E),
                               ),
                               onPressed: _listen,
                             )
@@ -524,11 +524,11 @@ class _IntercomPageState extends State<IntercomPage> {
                 const SizedBox(width: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7E57C2),
+                    color: const Color(0xFFFF9A2E),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                        color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -596,7 +596,7 @@ class _IntercomPageState extends State<IntercomPage> {
                 width: 4,
                 height: 16,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7E57C2),
+                  color: const Color(0xFFFF9A2E),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -639,7 +639,7 @@ class _IntercomPageState extends State<IntercomPage> {
                             color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white,
                             borderRadius: BorderRadius.circular(999),
                             border: Border.all(
-                              color: const Color(0xFF7E57C2).withValues(alpha: isDark ? 0.18 : 0.12),
+                              color: const Color(0xFFFF9A2E).withValues(alpha: isDark ? 0.18 : 0.12),
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -719,7 +719,7 @@ class _IntercomPageState extends State<IntercomPage> {
             width: 4,
             height: 16,
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2),
+              color: const Color(0xFFFF9A2E),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -755,7 +755,7 @@ class _IntercomPageState extends State<IntercomPage> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isUnplayed
-              ? const Color(0xFF7E57C2).withValues(alpha: 0.2)
+              ? const Color(0xFFFF9A2E).withValues(alpha: 0.2)
               : theme.dividerColor.withValues(alpha: isDark ? 0.05 : 0.08),
         ),
         boxShadow: [
@@ -772,13 +772,13 @@ class _IntercomPageState extends State<IntercomPage> {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isUnplayed
-                ? const Color(0xFF7E57C2).withValues(alpha: 0.1)
+                ? const Color(0xFFFF9A2E).withValues(alpha: 0.1)
                 : theme.dividerColor.withValues(alpha: isDark ? 0.05 : 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.volume_up_rounded,
-            color: isUnplayed ? const Color(0xFF7E57C2) : theme.hintColor,
+            color: isUnplayed ? const Color(0xFFFF9A2E) : theme.hintColor,
             size: 20,
           ),
         ),

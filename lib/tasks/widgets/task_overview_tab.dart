@@ -57,7 +57,7 @@ class TaskOverviewTab extends StatelessWidget {
               'tasks.period'.tr(context),
               remainingDays,
               icon: Icons.timer_outlined,
-              valueColor: isOverdue ? Colors.red : const Color(0xFF7E57C2),
+              valueColor: isOverdue ? Colors.red : const Color(0xFFFF9A2E),
             ),
           ],
         ),
@@ -94,10 +94,10 @@ class TaskOverviewTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: const Color(0xFF7E57C2)),
+            child: Icon(icon, size: 16, color: const Color(0xFFFF9A2E)),
           ),
           const SizedBox(width: 10),
           Text(

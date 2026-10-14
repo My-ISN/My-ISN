@@ -118,7 +118,7 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
                         color: swatchColor,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isSelected ? const Color(0xFF7E57C2) : Colors.grey.shade400,
+                          color: isSelected ? const Color(0xFFFF9A2E) : Colors.grey.shade400,
                           width: isSelected ? 3 : 1,
                         ),
                         boxShadow: [
@@ -130,7 +130,7 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
                         ],
                       ),
                       child: isSelected
-                          ? const Icon(Icons.check, size: 22, color: Color(0xFF7E57C2))
+                          ? const Icon(Icons.check, size: 22, color: Color(0xFFFF9A2E))
                           : null,
                     ),
                   );
@@ -248,7 +248,7 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
                 tooltip: _currentNote.isPinned ? 'Lepas Pin' : 'Sematkan Catatan',
                 icon: Icon(
                   _currentNote.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-                  color: _currentNote.isPinned ? const Color(0xFF7E57C2) : onBg,
+                  color: _currentNote.isPinned ? const Color(0xFFFF9A2E) : onBg,
                 ),
                 onPressed: _isPinning ? null : _togglePin,
               ),
@@ -281,7 +281,7 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
         floatingActionButton: (!_currentNote.isShared && widget.canEdit)
             ? FloatingActionButton.extended(
                 onPressed: _openEdit,
-                backgroundColor: const Color(0xFF7E57C2),
+                backgroundColor: const Color(0xFFFF9A2E),
                 icon: const Icon(Icons.edit, color: Colors.white),
                 label: Text(
                   'Edit Catatan',
@@ -382,7 +382,7 @@ class _NoteDetailPageState extends State<NoteDetailPage> {
                     "h3": Style(fontSize: FontSize(17), fontWeight: FontWeight.w600, margin: Margins.only(bottom: 6)),
                     "blockquote": Style(
                       backgroundColor: onBg.withAlpha(20),
-                      border: const Border(left: BorderSide(color: Color(0xFF7E57C2), width: 4)),
+                      border: const Border(left: BorderSide(color: Color(0xFFFF9A2E), width: 4)),
                       padding: HtmlPaddings.symmetric(horizontal: 14, vertical: 10),
                       margin: Margins.symmetric(vertical: 10),
                     ),

@@ -35,7 +35,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
   List<dynamic> _religions = [];
   bool _isLoadingLookups = false;
 
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
 
   @override
   void initState() {
@@ -340,7 +340,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.person_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -349,7 +349,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.person_outline_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -359,7 +359,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.email_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -369,7 +369,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.phone_android_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -378,7 +378,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.home_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -387,7 +387,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.location_city_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -396,7 +396,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.map_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -405,7 +405,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.pin_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -414,7 +414,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.flag_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
       ];
@@ -427,7 +427,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.payments_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -437,7 +437,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.timer_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildDropdown(
@@ -456,7 +456,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.assignment_turned_in_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildDropdown(
@@ -474,7 +474,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.calendar_today_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildDateField(
@@ -483,7 +483,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.event_busy_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -492,7 +492,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.beach_access_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
       ];
@@ -543,7 +543,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.cake_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildDropdown(
@@ -577,7 +577,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.bloodtype_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         Padding(
@@ -608,7 +608,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.account_balance_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -617,7 +617,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.person_pin_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -627,7 +627,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.numbers_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -636,7 +636,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.speed_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -645,7 +645,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           prefixIcon: const Icon(
             Icons.location_on_rounded,
             size: 20,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
       ];
@@ -732,7 +732,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
+            borderSide: const BorderSide(color: Color(0xFFFF9A2E), width: 1.5),
           ),
         ),
       ),
@@ -752,7 +752,7 @@ class _EmployeeEditPageState extends State<EmployeeEditPage> {
       suffixIcon: const Icon(
         Icons.calendar_month_rounded,
         size: 20,
-        color: Color(0xFF7E57C2),
+        color: Color(0xFFFF9A2E),
       ),
       onTap: () async {
         DateTime initialDate = DateTime.now();

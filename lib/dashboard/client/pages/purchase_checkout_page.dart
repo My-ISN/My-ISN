@@ -267,7 +267,7 @@ class _PurchaseCheckoutPageState extends State<PurchaseCheckoutPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF5F7FA),
+      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFFFF8F2),
       appBar: AppBar(
         backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         elevation: 0,
@@ -333,7 +333,7 @@ class _PurchaseCheckoutPageState extends State<PurchaseCheckoutPage> {
                 _buildSectionCard(
                   context: context,
                   icon: Icons.person_outline_rounded,
-                  iconColor: Colors.purple,
+                  iconColor: const Color(0xFFFF9A2E),
                   title: 'Informasi Penerima',
                   child: _buildReceiverInfo(),
                 ),
@@ -553,10 +553,10 @@ class _PurchaseCheckoutPageState extends State<PurchaseCheckoutPage> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.purple.withValues(alpha: 0.1),
+            color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.person_rounded, color: Colors.purple, size: 22),
+          child: const Icon(Icons.person_rounded, color: Color(0xFFFF9A2E), size: 22),
         ),
         const SizedBox(width: 14),
         Column(

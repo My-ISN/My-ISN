@@ -58,12 +58,12 @@ class FinanceAccountItem extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                        color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
                         Icons.account_balance_wallet_rounded,
-                        color: Color(0xFF7E57C2),
+                        color: Color(0xFFFF9A2E),
                         size: 24,
                       ),
                     ),

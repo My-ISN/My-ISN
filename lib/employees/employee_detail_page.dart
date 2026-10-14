@@ -26,7 +26,7 @@ class EmployeeDetailPage extends StatefulWidget {
 class _EmployeeDetailPageState extends State<EmployeeDetailPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  final Color _primaryColor = const Color(0xFF7E57C2); // Matching purple theme
+  final Color _primaryColor = const Color(0xFFFF9A2E); // Tema krem/oranye /umkm
   bool _isLoading = true;
   Map<String, dynamic>? _employeeData;
   String _errorMessage = '';
@@ -205,7 +205,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage>
           IconButton(
             icon: const Icon(
               Icons.edit_outlined,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFFFF9A2E),
               size: 22,
             ),
             onPressed: () {
@@ -372,7 +372,7 @@ class _EmployeeDetailPageState extends State<EmployeeDetailPage>
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF512DA8), Color(0xFF7E57C2)],
+                colors: [Color(0xFFE5892D), Color(0xFFFF9A2E)],
               ),
               shape: BoxShape.circle,
             ),

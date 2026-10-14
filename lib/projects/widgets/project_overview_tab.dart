@@ -60,7 +60,7 @@ class ProjectOverviewTab extends StatelessWidget {
               remainingDays,
               icon1: Icons.access_time_rounded,
               icon2: Icons.timer_outlined,
-              valueColor2: isOverdue ? Colors.red : const Color(0xFF7E57C2),
+              valueColor2: isOverdue ? Colors.red : const Color(0xFFFF9A2E),
             ),
           ],
         ),
@@ -97,10 +97,10 @@ class ProjectOverviewTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: const Color(0xFF7E57C2)),
+            child: Icon(icon, size: 16, color: const Color(0xFFFF9A2E)),
           ),
           const SizedBox(width: 10),
           Text(

@@ -195,12 +195,12 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                      color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.celebration,
-                      color: Color(0xFF7E57C2),
+                      color: Color(0xFFFF9A2E),
                       size: 28,
                     ),
                   ),
@@ -280,7 +280,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7E57C2),
+                    backgroundColor: const Color(0xFFFF9A2E),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -670,7 +670,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                   ),
                   child: const Icon(
                     Icons.memory_rounded, // CPU Icon
-                    color: Color(0xFF7E57C2), // Purple color
+                    color: Color(0xFFFF9A2E), // Oranye tema /umkm
                     size: 28,
                   ),
                 ),

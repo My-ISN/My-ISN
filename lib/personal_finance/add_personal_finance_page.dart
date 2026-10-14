@@ -152,12 +152,12 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
           data: Theme.of(context).copyWith(
             colorScheme: isDark
                 ? const ColorScheme.dark(
-                    primary: Color(0xFF7E57C2),
+                    primary: Color(0xFFFF9A2E),
                     surface: Color(0xFF1E1E1E),
                     onSurface: Colors.white,
                   )
                 : const ColorScheme.light(
-                    primary: Color(0xFF7E57C2),
+                    primary: Color(0xFFFF9A2E),
                     onPrimary: Colors.white,
                     onSurface: Colors.black87,
                   ),
@@ -254,7 +254,7 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
               icon: _selectedType == 3 ? Icons.assignment_rounded : Icons.receipt_long_rounded,
               color: _selectedType == 1
                   ? Colors.green[700]!
-                  : (_selectedType == 2 ? Colors.red[700]! : Colors.purple[700]!),
+                  : (_selectedType == 2 ? Colors.red[700]! : const Color(0xFF5F4B3D)),
               children: [
                 const SizedBox(height: 10),
                 _buildTextField(
@@ -356,7 +356,7 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
   Widget _buildTextField(String label, TextEditingController controller, IconData icon,
       {bool isNumber = false, bool required = true, int maxLines = 1}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    const primaryColor = Color(0xFF7E57C2);
+    const primaryColor = Color(0xFFFF9A2E);
     
     return TextFormField(
       controller: controller,
@@ -414,7 +414,7 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
 
   Widget _buildDatePicker(String label) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    const primaryColor = Color(0xFF7E57C2);
+    const primaryColor = Color(0xFFFF9A2E);
 
     return InkWell(
       onTap: _selectDate,
@@ -471,11 +471,11 @@ class _AddPersonalFinancePageState extends State<AddPersonalFinancePage> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _handleSave,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF7E57C2),
+          backgroundColor: const Color(0xFFFF9A2E),
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 58),
           elevation: 8,
-          shadowColor: const Color(0xFF7E57C2).withValues(alpha: 0.4),
+          shadowColor: const Color(0xFFFF9A2E).withValues(alpha: 0.4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         ),
         child: _isLoading

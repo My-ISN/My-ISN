@@ -41,7 +41,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   bool _isLoading = true;
   bool _isSubmitting = false;
 
-  Color get _primaryColor => const Color(0xFF7E57C2);
+  Color get _primaryColor => const Color(0xFFFF9A2E);
 
   @override
   void initState() {

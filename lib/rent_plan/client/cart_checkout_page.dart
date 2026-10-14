@@ -648,7 +648,7 @@ class _CartCheckoutPageState extends State<CartCheckoutPage> {
       child: Scaffold(
         backgroundColor: Theme.of(context).brightness == Brightness.dark
             ? const Color(0xFF121212)
-            : const Color(0xFFF5F7FA),
+            : const Color(0xFFFFF8F2),
         appBar: SecondaryAppBar(
           title: 'Checkout',
           onBackPressed: _prevStep,

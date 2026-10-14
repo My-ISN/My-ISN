@@ -31,7 +31,7 @@ class _FinancePageState extends State<FinancePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<Map<String, dynamic>> _availableTabs = [];
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
 
   bool _hasPermission(String resource) {
     if (widget.userData['role_resources'] == 'all') return true;
@@ -499,7 +499,7 @@ class _FinancePageState extends State<FinancePage>
                             const Icon(
                               Icons.edit_outlined,
                               size: 20,
-                              color: Color(0xFF7E57C2),
+                              color: Color(0xFFFF9A2E),
                             ),
                             const SizedBox(width: 12),
                             Text('finance.edit_transaction'.tr(context)),
@@ -513,7 +513,7 @@ class _FinancePageState extends State<FinancePage>
                           const Icon(
                             Icons.launch_rounded,
                             size: 20,
-                            color: Color(0xFF7E57C2),
+                            color: Color(0xFFFF9A2E),
                           ),
                           const SizedBox(width: 12),
                           Text('finance.open_web_ledger'.tr(context)),
@@ -711,7 +711,7 @@ class _FinancePageState extends State<FinancePage>
   Widget _buildDetailRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: const Color(0xFF7E57C2).withValues(alpha: 0.7)),
+        Icon(icon, size: 20, color: const Color(0xFFFF9A2E).withValues(alpha: 0.7)),
         const SizedBox(width: 12),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
         const Spacer(),
@@ -757,7 +757,7 @@ class _FinancePageState extends State<FinancePage>
   }
 
   void _showAccountDetail(Map<String, dynamic> account) {
-    Color primaryColor = const Color(0xFF7E57C2);
+    Color primaryColor = const Color(0xFFFF9A2E);
 
     showModalBottomSheet(
       context: context,
@@ -835,7 +835,7 @@ class _FinancePageState extends State<FinancePage>
                             const Icon(
                               Icons.edit_outlined,
                               size: 20,
-                              color: Color(0xFF7E57C2),
+                              color: Color(0xFFFF9A2E),
                             ),
                             const SizedBox(width: 12),
                             Text('finance.edit_account'.tr(context)),
@@ -1148,7 +1148,7 @@ class _FinancePageState extends State<FinancePage>
                   }
                 }
               },
-              backgroundColor: const Color(0xFF7E57C2),
+              backgroundColor: const Color(0xFFFF9A2E),
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -1236,7 +1236,7 @@ class _FinancePageState extends State<FinancePage>
                   style: TextStyle(
                     fontSize: _isHeaderExpanded ? 26 : 22,
                     fontWeight: FontWeight.w900,
-                    color: const Color(0xFF7E57C2),
+                    color: const Color(0xFFE5892D),
                   ),
                 ),
                 if (_isHeaderExpanded) ...[
@@ -1319,14 +1319,14 @@ class _FinancePageState extends State<FinancePage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+        color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF7E57C2).withValues(alpha: 0.1)),
+        border: Border.all(color: const Color(0xFFFF9A2E).withValues(alpha: 0.1)),
       ),
       child: Text(
         'finance.this_month'.tr(context).toUpperCase(),
         style: const TextStyle(
-          color: Color(0xFF7E57C2),
+          color: Color(0xFFE5892D),
           fontSize: 7.5,
           fontWeight: FontWeight.w900,
           letterSpacing: 0.5,
@@ -1431,11 +1431,11 @@ class _FinancePageState extends State<FinancePage>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2),
+            color: const Color(0xFFFF9A2E),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -1560,11 +1560,11 @@ class _FinancePageState extends State<FinancePage>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2),
+            color: const Color(0xFFFF9A2E),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -1622,7 +1622,7 @@ class _FinancePageState extends State<FinancePage>
             icon,
             color: onPressed == null
                 ? (isDark ? Colors.white24 : Colors.grey[400])
-                : const Color(0xFF7E57C2),
+                : const Color(0xFFFF9A2E),
             size: 24,
           ),
         ),
@@ -1638,13 +1638,13 @@ class _FinancePageState extends State<FinancePage>
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withOpacity(0.1),
+              color: const Color(0xFFFF9A2E).withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.receipt_long_rounded,
               size: 48,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFFFF9A2E),
             ),
           ),
           const SizedBox(height: 24),

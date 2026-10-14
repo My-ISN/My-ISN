@@ -144,7 +144,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
   }
 
   Color _getActiveColor() {
-    return _tabController.index == 0 ? const Color(0xFF673AB7) : const Color(0xFF009688);
+    return _tabController.index == 0 ? const Color(0xFFFF9A2E) : const Color(0xFF009688);
   }
 
   // --- Search Logic ---
@@ -399,7 +399,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
               },
               child: Row(
                 children: [
-                  const Icon(Icons.search, color: Color(0xFF7E57C2), size: 22),
+                  const Icon(Icons.search, color: Color(0xFFFF9A2E), size: 22),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -691,7 +691,7 @@ class _CustomerDashboardContentState extends State<CustomerDashboardContent> wit
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+        color: const Color(0xFFFF9A2E).withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Container(

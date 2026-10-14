@@ -405,7 +405,7 @@ class _LaptopUnitsPageState extends State<LaptopUnitsPage> {
                           spacing: 6,
                           runSpacing: 4,
                           children: [
-                            _statBadge('${group['total']} Unit', const Color(0xFF7E57C2)),
+                            _statBadge('${group['total']} Unit', const Color(0xFFFF9A2E)),
                             _statBadge('${group['tersedia']} Tersedia', const Color(0xFF2ED8B6)),
                             _statBadge('${group['disewa']} Disewa', const Color(0xFF00BCD4)),
                             _statBadge('${group['rusak']} Rusak', const Color(0xFFFF5376)),

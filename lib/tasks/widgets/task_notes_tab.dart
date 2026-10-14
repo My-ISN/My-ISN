@@ -95,7 +95,7 @@ class TaskNotesTabState extends State<TaskNotesTab> {
             ? const Center(
                 child: Padding(
                   padding: EdgeInsets.all(40.0),
-                  child: CircularProgressIndicator(color: Color(0xFF7E57C2)),
+                  child: CircularProgressIndicator(color: Color(0xFFFF9A2E)),
                 ),
               )
             : _notes.isEmpty
@@ -127,10 +127,10 @@ class TaskNotesTabState extends State<TaskNotesTab> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: const Color(0xFF7E57C2)),
+            child: Icon(icon, size: 16, color: const Color(0xFFFF9A2E)),
           ),
           const SizedBox(width: 10),
           Text(
@@ -171,7 +171,7 @@ class TaskNotesTabState extends State<TaskNotesTab> {
 
   Widget _buildNoteCard(dynamic n, bool isMe, String timeText) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = const Color(0xFF7E57C2);
+    final primaryColor = const Color(0xFFFF9A2E);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

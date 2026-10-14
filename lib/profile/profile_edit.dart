@@ -132,7 +132,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'profile.edit_photo'.tr(context),
-          toolbarColor: const Color(0xFF7E57C2),
+          toolbarColor: const Color(0xFFFF9A2E),
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.square,
           lockAspectRatio: false,
@@ -406,12 +406,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -424,7 +424,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       ? _saveHeaderSection
                       : _saveProfile),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF7E57C2),
+              backgroundColor: const Color(0xFFFF9A2E),
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
@@ -469,7 +469,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFF7E57C2).withOpacity(0.2),
+                          color: const Color(0xFFFF9A2E).withOpacity(0.2),
                           width: 4,
                         ),
                       ),
@@ -493,7 +493,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                                       placeholder: (context, url) => Container(
                                         color: Theme.of(context).brightness ==
                                                 Brightness.light
-                                            ? const Color(0xFFF3F6FF)
+                                            ? const Color(0xFFFFF8F2)
                                             : Theme.of(context).cardColor,
                                         child: const Icon(Icons.person_outline,
                                             size: 40, color: Colors.grey),
@@ -502,7 +502,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                                           Container(
                                         color: Theme.of(context).brightness ==
                                                 Brightness.light
-                                            ? const Color(0xFFF3F6FF)
+                                            ? const Color(0xFFFFF8F2)
                                             : Theme.of(context).cardColor,
                                         child: const Icon(Icons.person_outline,
                                             size: 40, color: Colors.grey),
@@ -511,7 +511,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                                   : Container(
                                       color: Theme.of(context).brightness ==
                                               Brightness.light
-                                          ? const Color(0xFFF3F6FF)
+                                          ? const Color(0xFFFFF8F2)
                                           : Theme.of(context).cardColor,
                                       child: const Icon(Icons.person_outline,
                                           size: 40, color: Colors.grey),
@@ -525,7 +525,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: const BoxDecoration(
-                          color: Color(0xFF7E57C2),
+                          color: Color(0xFFFF9A2E),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -543,7 +543,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 'profile.edit_photo'.tr(context),
                 style: const TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFE5892D),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -557,7 +557,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.person_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           required: true,
           validator: (v) => v!.isEmpty ? 'profile.required'.tr(context) : null,
@@ -570,7 +570,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.person_outline_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           textCapitalization: TextCapitalization.characters,
           inputFormatters: [UpperCaseTextFormatter()],
@@ -581,7 +581,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.email_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           required: true,
           keyboardType: TextInputType.emailAddress,
@@ -593,7 +593,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.phone_android_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           keyboardType: TextInputType.phone,
         ),
@@ -609,12 +609,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
               prefixIcon: const Icon(
                 Icons.cake_rounded,
                 size: 18,
-                color: Color(0xFF7E57C2),
+                color: Color(0xFFFF9A2E),
               ),
               suffixIcon: const Icon(
                 Icons.calendar_today_rounded,
                 size: 20,
-                color: Color(0xFF7E57C2),
+                color: Color(0xFFFF9A2E),
               ),
             ),
           ),
@@ -664,7 +664,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.bloodtype_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -673,7 +673,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.flag_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -682,7 +682,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.home_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           maxLines: 2,
         ),
@@ -722,7 +722,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.pin_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           keyboardType: TextInputType.number,
         ),
@@ -735,7 +735,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.info_outline_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           maxLines: 3,
         ),
@@ -745,7 +745,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.work_outline_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           maxLines: 3,
         ),
@@ -757,7 +757,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             width: 18,
             height: 18,
             colorFilter: const ColorFilter.mode(
-              Color(0xFF7E57C2),
+              Color(0xFFFF9A2E),
               BlendMode.srcIn,
             ),
           ),
@@ -770,7 +770,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
             width: 18,
             height: 18,
             colorFilter: const ColorFilter.mode(
-              Color(0xFF7E57C2),
+              Color(0xFFFF9A2E),
               BlendMode.srcIn,
             ),
           ),
@@ -784,7 +784,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.person_pin_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -793,7 +793,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.numbers_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
           keyboardType: TextInputType.number,
         ),
@@ -803,7 +803,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.account_balance_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -812,7 +812,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.public_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -821,7 +821,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.speed_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
         _buildTextField(
@@ -830,7 +830,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           prefixIcon: const Icon(
             Icons.location_on_rounded,
             size: 18,
-            color: Color(0xFF7E57C2),
+            color: Color(0xFFFF9A2E),
           ),
         ),
       ];
@@ -908,7 +908,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 2),
+            borderSide: const BorderSide(color: Color(0xFFFF9A2E), width: 2),
           ),
         ),
       ),

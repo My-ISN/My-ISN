@@ -48,7 +48,7 @@ class ProfileContractPage extends StatelessWidget {
                 const Icon(
                   Icons.calendar_today_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -58,7 +58,7 @@ class ProfileContractPage extends StatelessWidget {
                 const Icon(
                   Icons.business_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -68,7 +68,7 @@ class ProfileContractPage extends StatelessWidget {
                 const Icon(
                   Icons.work_outline_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -78,7 +78,7 @@ class ProfileContractPage extends StatelessWidget {
                 const Icon(
                   Icons.payments_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -88,7 +88,7 @@ class ProfileContractPage extends StatelessWidget {
                 const Icon(
                   Icons.timer_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -98,7 +98,7 @@ class ProfileContractPage extends StatelessWidget {
                 const Icon(
                   Icons.schedule_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
               ),
               _buildInfoRow(
@@ -108,7 +108,7 @@ class ProfileContractPage extends StatelessWidget {
                 const Icon(
                   Icons.event_busy_rounded,
                   size: 20,
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                 ),
                 last: true,
               ),
@@ -169,7 +169,7 @@ class ProfileContractPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: icon,

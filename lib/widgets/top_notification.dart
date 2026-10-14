@@ -103,7 +103,7 @@ class _TopNotificationState extends State<TopNotification>
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -111,10 +111,10 @@ class _TopNotificationState extends State<TopNotification>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                      color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.campaign, color: Color(0xFF7E57C2)),
+                    child: const Icon(Icons.campaign, color: Color(0xFFFF9A2E)),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -127,7 +127,7 @@ class _TopNotificationState extends State<TopNotification>
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
-                            color: Color(0xFF7E57C2),
+                            color: Color(0xFFE5892D),
                           ),
                         ),
                         Text(

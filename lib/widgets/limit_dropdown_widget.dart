@@ -18,7 +18,7 @@ class LimitDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = activeColor ?? const Color(0xFF7E57C2);
+    final Color color = activeColor ?? const Color(0xFFFF9A2E);
 
     return Container(
       height: 42,

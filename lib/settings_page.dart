@@ -324,7 +324,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const Icon(
               Icons.fingerprint_rounded,
               size: 80,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFFFF9A2E),
             ),
             const SizedBox(height: 24),
             Text(
@@ -370,7 +370,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context, true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7E57C2),
+                      backgroundColor: const Color(0xFFFF9A2E),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       elevation: 0,
@@ -486,7 +486,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Icon(
                 Icons.language_rounded,
                 size: 48,
-                color: Color(0xFF7E57C2),
+                color: Color(0xFFFF9A2E),
               ),
             ),
             const SizedBox(height: 16),
@@ -711,7 +711,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ? Icons.light_mode_rounded
                     : Icons.dark_mode_rounded,
                 size: 48,
-                color: const Color(0xFF7E57C2),
+                color: const Color(0xFFFF9A2E),
               ),
             ),
             const SizedBox(height: 16),
@@ -729,7 +729,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text('settings.theme_system'.tr(context)),
               secondary: const Icon(
                 Icons.brightness_4_rounded,
-                color: Color(0xFF7E57C2),
+                color: Color(0xFFFF9A2E),
               ),
               value: ThemeMode.system,
               groupValue: currentMode,
@@ -745,7 +745,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text('settings.theme_light'.tr(context)),
               secondary: const Icon(
                 Icons.light_mode_rounded,
-                color: Color(0xFF7E57C2),
+                color: Color(0xFFFF9A2E),
               ),
               value: ThemeMode.light,
               groupValue: currentMode,
@@ -761,7 +761,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: Text('settings.theme_dark'.tr(context)),
               secondary: const Icon(
                 Icons.dark_mode_rounded,
-                color: Color(0xFF7E57C2),
+                color: Color(0xFFFF9A2E),
               ),
               value: ThemeMode.dark,
               groupValue: currentMode,
@@ -915,7 +915,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       child: CircleAvatar(
                         radius: 28,
-                        backgroundColor: const Color(0xFF7E57C2),
+                        backgroundColor: const Color(0xFFFF9A2E),
                         backgroundImage: (widget.userData['profile_photo'] != null &&
                                 widget.userData['profile_photo'].toString().isNotEmpty)
                             ? CachedNetworkImageProvider(
@@ -1065,7 +1065,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildIconContainer(BuildContext context, IconData icon,
       {Color? color, bool isDanger = false}) {
-    final themeColor = color ?? const Color(0xFF7E57C2);
+    final themeColor = color ?? const Color(0xFFFF9A2E);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(

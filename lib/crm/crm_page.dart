@@ -25,7 +25,7 @@ class CrmPage extends StatefulWidget {
 class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final CrmService _crmService = CrmService();
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
 
   // --- LEADS STATE ---
   List<dynamic> _leads = [];
@@ -184,7 +184,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
           // Styled Tab Bar Container
           Container(
             color: isDark
-                ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+                ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
                 : theme.cardColor,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: TabBar(
@@ -325,7 +325,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         children: [
-          _buildStatCard('Total Lead', _leadStats['total_leads'] ?? 0, const Color(0xFF6A11CB), Icons.trending_up_rounded),
+          _buildStatCard('Total Lead', _leadStats['total_leads'] ?? 0, const Color(0xFFE5892D), Icons.trending_up_rounded),
           _buildStatCard('Lead Baru', _leadStats['new_leads'] ?? 0, Colors.orange, Icons.fiber_new_rounded),
           _buildStatCard('Followup Hari Ini', _leadStats['today_followups'] ?? 0, Colors.blue, Icons.today_rounded),
           _buildStatCard('Deal', _leadStats['deal_leads'] ?? 0, Colors.green, Icons.check_circle_rounded),
@@ -342,7 +342,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: isDark
-            ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+            ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
             : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: isDark ? Border.all(color: Colors.white.withValues(alpha: 0.1)) : null,
@@ -457,7 +457,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF7E57C2).withValues(alpha: 0.04) : Theme.of(context).cardColor,
+        color: isDark ? const Color(0xFFFF9A2E).withValues(alpha: 0.04) : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: isDark ? Border.all(color: Colors.white.withValues(alpha: 0.08)) : null,
         boxShadow: [
@@ -775,7 +775,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF7E57C2).withValues(alpha: 0.04) : Theme.of(context).cardColor,
+        color: isDark ? const Color(0xFFFF9A2E).withValues(alpha: 0.04) : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: isDark ? Border.all(color: Colors.white.withValues(alpha: 0.08)) : null,
         boxShadow: [
@@ -1081,7 +1081,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF7E57C2).withValues(alpha: 0.04) : Theme.of(context).cardColor,
+        color: isDark ? const Color(0xFFFF9A2E).withValues(alpha: 0.04) : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: isDark ? Border.all(color: Colors.white.withValues(alpha: 0.08)) : null,
         boxShadow: [
@@ -1280,7 +1280,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF7E57C2).withValues(alpha: 0.04) : Theme.of(context).cardColor,
+          color: isDark ? const Color(0xFFFF9A2E).withValues(alpha: 0.04) : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: isDark ? Border.all(color: Colors.white.withValues(alpha: 0.1)) : null,
           boxShadow: [
@@ -2450,7 +2450,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
       case 'Prospek':
         return Colors.blue;
       case 'Penawaran':
-        return Colors.purple;
+        return const Color(0xFF5F4B3D);
       case 'Negosiasi':
         return Colors.indigo;
       case 'Deal':

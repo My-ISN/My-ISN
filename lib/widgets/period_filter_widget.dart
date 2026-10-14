@@ -17,7 +17,7 @@ class PeriodFilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = const Color(0xFF7E57C2);
+    final Color primaryColor = const Color(0xFFFF9A2E);
     
     // Get month name and truncate it
     String monthName = '';
@@ -133,7 +133,7 @@ class _PeriodPickerSheetState extends State<PeriodPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = const Color(0xFF7E57C2);
+    final Color primaryColor = const Color(0xFFFF9A2E);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),

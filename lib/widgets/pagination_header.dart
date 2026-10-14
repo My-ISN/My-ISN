@@ -26,7 +26,7 @@ class PaginationHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = primaryColor ?? const Color(0xFF7E57C2);
+    final Color color = primaryColor ?? const Color(0xFFFF9A2E);
     
     // Default total label matches the most common pattern in the app
     final String label = totalLabel ?? 'rent_plan.total_count'.tr(

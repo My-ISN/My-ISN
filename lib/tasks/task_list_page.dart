@@ -44,7 +44,7 @@ class _TaskListPageState extends State<TaskListPage> {
   // Filter state
   int? _selectedDepartmentId;
   List<dynamic> _departments = [];
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
 
   bool _hasPermission(String resource) {
     if (widget.userData['role_access'] == '1' ||
@@ -206,7 +206,7 @@ class _TaskListPageState extends State<TaskListPage> {
           );
           if (result == true) _fetchTasks();
         },
-        backgroundColor: const Color(0xFF7E57C2),
+        backgroundColor: const Color(0xFFFF9A2E),
         icon: const Icon(Icons.playlist_add_rounded, color: Colors.white),
         label: Text('tasks.add_task'.tr(context), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ) : null,
@@ -243,7 +243,7 @@ class _TaskListPageState extends State<TaskListPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+              ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Theme.of(context).brightness == Brightness.dark
@@ -315,7 +315,7 @@ class _TaskListPageState extends State<TaskListPage> {
                     color: isSelected 
                         ? _primaryColor.withValues(alpha: 0.2)
                         : (Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+                            ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
                             : Theme.of(context).cardColor),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
@@ -357,7 +357,7 @@ class _TaskListPageState extends State<TaskListPage> {
           setState(() => _page = page);
           _fetchTasks();
         },
-        primaryColor: const Color(0xFF7E57C2),
+        primaryColor: const Color(0xFFFF9A2E),
       ),
     );
   }
@@ -385,7 +385,7 @@ class _TaskListPageState extends State<TaskListPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+            ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
             : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Theme.of(context).brightness == Brightness.dark
@@ -455,7 +455,7 @@ class _TaskListPageState extends State<TaskListPage> {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF7E57C2).withValues(alpha: 0.04)
+            ? const Color(0xFFFF9A2E).withValues(alpha: 0.04)
             : Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Theme.of(context).brightness == Brightness.dark
@@ -552,7 +552,7 @@ class _TaskListPageState extends State<TaskListPage> {
                           icon: const Icon(Icons.open_in_new, size: 18, color: Colors.white),
                           label: Text('tasks.open_detail_update'.tr(context), style: const TextStyle(color: Colors.white)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7E57C2),
+                            backgroundColor: const Color(0xFFFF9A2E),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),

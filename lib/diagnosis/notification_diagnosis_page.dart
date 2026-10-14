@@ -23,7 +23,7 @@ class _NotificationDiagnosisPageState extends State<NotificationDiagnosisPage> {
   String? _step2Error;
   String? _step3Error;
 
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
 
   @override
   void initState() {

@@ -19,11 +19,11 @@ class _QuickSendAddPageState extends State<QuickSendAddPage> {
   final QuickSendService _service = QuickSendService();
 
   final List<Map<String, TextEditingController>> _items = [];
-  String _selectedColor = '#7E57C2';
+  String _selectedColor = '#FF9A2E';
   bool _isSaving = false;
 
   final List<String> _presets = [
-    '#7E57C2', '#FF4D6D', '#4CAF50', '#2196F3', '#FF9800', '#00BCD4'
+    '#FF9A2E', '#FF4D6D', '#4CAF50', '#2196F3', '#FF9800', '#00BCD4'
   ];
 
   @override

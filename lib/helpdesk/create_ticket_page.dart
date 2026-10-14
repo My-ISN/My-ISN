@@ -152,7 +152,7 @@ class _CreateTicketPageState extends State<CreateTicketPage> {
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _submitTicket,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7E57C2),
+                      backgroundColor: const Color(0xFFFF9A2E),
                       foregroundColor: Theme.of(context).dividerColor.withAlpha(25),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,

@@ -24,7 +24,7 @@ class _AttendancePageState extends State<AttendancePage> {
   bool _isLoading = true;
   bool _isSummaryExpanded = false;
   Map<String, dynamic> _attendanceData = {};
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
 
   @override
   void initState() {
@@ -480,7 +480,7 @@ class _AttendancePageState extends State<AttendancePage> {
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
             ? Colors.white.withValues(alpha: 0.05)
-            : const Color(0xFFF8FAFF),
+            : const Color(0xFFFFFDF9),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.1),

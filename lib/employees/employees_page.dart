@@ -23,7 +23,7 @@ class EmployeesPage extends StatefulWidget {
 }
 
 class _EmployeesPageState extends State<EmployeesPage> {
-  final Color _primaryColor = const Color(0xFF7E57C2);
+  final Color _primaryColor = const Color(0xFFFF9A2E);
   bool _isLoading = true;
   List<dynamic> _employees = [];
   List<dynamic> _filteredEmployees = [];

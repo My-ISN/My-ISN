@@ -397,7 +397,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
                         spacing: 8,
                         children: ['Tersedia', 'Disewa', 'Rusak', 'Maintenance'].map((s) {
                           final isSelected = selectedStatus == s;
-                          Color activeCol = const Color(0xFF7E57C2);
+                          Color activeCol = const Color(0xFFFF9A2E);
                           if (s == 'Rusak') activeCol = Colors.redAccent;
                           if (s == 'Tersedia') activeCol = Colors.green;
                           if (s == 'Maintenance') activeCol = Colors.orange;
@@ -459,7 +459,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF7E57C2)),
+                            borderSide: const BorderSide(color: Color(0xFFFF9A2E)),
                           ),
                         ),
                       ),
@@ -471,7 +471,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
                         height: 48,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7E57C2),
+                            backgroundColor: const Color(0xFFFF9A2E),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -553,7 +553,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = const Color(0xFF7E57C2);
+    final primaryColor = const Color(0xFFFF9A2E);
 
     return Scaffold(
       appBar: SecondaryAppBar(
@@ -696,7 +696,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
                 width: 48,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF7E57C2), Color(0xFF6A11CB)],
+                    colors: [Color(0xFFFF9A2E), Color(0xFFE5892D)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -811,7 +811,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
     final String tanggalMasuk = _unitData!['tanggal_masuk'] ?? '-';
 
     Color statusColor = Colors.green;
-    if (status == 'Disewa') statusColor = const Color(0xFF7E57C2);
+    if (status == 'Disewa') statusColor = const Color(0xFFFF9A2E);
     if (status == 'Rusak') statusColor = Colors.redAccent;
     if (status == 'Maintenance') statusColor = Colors.orange;
 
@@ -932,12 +932,12 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
           color: cardBg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+            color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.05),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -952,10 +952,10 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7E57C2).withValues(alpha: 0.15),
+                    color: const Color(0xFFFF9A2E).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.business_center_rounded, color: Color(0xFF7E57C2), size: 20),
+                  child: const Icon(Icons.business_center_rounded, color: Color(0xFFFF9A2E), size: 20),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -967,7 +967,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
                         style: GoogleFonts.outfit(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF7E57C2),
+                          color: const Color(0xFFE5892D),
                         ),
                       ),
                       Text(
@@ -996,7 +996,7 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.12),
+                        color: const Color(0xFFFF9A2E).withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -1006,11 +1006,11 @@ class _ScanLaptopDetailPageState extends State<ScanLaptopDetailPage> {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF7E57C2),
+                              color: Color(0xFFE5892D),
                             ),
                           ),
                           SizedBox(width: 4),
-                          Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF7E57C2)),
+                          Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFFFF9A2E)),
                         ],
                       ),
                     ),

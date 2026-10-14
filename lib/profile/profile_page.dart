@@ -198,14 +198,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        const Color(0xFF512DA8),
-                        const Color(0xFF7E57C2).withValues(alpha: 0.8),
+                        const Color(0xFFE5892D),
+                        const Color(0xFFFF9A2E).withValues(alpha: 0.8),
                       ],
                     ),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7E57C2).withValues(alpha: 0.2),
+                        color: const Color(0xFFFF9A2E).withValues(alpha: 0.2),
                         blurRadius: 20,
                         spreadRadius: 2,
                       ),

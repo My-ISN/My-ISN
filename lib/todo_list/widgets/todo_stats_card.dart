@@ -112,7 +112,7 @@ class TodoStatsCard extends StatelessWidget {
                                 context,
                                 'todo_list.completed_today'.tr(context),
                                 completedTodayCount.toString(),
-                                Colors.purple,
+                                const Color(0xFF5F4B3D),
                               ),
                               const SizedBox(height: 12),
                               _buildStatMiniRow(

@@ -32,9 +32,9 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
   final RentPlanService _rentPlanService = RentPlanService();
   final ImagePicker _imagePicker = ImagePicker();
 
-  // Warna Tema Ungu HRIS
-  static const Color _purplePrimary = Color(0xFF7E57C2);
-  static const Color _purpleDark = Color(0xFF5E35B1);
+  // Warna tema krem/oranye /umkm
+  static const Color _brandPrimary = Color(0xFFFF9A2E);
+  static const Color _brandDark = Color(0xFFE5892D);
 
   // ══════════════════════════════════════════════════════════════════════════════
   // TAB 1: KIRIM LAPTOP STATE
@@ -203,7 +203,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.local_shipping_rounded, color: _purplePrimary, size: 28),
+            const Icon(Icons.local_shipping_rounded, color: _brandPrimary, size: 28),
             const SizedBox(width: 10),
             Text(
               'Konfirmasi Serah Terima',
@@ -221,7 +221,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             ),
             const SizedBox(height: 10),
             Text('• Penyewa: $renterName', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-            Text('• Bukti: ${_kirimPhotos.length} foto penyewa', style: GoogleFonts.outfit(color: _purplePrimary)),
+            Text('• Bukti: ${_kirimPhotos.length} foto penyewa', style: GoogleFonts.outfit(color: _brandPrimary)),
             if (_kirimVideo != null)
               Text('• Video: 1 video terlampir', style: GoogleFonts.outfit(color: const Color(0xFFE91E63))),
           ],
@@ -233,7 +233,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: _purplePrimary,
+              backgroundColor: _brandPrimary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -376,7 +376,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.archive_rounded, color: _purplePrimary, size: 28),
+            const Icon(Icons.archive_rounded, color: _brandPrimary, size: 28),
             const SizedBox(width: 10),
             Text('Konfirmasi Terima Laptop', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 18)),
           ],
@@ -388,9 +388,9 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             Text('Konfirmasi pengembalian unit sewa:', style: GoogleFonts.outfit(fontSize: 13)),
             const SizedBox(height: 10),
             Text('• Unit: $laptopName ($barcode)', style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
-            Text('• Kondisi: $_terimaKondisi', style: GoogleFonts.outfit(color: _purplePrimary, fontWeight: FontWeight.bold)),
+            Text('• Kondisi: $_terimaKondisi', style: GoogleFonts.outfit(color: _brandPrimary, fontWeight: FontWeight.bold)),
             Text('• Kelengkapan: ${_kelengkapanCharger ? "Charger ADA" : "Charger TIDAK ADA"}, ${_kelengkapanTas ? "Tas ADA" : "Tas TIDAK ADA"}', style: GoogleFonts.outfit(fontSize: 12)),
-            Text('• Foto: ${_terimaPhotos.length} foto bukti terlampir', style: GoogleFonts.outfit(color: _purplePrimary)),
+            Text('• Foto: ${_terimaPhotos.length} foto bukti terlampir', style: GoogleFonts.outfit(color: _brandPrimary)),
             const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(10),
@@ -434,7 +434,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: _purplePrimary,
+              backgroundColor: _brandPrimary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -536,13 +536,13 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
               indicator: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 gradient: const LinearGradient(
-                  colors: [_purplePrimary, _purpleDark],
+                  colors: [_brandPrimary, _brandDark],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: _purplePrimary.withValues(alpha: 0.35),
+                    color: _brandPrimary.withValues(alpha: 0.35),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -599,7 +599,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
-                    child: CircularProgressIndicator(color: _purplePrimary),
+                    child: CircularProgressIndicator(color: _brandPrimary),
                   ),
                 )
               else
@@ -670,14 +670,14 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                       decoration: InputDecoration(
                         hintText: 'Barcode laptop (opsional)...',
                         hintStyle: GoogleFonts.outfit(color: Colors.grey[400], fontSize: 13),
-                        prefixIcon: const Icon(Icons.qr_code_2_rounded, color: _purplePrimary, size: 20),
+                        prefixIcon: const Icon(Icons.qr_code_2_rounded, color: _brandPrimary, size: 20),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.qr_code_scanner_rounded, color: _purplePrimary),
+                    icon: const Icon(Icons.qr_code_scanner_rounded, color: _brandPrimary),
                     onPressed: () async {
                       final val = await Navigator.push<String>(
                         context,
@@ -723,7 +723,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
               child: ElevatedButton(
                 onPressed: _kirimSubmitting ? null : _processKirimSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _purplePrimary,
+                  backgroundColor: _brandPrimary,
                   foregroundColor: Colors.white,
                   elevation: 4,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -789,7 +789,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                       decoration: InputDecoration(
                         hintText: 'Scan / Masukkan barcode laptop...',
                         hintStyle: GoogleFonts.outfit(color: Colors.grey[400], fontSize: 13),
-                        prefixIcon: const Icon(Icons.laptop_chromebook_rounded, color: _purplePrimary, size: 20),
+                        prefixIcon: const Icon(Icons.laptop_chromebook_rounded, color: _brandPrimary, size: 20),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                       ),
@@ -797,11 +797,11 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.qr_code_scanner_rounded, color: _purplePrimary),
+                    icon: const Icon(Icons.qr_code_scanner_rounded, color: _brandPrimary),
                     onPressed: _scanTerimaBarcode,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.search_rounded, color: _purpleDark),
+                    icon: const Icon(Icons.search_rounded, color: _brandDark),
                     onPressed: () => _searchTerimaLaptop(_terimaBarcodeCtrl.text),
                   ),
                 ],
@@ -813,7 +813,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
               const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
-                  child: CircularProgressIndicator(color: _purplePrimary),
+                  child: CircularProgressIndicator(color: _brandPrimary),
                 ),
               )
             else if (_terimaLaptopData != null) ...[
@@ -899,7 +899,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                 child: ElevatedButton(
                   onPressed: _terimaSubmitting ? null : _processTerimaSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _purplePrimary,
+                    backgroundColor: _brandPrimary,
                     foregroundColor: Colors.white,
                     elevation: 4,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -942,13 +942,13 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF311B92).withValues(alpha: 0.6), const Color(0xFF4527A0).withValues(alpha: 0.6)]
-              : [const Color(0xFFF3E5F5), const Color(0xFFEDE7F6)],
+              ? [const Color(0xFF3A2E24).withValues(alpha: 0.6), const Color(0xFF4A3F36).withValues(alpha: 0.6)]
+              : [const Color(0xFFFFF2E6), const Color(0xFFFFF2E6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _purplePrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: _brandPrimary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -958,7 +958,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _purplePrimary,
+                  color: _brandPrimary,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
@@ -969,7 +969,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : const Color(0xFF4A148C),
+                  color: isDark ? Colors.white : const Color(0xFF5F4B3D),
                 ),
               ),
             ],
@@ -992,13 +992,13 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF311B92).withValues(alpha: 0.6), const Color(0xFF4527A0).withValues(alpha: 0.6)]
-              : [const Color(0xFFF3E5F5), const Color(0xFFEDE7F6)],
+              ? [const Color(0xFF3A2E24).withValues(alpha: 0.6), const Color(0xFF4A3F36).withValues(alpha: 0.6)]
+              : [const Color(0xFFFFF2E6), const Color(0xFFFFF2E6)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _purplePrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: _brandPrimary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1008,7 +1008,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _purplePrimary,
+                  color: _brandPrimary,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.checklist_rtl_rounded, color: Colors.white, size: 20),
@@ -1019,7 +1019,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : const Color(0xFF4A148C),
+                  color: isDark ? Colors.white : const Color(0xFF5F4B3D),
                 ),
               ),
             ],
@@ -1044,12 +1044,12 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
           height: 18,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: _purplePrimary.withValues(alpha: 0.2),
+            color: _brandPrimary.withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: Text(
             number,
-            style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: _purplePrimary),
+            style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: _brandPrimary),
           ),
         ),
         const SizedBox(width: 8),
@@ -1066,7 +1066,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: _purplePrimary),
+        Icon(icon, size: 18, color: _brandPrimary),
         const SizedBox(width: 8),
         Text(title, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold)),
       ],
@@ -1086,9 +1086,9 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
         decoration: InputDecoration(
           hintText: 'Cari nama penyewa / invoice rental...',
           hintStyle: GoogleFonts.outfit(color: Colors.grey[400], fontSize: 13),
-          prefixIcon: const Icon(Icons.search_rounded, color: _purplePrimary, size: 20),
+          prefixIcon: const Icon(Icons.search_rounded, color: _brandPrimary, size: 20),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.arrow_forward_rounded, color: _purplePrimary),
+            icon: const Icon(Icons.arrow_forward_rounded, color: _brandPrimary),
             onPressed: () => _searchKirimRental(_kirimSearchCtrl.text),
           ),
           border: InputBorder.none,
@@ -1140,8 +1140,8 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             child: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: _purplePrimary.withValues(alpha: 0.1),
-                  child: const Icon(Icons.person_rounded, color: _purplePrimary, size: 20),
+                  backgroundColor: _brandPrimary.withValues(alpha: 0.1),
+                  child: const Icon(Icons.person_rounded, color: _brandPrimary, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1175,7 +1175,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E2026) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _purplePrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: _brandPrimary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1185,8 +1185,8 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             children: [
               Text(name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16)),
               TextButton.icon(
-                icon: const Icon(Icons.change_circle_rounded, size: 16, color: _purplePrimary),
-                label: Text('Ganti', style: GoogleFonts.outfit(fontSize: 12, color: _purplePrimary)),
+                icon: const Icon(Icons.change_circle_rounded, size: 16, color: _brandPrimary),
+                label: Text('Ganti', style: GoogleFonts.outfit(fontSize: 12, color: _brandPrimary)),
                 onPressed: () => setState(() => _kirimSelectedRental = null),
               ),
             ],
@@ -1214,14 +1214,14 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E2026) : Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _purplePrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: _brandPrimary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.laptop_chromebook_rounded, color: _purplePrimary, size: 24),
+              const Icon(Icons.laptop_chromebook_rounded, color: _brandPrimary, size: 24),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -1296,7 +1296,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
     return Row(
       children: conditions.map((c) {
         final isSelected = _terimaKondisi == c;
-        Color color = _purplePrimary;
+        Color color = _brandPrimary;
         if (c == 'Rusak Ringan') color = Colors.orange;
         if (c == 'Rusak Berat') color = Colors.red;
 
@@ -1332,7 +1332,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             child: CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               dense: true,
-              activeColor: _purplePrimary,
+              activeColor: _brandPrimary,
               title: Text('Charger / Adaptor', style: GoogleFonts.outfit(fontSize: 13)),
               value: _kelengkapanCharger,
               onChanged: (val) => setState(() => _kelengkapanCharger = val ?? true),
@@ -1342,7 +1342,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             child: CheckboxListTile(
               contentPadding: EdgeInsets.zero,
               dense: true,
-              activeColor: _purplePrimary,
+              activeColor: _brandPrimary,
               title: Text('Tas Laptop', style: GoogleFonts.outfit(fontSize: 13)),
               value: _kelengkapanTas,
               onChanged: (val) => setState(() => _kelengkapanTas = val ?? true),
@@ -1378,14 +1378,14 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
               decoration: BoxDecoration(
                 color: isDark ? Colors.white10 : Colors.grey[100],
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _purplePrimary.withValues(alpha: 0.4), style: BorderStyle.solid),
+                border: Border.all(color: _brandPrimary.withValues(alpha: 0.4), style: BorderStyle.solid),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.add_a_photo_rounded, color: _purplePrimary, size: 28),
+                  const Icon(Icons.add_a_photo_rounded, color: _brandPrimary, size: 28),
                   const SizedBox(height: 6),
-                  Text('Tambah Foto', style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.w600, color: _purplePrimary)),
+                  Text('Tambah Foto', style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.w600, color: _brandPrimary)),
                 ],
               ),
             ),
@@ -1440,7 +1440,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.videocam_rounded, color: _purplePrimary, size: 24),
+              const Icon(Icons.videocam_rounded, color: _brandPrimary, size: 24),
               const SizedBox(width: 8),
               Text('Rekam / Unggah Video', style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w600)),
             ],
@@ -1454,11 +1454,11 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E2026) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _purplePrimary.withValues(alpha: 0.3)),
+        border: Border.all(color: _brandPrimary.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.video_file_rounded, color: _purplePrimary, size: 32),
+          const Icon(Icons.video_file_rounded, color: _brandPrimary, size: 32),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -1503,7 +1503,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                     icon: const Icon(Icons.camera_alt_rounded),
                     label: const Text('Kamera'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _purplePrimary,
+                      backgroundColor: _brandPrimary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -1524,8 +1524,8 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                     icon: const Icon(Icons.photo_library_rounded),
                     label: const Text('Galeri'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: _purplePrimary,
-                      side: const BorderSide(color: _purplePrimary),
+                      foregroundColor: _brandPrimary,
+                      side: const BorderSide(color: _brandPrimary),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
@@ -1572,7 +1572,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                     icon: const Icon(Icons.videocam_rounded),
                     label: const Text('Kamera Video'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _purplePrimary,
+                      backgroundColor: _brandPrimary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -1593,8 +1593,8 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                     icon: const Icon(Icons.video_library_rounded),
                     label: const Text('Galeri Video'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: _purplePrimary,
-                      side: const BorderSide(color: _purplePrimary),
+                      foregroundColor: _brandPrimary,
+                      side: const BorderSide(color: _brandPrimary),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),

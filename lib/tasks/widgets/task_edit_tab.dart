@@ -275,7 +275,7 @@ class TaskEditTabState extends State<TaskEditTab> {
                   value: isSelected,
                   title: Text(name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                   subtitle: Text(emp['role_name'] ?? '', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                  activeColor: const Color(0xFF7E57C2),
+                  activeColor: const Color(0xFFE5892D),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   onChanged: (val) {
                     setModalState(() {
@@ -369,10 +369,10 @@ class TaskEditTabState extends State<TaskEditTab> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: const Color(0xFF7E57C2)),
+            child: Icon(icon, size: 16, color: const Color(0xFFFF9A2E)),
           ),
           const SizedBox(width: 10),
           Text(
@@ -536,7 +536,7 @@ class TaskEditTabState extends State<TaskEditTab> {
             prefixIcon: icon != null ? Icon(icon, size: 18, color: Colors.grey[400]) : null,
             suffixIcon: useSpeech && _isSpeechInitialized
                 ? IconButton(
-                    icon: Icon(_isListening ? Icons.mic : Icons.mic_none, color: _isListening ? Colors.red : const Color(0xFF7E57C2)),
+                    icon: Icon(_isListening ? Icons.mic : Icons.mic_none, color: _isListening ? Colors.red : const Color(0xFFFF9A2E)),
                     onPressed: () => _toggleListening(controller),
                   )
                 : null,
@@ -550,7 +550,7 @@ class TaskEditTabState extends State<TaskEditTab> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
+              borderSide: const BorderSide(color: Color(0xFFFF9A2E), width: 1.5),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
@@ -594,7 +594,7 @@ class TaskEditTabState extends State<TaskEditTab> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF7E57C2), width: 1.5),
+              borderSide: const BorderSide(color: Color(0xFFFF9A2E), width: 1.5),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),

@@ -27,7 +27,7 @@ class CartPage extends StatelessWidget {
     final purchaseItems = cart.items.where((i) => !i.isRental).toList();
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFF5F7FA),
+      backgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFFFF8F2),
       appBar: AppBar(
         backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         elevation: 0,
@@ -63,7 +63,7 @@ class CartPage extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     children: [
                       if (rentalItems.isNotEmpty) ...[
-                        _buildGroupHeader('Sewa Laptop', Icons.laptop_mac_rounded, const Color(0xFF673AB7)),
+                        _buildGroupHeader('Sewa Laptop', Icons.laptop_mac_rounded, const Color(0xFFFF9A2E)),
                         const SizedBox(height: 10),
                         ...rentalItems.map((item) => _buildCartItem(context, item, cart, isDark)),
                         const SizedBox(height: 16),
@@ -137,7 +137,7 @@ class CartPage extends StatelessWidget {
   }
 
   Widget _buildCartItem(BuildContext context, CartItem item, CartProvider cart, bool isDark) {
-    final Color typeColor = item.isRental ? const Color(0xFF673AB7) : const Color(0xFF009688);
+    final Color typeColor = item.isRental ? const Color(0xFFFF9A2E) : const Color(0xFF009688);
 
     return Dismissible(
       key: Key('${item.id}_${item.isRental}'),
@@ -310,7 +310,7 @@ class CartPage extends StatelessWidget {
             ),
             Row(
               children: [
-                if (rentalCount > 0) _buildCountChip('$rentalCount Sewa', const Color(0xFF673AB7)),
+                if (rentalCount > 0) _buildCountChip('$rentalCount Sewa', const Color(0xFFFF9A2E)),
                 if (rentalCount > 0 && purchaseCount > 0) const SizedBox(width: 8),
                 if (purchaseCount > 0) _buildCountChip('$purchaseCount Beli', const Color(0xFF009688)),
                 const Spacer(),
@@ -438,7 +438,7 @@ class CartPage extends StatelessWidget {
               title: 'Checkout Sewa Laptop',
               subtitle: '${cart.items.where((i) => i.isRental).length} item sewa',
               icon: Icons.laptop_mac_rounded,
-              color: const Color(0xFF673AB7),
+              color: const Color(0xFFFF9A2E),
               onTap: () {
                 Navigator.pop(context);
                 if (!context.mounted) return;

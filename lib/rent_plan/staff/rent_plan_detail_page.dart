@@ -1114,14 +1114,14 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: isDark
-                  ? [const Color(0xFF311B92).withValues(alpha: 0.6), const Color(0xFF4527A0).withValues(alpha: 0.6)]
-                  : [const Color(0xFFF3E5F5), const Color(0xFFEDE7F6)],
+                  ? [const Color(0xFF3A2E24).withValues(alpha: 0.6), const Color(0xFF4A3F36).withValues(alpha: 0.6)]
+                  : [const Color(0xFFFFF2E6), const Color(0xFFFFF2E6)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+              color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -1132,7 +1132,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7E57C2),
+                      color: const Color(0xFFFF9A2E),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 22),
@@ -1144,7 +1144,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                       style: GoogleFonts.outfit(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF4A148C),
+                        color: isDark ? Colors.white : const Color(0xFF5F4B3D),
                       ),
                     ),
                   ),
@@ -1257,7 +1257,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7E57C2),
+                    backgroundColor: const Color(0xFFFF9A2E),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 2,
@@ -1288,7 +1288,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
                     style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5E35B1),
+                    backgroundColor: const Color(0xFFE5892D),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 2,
@@ -1323,7 +1323,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
           height: 18,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2).withValues(alpha: 0.2),
+            color: const Color(0xFFFF9A2E).withValues(alpha: 0.2),
             shape: BoxShape.circle,
           ),
           child: Text(
@@ -1331,7 +1331,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
             style: GoogleFonts.outfit(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF7E57C2),
+              color: const Color(0xFFE5892D),
             ),
           ),
         ),
@@ -1867,7 +1867,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         _buildSection(
           title: 'rent_plan.docs_guarantees'.tr(context),
           icon: Icons.verified_user_rounded,
-          color: Colors.deepPurple[700]!,
+          color: const Color(0xFFE5892D),
           children: [
             if (_jenisSewa == 'pribadi') ...[
               _buildFileUploadTile(
@@ -3381,7 +3381,7 @@ class _RentPlanDetailPageState extends State<RentPlanDetailPage> {
         'val': 'completed',
         'label': 'rent_plan.status_completed'.tr(context),
         'icon': Icons.check_circle_outline_rounded,
-        'color': Colors.purple,
+        'color': const Color(0xFF5F4B3D),
       },
     ];
 

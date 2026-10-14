@@ -244,7 +244,7 @@ class _RegisterPageState extends State<RegisterPage> {
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'profile.edit_photo'.tr(context),
-          toolbarColor: const Color(0xFF7E57C2),
+          toolbarColor: const Color(0xFFFF9A2E),
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.square,
           lockAspectRatio: false,
@@ -298,7 +298,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: 300,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF7E57C2).withValues(alpha: 0.08),
+                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -310,7 +310,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: 350,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+                  color: const Color(0xFFFF9A2E).withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -384,7 +384,7 @@ class _RegisterPageState extends State<RegisterPage> {
           decoration: BoxDecoration(
             gradient: isActive 
               ? const LinearGradient(
-                  colors: [Color(0xFF9575CD), Color(0xFF7E57C2)],
+                  colors: [Color(0xFFE5892D), Color(0xFFFF9A2E)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
@@ -393,7 +393,7 @@ class _RegisterPageState extends State<RegisterPage> {
             shape: BoxShape.circle,
             boxShadow: isActive ? [
               BoxShadow(
-                color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+                color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               )
@@ -418,7 +418,7 @@ class _RegisterPageState extends State<RegisterPage> {
           label,
           style: TextStyle(
             fontSize: 10,
-            color: isActive ? const Color(0xFF7E57C2) : Colors.grey.shade500,
+            color: isActive ? const Color(0xFFE5892D) : Colors.grey.shade500,
             fontWeight: isActive ? FontWeight.w900 : FontWeight.w500,
             letterSpacing: 0.2,
           ),
@@ -435,7 +435,7 @@ class _RegisterPageState extends State<RegisterPage> {
         margin: const EdgeInsets.only(bottom: 22, left: 4, right: 4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(2),
-          color: isActive ? const Color(0xFF7E57C2).withValues(alpha: 0.8) : Colors.grey.withValues(alpha: 0.15),
+          color: isActive ? const Color(0xFFFF9A2E).withValues(alpha: 0.8) : Colors.grey.withValues(alpha: 0.15),
         ),
       ),
     );
@@ -464,10 +464,10 @@ class _RegisterPageState extends State<RegisterPage> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+            color: const Color(0xFFFF9A2E).withValues(alpha: 0.05),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.phone_android_rounded, size: 70, color: Color(0xFF7E57C2)),
+          child: const Icon(Icons.phone_android_rounded, size: 70, color: Color(0xFFFF9A2E)),
         ),
         const SizedBox(height: 24),
         Text(
@@ -493,7 +493,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Row(
               children: [
                 const SizedBox(width: 16),
-                const Icon(Icons.phone_iphone_rounded, color: Color(0xFF7E57C2), size: 20),
+                const Icon(Icons.phone_iphone_rounded, color: Color(0xFFFF9A2E), size: 20),
                 const SizedBox(width: 8),
                 Text(
                   '+62',
@@ -539,7 +539,7 @@ class _RegisterPageState extends State<RegisterPage> {
             _isEmailMethod = true;
           }),
           style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF7E57C2),
+            foregroundColor: const Color(0xFFFF9A2E),
           ),
           child: Text(
             'register.or_use_email'.tr(context),
@@ -590,7 +590,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Row(
               children: [
                 const SizedBox(width: 16),
-                const Icon(Icons.phone_android_rounded, color: Color(0xFF7E57C2), size: 20),
+                const Icon(Icons.phone_android_rounded, color: Color(0xFFFF9A2E), size: 20),
                 const SizedBox(width: 8),
                 Text(
                   '+62',
@@ -645,10 +645,10 @@ class _RegisterPageState extends State<RegisterPage> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF7E57C2).withValues(alpha: 0.05),
+            color: const Color(0xFFFF9A2E).withValues(alpha: 0.05),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.verified_user_rounded, size: 70, color: Color(0xFF7E57C2)),
+          child: const Icon(Icons.verified_user_rounded, size: 70, color: Color(0xFFFF9A2E)),
         ),
         const SizedBox(height: 24),
         Text(
@@ -675,7 +675,7 @@ class _RegisterPageState extends State<RegisterPage> {
             textStyle: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFF5F4B3D),
             ),
             decoration: BoxDecoration(
               border: Border(
@@ -689,11 +689,11 @@ class _RegisterPageState extends State<RegisterPage> {
             textStyle: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFF5F4B3D),
             ),
             decoration: const BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Color(0xFF7E57C2), width: 3),
+                bottom: BorderSide(color: Color(0xFFFF9A2E), width: 3),
               ),
             ),
           ),
@@ -703,11 +703,11 @@ class _RegisterPageState extends State<RegisterPage> {
             textStyle: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFF5F4B3D),
             ),
             decoration: const BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Color(0xFF7E57C2), width: 2),
+                bottom: BorderSide(color: Color(0xFFFF9A2E), width: 2),
               ),
             ),
           ),
@@ -729,7 +729,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 onPressed: _requestOtp,
                 child: Text(
                   'register.send_otp'.tr(context),
-                  style: const TextStyle(color: Color(0xFF7E57C2), fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Color(0xFFE5892D), fontWeight: FontWeight.bold),
                 ),
               ),
           ],
@@ -806,15 +806,15 @@ class _RegisterPageState extends State<RegisterPage> {
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
                       colors: [
-                        const Color(0xFF7E57C2).withValues(alpha: 0.2),
-                        const Color(0xFF7E57C2).withOpacity(0.05),
+                        const Color(0xFFFF9A2E).withValues(alpha: 0.2),
+                        const Color(0xFFFF9A2E).withOpacity(0.05),
                       ],
                     ),
                   ),
                 ),
                 CircleAvatar(
                   radius: 43,
-                  backgroundColor: const Color(0xFFF8F9FE),
+                  backgroundColor: const Color(0xFFFFFDF9),
                   backgroundImage: _image != null ? FileImage(_image!) : null,
                   child: _image == null
                       ? Icon(Icons.person_outline_rounded, size: 40, color: Colors.grey.shade400)
@@ -825,7 +825,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   right: 0,
                   child: Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(color: Color(0xFF7E57C2), shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: Color(0xFFFF9A2E), shape: BoxShape.circle),
                     child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 16),
                   ),
                 ),
@@ -858,14 +858,14 @@ class _RegisterPageState extends State<RegisterPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : const Color(0xFFF8F9FE),
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : const Color(0xFFFFFDF9),
             borderRadius: BorderRadius.circular(16),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _selectedGender,
               isExpanded: true,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF7E57C2)),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFFFF9A2E)),
               items: ['Male', 'Female'].map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -909,7 +909,7 @@ class _RegisterPageState extends State<RegisterPage> {
             const Icon(
               Icons.fingerprint_rounded,
               size: 80,
-              color: Color(0xFF7E57C2),
+              color: Color(0xFFFF9A2E),
             ),
             const SizedBox(height: 24),
             Text(
@@ -958,7 +958,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       await _registerBiometric(identifier, password);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7E57C2),
+                      backgroundColor: const Color(0xFFFF9A2E),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       elevation: 0,
@@ -1057,7 +1057,7 @@ class _RegisterPageState extends State<RegisterPage> {
           decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white.withOpacity(0.05)
-                : const Color(0xFFF8F9FE),
+                : const Color(0xFFFFFDF9),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -1090,7 +1090,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   }
                 : null,
             decoration: InputDecoration(
-              prefixIcon: prefix ?? Icon(icon, color: const Color(0xFF7E57C2), size: 20),
+              prefixIcon: prefix ?? Icon(icon, color: const Color(0xFFFF9A2E), size: 20),
               filled: true,
               fillColor: Colors.transparent,
               border: OutlineInputBorder(
@@ -1104,7 +1104,7 @@ class _RegisterPageState extends State<RegisterPage> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
-                  color: Color(0xFF7E57C2),
+                  color: Color(0xFFFF9A2E),
                   width: 1.5,
                 ),
               ),
@@ -1129,13 +1129,13 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: const LinearGradient(
-          colors: [Color(0xFF9575CD), Color(0xFF7E57C2)],
+          colors: [Color(0xFFE5892D), Color(0xFFFF9A2E)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7E57C2).withValues(alpha: 0.3),
+            color: const Color(0xFFFF9A2E).withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),

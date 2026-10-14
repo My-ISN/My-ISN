@@ -290,13 +290,13 @@ class _NotesPageState extends State<NotesPage> {
       floatingActionButton: _canAdd
           ? FloatingActionButton.extended(
               onPressed: () => _openEditor(),
-              backgroundColor: const Color(0xFF7E57C2),
+              backgroundColor: const Color(0xFFFF9A2E),
               icon: const Icon(Icons.add, color: Colors.white),
               label: Text('Catatan Baru', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600)),
             )
           : null,
       body: RefreshIndicator(
-        color: const Color(0xFF7E57C2),
+        color: const Color(0xFFFF9A2E),
         onRefresh: _fetchNotes,
         child: CustomScrollView(
           slivers: [
@@ -312,10 +312,10 @@ class _NotesPageState extends State<NotesPage> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7E57C2).withAlpha(26),
+                            color: const Color(0xFFFF9A2E).withAlpha(26),
                             borderRadius: BorderRadius.circular(14),
                           ),
-                          child: const Icon(Icons.sticky_note_2_outlined, color: Color(0xFF7E57C2), size: 26),
+                          child: const Icon(Icons.sticky_note_2_outlined, color: Color(0xFFFF9A2E), size: 26),
                         ),
                         const SizedBox(width: 12),
                         Column(
@@ -368,7 +368,7 @@ class _NotesPageState extends State<NotesPage> {
             // ── Loading ──
             if (_isLoading)
               const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator(color: Color(0xFF7E57C2))),
+                child: Center(child: CircularProgressIndicator(color: Color(0xFFFF9A2E))),
               )
             else if (_pinned.isEmpty && _others.isEmpty)
               SliverFillRemaining(
@@ -399,11 +399,11 @@ class _NotesPageState extends State<NotesPage> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                     child: Row(
                       children: [
-                        const Icon(Icons.push_pin, size: 16, color: Color(0xFF7E57C2)),
+                        const Icon(Icons.push_pin, size: 16, color: Color(0xFFFF9A2E)),
                         const SizedBox(width: 6),
                         Text('Disematkan',
                             style: GoogleFonts.poppins(
-                                fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF7E57C2))),
+                                fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFFE5892D))),
                       ],
                     ),
                   ),

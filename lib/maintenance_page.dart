@@ -79,8 +79,8 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF1A1A2E), // Deep Dark Blue
-                    const Color(0xFF16213E),
+                    const Color(0xFF241F1B), // Deep Dark Blue
+                    const Color(0xFF2E2823),
                     colorScheme.surface,
                   ],
                 ),
@@ -92,7 +92,7 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
           Positioned(
             top: size.height * 0.1,
             right: -50,
-            child: _buildBlurCircle(300, const Color(0xFF7E57C2).withOpacity(0.15)),
+            child: _buildBlurCircle(300, const Color(0xFFFF9A2E).withOpacity(0.15)),
           ),
           Positioned(
             bottom: size.height * 0.1,
@@ -102,7 +102,7 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
           Positioned(
             top: size.height * 0.4,
             left: size.width * 0.3,
-            child: _buildBlurCircle(200, Colors.purple.withOpacity(0.08)),
+            child: _buildBlurCircle(200, const Color(0xFFFF9A2E).withOpacity(0.08)),
           ),
 
           // 3. Main Content
@@ -123,7 +123,7 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF7E57C2).withOpacity(0.3),
+                              color: const Color(0xFFFF9A2E).withOpacity(0.3),
                               blurRadius: 40,
                               spreadRadius: 5,
                             ),
@@ -160,7 +160,7 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF7E57C2).withOpacity(0.1),
+                        color: const Color(0xFFFF9A2E).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: const Text(
@@ -168,7 +168,7 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF7E57C2),
+                          color: Color(0xFF5F4B3D),
                           letterSpacing: 2,
                         ),
                       ),
@@ -251,11 +251,11 @@ class _MaintenancePageState extends State<MaintenancePage> with SingleTickerProv
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF7E57C2), Color(0xFF9575CD)],
+                          colors: [Color(0xFFFF9A2E), Color(0xFFE5892D)],
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF7E57C2).withOpacity(0.3),
+                            color: const Color(0xFFFF9A2E).withOpacity(0.3),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
