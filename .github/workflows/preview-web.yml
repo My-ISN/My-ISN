@@ -4,11 +4,15 @@ name: Preview Web (GitHub Pages)
 # APK ke HP) setiap kali kode di-push. Hasil `flutter build web` diterbitkan
 # ke GitHub Pages.
 #
-# Catatan Pages: workflow ini memakai `actions/configure-pages` dengan
-# `enablement: true`, yang mencoba MENGAKTIFKAN GitHub Pages otomatis
-# (Settings -> Pages -> Source: GitHub Actions). Bila langkah itu ditolak
-# oleh GitHub, pemilik cukup melakukan satu klik: Settings -> Pages ->
-# Source: "GitHub Actions", lalu jalankan ulang workflow ini.
+# SATU SETELAN YANG HARUS DIKLIK PEMILIK (sekali saja, tidak bisa dilakukan
+# otomatis oleh workflow karena token Actions tidak punya hak admin Pages):
+#   Repo -> Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
+# Selama setelan itu belum aktif, workflow ini tetap HIJAU, hanya melewati
+# tahap deploy dan menulis peringatan + laporan.
+#
+# Laporan hasil build selalu ditulis ke cabang `preview-web-report`
+# (berkas REPORT.txt) supaya bisa dibaca tanpa login, karena log Actions
+# tidak dapat diakses tanpa autentikasi.
 
 on:
   push:
@@ -16,9 +20,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write # untuk push cabang laporan
+  pages: write # untuk deploy Pages
+  id-token: write # untuk deploy Pages
 
 concurrency:
   group: pages-preview
@@ -29,6 +33,8 @@ jobs:
     name: Build Flutter Web
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    outputs:
+      pages_enabled: ${{ steps.pages_check.outputs.enabled }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,25 +49,91 @@ jobs:
       - name: Ambil dependensi
         run: flutter pub get
 
-      - name: Info toolchain (bukti versi)
+      - name: Info toolchain
         run: |
-          set -x
-          flutter --version
-          dart --version
+          mkdir -p /tmp/preview-report
+          {
+            echo "=== LAPORAN BUILD PREVIEW WEB ==="
+            echo "repo      : $GITHUB_REPOSITORY"
+            echo "branch    : $GITHUB_REF_NAME"
+            echo "commit    : $GITHUB_SHA"
+            echo "run id    : $GITHUB_RUN_ID"
+            echo "waktu     : $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo
+            echo "=== TOOLCHAIN ==="
+            flutter --version 2>&1
+            dart --version 2>&1
+            java -version 2>&1 | head -3
+          } | tee /tmp/preview-report/toolchain.txt
 
       - name: Build web (release, base-href /My-ISN/)
         run: |
-          set -x
-          flutter build web --release --no-tree-shake-icons --base-href "/My-ISN/"
+          set -o pipefail
+          flutter build web --release --no-tree-shake-icons --base-href "/My-ISN/" 2>&1 | tee /tmp/flutter-build-web.log
 
-      - name: Ringkasan berkas hasil build
+      - name: Uji asap (smoke test) hasil build
         if: always()
         run: |
-          set -x
-          ls -la build/web 2>/dev/null | head -20
-          du -sh build/web 2>/dev/null || true
+          if [ ! -d build/web ]; then
+            echo "build/web TIDAK ADA" | tee /tmp/preview-report/smoke.txt
+            exit 0
+          fi
+          cd build/web
+          python3 -m http.server 8099 --bind 127.0.0.1 >/tmp/httpd.log 2>&1 &
+          SRV=$!
+          sleep 2
+          {
+            echo "=== UJI ASAP: HTTP dari server statis lokal di runner ==="
+            for f in index.html flutter_bootstrap.js main.dart.js flutter.js; do
+              if [ -f "$f" ]; then
+                printf '%s  %s  %s bytes  %s\n' "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/$f)" "$(curl -s -o /dev/null -w '%{content_type}' http://127.0.0.1:8099/$f)" "$(stat -c%s $f)" "$f"
+              else
+                echo "TIDAK ADA: $f"
+              fi
+            done
+            echo
+            echo "=== base href di index.html (harus /My-ISN/) ==="
+            grep -o '<base href="[^"]*"' index.html
+            echo
+            echo "=== bukti kode aplikasi ikut terkompilasi (marker API ISKOM) ==="
+            echo -n "istanakomputer.com muncul: "; grep -c "istanakomputer.com" main.dart.js || true
+            echo -n "mobileapi muncul          : "; grep -c "mobileapi" main.dart.js || true
+            echo -n "ukuran main.dart.js       : "; stat -c%s main.dart.js
+            echo
+            echo "=== isi folder build/web ==="
+            ls -la
+          } | tee /tmp/preview-report/smoke.txt
+          kill $SRV 2>/dev/null || true
 
-      - name: Simpan build web sebagai artifact (cadangan)
+      - name: Susun laporan (REPORT.txt)
+        if: always()
+        run: |
+          mkdir -p /tmp/preview-report
+          {
+            cat /tmp/preview-report/toolchain.txt 2>/dev/null || echo "(toolchain tidak tersedia)"
+            echo
+            echo "=== HASIL BUILD WEB ==="
+            if [ -d build/web ]; then
+              echo "build/web ADA, total: $(du -sh build/web | cut -f1)"
+            else
+              echo "build/web TIDAK ADA (build web gagal)"
+            fi
+            echo
+            echo "=== 40 BARIS TERAKHIR LOG BUILD (termasuk galat bila ada) ==="
+            tail -40 /tmp/flutter-build-web.log 2>/dev/null || echo "(log build tidak ada)"
+            echo
+            echo "=== BARIS 'Error' / 'dart:io' PADA LOG BUILD (bila ada) ==="
+            grep -nE "^Error|Error:|is not available on this platform|dart:io" /tmp/flutter-build-web.log 2>/dev/null | head -40 || echo "(tidak ada)"
+            echo
+            cat /tmp/preview-report/smoke.txt 2>/dev/null || echo "(smoke test tidak tersedia)"
+            echo
+            echo "=== STATUS GITHUB PAGES ==="
+            echo "cek: https://api.github.com/repos/$GITHUB_REPOSITORY/pages (404 = belum diaktifkan)"
+          } > /tmp/preview-report/REPORT.txt
+          echo "--- ringkasan REPORT.txt ---"
+          head -30 /tmp/preview-report/REPORT.txt
+
+      - name: Unggah build web sebagai artifact (cadangan)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -70,12 +142,44 @@ jobs:
           if-no-files-found: warn
           path: build/web
 
+      - name: Publikasikan laporan ke cabang preview-web-report
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set +x
+          cd /tmp/preview-report
+          git init -q -b preview-web-report
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "laporan build preview web (run ${GITHUB_RUN_ID})"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git push -q --force origin preview-web-report 2>/tmp/push.err; then
+            echo "laporan terkirim ke cabang preview-web-report"
+          else
+            sed -E 's/x-access-token:[^@]*@/x-access-token:***@/g' /tmp/push.err
+            echo "::warning::Gagal push cabang laporan (lihat pesan di atas)"
+          fi
+
+      - name: Cek status GitHub Pages
+        id: pages_check
+        run: |
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
+          echo "kode API Pages: $CODE"
+          if [ "$CODE" = "200" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages BELUM aktif. Satu klik untuk pemilik: Settings -> Pages -> Build and deployment -> Source: GitHub Actions. Setelah itu push lagi (atau Actions -> Preview Web -> Run workflow) agar preview terbit di https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+          fi
+
       - name: Siapkan GitHub Pages
+        if: steps.pages_check.outputs.enabled == 'true'
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Unggah artifact Pages
+        if: steps.pages_check.outputs.enabled == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
@@ -83,6 +187,7 @@ jobs:
   deploy-web:
     name: Terbitkan ke GitHub Pages
     needs: build-web
+    if: needs.build-web.outputs.pages_enabled == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
