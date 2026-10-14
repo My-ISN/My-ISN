@@ -1,0 +1,103 @@
+name: Build APK & AAB
+
+# Dibangun otomatis tanpa Android Studio.
+# Proyek ini adalah Flutter (bukan Android native murni), sehingga toolchain
+# utamanya `flutter`, dan Gradle dipanggil oleh Flutter di dalam folder android/.
+# Catatan: gradlew/gradle-wrapper.jar TIDAK ada di repo karena di-ignore oleh
+# android/.gitignore (bawaan template Flutter) - Flutter membangkitkannya
+# otomatis saat build pertama. Karena itu langkah `./gradlew --version`
+# dijalankan setelah wrapper dibangkitkan oleh Flutter.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build APK debug + AAB release
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-36 build-tools;36.0.0"
+          log-accepted-android-sdk-licenses: true
+
+      - name: Setup Gradle (cache)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      # Proyek dibuat dengan Flutter stable 3.41.9 (Dart 3.11.5).
+      # Pin versi ini agar hasil build identik dengan yang diharapkan pemilik.
+      - name: Setup Flutter 3.41.9 (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.9
+          channel: stable
+          cache: true
+
+      - name: Ambil dependensi
+        run: flutter pub get
+
+      - name: Info toolchain (bukti versi)
+        run: |
+          set -x
+          flutter --version
+          dart --version
+          java -version
+
+      - name: Versi Gradle wrapper (bukti toolchain)
+        run: |
+          set -x
+          if [ ! -f android/gradlew ]; then
+            echo "gradlew belum ada - normal di repo Flutter (di-ignore .gitignore)."
+            echo "Membangkitkan wrapper lewat konfigurasi Gradle Flutter..."
+            flutter build apk --debug --config-only
+          fi
+          cd android
+          chmod +x ./gradlew || true
+          ./gradlew --version
+
+      - name: Build APK (debug)
+        run: flutter build apk --debug --build-name=1.2.3 --build-number=25
+
+      - name: Build AAB (release, ditandatangani debug key)
+        run: flutter build appbundle --release --build-name=1.2.3 --build-number=25
+
+      - name: Unggah artifact APK & AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-aab-hasil
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            app/build/outputs/**/*.apk
+            app/build/outputs/**/*.aab
+            build/app/outputs/**/*.apk
+            build/app/outputs/**/*.aab
+
+      - name: Ringkasan berkas hasil build
+        if: always()
+        run: |
+          set -x
+          find build/app/outputs -type f \( -name '*.apk' -o -name '*.aab' \) -printf '%p  %s bytes\n' 2>/dev/null || true
