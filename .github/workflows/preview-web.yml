@@ -78,32 +78,36 @@ jobs:
             echo "build/web TIDAK ADA" | tee /tmp/preview-report/smoke.txt
             exit 0
           fi
-          cd build/web
-          python3 -m http.server 8099 --bind 127.0.0.1 >/tmp/httpd.log 2>&1 &
-          SRV=$!
+          # PENTING: index.html memakai <base href="/My-ISN/">, jadi aplikasi harus
+          # disajikan pada path /My-ISN/ agar aset relatif dapat dimuat
+          # (meniru GitHub Pages project site).
+          rm -rf /tmp/serveroot && mkdir -p /tmp/serveroot
+          cp -r build/web /tmp/serveroot/My-ISN
+          python3 -m http.server 8099 --bind 127.0.0.1 --directory /tmp/serveroot >/tmp/httpd.log 2>&1 &
           sleep 2
           {
             echo "=== UJI ASAP: HTTP dari server statis lokal di runner ==="
+            echo "URL dasar: http://127.0.0.1:8099/My-ISN/"
             for f in index.html flutter_bootstrap.js main.dart.js flutter.js; do
-              if [ -f "$f" ]; then
-                printf '%s  %s  %s bytes  %s\n' "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/$f)" "$(curl -s -o /dev/null -w '%{content_type}' http://127.0.0.1:8099/$f)" "$(stat -c%s $f)" "$f"
+              if [ -f "build/web/$f" ]; then
+                printf '%s  %s  %s bytes  %s\n' "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/My-ISN/$f)" "$(curl -s -o /dev/null -w '%{content_type}' http://127.0.0.1:8099/My-ISN/$f)" "$(stat -c%s build/web/$f)" "$f"
               else
                 echo "TIDAK ADA: $f"
               fi
             done
             echo
             echo "=== base href di index.html (harus /My-ISN/) ==="
-            grep -o '<base href="[^"]*"' index.html
+            grep -o '<base href="[^"]*"' build/web/index.html
             echo
             echo "=== bukti kode aplikasi ikut terkompilasi (marker API ISKOM) ==="
-            echo -n "istanakomputer.com muncul: "; grep -c "istanakomputer.com" main.dart.js || true
-            echo -n "mobileapi muncul          : "; grep -c "mobileapi" main.dart.js || true
-            echo -n "ukuran main.dart.js       : "; stat -c%s main.dart.js
+            echo -n "istanakomputer.com muncul: "; grep -c "istanakomputer.com" build/web/main.dart.js || true
+            echo -n "mobileapi muncul          : "; grep -c "mobileapi" build/web/main.dart.js || true
+            echo -n "ukuran main.dart.js       : "; stat -c%s build/web/main.dart.js
             echo
             echo "=== isi folder build/web ==="
-            ls -la
+            ls -la build/web
           } | tee /tmp/preview-report/smoke.txt
-          kill $SRV 2>/dev/null || true
+          pkill -f "http.server 8099" 2>/dev/null || true
 
       - name: Uji render di browser (Chrome headless)
         if: always()
@@ -113,30 +117,39 @@ jobs:
             echo "build/web tidak ada, uji render dilewati" > /tmp/preview-report/render.txt
             exit 0
           fi
-          (cd build/web && python3 -m http.server 8099 --bind 127.0.0.1 >/tmp/httpd2.log 2>&1) &
+          # disajikan pada /My-ISN/ agar cocok dengan <base href> di index.html
+          rm -rf /tmp/serveroot && mkdir -p /tmp/serveroot
+          cp -r build/web /tmp/serveroot/My-ISN
+          python3 -m http.server 8099 --bind 127.0.0.1 --directory /tmp/serveroot >/tmp/httpd2.log 2>&1 &
           sleep 2
+          URL="http://127.0.0.1:8099/My-ISN/"
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
           {
             echo "=== UJI RENDER DI BROWSER (Chrome headless) ==="
-            echo "chrome: ${CHROME:-TIDAK ADA}"
+            echo "url    : $URL"
+            echo "chrome : ${CHROME:-TIDAK ADA}"
+            curl -s -o /dev/null -w "curl index.html: HTTP %{http_code}\n" "$URL"
           } > /tmp/preview-report/render.txt
           if [ -n "$CHROME" ]; then
             mkdir -p /tmp/shot
-            timeout 180 "$CHROME" --headless=new --no-sandbox --disable-gpu \
-              --use-gl=swiftshader --enable-unsafe-swiftshader \
-              --window-size=414,896 --virtual-time-budget=30000 \
-              --screenshot=/tmp/shot/preview.png "http://127.0.0.1:8099/" \
+            timeout 240 "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage \
+              --use-gl=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist \
+              --hide-scrollbars --window-size=414,896 --virtual-time-budget=45000 \
+              --screenshot=/tmp/shot/preview.png "$URL" \
               >> /tmp/preview-report/render.txt 2>&1 || echo "screenshot: GAGAL/timeout" >> /tmp/preview-report/render.txt
-            timeout 180 "$CHROME" --headless=new --no-sandbox --disable-gpu \
-              --virtual-time-budget=30000 --dump-dom "http://127.0.0.1:8099/" \
+            timeout 240 "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage \
+              --use-gl=swiftshader --enable-unsafe-swiftshader \
+              --virtual-time-budget=45000 --dump-dom "$URL" \
               > /tmp/shot/dom.html 2>> /tmp/preview-report/render.txt || true
             {
-              echo "--- penanda render Flutter di DOM (flt-glass-pane/flt-scene-host/flutter-view) ---"
-              grep -o "flt-glass-pane\|flt-scene-host\|flutter-view\|flt-semantics" /tmp/shot/dom.html 2>/dev/null | sort | uniq -c || echo "(tidak ada penanda)"
-              echo "--- ukuran screenshot ---"
+              echo "--- penanda render Flutter di DOM ---"
+              grep -o "flt-glass-pane\|flt-scene-host\|flutter-view\|flt-semantics\|<canvas" /tmp/shot/dom.html 2>/dev/null | sort | uniq -c || echo "(tidak ada penanda)"
+              echo "--- ukuran DOM & screenshot ---"
+              echo "dom.html: $(wc -c < /tmp/shot/dom.html 2>/dev/null || echo 0) bytes"
               stat -c%s /tmp/shot/preview.png 2>/dev/null || echo "tidak ada screenshot"
             } >> /tmp/preview-report/render.txt
             cp /tmp/shot/preview.png /tmp/preview-report/preview-runtime.png 2>/dev/null || true
+            cp /tmp/shot/dom.html /tmp/preview-report/dom.html 2>/dev/null || true
           fi
           pkill -f "http.server 8099" 2>/dev/null || true
           cat /tmp/preview-report/render.txt
