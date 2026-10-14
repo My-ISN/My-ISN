@@ -451,6 +451,9 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
     final status = item['status'] ?? 'Lead Baru';
     final statusColor = _getStatusColor(status);
     final leadId = int.tryParse(item['lead_id']?.toString() ?? '0') ?? 0;
+    final String waOleh = (item['wa_clicked_by_name'] ?? item['wa_clicked_by_username'] ?? '').toString();
+    final String waAt = (item['wa_clicked_at'] ?? '').toString();
+    final String waTeks = 'Chat WA oleh ' + (waOleh.isNotEmpty ? waOleh : 'Staf') + ' \u2022 ' + _formatWaktuCrm(waAt);
 
     return Container(
       decoration: BoxDecoration(
@@ -596,7 +599,7 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                       Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          onTap: () => _openWhatsApp(item['contact_number']),
+                          onTap: () => _openWhatsApp(item['contact_number'], leadId: leadId),
                           borderRadius: BorderRadius.circular(8),
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -634,6 +637,22 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                     ],
                   ],
                 ),
+                if (waOleh.isNotEmpty || waAt.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.verified_user_outlined, size: 13, color: Color(0xFF25D366)),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          waTeks,
+                          style: const TextStyle(fontSize: 11, color: Color(0xFF1E7E34)),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -1451,6 +1470,8 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
         ? rawLead
         : Map<String, dynamic>.from(rawLead as Map);
     final leadId = int.tryParse(initialLead['lead_id']?.toString() ?? '0') ?? 0;
+    final String waOleh = (initialLead['wa_clicked_by_name'] ?? initialLead['wa_clicked_by_username'] ?? 'Staf').toString();
+    final String waAt = (initialLead['wa_clicked_at'] ?? '').toString();
 
     showModalBottomSheet(
       context: context,
@@ -1558,7 +1579,9 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                       child: ListView(
                         children: [
                           _buildDetailRow('Perusahaan', lead['company_name']),
-                          _buildDetailRow('Telepon / WA', lead['contact_number'], onTap: () => _openWhatsApp(lead['contact_number'])),
+                          _buildDetailRow('Telepon / WA', lead['contact_number'],
+                              onTap: () => _openWhatsApp(lead['contact_number'], leadId: leadId)),
+                          _buildDetailRow('Chat WA oleh', waOleh + ' • ' + _formatWaktuCrm(waAt)),
                           _buildDetailRow('Email', lead['email']),
                           _buildDetailRow('Kota', lead['city']),
                           _buildDetailRow('Alamat', lead['address']),
@@ -1602,10 +1625,15 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(f['followup_notes'] ?? '', style: const TextStyle(fontSize: 13)),
+                                      Text(
+                                        (f['followup_notes'] ?? f['notes'] ?? '').toString(),
+                                        style: const TextStyle(fontSize: 13),
+                                      ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        '${f['first_name'] ?? 'Staff'} • ${f['followup_date'] ?? ''}',
+                                        (f['staff_name'] ?? f['first_name'] ?? 'Staf').toString() +
+                                            ' \u2022 ' +
+                                            _formatWaktuCrm(f['followup_date'] ?? f['created_at']),
                                         style: const TextStyle(fontSize: 11, color: Colors.grey),
                                       ),
                                     ],
@@ -2230,6 +2258,19 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
   // ---------------------------------------------------------------------------
   // HELPER WIDGETS
   // ---------------------------------------------------------------------------
+  /// "2026-10-14 14:31:42" -> "14/10/2026 14:31" (tahan nilai kosong/aneh).
+  String _formatWaktuCrm(dynamic raw) {
+    final s = (raw ?? '').toString().trim();
+    if (s.isEmpty) return '-';
+    try {
+      final dt = DateTime.parse(s.replaceFirst(' ', 'T'));
+      String dua(int n) => n.toString().padLeft(2, '0');
+      return '${dua(dt.day)}/${dua(dt.month)}/${dt.year} ${dua(dt.hour)}:${dua(dt.minute)}';
+    } catch (_) {
+      return s;
+    }
+  }
+
   Widget _buildDetailRow(String label, dynamic value, {VoidCallback? onTap, Color? valueColor}) {
     if (value == null || value.toString().trim().isEmpty) return const SizedBox.shrink();
     final isWhatsApp = label.toLowerCase().contains('wa') || label.toLowerCase().contains('telepon') || label.toLowerCase().contains('whatsapp');
@@ -2294,7 +2335,10 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  Future<void> _openWhatsApp(String? phone) async {
+  /// Membuka WhatsApp. Bila [leadId] diisi, pesan diisi dari template chat CRM
+  /// di server (sama seperti versi web) dan server menandai staf yang membuka
+  /// chat tersebut — jadi riwayat "siapa menghubungi lead ini" tercatat.
+  Future<void> _openWhatsApp(String? phone, {int? leadId}) async {
     if (phone == null || phone.trim().isEmpty) return;
     String cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanPhone.startsWith('0')) {
@@ -2307,8 +2351,26 @@ class _CrmPageState extends State<CrmPage> with SingleTickerProviderStateMixin {
       return;
     }
 
-    final Uri waAppUri = Uri.parse('whatsapp://send?phone=$cleanPhone');
-    final Uri waWebUri = Uri.parse('https://wa.me/$cleanPhone');
+    String? pesan;
+    if (leadId != null && leadId > 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Menyiapkan template pesan WA...'), duration: Duration(seconds: 2)),
+        );
+      }
+      final res = await _crmService.prepareLeadWa(leadId: leadId, userId: _currentUserId);
+      if (res['status'] == true) {
+        pesan = (res['message'] ?? '').toString();
+      } else if (mounted) {
+        context.showErrorSnackBar('Template gagal dimuat (${res['message'] ?? '-'}). Chat dibuka tanpa template.');
+      }
+      // Segarkan daftar supaya penanda staf langsung tampil.
+      if (mounted) _fetchLeads(page: _leadPage);
+    }
+
+    final teks = (pesan != null && pesan.trim().isNotEmpty) ? '&text=${Uri.encodeComponent(pesan)}' : '';
+    final Uri waAppUri = Uri.parse('whatsapp://send?phone=$cleanPhone$teks');
+    final Uri waWebUri = Uri.parse('https://wa.me/$cleanPhone${teks.replaceFirst('&', '?')}');
 
     try {
       if (await canLaunchUrl(waAppUri)) {

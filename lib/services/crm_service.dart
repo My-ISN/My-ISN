@@ -61,7 +61,34 @@ class CrmService {
 
       final response = await http.get(
         Uri.parse('$baseUrl/get_crm_lead_detail?user_id=$uId&lead_id=$leadId'),
-      );
+      ).timeout(const Duration(seconds: 20));
+      return json.decode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
+  }
+
+  /// Menyiapkan Chat WA untuk satu lead: server mengisi template pesan
+  /// (urutan prioritas sama dengan versi web `erp/crm-leads/send-wa`) SEKALIGUS
+  /// menandai staf yang membuka chat (wa_clicked_by + riwayat follow-up).
+  /// Balasan: {status, phone, message, wa_url, wa_clicked_by_name, wa_clicked_at, ...}
+  Future<Map<String, dynamic>> prepareLeadWa({
+    required int leadId,
+    bool useDraft = false,
+    String? userId,
+  }) async {
+    try {
+      final uId = userId ?? await _getUserId();
+      if (uId == null) return {'status': false, 'message': 'User not logged in'};
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/crm_lead_wa'),
+        body: {
+          'user_id': uId,
+          'lead_id': leadId.toString(),
+          'use_draft': useDraft ? '1' : '0',
+        },
+      ).timeout(const Duration(seconds: 25));
       return json.decode(response.body);
     } catch (e) {
       return {'status': false, 'message': e.toString()};
