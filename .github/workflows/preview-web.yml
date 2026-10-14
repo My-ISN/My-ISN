@@ -105,6 +105,42 @@ jobs:
           } | tee /tmp/preview-report/smoke.txt
           kill $SRV 2>/dev/null || true
 
+      - name: Uji render di browser (Chrome headless)
+        if: always()
+        run: |
+          mkdir -p /tmp/preview-report
+          if [ ! -d build/web ]; then
+            echo "build/web tidak ada, uji render dilewati" > /tmp/preview-report/render.txt
+            exit 0
+          fi
+          (cd build/web && python3 -m http.server 8099 --bind 127.0.0.1 >/tmp/httpd2.log 2>&1) &
+          sleep 2
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          {
+            echo "=== UJI RENDER DI BROWSER (Chrome headless) ==="
+            echo "chrome: ${CHROME:-TIDAK ADA}"
+          } > /tmp/preview-report/render.txt
+          if [ -n "$CHROME" ]; then
+            mkdir -p /tmp/shot
+            timeout 180 "$CHROME" --headless=new --no-sandbox --disable-gpu \
+              --use-gl=swiftshader --enable-unsafe-swiftshader \
+              --window-size=414,896 --virtual-time-budget=30000 \
+              --screenshot=/tmp/shot/preview.png "http://127.0.0.1:8099/" \
+              >> /tmp/preview-report/render.txt 2>&1 || echo "screenshot: GAGAL/timeout" >> /tmp/preview-report/render.txt
+            timeout 180 "$CHROME" --headless=new --no-sandbox --disable-gpu \
+              --virtual-time-budget=30000 --dump-dom "http://127.0.0.1:8099/" \
+              > /tmp/shot/dom.html 2>> /tmp/preview-report/render.txt || true
+            {
+              echo "--- penanda render Flutter di DOM (flt-glass-pane/flt-scene-host/flutter-view) ---"
+              grep -o "flt-glass-pane\|flt-scene-host\|flutter-view\|flt-semantics" /tmp/shot/dom.html 2>/dev/null | sort | uniq -c || echo "(tidak ada penanda)"
+              echo "--- ukuran screenshot ---"
+              stat -c%s /tmp/shot/preview.png 2>/dev/null || echo "tidak ada screenshot"
+            } >> /tmp/preview-report/render.txt
+            cp /tmp/shot/preview.png /tmp/preview-report/preview-runtime.png 2>/dev/null || true
+          fi
+          pkill -f "http.server 8099" 2>/dev/null || true
+          cat /tmp/preview-report/render.txt
+
       - name: Susun laporan (REPORT.txt)
         if: always()
         run: |
@@ -126,6 +162,8 @@ jobs:
             grep -nE "^Error|Error:|is not available on this platform|dart:io" /tmp/flutter-build-web.log 2>/dev/null | head -40 || echo "(tidak ada)"
             echo
             cat /tmp/preview-report/smoke.txt 2>/dev/null || echo "(smoke test tidak tersedia)"
+            echo
+            cat /tmp/preview-report/render.txt 2>/dev/null || echo "(uji render tidak tersedia)"
             echo
             echo "=== STATUS GITHUB PAGES ==="
             echo "cek: https://api.github.com/repos/$GITHUB_REPOSITORY/pages (404 = belum diaktifkan)"
