@@ -300,14 +300,28 @@ class _TodoListPageState extends State<TodoListPage> {
       if (aDone && !bDone) return 1;
       if (!aDone && bDone) return -1;
 
-      // Secondary sort: newest first
+      // Item yang belum selesai: urutkan dari prioritas dulu (1=Tinggi, 2=Normal, 3=Rendah)
+      if (!aDone && !bDone) {
+        int aPriority = int.tryParse(a['priority']?.toString() ?? '2') ?? 2;
+        int bPriority = int.tryParse(b['priority']?.toString() ?? '2') ?? 2;
+        if (aPriority != bPriority) {
+          return aPriority.compareTo(bPriority);
+        }
+      }
+
+      // Item yang sudah selesai (atau prioritas sama pada yang belum selesai): urutkan sesuai tanggal dibuat (terbaru dahulu)
       try {
         DateTime aDate = DateTime.parse(a['created_at']);
         DateTime bDate = DateTime.parse(b['created_at']);
-        return bDate.compareTo(aDate);
+        int cmp = bDate.compareTo(aDate);
+        if (cmp != 0) return cmp;
       } catch (e) {
-        return 0;
+        // Fallback
       }
+
+      int aId = int.tryParse(a['todo_item_id']?.toString() ?? '0') ?? 0;
+      int bId = int.tryParse(b['todo_item_id']?.toString() ?? '0') ?? 0;
+      return bId.compareTo(aId);
     });
   }
 
