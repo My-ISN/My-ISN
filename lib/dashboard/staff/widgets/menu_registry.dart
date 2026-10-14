@@ -5,15 +5,12 @@ import 'package:myisn/todo_list/todo_list_page.dart';
 import 'package:myisn/employees/employees_page.dart';
 import 'package:myisn/work_log/work_log_page.dart';
 import 'package:myisn/finance/finance_page.dart';
-import 'package:myisn/personal_finance/personal_finance_page.dart';
 import 'package:myisn/helpdesk/helpdesk_list_page.dart';
 import 'package:myisn/ai_bot/ai_bot_page.dart';
 import 'package:myisn/ai_bot/ai_chat_isn_page.dart';
 import 'package:myisn/creative_idea/creative_idea_page.dart';
-import 'package:myisn/intercom/intercom_page.dart';
 import 'package:myisn/profile/profile_page.dart';
 import 'package:myisn/dashboard/dashboard_page.dart';
-import 'package:myisn/quicksend/quick_send_page.dart';
 import 'package:myisn/job_desk/job_desk_page.dart';
 import 'package:myisn/reports/reports_page.dart';
 import 'package:myisn/projects/project_list_page.dart';
@@ -88,28 +85,12 @@ class MenuRegistry {
         pageBuilder: (context, user) => WorkLogPage(userData: user),
       ),
       AppModule(
-        titleKey: 'dashboard.quick_menu_quicksend',
-        icon: Icons.send_rounded,
-        color: const Color(0xFF7E57C2),
-        permission: 'mobile_quicksend_view',
-        categoryKey: 'side_drawer.support',
-        pageBuilder: (context, user) => QuickSendPage(userData: user),
-      ),
-      AppModule(
         titleKey: 'dashboard.quick_menu_finance',
         icon: Icons.account_balance_wallet_rounded,
         color: const Color(0xFF7E57C2),
         permission: 'mobile_finance_enable',
         categoryKey: 'side_drawer.financial',
         pageBuilder: (context, user) => FinancePage(userData: user),
-      ),
-      AppModule(
-        titleKey: 'personal_finance.my_wallet',
-        icon: Icons.payments_rounded,
-        color: const Color(0xFF7E57C2),
-        permission: 'mobile_personal_finance_enable',
-        categoryKey: 'side_drawer.financial',
-        pageBuilder: (context, user) => PersonalFinancePage(userData: user),
       ),
       AppModule(
         titleKey: 'dashboard.quick_menu_job_desk',
@@ -156,14 +137,6 @@ class MenuRegistry {
         permission: 'mobile_helpdesk_view',
         categoryKey: 'side_drawer.support',
         pageBuilder: (context, user) => HelpdeskListPage(userData: user),
-      ),
-      AppModule(
-        titleKey: 'dashboard.quick_menu_intercom',
-        icon: Icons.volume_up_rounded,
-        color: const Color(0xFF7E57C2),
-        permission: 'mobile_intercom_view',
-        categoryKey: 'side_drawer.support',
-        pageBuilder: (context, user) => IntercomPage(userData: user),
       ),
       if (!isCustomer)
         AppModule(

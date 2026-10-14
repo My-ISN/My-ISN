@@ -16,7 +16,7 @@ name: Preview Web (GitHub Pages)
 
 on:
   push:
-    branches: [main, feat/preview-web, feat/cekupdate-hris]
+    branches: [main, feat/preview-web, feat/cekupdate-hris, feat/hapus-fitur-warna-umkm]
   workflow_dispatch:
 
 permissions:

@@ -36,6 +36,7 @@ class DashboardQuickMenu extends StatelessWidget {
     if (pinnedKeys != null && pinnedKeys.isNotEmpty) {
       // Show customized pins
       displayModules = pinnedKeys
+          .where((key) => allModules.any((m) => m.titleKey == key))
           .map((key) => allModules.firstWhere(
                 (m) => m.titleKey == key,
                 orElse: () => allModules.first,

@@ -19,9 +19,6 @@ import '../helpdesk/helpdesk_list_page.dart';
 import '../ai_bot/ai_bot_page.dart';
 import '../ai_bot/ai_chat_isn_page.dart';
 import '../creative_idea/creative_idea_page.dart';
-import '../personal_finance/personal_finance_page.dart';
-import '../intercom/intercom_page.dart';
-import '../quicksend/quick_send_page.dart';
 import '../job_desk/job_desk_page.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
@@ -564,7 +561,6 @@ class _SideDrawerState extends State<SideDrawer> {
                 // Group: Financial
                 if (_hasCategoryPermission([
                   'mobile_finance_enable',
-                  'mobile_personal_finance_enable',
                 ]))
                   _buildExpandableSection(
                     context,
@@ -593,25 +589,6 @@ class _SideDrawerState extends State<SideDrawer> {
                             );
                           },
                         ),
-                      if (_hasPermission('mobile_personal_finance_enable'))
-                        _buildMenuItem(
-                          context,
-                          icon: Icons.payments_outlined,
-                          title: 'personal_finance.my_wallet'.tr(context),
-                          isActive: widget.activePage == 'my_wallet',
-                          padding: const EdgeInsets.only(left: 32, right: 12),
-                          onTap: () {
-                            Navigator.pop(context);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PersonalFinancePage(
-                                  userData: widget.userData,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
                     ],
                   ),
 
@@ -619,8 +596,6 @@ class _SideDrawerState extends State<SideDrawer> {
                 if (_hasCategoryPermission([
                   'mobile_helpdesk_view',
                   'creative_idea',
-                  'mobile_intercom_view',
-                  'mobile_quicksend_view',
                 ]))
                   _buildExpandableSection(
                     context,
@@ -699,44 +674,6 @@ class _SideDrawerState extends State<SideDrawer> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => CreativeIdeaPage(
-                                userData: widget.userData,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    if (_hasPermission('mobile_intercom_view'))
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.volume_up_outlined,
-                        title: 'dashboard.quick_menu_intercom'.tr(context),
-                        isActive: widget.activePage == 'intercom',
-                        padding: const EdgeInsets.only(left: 32, right: 12),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => IntercomPage(
-                                userData: widget.userData,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    if (_hasPermission('mobile_quicksend_view'))
-                      _buildMenuItem(
-                        context,
-                        icon: Icons.send_outlined,
-                        title: 'dashboard.quick_menu_quicksend'.tr(context),
-                        isActive: widget.activePage == 'quicksend',
-                        padding: const EdgeInsets.only(left: 32, right: 12),
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => QuickSendPage(
                                 userData: widget.userData,
                               ),
                             ),
