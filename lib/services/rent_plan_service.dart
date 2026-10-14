@@ -17,6 +17,12 @@ class RentPlanService {
     String? search,
     int limit = 10,
     int offset = 0,
+    // Dipakai layar serah terima: daftar status yang relevan, mis.
+    // 'confirmed,pengembalian,masalah' (hanya rental yang sedang disewa).
+    String? statusIn,
+    // true = server hanya mengirim kolom yang ditampilkan (nama, nomor HP,
+    // invoice, unit, tanggal, status) — data pelanggan lain tidak dikirim.
+    bool lite = false,
   }) async {
     try {
       String? userDataString = await _storage.read(key: 'user_data');
@@ -34,6 +40,12 @@ class RentPlanService {
       };
       if (search != null && search.isNotEmpty) {
         params['search'] = search;
+      }
+      if (statusIn != null && statusIn.isNotEmpty) {
+        params['status_in'] = statusIn;
+      }
+      if (lite) {
+        params['lite'] = '1';
       }
 
       final url = Uri.parse(
@@ -98,7 +110,15 @@ class RentPlanService {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      return json.decode(response.body);
+      final data = json.decode(response.body);
+      if (data is Map<String, dynamic>) {
+        // Kode HTTP disertakan agar pemanggil bisa mengenali 409 (sudah pernah discan).
+        data['http_status'] = response.statusCode;
+
+        return data;
+      }
+
+      return {'status': false, 'message': 'Balasan server tidak dikenali.'};
     } catch (e) {
       return {'status': false, 'message': e.toString()};
     }
@@ -340,7 +360,15 @@ class RentPlanService {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      return json.decode(response.body);
+      final data = json.decode(response.body);
+      if (data is Map<String, dynamic>) {
+        // Kode HTTP disertakan agar pemanggil bisa mengenali 409 (sudah pernah discan).
+        data['http_status'] = response.statusCode;
+
+        return data;
+      }
+
+      return {'status': false, 'message': 'Balasan server tidak dikenali.'};
     } catch (e) {
       return {'status': false, 'message': e.toString()};
     }
@@ -477,7 +505,15 @@ class RentPlanService {
         const Duration(seconds: 60),
       );
       final response = await http.Response.fromStream(streamedResponse);
-      return json.decode(response.body);
+      final data = json.decode(response.body);
+      if (data is Map<String, dynamic>) {
+        // Kode HTTP disertakan agar pemanggil bisa mengenali 409 (sudah pernah discan).
+        data['http_status'] = response.statusCode;
+
+        return data;
+      }
+
+      return {'status': false, 'message': 'Balasan server tidak dikenali.'};
     } catch (e) {
       return {'status': false, 'message': e.toString()};
     }
@@ -547,7 +583,15 @@ class RentPlanService {
         const Duration(seconds: 60),
       );
       final response = await http.Response.fromStream(streamedResponse);
-      return json.decode(response.body);
+      final data = json.decode(response.body);
+      if (data is Map<String, dynamic>) {
+        // Kode HTTP disertakan agar pemanggil bisa mengenali 409 (sudah pernah discan).
+        data['http_status'] = response.statusCode;
+
+        return data;
+      }
+
+      return {'status': false, 'message': 'Balasan server tidak dikenali.'};
     } catch (e) {
       return {'status': false, 'message': e.toString()};
     }

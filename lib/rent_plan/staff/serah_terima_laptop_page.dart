@@ -65,6 +65,11 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
   final List<XFile> _terimaPhotos = [];
   XFile? _terimaVideo;
 
+  // ── Pencarian nama penyewa di layar TERIMA (barcode sering rusak) ──────────
+  final TextEditingController _terimaSearchNameCtrl = TextEditingController();
+  bool _terimaNameSearching = false;
+  List<dynamic> _terimaSearchResults = [];
+
   static const int _maxPhotos = 5;
 
   @override
@@ -100,6 +105,7 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
     _terimaBarcodeCtrl.dispose();
     _terimaNotesCtrl.dispose();
     _terimaBarcodeFocus.dispose();
+    _terimaSearchNameCtrl.dispose();
     super.dispose();
   }
 
@@ -187,6 +193,16 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
       context.showErrorSnackBar('Harap pilih penyewa / order rental terlebih dahulu.');
       return;
     }
+    // Satu invoice hanya boleh discan SEKALI untuk kirim (pagar server + tanda lokal).
+    if (_sudahDiscanKirim(_kirimSelectedRental)) {
+      await _showPesanTegas(
+        'Invoice Sudah Pernah Discan (KIRIM)',
+        'Invoice ${_kirimSelectedRental!['invoice_number'] ?? '-'} sudah pernah discan untuk serah terima (kirim), '
+            'jadi scan ini tidak diproses dan data yang sudah tercatat tidak diubah. '
+            'Kalau ini salah scan, laporkan ke admin/IT — pembetulan dilakukan manual oleh admin.',
+      );
+      return;
+    }
     if (_kirimPhotos.isEmpty) {
       context.showWarningSnackBar('Wajib mengambil minimal 1 Foto Penyewa sebagai bukti serah terima.');
       return;
@@ -264,7 +280,11 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
           Navigator.pop(context, true);
         }
       } else {
-        if (mounted) context.showErrorSnackBar(res['message'] ?? 'Gagal menyimpan serah terima laptop.');
+        if (res['sudah_discan'] == true || res['http_status'] == 409) {
+          _tanganiScanGanda(res, kirim: true);
+        } else if (mounted) {
+          context.showErrorSnackBar(res['message'] ?? 'Gagal menyimpan serah terima laptop.');
+        }
       }
     } catch (e) {
       if (mounted) context.showErrorSnackBar('Terjadi kesalahan: $e');
@@ -307,6 +327,12 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             _terimaKondisi = _terimaLaptopData!['kondisi'];
           }
         });
+        // Invoice yang sudah pernah diterima langsung ditandai (tombol dikunci).
+        if (_sudahDiscanTerima(_terimaActiveRental) && mounted) {
+          context.showWarningSnackBar(
+            'Invoice ini sudah pernah discan untuk TERIMA — tombol terima dikunci, scan ulang tidak diproses.',
+          );
+        }
       } else {
         if (mounted) context.showErrorSnackBar(res['message'] ?? 'Laptop atau rental tidak ditemukan.');
       }
@@ -354,6 +380,16 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
   Future<void> _processTerimaSubmit() async {
     if (_terimaLaptopData == null || _terimaActiveRental == null) {
       context.showErrorSnackBar('Harap cari dan pilih laptop/rental yang akan diterima.');
+      return;
+    }
+    // Satu invoice hanya boleh discan SEKALI untuk terima (pagar server + tanda lokal).
+    if (_sudahDiscanTerima(_terimaActiveRental)) {
+      await _showPesanTegas(
+        'Invoice Sudah Pernah Discan (TERIMA)',
+        'Invoice ${_terimaActiveRental!['invoice_number'] ?? '-'} sudah pernah discan untuk TERIMA (pengembalian), '
+            'jadi scan ini tidak diproses dan data yang sudah tercatat tidak diubah. '
+            'Kalau ini salah scan, laporkan ke admin/IT — pembetulan dilakukan manual oleh admin.',
+      );
       return;
     }
     if (_terimaPhotos.isEmpty) {
@@ -471,7 +507,11 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
           Navigator.pop(context, true);
         }
       } else {
-        if (mounted) context.showErrorSnackBar(res['message'] ?? 'Gagal memproses penerimaan laptop.');
+        if (res['sudah_discan'] == true || res['http_status'] == 409) {
+          _tanganiScanGanda(res, kirim: false);
+        } else if (mounted) {
+          context.showErrorSnackBar(res['message'] ?? 'Gagal memproses penerimaan laptop.');
+        }
       }
     } catch (e) {
       if (mounted) context.showErrorSnackBar('Terjadi kesalahan: $e');
@@ -498,6 +538,180 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
       return r['renter_name'].toString();
     }
     return 'Penyewa #${r['rental_id'] ?? '-'}';
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // SATU INVOICE, SATU SCAN (KIRIM & TERIMA)
+  //
+  // Pagar utama ada di SERVER (mobileapi/send_rental_laptop &
+  // mobileapi/receive_rental_laptop → 409 "sudah pernah discan"). Di sini
+  // tanda yang sama dipakai supaya petugas tidak bisa menekan tombol untuk
+  // invoice yang sudah pernah discan — tombol dinonaktifkan + pesan jelas.
+  // ══════════════════════════════════════════════════════════════════════════════
+
+  static const List<String> _statusSudahKirim = ['confirmed', 'pengembalian', 'completed'];
+
+  bool _adaBuktiMedia(dynamic nilai) {
+    if (nilai == null) return false;
+    final s = nilai.toString().trim();
+    return s.isNotEmpty && s != '[]' && s != 'null';
+  }
+
+  bool _sudahDiscanKirim(Map<String, dynamic>? r) {
+    if (r == null) return false;
+    final status = (r['status'] ?? r['rental_status'] ?? '').toString().toLowerCase();
+    if (_statusSudahKirim.contains(status)) return true;
+    return _adaBuktiMedia(r['foto_kirim']) || _adaBuktiMedia(r['video_kirim']);
+  }
+
+  bool _sudahDiscanTerima(Map<String, dynamic>? r) {
+    if (r == null) return false;
+    final status = (r['status'] ?? r['rental_status'] ?? '').toString().toLowerCase();
+    if (status == 'completed') return true;
+    return _adaBuktiMedia(r['foto_pengembalian']) ||
+        _adaBuktiMedia(r['foto_pengembalian_client']) ||
+        _adaBuktiMedia(r['video_pengembalian']);
+  }
+
+  /// Tandai baris terpilih sebagai sudah discan (dipakai saat server menolak 409).
+  void _tandaiSudahDiscan({required bool kirim}) {
+    final r = _kirimSelectedRental ?? _terimaActiveRental;
+    if (r == null) return;
+    final map = Map<String, dynamic>.from(r);
+    map['status'] = kirim ? 'confirmed' : 'completed';
+    map['rental_status'] = kirim ? 'confirmed' : 'completed';
+    setState(() {
+      if (kirim) {
+        _kirimSelectedRental = map;
+      } else {
+        _terimaActiveRental = map;
+      }
+    });
+  }
+
+  /// Pesan tegas tanpa tombol paksa (jalan keluar salah scan = lapor admin/IT).
+  Future<void> _showPesanTegas(String judul, String pesan) async {
+    if (!mounted) return;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1E2026) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.block_rounded, color: Colors.redAccent, size: 26),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                judul,
+                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            pesan,
+            style: GoogleFonts.outfit(fontSize: 13, height: 1.35),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Mengerti',
+              style: GoogleFonts.outfit(color: _purplePrimary, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Hasil scan ditolak server karena invoice ini sudah pernah discan.
+  void _tanganiScanGanda(Map<String, dynamic> res, {required bool kirim}) {
+    _tandaiSudahDiscan(kirim: kirim);
+    _showPesanTegas(
+      kirim ? 'Invoice Sudah Pernah Discan (KIRIM)' : 'Invoice Sudah Pernah Discan (TERIMA)',
+      (res['message'] ?? 'Invoice ini sudah pernah discan dan tidak diproses ulang.').toString(),
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // PENCARIAN NAMA PENYEWA DI LAYAR TERIMA
+  // (dipakai bila barcode unit rusak / tidak bisa discan)
+  // ══════════════════════════════════════════════════════════════════════════════
+
+  Future<void> _searchTerimaByName(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() => _terimaSearchResults = []);
+      return;
+    }
+    setState(() => _terimaNameSearching = true);
+    try {
+      // Hanya rental yang RELEVAN untuk petugas penerimaan: yang sedang disewa
+      // (confirmed), sedang proses kembali (pengembalian), atau bermasalah.
+      // Yang belum dikirim (new/pending) dan yang sudah selesai (completed)
+      // tidak ditampilkan. lite=true → server hanya mengirim kolom yang dipakai.
+      final res = await _rentPlanService.getRentPlans(
+        search: query.trim(),
+        statusIn: 'confirmed,pengembalian,masalah',
+        lite: true,
+        limit: 15,
+      );
+      if (res['status'] == true && res['data'] != null) {
+        setState(() => _terimaSearchResults = res['data']);
+      } else {
+        if (mounted) context.showErrorSnackBar(res['message'] ?? 'Pencarian penyewa gagal.');
+      }
+    } catch (e) {
+      if (mounted) context.showErrorSnackBar('Pencarian penyewa gagal: $e');
+    } finally {
+      if (mounted) setState(() => _terimaNameSearching = false);
+    }
+  }
+
+  /// Pilih hasil pencarian nama → lanjutkan proses terima seperti hasil scan.
+  Future<void> _pilihRentalUntukTerima(Map<String, dynamic> rental) async {
+    final barcode = (rental['barcode'] ?? '').toString().trim();
+    final nama = _getRenterName(rental);
+    final invoice = (rental['invoice_number'] ?? '-').toString();
+
+    setState(() {
+      _terimaSearchResults = [];
+      _terimaSearchNameCtrl.clear();
+    });
+
+    // Sama seperti hasil scan: kalau barcode unitnya ada di invoice, pakai jalur
+    // barcode (lengkap dengan info unit & status rental).
+    if (barcode.isNotEmpty) {
+      _terimaBarcodeCtrl.text = barcode;
+      await _searchTerimaLaptop(barcode);
+      if (_terimaActiveRental != null) {
+        if (mounted) context.showSuccessSnackBar('Rental $nama ($invoice) siap diproses terima.');
+        return;
+      }
+    }
+
+    // Barcode tidak ada / tidak terbaca di master → pakai data invoice terpilih.
+    setState(() {
+      _terimaBarcodeCtrl.text = barcode;
+      _terimaLaptopData ??= {
+        'barcode': barcode,
+        'nama_laptop': rental['nama_laptop'] ?? 'Unit Rental',
+        'kondisi': _terimaKondisi,
+      };
+      _terimaActiveRental = Map<String, dynamic>.from(rental)
+        ..['rental_status'] = rental['status'];
+    });
+    if (mounted) {
+      context.showWarningSnackBar(
+        barcode.isEmpty
+            ? 'Invoice $invoice tidak punya barcode unit — lanjutkan terima memakai data invoice.'
+            : 'Unit tidak terbaca di master — lanjutkan terima memakai data invoice $invoice.',
+      );
+    }
   }
 
   // ══════════════════════════════════════════════════════════════════════════════
@@ -716,12 +930,22 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
             ),
             const SizedBox(height: 32),
 
-            // 7. Tombol Submit Kirim
+            // 7. Tombol Submit Kirim (dikunci bila invoice sudah pernah discan)
+            if (_sudahDiscanKirim(_kirimSelectedRental)) ...[
+              _buildSudahDiscanBanner(
+                isDark,
+                'Invoice ini SUDAH PERNAH DISCAN untuk KIRIM — tombol dikunci, scan ulang tidak akan diproses. '
+                    'Hubungi admin/IT bila ini salah scan.',
+              ),
+              const SizedBox(height: 12),
+            ],
             SizedBox(
               width: double.infinity,
               height: 54,
               child: ElevatedButton(
-                onPressed: _kirimSubmitting ? null : _processKirimSubmit,
+                onPressed: (_kirimSubmitting || _sudahDiscanKirim(_kirimSelectedRental))
+                    ? null
+                    : _processKirimSubmit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _purplePrimary,
                   foregroundColor: Colors.white,
@@ -737,11 +961,20 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.check_circle_rounded, size: 22),
+                          Icon(
+                            _sudahDiscanKirim(_kirimSelectedRental)
+                                ? Icons.lock_rounded
+                                : Icons.check_circle_rounded,
+                            size: 22,
+                          ),
                           const SizedBox(width: 8),
-                          Text(
-                            'Konfirmasi Serah Terima Laptop',
-                            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                          Flexible(
+                            child: Text(
+                              _sudahDiscanKirim(_kirimSelectedRental)
+                                  ? 'Sudah Dikirim — Tidak Bisa Discan Ulang'
+                                  : 'Konfirmasi Serah Terima Laptop',
+                              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ],
                       ),
@@ -807,6 +1040,28 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+
+            // 2b. Cari nama penyewa — dipakai bila barcode unit rusak / tidak
+            //     bisa discan. Hasilnya diproses sama seperti hasil scan barcode.
+            _buildSectionHeader('Cari Nama Penyewa (Bila Barcode Rusak)', Icons.person_search_rounded),
+            const SizedBox(height: 4),
+            Text(
+              'Cari nama penyewa / nomor HP / kode invoice, lalu pilih salah satu. Proses terima berjalan sama seperti hasil scan.',
+              style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 12),
+            ),
+            const SizedBox(height: 10),
+            _buildTerimaNameSearchField(isDark),
+            const SizedBox(height: 12),
+            if (_terimaNameSearching)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: CircularProgressIndicator(color: _purplePrimary),
+                ),
+              )
+            else
+              _buildTerimaNameSearchResults(isDark),
             const SizedBox(height: 20),
 
             if (_terimaSearching)
@@ -892,12 +1147,22 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
               ),
               const SizedBox(height: 32),
 
-              // Tombol Submit Terima
+              // Tombol Submit Terima (dikunci bila invoice sudah pernah discan)
+              if (_sudahDiscanTerima(_terimaActiveRental)) ...[
+                _buildSudahDiscanBanner(
+                  isDark,
+                  'Invoice ini SUDAH PERNAH DISCAN untuk TERIMA — tombol dikunci, scan ulang tidak akan diproses. '
+                      'Hubungi admin/IT bila ini salah scan.',
+                ),
+                const SizedBox(height: 12),
+              ],
               SizedBox(
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: _terimaSubmitting ? null : _processTerimaSubmit,
+                  onPressed: (_terimaSubmitting || _sudahDiscanTerima(_terimaActiveRental))
+                      ? null
+                      : _processTerimaSubmit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _purplePrimary,
                     foregroundColor: Colors.white,
@@ -913,11 +1178,20 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.archive_rounded, size: 22),
+                            Icon(
+                              _sudahDiscanTerima(_terimaActiveRental)
+                                  ? Icons.lock_rounded
+                                  : Icons.archive_rounded,
+                              size: 22,
+                            ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Konfirmasi Terima Laptop',
-                              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                            Flexible(
+                              child: Text(
+                                _sudahDiscanTerima(_terimaActiveRental)
+                                    ? 'Sudah Diterima — Tidak Bisa Discan Ulang'
+                                    : 'Konfirmasi Terima Laptop',
+                                style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ],
                         ),
@@ -1151,6 +1425,150 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
                       Text(name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
                       const SizedBox(height: 2),
                       Text('Inv: $inv • Status: $status', style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey[500])),
+                      if (_sudahDiscanKirim(r))
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            'SUDAH DIKIRIM — tidak bisa discan ulang',
+                            style: GoogleFonts.outfit(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Peringatan merah: invoice sudah pernah discan (tombol dikunci).
+  Widget _buildSudahDiscanBanner(bool isDark, String teks) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.lock_rounded, color: Colors.redAccent, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              teks,
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Colors.red[700],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Kolom pencarian nama penyewa di layar TERIMA.
+  Widget _buildTerimaNameSearchField(bool isDark) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E2026) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.white12 : Colors.grey[300]!),
+      ),
+      child: TextField(
+        controller: _terimaSearchNameCtrl,
+        style: GoogleFonts.outfit(fontSize: 14),
+        decoration: InputDecoration(
+          hintText: 'Cari nama penyewa / No. HP / invoice...',
+          hintStyle: GoogleFonts.outfit(color: Colors.grey[400], fontSize: 13),
+          prefixIcon: const Icon(Icons.person_search_rounded, color: _purplePrimary, size: 20),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.arrow_forward_rounded, color: _purplePrimary),
+            onPressed: () => _searchTerimaByName(_terimaSearchNameCtrl.text),
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        ),
+        onSubmitted: _searchTerimaByName,
+      ),
+    );
+  }
+
+  /// Hasil pencarian nama penyewa (nama, unit, tanggal, status) → pilih satu.
+  Widget _buildTerimaNameSearchResults(bool isDark) {
+    if (_terimaSearchResults.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(14),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E2026) : Colors.grey[100],
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Text(
+          'Cari nama penyewa yang akan mengembalikan laptop. Hanya rental yang sedang disewa yang ditampilkan.',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 12),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _terimaSearchResults.length,
+      separatorBuilder: (_, index) => const SizedBox(height: 8),
+      itemBuilder: (ctx, idx) {
+        final r = _terimaSearchResults[idx];
+        final name = _getRenterName(r);
+        final inv = (r['invoice_number'] ?? '-').toString();
+        final unit = (r['barcode'] ?? '').toString().trim();
+        final status = (r['status'] ?? '-').toString();
+        final tanggal = (r['tanggal_kirim'] ?? r['invoice_date'] ?? '-').toString();
+
+        return InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => _pilihRentalUntukTerima(r),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E2026) : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _purplePrimary.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: _purplePrimary.withValues(alpha: 0.1),
+                  child: const Icon(Icons.person_rounded, color: _purplePrimary, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name, style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Inv: $inv • Unit: ${unit.isEmpty ? '-' : unit}',
+                        style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Tanggal: $tanggal • Status: $status',
+                        style: GoogleFonts.outfit(fontSize: 11, color: Colors.grey[500]),
+                      ),
                     ],
                   ),
                 ),
@@ -1197,6 +1615,14 @@ class _SerahTerimaLaptopPageState extends State<SerahTerimaLaptopPage>
           Text('• Telepon: $phone', style: GoogleFonts.outfit(fontSize: 13)),
           const SizedBox(height: 4),
           Text('• Alamat: $alamat', style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey[600])),
+          if (_sudahDiscanKirim(r)) ...[
+            const SizedBox(height: 10),
+            _buildSudahDiscanBanner(
+              isDark,
+              'Invoice ini sudah pernah discan untuk KIRIM (status: ${r['status'] ?? r['rental_status'] ?? '-'}). '
+                  'Scan ulang dikunci.',
+            ),
+          ],
         ],
       ),
     );
