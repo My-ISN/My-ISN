@@ -16,10 +16,7 @@ name: Preview Web (GitHub Pages)
 
 on:
   push:
-    # Cabang fitur ditambahkan sementara supaya perubahan bisa diverifikasi di CI
-    # sebelum digabung ke main (hapus lagi setelah fiturnya masuk main).
-    branches:
-      [main, feat/preview-web, feat/cekupdate-hris, feat/warna-umkm-seluruh-halaman]
+    branches: [main, feat/preview-web, feat/cekupdate-hris]
   workflow_dispatch:
 
 permissions:

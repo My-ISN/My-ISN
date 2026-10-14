@@ -105,13 +105,13 @@ jobs:
           ./gradlew --version
 
       - name: Build APK (release, dipakai untuk update staf)
-        run: flutter build apk --release --build-name=1.3.2 --build-number=2026
+        run: flutter build apk --release --build-name=1.3.3 --build-number=2027
 
       - name: Build APK (debug, untuk pemeriksaan)
-        run: flutter build apk --debug --build-name=1.3.2 --build-number=2026
+        run: flutter build apk --debug --build-name=1.3.3 --build-number=2027
 
       - name: Build AAB (release)
-        run: flutter build appbundle --release --build-name=1.3.2 --build-number=2026
+        run: flutter build appbundle --release --build-name=1.3.3 --build-number=2027
 
       - name: Sidik jari penandatangan APK (bukti kunci yang dipakai)
         id: sidik
@@ -155,19 +155,21 @@ jobs:
           SIDIK: ${{ steps.sidik.outputs.sidik }}
         run: |
           set -e
-          TAG="apk-1.3.2-2026"
-          NAMA="myisn-1.3.2-2026.apk"
+          TAG="apk-1.3.3-2027"
+          NAMA="myisn-1.3.3-2027.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "/tmp/$NAMA"
           ls -l "/tmp/$NAMA"
           cat > /tmp/catatan.md <<EOF
-          APK My-ISN **1.3.2 (build 2026)** untuk staf CV ISKOM.
+          APK My-ISN **1.3.3 (build 2027)** untuk staf CV ISKOM.
 
-          Nomor build mengikuti TAHUN rilis (1.2.2 = 2024, 1.2.3 = 2025, rilis
-          ini = 2026) supaya APK baru selalu bisa menimpa aplikasi yang sudah
-          terpasang di HP staf tanpa uninstall.
+          Nomor build mengikuti TAHUN rilis (1.2.2 = 2024, 1.2.3 = 2025,
+          1.3.2 = 2026, rilis ini = 2027) supaya APK baru selalu bisa menimpa
+          aplikasi yang sudah terpasang di HP staf tanpa uninstall.
 
           - Aplikasi memeriksa versi terbaru sendiri: begitu ada versi lebih
             baru, muncul keterangan dan tombol **Perbarui Sekarang**.
+          - Seluruh halaman kini memakai palet aplikasi /umkm: oranye #FF9A2E,
+            krem #FFF8F2/#FFF2E6, coklat #5F4B3D — tidak ada lagi warna ungu.
           - Menu CRM di HP: tombol Chat WA kini membawa **template chat** (sama seperti versi web
             erp/crm-leads) dan menandai **staf yang menghubungi lead**.
           - Riwayat follow-up lead dibaca dari kolom yang benar (sebelumnya tidak pernah muncul).
@@ -181,7 +183,7 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "/tmp/$NAMA" --clobber
           else
-            gh release create "$TAG" "/tmp/$NAMA" --title "APK My-ISN 1.3.2 (2026)" --notes-file /tmp/catatan.md
+            gh release create "$TAG" "/tmp/$NAMA" --title "APK My-ISN 1.3.3 (2027)" --notes-file /tmp/catatan.md
           fi
           gh release view "$TAG" --json assets,tagName,url
 
