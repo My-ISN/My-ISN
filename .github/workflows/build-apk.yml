@@ -79,10 +79,10 @@ jobs:
           ./gradlew --version
 
       - name: Build APK (debug)
-        run: flutter build apk --debug --build-name=1.2.3 --build-number=25
+        run: flutter build apk --debug --build-name=1.3.1 --build-number=26
 
       - name: Build AAB (release, ditandatangani debug key)
-        run: flutter build appbundle --release --build-name=1.2.3 --build-number=25
+        run: flutter build appbundle --release --build-name=1.3.1 --build-number=26
 
       - name: Unggah artifact APK & AAB
         uses: actions/upload-artifact@v4
