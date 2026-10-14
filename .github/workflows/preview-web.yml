@@ -270,7 +270,10 @@ jobs:
   deploy-web:
     name: Terbitkan ke GitHub Pages
     needs: build-web
-    if: needs.build-web.outputs.pages_enabled == 'true'
+    # GitHub Pages hanya menerima deployment dari cabang default (main).
+    # Cabang fitur tetap membangun + menguji + melaporkan, lalu lewati deploy
+    # supaya workflow tetap HIJAU (perilaku sama saat Pages belum aktif).
+    if: needs.build-web.outputs.pages_enabled == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
