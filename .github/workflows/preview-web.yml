@@ -154,6 +154,45 @@ jobs:
           pkill -f "http.server 8099" 2>/dev/null || true
           cat /tmp/preview-report/render.txt
 
+      - name: Cek status GitHub Pages (API Pages WAJIB pakai token)
+        id: pages_check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/preview-report
+          API="https://api.github.com/repos/$GITHUB_REPOSITORY/pages"
+          # PENTING: GET /repos/<owner>/<repo>/pages mengembalikan HTTP 404 bila
+          # diminta TANPA autentikasi -- bahkan untuk repo PUBLIK yang situs
+          # Pages-nya sudah hidup (diuji pada microsoft/monaco-editor,
+          # rust-lang/rust-clippy, google/material-design-icons: ketiganya
+          # situs 200 tetapi API 404 tanpa token). Karena itu cek tanpa token
+          # SELALU menyimpulkan "belum aktif" dan tahap deploy terlewat tanpa
+          # pesan galat yang jelas. Pakai token run ini (punya hak pages: write,
+          # termasuk baca).
+          CODE=$(curl -s -o /tmp/pages.json -w '%{http_code}' \
+                 -H "Authorization: Bearer $GH_TOKEN" \
+                 -H "Accept: application/vnd.github+json" \
+                 -H "X-GitHub-Api-Version: 2022-11-28" "$API")
+          BUILD_TYPE=$(python3 -c "import json;print(json.load(open('/tmp/pages.json')).get('build_type') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
+          SITE_URL=$(python3 -c "import json;print(json.load(open('/tmp/pages.json')).get('html_url') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
+          PAGES_STATUS=$(python3 -c "import json;print(json.load(open('/tmp/pages.json')).get('status') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
+          PAGES_VIS=$(python3 -c "import json;print(json.load(open('/tmp/pages.json')).get('visibility') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
+          {
+            echo "cek API     : $API (dengan token run)"
+            echo "kode HTTP   : $CODE"
+            echo "build_type  : $BUILD_TYPE (harus 'workflow' agar deploy atas kendali kita)"
+            echo "html_url    : $SITE_URL"
+            echo "status situs: $PAGES_STATUS | visibility: $PAGES_VIS"
+            echo "cuplikan    : $(head -c 300 /tmp/pages.json | tr -d '\n')"
+            echo "tautan preview: https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+          } | tee /tmp/preview-report/pages-check.txt
+          if [ "$BUILD_TYPE" = "workflow" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages belum siap untuk sumber 'GitHub Actions' (kode HTTP API: $CODE, build_type: $BUILD_TYPE). Satu klik untuk pemilik: Settings -> Pages -> Build and deployment -> Source: pilih 'GitHub Actions' (bukan 'Deploy from a branch'), lalu Actions -> Preview Web (GitHub Pages) -> Run workflow. Preview hidup di https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+          fi
+
       - name: Susun laporan (REPORT.txt)
         if: always()
         run: |
@@ -179,8 +218,7 @@ jobs:
             cat /tmp/preview-report/render.txt 2>/dev/null || echo "(uji render tidak tersedia)"
             echo
             echo "=== STATUS GITHUB PAGES ==="
-            echo "cek API : https://api.github.com/repos/$GITHUB_REPOSITORY/pages (404 = belum diaktifkan)"
-            echo "cek URL : https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+            cat /tmp/preview-report/pages-check.txt 2>/dev/null || echo "(cek Pages tidak tersedia)"
             echo "bukti render: lihat preview-runtime.png + dom.html di cabang ini (penanda flt-glass-pane/flutter-view)"
             echo "log build   : catat ringkas di bawah; log lengkap tidak dapat dibaca tanpa login"
           } > /tmp/preview-report/REPORT.txt
@@ -214,21 +252,6 @@ jobs:
           else
             sed -E 's/x-access-token:[^@]*@/x-access-token:***@/g' /tmp/push.err
             echo "::warning::Gagal push cabang laporan (lihat pesan di atas)"
-          fi
-
-      - name: Cek status GitHub Pages
-        id: pages_check
-        run: |
-          RESP=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
-          CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
-          BUILD_TYPE=$(echo "$RESP" | python3 -c "import json,sys;print(json.load(sys.stdin).get('build_type','') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
-          SITE_URL=$(echo "$RESP" | python3 -c "import json,sys;print(json.load(sys.stdin).get('html_url','') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
-          echo "kode HTTP API Pages: $CODE | build_type: $BUILD_TYPE | html_url: $SITE_URL"
-          if [ "$BUILD_TYPE" = "workflow" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::GitHub Pages belum siap untuk sumber 'GitHub Actions'. Satu klik untuk pemilik: Settings -> Pages -> Build and deployment -> Source: pilih 'GitHub Actions' (bukan 'Deploy from a branch'). Setelah itu jalankan lagi Actions -> Preview Web (GitHub Pages) -> Run workflow; preview hidup di https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
           fi
 
       - name: Siapkan GitHub Pages
