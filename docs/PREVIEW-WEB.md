@@ -24,10 +24,13 @@ diklik pemilik satu kali:
 
 1. Buka https://github.com/My-ISN/My-ISN/settings/pages
 2. Bagian **Build and deployment** → **Source** → pilih **GitHub Actions**
-3. Simpan.
+   (jangan pilih "Deploy from a branch")
+3. Simpan (tidak ada tombol simpan untuk opsi ini; pilihannya langsung aktif)
+4. Jalankan ulang workflow: **Actions** → **Preview Web (GitHub Pages)** →
+   **Run workflow** → pilih cabang → **Run workflow**.
 
-Setelah itu, jalankan ulang workflow: **Actions** → **Preview Web (GitHub Pages)**
-→ **Run workflow**. Preview akan hidup di tautan di atas.
+Preview akan hidup di tautan di atas. Statusnya bisa dipantau di laporan
+(`build_type` harus `workflow`).
 
 Selama setelan itu belum diklik, workflow tetap **hijau** dan hanya melewati
 tahap deploy (ada peringatan di ringkasan run).
@@ -39,8 +42,14 @@ laporan ke cabang `preview-web-report`:
 
     https://raw.githubusercontent.com/My-ISN/My-ISN/preview-web-report/REPORT.txt
 
-Isinya: versi Flutter/Dart, potongan log build, hasil smoke test, dan catatan
-bila ada galat.
+Isinya: versi Flutter/Dart, potongan log build, hasil smoke test, hasil uji
+render, dan catatan bila ada galat. Bukti render ikut disimpan di cabang yang
+sama:
+
+- `preview-runtime.png` — screenshot aplikasi yang benar-benar dirender browser
+  (Chrome headless di runner, ukuran HP 414x896)
+- `dom.html` — DOM hasil render (memuat penanda `flt-glass-pane`/`flutter-view`,
+  artinya mesin Flutter benar-benar jalan, bukan halaman kosong)
 
 ## 3. Mengedit kode langsung di browser
 

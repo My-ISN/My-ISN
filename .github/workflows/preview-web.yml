@@ -179,7 +179,10 @@ jobs:
             cat /tmp/preview-report/render.txt 2>/dev/null || echo "(uji render tidak tersedia)"
             echo
             echo "=== STATUS GITHUB PAGES ==="
-            echo "cek: https://api.github.com/repos/$GITHUB_REPOSITORY/pages (404 = belum diaktifkan)"
+            echo "cek API : https://api.github.com/repos/$GITHUB_REPOSITORY/pages (404 = belum diaktifkan)"
+            echo "cek URL : https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+            echo "bukti render: lihat preview-runtime.png + dom.html di cabang ini (penanda flt-glass-pane/flutter-view)"
+            echo "log build   : catat ringkas di bawah; log lengkap tidak dapat dibaca tanpa login"
           } > /tmp/preview-report/REPORT.txt
           echo "--- ringkasan REPORT.txt ---"
           head -30 /tmp/preview-report/REPORT.txt
@@ -216,13 +219,16 @@ jobs:
       - name: Cek status GitHub Pages
         id: pages_check
         run: |
+          RESP=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
           CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
-          echo "kode API Pages: $CODE"
-          if [ "$CODE" = "200" ]; then
+          BUILD_TYPE=$(echo "$RESP" | python3 -c "import json,sys;print(json.load(sys.stdin).get('build_type','') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
+          SITE_URL=$(echo "$RESP" | python3 -c "import json,sys;print(json.load(sys.stdin).get('html_url','') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
+          echo "kode HTTP API Pages: $CODE | build_type: $BUILD_TYPE | html_url: $SITE_URL"
+          if [ "$BUILD_TYPE" = "workflow" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::GitHub Pages BELUM aktif. Satu klik untuk pemilik: Settings -> Pages -> Build and deployment -> Source: GitHub Actions. Setelah itu push lagi (atau Actions -> Preview Web -> Run workflow) agar preview terbit di https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+            echo "::warning::GitHub Pages belum siap untuk sumber 'GitHub Actions'. Satu klik untuk pemilik: Settings -> Pages -> Build and deployment -> Source: pilih 'GitHub Actions' (bukan 'Deploy from a branch'). Setelah itu jalankan lagi Actions -> Preview Web (GitHub Pages) -> Run workflow; preview hidup di https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
           fi
 
       - name: Siapkan GitHub Pages
