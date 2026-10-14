@@ -1,0 +1,255 @@
+name: Preview Web (GitHub Pages)
+
+# Tujuan: pemilik bisa MELIHAT aplikasi langsung di browser (tanpa memasang
+# APK ke HP) setiap kali kode di-push. Hasil `flutter build web` diterbitkan
+# ke GitHub Pages.
+#
+# SATU SETELAN YANG HARUS DIKLIK PEMILIK (sekali saja, tidak bisa dilakukan
+# otomatis oleh workflow karena token Actions tidak punya hak admin Pages):
+#   Repo -> Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
+# Selama setelan itu belum aktif, workflow ini tetap HIJAU, hanya melewati
+# tahap deploy dan menulis peringatan + laporan.
+#
+# Laporan hasil build selalu ditulis ke cabang `preview-web-report`
+# (berkas REPORT.txt) supaya bisa dibaca tanpa login, karena log Actions
+# tidak dapat diakses tanpa autentikasi.
+
+on:
+  push:
+    branches: [main, feat/preview-web, feat/cekupdate-hris]
+  workflow_dispatch:
+
+permissions:
+  contents: write # untuk push cabang laporan
+  pages: write # untuk deploy Pages
+  id-token: write # untuk deploy Pages
+
+concurrency:
+  group: pages-preview
+  cancel-in-progress: true
+
+jobs:
+  build-web:
+    name: Build Flutter Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      pages_enabled: ${{ steps.pages_check.outputs.enabled }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter 3.41.9 (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.9
+          channel: stable
+          cache: true
+
+      - name: Ambil dependensi
+        run: flutter pub get
+
+      - name: Info toolchain
+        run: |
+          mkdir -p /tmp/preview-report
+          {
+            echo "=== LAPORAN BUILD PREVIEW WEB ==="
+            echo "repo      : $GITHUB_REPOSITORY"
+            echo "branch    : $GITHUB_REF_NAME"
+            echo "commit    : $GITHUB_SHA"
+            echo "run id    : $GITHUB_RUN_ID"
+            echo "waktu     : $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo
+            echo "=== TOOLCHAIN ==="
+            flutter --version 2>&1
+            dart --version 2>&1
+            java -version 2>&1 | head -3
+          } | tee /tmp/preview-report/toolchain.txt
+
+      - name: Build web (release, base-href /My-ISN/)
+        run: |
+          set -o pipefail
+          flutter build web --release --no-tree-shake-icons --base-href "/My-ISN/" 2>&1 | tee /tmp/flutter-build-web.log
+
+      - name: Uji asap (smoke test) hasil build
+        if: always()
+        run: |
+          if [ ! -d build/web ]; then
+            echo "build/web TIDAK ADA" | tee /tmp/preview-report/smoke.txt
+            exit 0
+          fi
+          # PENTING: index.html memakai <base href="/My-ISN/">, jadi aplikasi harus
+          # disajikan pada path /My-ISN/ agar aset relatif dapat dimuat
+          # (meniru GitHub Pages project site).
+          rm -rf /tmp/serveroot && mkdir -p /tmp/serveroot
+          cp -r build/web /tmp/serveroot/My-ISN
+          python3 -m http.server 8099 --bind 127.0.0.1 --directory /tmp/serveroot >/tmp/httpd.log 2>&1 &
+          sleep 2
+          {
+            echo "=== UJI ASAP: HTTP dari server statis lokal di runner ==="
+            echo "URL dasar: http://127.0.0.1:8099/My-ISN/"
+            for f in index.html flutter_bootstrap.js main.dart.js flutter.js; do
+              if [ -f "build/web/$f" ]; then
+                printf '%s  %s  %s bytes  %s\n' "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/My-ISN/$f)" "$(curl -s -o /dev/null -w '%{content_type}' http://127.0.0.1:8099/My-ISN/$f)" "$(stat -c%s build/web/$f)" "$f"
+              else
+                echo "TIDAK ADA: $f"
+              fi
+            done
+            echo
+            echo "=== base href di index.html (harus /My-ISN/) ==="
+            grep -o '<base href="[^"]*"' build/web/index.html
+            echo
+            echo "=== bukti kode aplikasi ikut terkompilasi (marker API ISKOM) ==="
+            echo -n "istanakomputer.com muncul: "; grep -c "istanakomputer.com" build/web/main.dart.js || true
+            echo -n "mobileapi muncul          : "; grep -c "mobileapi" build/web/main.dart.js || true
+            echo -n "ukuran main.dart.js       : "; stat -c%s build/web/main.dart.js
+            echo
+            echo "=== isi folder build/web ==="
+            ls -la build/web
+          } | tee /tmp/preview-report/smoke.txt
+          pkill -f "http.server 8099" 2>/dev/null || true
+
+      - name: Uji render di browser (Chrome headless)
+        if: always()
+        run: |
+          mkdir -p /tmp/preview-report
+          if [ ! -d build/web ]; then
+            echo "build/web tidak ada, uji render dilewati" > /tmp/preview-report/render.txt
+            exit 0
+          fi
+          # disajikan pada /My-ISN/ agar cocok dengan <base href> di index.html
+          rm -rf /tmp/serveroot && mkdir -p /tmp/serveroot
+          cp -r build/web /tmp/serveroot/My-ISN
+          python3 -m http.server 8099 --bind 127.0.0.1 --directory /tmp/serveroot >/tmp/httpd2.log 2>&1 &
+          sleep 2
+          URL="http://127.0.0.1:8099/My-ISN/"
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          {
+            echo "=== UJI RENDER DI BROWSER (Chrome headless) ==="
+            echo "url    : $URL"
+            echo "chrome : ${CHROME:-TIDAK ADA}"
+            curl -s -o /dev/null -w "curl index.html: HTTP %{http_code}\n" "$URL"
+          } > /tmp/preview-report/render.txt
+          if [ -n "$CHROME" ]; then
+            mkdir -p /tmp/shot
+            timeout 240 "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage \
+              --use-gl=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist \
+              --hide-scrollbars --window-size=414,896 --virtual-time-budget=45000 \
+              --screenshot=/tmp/shot/preview.png "$URL" \
+              >> /tmp/preview-report/render.txt 2>&1 || echo "screenshot: GAGAL/timeout" >> /tmp/preview-report/render.txt
+            timeout 240 "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage \
+              --use-gl=swiftshader --enable-unsafe-swiftshader \
+              --virtual-time-budget=45000 --dump-dom "$URL" \
+              > /tmp/shot/dom.html 2>> /tmp/preview-report/render.txt || true
+            {
+              echo "--- penanda render Flutter di DOM ---"
+              grep -o "flt-glass-pane\|flt-scene-host\|flutter-view\|flt-semantics\|<canvas" /tmp/shot/dom.html 2>/dev/null | sort | uniq -c || echo "(tidak ada penanda)"
+              echo "--- ukuran DOM & screenshot ---"
+              echo "dom.html: $(wc -c < /tmp/shot/dom.html 2>/dev/null || echo 0) bytes"
+              stat -c%s /tmp/shot/preview.png 2>/dev/null || echo "tidak ada screenshot"
+            } >> /tmp/preview-report/render.txt
+            cp /tmp/shot/preview.png /tmp/preview-report/preview-runtime.png 2>/dev/null || true
+            cp /tmp/shot/dom.html /tmp/preview-report/dom.html 2>/dev/null || true
+          fi
+          pkill -f "http.server 8099" 2>/dev/null || true
+          cat /tmp/preview-report/render.txt
+
+      - name: Susun laporan (REPORT.txt)
+        if: always()
+        run: |
+          mkdir -p /tmp/preview-report
+          {
+            cat /tmp/preview-report/toolchain.txt 2>/dev/null || echo "(toolchain tidak tersedia)"
+            echo
+            echo "=== HASIL BUILD WEB ==="
+            if [ -d build/web ]; then
+              echo "build/web ADA, total: $(du -sh build/web | cut -f1)"
+            else
+              echo "build/web TIDAK ADA (build web gagal)"
+            fi
+            echo
+            echo "=== 40 BARIS TERAKHIR LOG BUILD (termasuk galat bila ada) ==="
+            tail -40 /tmp/flutter-build-web.log 2>/dev/null || echo "(log build tidak ada)"
+            echo
+            echo "=== BARIS 'Error' / 'dart:io' PADA LOG BUILD (bila ada) ==="
+            grep -nE "^Error|Error:|is not available on this platform|dart:io" /tmp/flutter-build-web.log 2>/dev/null | head -40 || echo "(tidak ada)"
+            echo
+            cat /tmp/preview-report/smoke.txt 2>/dev/null || echo "(smoke test tidak tersedia)"
+            echo
+            cat /tmp/preview-report/render.txt 2>/dev/null || echo "(uji render tidak tersedia)"
+            echo
+            echo "=== STATUS GITHUB PAGES ==="
+            echo "cek API : https://api.github.com/repos/$GITHUB_REPOSITORY/pages (404 = belum diaktifkan)"
+            echo "cek URL : https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+            echo "bukti render: lihat preview-runtime.png + dom.html di cabang ini (penanda flt-glass-pane/flutter-view)"
+            echo "log build   : catat ringkas di bawah; log lengkap tidak dapat dibaca tanpa login"
+          } > /tmp/preview-report/REPORT.txt
+          echo "--- ringkasan REPORT.txt ---"
+          head -30 /tmp/preview-report/REPORT.txt
+
+      - name: Unggah build web sebagai artifact (cadangan)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-preview-hasil
+          retention-days: 14
+          if-no-files-found: warn
+          path: build/web
+
+      - name: Publikasikan laporan ke cabang preview-web-report
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set +x
+          cd /tmp/preview-report
+          git init -q -b preview-web-report
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "laporan build preview web (run ${GITHUB_RUN_ID})"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git push -q --force origin preview-web-report 2>/tmp/push.err; then
+            echo "laporan terkirim ke cabang preview-web-report"
+          else
+            sed -E 's/x-access-token:[^@]*@/x-access-token:***@/g' /tmp/push.err
+            echo "::warning::Gagal push cabang laporan (lihat pesan di atas)"
+          fi
+
+      - name: Cek status GitHub Pages
+        id: pages_check
+        run: |
+          RESP=$(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' "https://api.github.com/repos/$GITHUB_REPOSITORY/pages")
+          BUILD_TYPE=$(echo "$RESP" | python3 -c "import json,sys;print(json.load(sys.stdin).get('build_type','') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
+          SITE_URL=$(echo "$RESP" | python3 -c "import json,sys;print(json.load(sys.stdin).get('html_url','') or 'tidak-ada')" 2>/dev/null || echo "tidak-ada")
+          echo "kode HTTP API Pages: $CODE | build_type: $BUILD_TYPE | html_url: $SITE_URL"
+          if [ "$BUILD_TYPE" = "workflow" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages belum siap untuk sumber 'GitHub Actions'. Satu klik untuk pemilik: Settings -> Pages -> Build and deployment -> Source: pilih 'GitHub Actions' (bukan 'Deploy from a branch'). Setelah itu jalankan lagi Actions -> Preview Web (GitHub Pages) -> Run workflow; preview hidup di https://${GITHUB_REPOSITORY_OWNER,,}.github.io/${GITHUB_REPOSITORY#*/}/"
+          fi
+
+      - name: Siapkan GitHub Pages
+        if: steps.pages_check.outputs.enabled == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: Unggah artifact Pages
+        if: steps.pages_check.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy-web:
+    name: Terbitkan ke GitHub Pages
+    needs: build-web
+    if: needs.build-web.outputs.pages_enabled == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy ke GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
