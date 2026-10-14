@@ -32,11 +32,34 @@ android {
         versionName = flutter.versionName
     }
 
+    // Kunci tanda tangan TETAP milik ISKOM (bukan kunci debug bawaan Gradle).
+    // Tanpa kunci ini, setiap build di runner GitHub dibangkitkan ulang kunci
+    // debug-nya sehingga tanda tangan APK berubah tiap rilis dan Android
+    // menolak memasang APK baru di atas aplikasi yang sudah terpasang.
+    // Salinan cadangan kunci disimpan di luar repo (VPS:
+    // ~/.hermes/state/iskom-signing-backup.p12) - jangan diganti selama
+    // aplikasi ini masih dipakai staf, karena tanda tangannya jadi berbeda lagi.
+    signingConfigs {
+        create("iskom") {
+            storeFile = file("iskom-signing.p12")
+            storeType = "PKCS12"
+            storePassword = "iskom2026"
+            keyAlias = "iskom"
+            keyPassword = "iskom2026"
+        }
+    }
+
     buildTypes {
+        debug {
+            // APK debug yang dibagikan ke staf ikut memakai kunci tetap ini,
+            // supaya APK rilis berikutnya bisa menimpa yang sudah terpasang
+            // (kunci debug Gradle yang dibangkitkan ulang tiap runner GitHub
+            // membuat tanda tangannya BERUBAH tiap build -> instalasi
+            // pembaruan ditolak Android dengan "Aplikasi tidak terpasang").
+            signingConfig = signingConfigs.getByName("iskom")
+        }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("iskom")
             
             isMinifyEnabled = true
             isShrinkResources = true
