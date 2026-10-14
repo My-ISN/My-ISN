@@ -110,12 +110,12 @@ class RentPlanService {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      final data = json.decode(response.body);
-      if (data is Map<String, dynamic>) {
+      final hasilJson = json.decode(response.body);
+      if (hasilJson is Map<String, dynamic>) {
         // Kode HTTP disertakan agar pemanggil bisa mengenali 409 (sudah pernah discan).
-        data['http_status'] = response.statusCode;
+        hasilJson['http_status'] = response.statusCode;
 
-        return data;
+        return hasilJson;
       }
 
       return {'status': false, 'message': 'Balasan server tidak dikenali.'};
@@ -360,12 +360,12 @@ class RentPlanService {
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
-      final data = json.decode(response.body);
-      if (data is Map<String, dynamic>) {
+      final hasilJson = json.decode(response.body);
+      if (hasilJson is Map<String, dynamic>) {
         // Kode HTTP disertakan agar pemanggil bisa mengenali 409 (sudah pernah discan).
-        data['http_status'] = response.statusCode;
+        hasilJson['http_status'] = response.statusCode;
 
-        return data;
+        return hasilJson;
       }
 
       return {'status': false, 'message': 'Balasan server tidak dikenali.'};
@@ -505,12 +505,12 @@ class RentPlanService {
         const Duration(seconds: 60),
       );
       final response = await http.Response.fromStream(streamedResponse);
-      final data = json.decode(response.body);
-      if (data is Map<String, dynamic>) {
+      final hasilJson = json.decode(response.body);
+      if (hasilJson is Map<String, dynamic>) {
         // Kode HTTP disertakan agar pemanggil bisa mengenali 409 (sudah pernah discan).
-        data['http_status'] = response.statusCode;
+        hasilJson['http_status'] = response.statusCode;
 
-        return data;
+        return hasilJson;
       }
 
       return {'status': false, 'message': 'Balasan server tidak dikenali.'};
@@ -583,12 +583,12 @@ class RentPlanService {
         const Duration(seconds: 60),
       );
       final response = await http.Response.fromStream(streamedResponse);
-      final data = json.decode(response.body);
-      if (data is Map<String, dynamic>) {
+      final hasilJson = json.decode(response.body);
+      if (hasilJson is Map<String, dynamic>) {
         // Kode HTTP disertakan agar pemanggil bisa mengenali 409 (sudah pernah discan).
-        data['http_status'] = response.statusCode;
+        hasilJson['http_status'] = response.statusCode;
 
-        return data;
+        return hasilJson;
       }
 
       return {'status': false, 'message': 'Balasan server tidak dikenali.'};
