@@ -141,6 +141,43 @@ class DashboardQuickMenu extends StatelessWidget {
 
   Widget _buildMenuWidget(
       BuildContext context, AppModule m, Map<String, dynamic> user) {
+    void bukaMenu() {
+      if (m.tabTag != null) {
+        DashboardPage.switchTab(m.tabTag!);
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => m.pageBuilder(context, user),
+          ),
+        );
+      }
+    }
+
+    if (m.permission == 'mobile_rent_plan_enable') {
+      // Badge "Pesan Perlu Dibalas" pada kartu Rent Plan di menu cepat.
+      // Badge selalu 0 bila server menyatakan staf tidak ber-akses menu
+      // Rent Plan (NotificationManager.setHandoffCount menyaring `akses`).
+      return ValueListenableBuilder<int>(
+        valueListenable: NotificationManager().unreadHandoffCount,
+        builder: (context, count, child) {
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildQuickMenuCard(
+                context,
+                m.titleKey.tr(context),
+                m.icon,
+                m.color,
+                bukaMenu,
+              ),
+              if (count > 0) _buildBadge(context, count),
+            ],
+          );
+        },
+      );
+    }
+
     if (m.permission == 'mobile_todo_enable') {
       return ValueListenableBuilder<int>(
         valueListenable: NotificationManager().unreadTodoCount,
@@ -153,48 +190,9 @@ class DashboardQuickMenu extends StatelessWidget {
                 m.titleKey.tr(context),
                 m.icon,
                 m.color,
-                () {
-                  if (m.tabTag != null) {
-                    DashboardPage.switchTab(m.tabTag!);
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => m.pageBuilder(context, user),
-                      ),
-                    );
-                  }
-                },
+                bukaMenu,
               ),
-              if (count > 0)
-                Positioned(
-                  right: 8,
-                  top: 5,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Theme.of(context).cardColor,
-                        width: 1.5,
-                      ),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 18,
-                      minHeight: 18,
-                    ),
-                    child: Text(
-                      count > 9 ? '9+' : '$count',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w900,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
+              if (count > 0) _buildBadge(context, count),
             ],
           );
         },
@@ -206,18 +204,39 @@ class DashboardQuickMenu extends StatelessWidget {
       m.titleKey.tr(context),
       m.icon,
       m.color,
-      () {
-        if (m.tabTag != null) {
-          DashboardPage.switchTab(m.tabTag!);
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => m.pageBuilder(context, user),
-            ),
-          );
-        }
-      },
+      bukaMenu,
+    );
+  }
+
+  /// Badge merah jumlah item (dipakai kartu Todo & Rent Plan/"Pesan Perlu Dibalas").
+  Widget _buildBadge(BuildContext context, int count) {
+    return Positioned(
+      right: 8,
+      top: 5,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Theme.of(context).cardColor,
+            width: 1.5,
+          ),
+        ),
+        constraints: const BoxConstraints(
+          minWidth: 18,
+          minHeight: 18,
+        ),
+        child: Text(
+          count > 9 ? '9+' : '$count',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 9,
+            fontWeight: FontWeight.w900,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 
