@@ -29,11 +29,16 @@ class AppConstants {
   ///           (bila server menjawab 404, adaptor otomatis mencoba alias lama
   ///           $baseUrl/get_handoff_antrean & $baseUrl/tandai_handoff_dibalas)
   ///
-  /// Ubah ke `false` setelah endpoint di server aktif (terbukti menjawab 200
-  /// untuk user_id yang berhak) dan hak akses `mobile_rent_plan_enable` sudah
-  /// diisi untuk staf yang berhak. 15 Okt 2026: BELUM terbukti — keempat
-  /// endpoint (baru & alias) masih 404 di produksi, jadi tetap `true`.
-  static const bool handoffDemoMode = true;
+  /// 15 Okt 2026 ±18:50 WIB — sudah TERBUKTI 200 di produksi, karena itu
+  /// nilai sekarang `false` (mode uji dimatikan):
+  ///   GET .../bot/handoff-antrean?user_id=152 -> 200
+  ///       {"status":true,"akses":true,"jumlah":0,"data":[]}
+  ///   user_id tak berhak                      -> 403 (akses:false)
+  ///   tanpa user_id                           -> 400 "user_id wajib diisi."
+  /// Alias lama /get_handoff_antrean juga sudah hidup (200 untuk user berhak,
+  /// 403 untuk yang tidak berhak), jadi cadangan jatuh-ke-alias saat 404 tetap
+  /// tidak terpakai dan aman.
+  static const bool handoffDemoMode = false;
 
   /// Helper: buat storage instance dengan opsi standar
   static FlutterSecureStorage get storage => const FlutterSecureStorage(
