@@ -26,9 +26,13 @@ class AppConstants {
   /// `false` = memakai endpoint asli:
   ///           GET  $baseUrl/bot/handoff-antrean?user_id=&limit=&offset=
   ///           POST $baseUrl/bot/handoff-selesai  (user_id, id, catatan)
+  ///           (bila server menjawab 404, adaptor otomatis mencoba alias lama
+  ///           $baseUrl/get_handoff_antrean & $baseUrl/tandai_handoff_dibalas)
   ///
-  /// Ubah ke `false` setelah endpoint di server aktif dan hak akses
-  /// `mobile_rent_plan_enable` sudah diisi untuk staf yang berhak.
+  /// Ubah ke `false` setelah endpoint di server aktif (terbukti menjawab 200
+  /// untuk user_id yang berhak) dan hak akses `mobile_rent_plan_enable` sudah
+  /// diisi untuk staf yang berhak. 15 Okt 2026: BELUM terbukti — keempat
+  /// endpoint (baru & alias) masih 404 di produksi, jadi tetap `true`.
   static const bool handoffDemoMode = true;
 
   /// Helper: buat storage instance dengan opsi standar
