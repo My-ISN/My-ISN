@@ -17,6 +17,20 @@ class AppConstants {
     encryptedSharedPreferences: true,
   );
 
+  /// MODE UJI fitur "Pesan Perlu Dibalas" (menu hanya untuk staf ber-akses
+  /// menu rent_plan).
+  ///
+  /// `true`  = aplikasi memakai DATA CONTOH lokal sehingga bisa dibangun &
+  ///           diuji sebelum endpoint backend siap (tidak menyentuh server,
+  ///           nomor contoh fiktif 6280000xxxxxx).
+  /// `false` = memakai endpoint asli:
+  ///           GET  $baseUrl/bot/handoff-antrean?user_id=&limit=&offset=
+  ///           POST $baseUrl/bot/handoff-selesai  (user_id, id, catatan)
+  ///
+  /// Ubah ke `false` setelah endpoint di server aktif dan hak akses
+  /// `mobile_rent_plan_enable` sudah diisi untuk staf yang berhak.
+  static const bool handoffDemoMode = true;
+
   /// Helper: buat storage instance dengan opsi standar
   static FlutterSecureStorage get storage => const FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),

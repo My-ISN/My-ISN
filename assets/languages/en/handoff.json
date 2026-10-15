@@ -1,0 +1,24 @@
+{
+    "handoff": {
+        "title": "Messages to Reply",
+        "menu": "Messages to Reply",
+        "muat_ulang": "Reload",
+        "banner_demo": "TEST MODE — sample data, not connected to the server",
+        "kosong_judul": "No messages waiting for a reply",
+        "kosong_hint": "The queue is empty. Every customer message has been answered.",
+        "akses_judul": "No Access",
+        "akses_hint": "This page is only for staff with access to the Rent Plan menu.",
+        "galat_judul": "Failed to load the queue",
+        "galat_hint": "Check your internet connection and try again.",
+        "coba_lagi": "Try Again",
+        "buka_wa": "Open WhatsApp",
+        "tandai": "Mark as Replied",
+        "tandai_berhasil": "Message marked as replied.",
+        "tandai_gagal": "Failed to mark the message: {error}",
+        "nomor_kosong": "Destination number is not available.",
+        "wa_gagal": "Cannot open WhatsApp.",
+        "belum_dibalas": "{count} unreplied message(s)",
+        "kutipan_kosong": "(no message excerpt)",
+        "waktu_kosong": "-"
+    }
+}

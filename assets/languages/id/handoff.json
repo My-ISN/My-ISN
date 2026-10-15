@@ -1,0 +1,24 @@
+{
+    "handoff": {
+        "title": "Pesan Perlu Dibalas",
+        "menu": "Pesan Perlu Dibalas",
+        "muat_ulang": "Muat ulang",
+        "banner_demo": "MODE UJI — data contoh, belum terhubung ke server",
+        "kosong_judul": "Belum ada pesan yang perlu dibalas",
+        "kosong_hint": "Antrean kosong. Semua pesan pelanggan sudah dibalas.",
+        "akses_judul": "Tidak Ada Akses",
+        "akses_hint": "Halaman ini hanya untuk staf dengan akses menu Rencana Sewa.",
+        "galat_judul": "Gagal memuat antrean",
+        "galat_hint": "Periksa koneksi internet lalu coba lagi.",
+        "coba_lagi": "Coba Lagi",
+        "buka_wa": "Buka WhatsApp",
+        "tandai": "Tandai Sudah Dibalas",
+        "tandai_berhasil": "Pesan ditandai sudah dibalas.",
+        "tandai_gagal": "Gagal menandai pesan: {error}",
+        "nomor_kosong": "Nomor tujuan tidak tersedia.",
+        "wa_gagal": "Tidak dapat membuka WhatsApp.",
+        "belum_dibalas": "{count} pesan belum dibalas",
+        "kutipan_kosong": "(tidak ada kutipan pesan)",
+        "waktu_kosong": "-"
+    }
+}

@@ -32,6 +32,7 @@ import '../passwords/password_list_page.dart';
 import '../crm/crm_page.dart';
 import '../reminder/reminder_page.dart';
 import '../notes/notes_page.dart';
+import '../handoff/pesan_perlu_dibalas_page.dart';
 
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -62,7 +63,7 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'laptop_units', 'scan_laptop_barcode', 'send_laptop', 'receive_laptop', 'todo_list', 'reminder', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords', 'crm'].contains(
+    if (['rent_plan', 'handoff', 'laptop_units', 'scan_laptop_barcode', 'send_laptop', 'receive_laptop', 'todo_list', 'reminder', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords', 'crm'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
@@ -270,6 +271,36 @@ class _SideDrawerState extends State<SideDrawer> {
                                       userData: widget.userData,
                                     ),
                               ),
+                            );
+                          },
+                        ),
+
+                      if (!isCustomer &&
+                          _hasPermission('mobile_rent_plan_enable'))
+                        ValueListenableBuilder<int>(
+                          valueListenable:
+                              NotificationManager().unreadHandoffCount,
+                          builder: (context, count, child) {
+                            return _buildMenuItem(
+                              context,
+                              icon: Icons.mark_chat_unread_outlined,
+                              title: 'handoff.menu'.tr(context),
+                              isActive: widget.activePage == 'handoff',
+                              badgeCount: count,
+                              padding:
+                                  const EdgeInsets.only(left: 32, right: 12),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PesanPerluDibalasPage(
+                                      userData: widget.userData,
+                                    ),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),

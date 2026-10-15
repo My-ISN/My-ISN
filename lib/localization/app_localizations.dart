@@ -40,6 +40,7 @@ class AppLocalizations {
       'reports',
       'projects',
       'tasks',
+      'handoff',
     ];
 
     _localizedStrings = {};

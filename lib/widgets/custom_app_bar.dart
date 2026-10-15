@@ -9,6 +9,7 @@ import '../todo_list/todo_list_page.dart';
 import 'top_notification.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
+import '../services/handoff_service.dart';
 import '../dashboard/staff/widgets/menu_registry.dart';
 import '../dashboard/dashboard_page.dart';
 
@@ -21,6 +22,11 @@ class NotificationManager {
 
   final ValueNotifier<int> unreadCount = ValueNotifier<int>(0);
   final ValueNotifier<int> unreadTodoCount = ValueNotifier<int>(0);
+
+  /// Badge menu "Pesan Perlu Dibalas" (antrean WA untuk staf ber-akses
+  /// menu rent_plan). Angka & hak akses datang dari server.
+  final ValueNotifier<int> unreadHandoffCount = ValueNotifier<int>(0);
+  final ValueNotifier<bool> handoffAkses = ValueNotifier<bool>(false);
   int _lastKnownId = -1;
   int _lastKnownTodoId = -1;
 
@@ -124,6 +130,16 @@ class NotificationManager {
 
   void clearTodoBadge() {
     unreadTodoCount.value = 0;
+  }
+
+  /// Atur badge "Pesan Perlu Dibalas".
+  ///
+  /// [akses] adalah keputusan server: bila server menyatakan staf tidak
+  /// ber-akses menu rent_plan, badge selalu 0 (aplikasi tidak menyimpan daftar
+  /// staf, hanya mengikuti jawaban server).
+  void setHandoffCount(int count, {required bool akses}) {
+    unreadHandoffCount.value = (akses && count > 0) ? count : 0;
+    handoffAkses.value = akses;
   }
 }
 
@@ -465,6 +481,21 @@ class _CustomAppBarState extends State<CustomAppBar> {
       }
     } catch (e) {
       // Silent error
+    }
+
+    // 3. Antrean "Pesan Perlu Dibalas" (badge menu). Hanya dipanggil untuk
+    //    staf yang berpotensi ber-akses menu rent_plan; keputusan sebenarnya
+    //    tetap dari server lewat field `akses` pada balasan.
+    final bool bolehHandoff = widget.userData['user_type'] == 'company' ||
+        _hasPermission('mobile_rent_plan_enable');
+    if (bolehHandoff) {
+      try {
+        final HandoffRingkasan ringkasan =
+            await HandoffService().getAntrean(limit: 1);
+        _notifManager.setHandoffCount(ringkasan.jumlah, akses: ringkasan.akses);
+      } catch (_) {
+        // Silent error
+      }
     }
   }
 
