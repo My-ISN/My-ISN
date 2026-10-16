@@ -14,6 +14,7 @@ import '../reminder/reminder_page.dart';
 import '../constants.dart';
 import '../rent_plan/staff/rent_plan_detail_page.dart';
 import '../payroll/payroll_page.dart';
+import '../approval/approval_hub_page.dart';
 
 
 @pragma('vm:entry-point')
@@ -192,6 +193,16 @@ class NotificationService {
           MaterialPageRoute(
             builder: (context) => RentPlanDetailPage(rentalId: rentId),
           ),
+        );
+      }
+    } else if (type == 'agent_approval' || type == 'approval') {
+      const storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+      final userDataStr = await storage.read(key: 'user_data');
+      final userData = userDataStr != null ? json.decode(userDataStr) as Map<String, dynamic> : <String, dynamic>{};
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ApprovalHubPage(userData: userData)),
         );
       }
     }
