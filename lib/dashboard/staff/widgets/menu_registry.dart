@@ -25,6 +25,7 @@ import 'package:myisn/rent_plan/staff/scan_laptop_detail_page.dart';
 import 'package:myisn/crm/crm_page.dart';
 import 'package:myisn/reminder/reminder_page.dart';
 import 'package:myisn/notes/notes_page.dart';
+import 'package:myisn/approval/approval_hub_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -52,7 +53,30 @@ class MenuRegistry {
         userData['user_role_id'] == 21 ||
         userData['user_role_id'] == '21';
 
+    // ── Deteksi Super Admin / Owner ──
+    final String userType =
+        (userData['user_type'] ?? '').toString().toLowerCase();
+    final String roleName =
+        (userData['role_name'] ?? '').toString().toLowerCase();
+    final dynamic roleId = userData['user_role_id'];
+    final bool isSuperAdmin = userType == 'super_user' ||
+        userType == 'company' ||
+        userType == 'superadmin' ||
+        userType == 'super_admin' ||
+        roleName.contains('super admin') ||
+        roleId == 1 ||
+        roleId == '1';
+
     return [
+      // Pusat Persetujuan (ACC) — hanya untuk Super Admin / Owner
+      if (isSuperAdmin)
+        AppModule(
+          titleKey: 'Pusat Persetujuan (ACC)',
+          icon: Icons.verified_user_rounded,
+          color: const Color(0xFF10B981),
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => ApprovalHubPage(userData: user),
+        ),
       AppModule(
         titleKey: 'dashboard.quick_menu_rent_plan',
         icon: Icons.house_rounded,
