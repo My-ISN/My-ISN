@@ -1,0 +1,7 @@
+cek API     : https://api.github.com/repos/My-ISN/My-ISN/pages (dengan token run)
+kode HTTP   : 200
+build_type  : workflow (harus 'workflow' agar deploy atas kendali kita)
+html_url    : https://my-isn.github.io/My-ISN/
+status situs: tidak-ada | visibility: tidak-ada
+cuplikan    : {  "url": "https://api.github.com/repos/My-ISN/My-ISN/pages",  "status": null,  "cname": null,  "custom_404": false,  "html_url": "https://my-isn.github.io/My-ISN/",  "build_type": "workflow",  "source": {    "branch": "main",    "path": "/"  },  "public": true,  "protected_domain_state"
+tautan preview: https://my-isn.github.io/My-ISN/
