@@ -40,7 +40,7 @@ class HeartbeatService {
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+    _timer = Timer.periodic(const Duration(minutes: 5), (timer) {
       if (!_isPaused) {
         _sendHeartbeat();
       }
@@ -67,18 +67,23 @@ class HeartbeatService {
       if (response.statusCode == 200) {
         debugPrint('HeartbeatService: Sent successfully at ${DateTime.now()}');
       } else if (response.statusCode == 503) {
-        debugPrint('HeartbeatService: Maintenance mode detected');
-        final data = json.decode(response.body);
-        
-        // Trigger global redirect using navigatorKey
-        navigatorKey.currentState?.pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => MaintenancePage(message: data['message']),
-          ),
-          (route) => false,
-        );
-        
-        stop(); // Stop heartbeat if maintenance is on
+        debugPrint('HeartbeatService: Maintenance mode or server busy detected');
+        try {
+          final data = json.decode(response.body);
+          if (data is Map && data.containsKey('message') && data['message'] != null) {
+            // Trigger global redirect using navigatorKey
+            navigatorKey.currentState?.pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => MaintenancePage(message: data['message'].toString()),
+              ),
+              (route) => false,
+            );
+            
+            stop(); // Stop heartbeat if maintenance is on
+          }
+        } catch (_) {
+          debugPrint('HeartbeatService: Non-JSON 503 received');
+        }
       } else {
         debugPrint('HeartbeatService: Failed with status ${response.statusCode}');
       }

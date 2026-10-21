@@ -334,18 +334,37 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
 
       final response = await http
           .get(Uri.parse(url))
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 25));
 
       if (response.statusCode == 503) {
-        final data = json.decode(response.body);
+        try {
+          final data = json.decode(response.body);
+          if (data is Map && data['message'] != null) {
+            if (mounted) {
+              context.clearSnackBars();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MaintenancePage(message: data['message'].toString()),
+                ),
+              );
+            }
+            return;
+          }
+        } catch (_) {
+          // Respons HTML atau non-JSON 503 dari server Hostinger
+        }
         if (mounted) {
-          context.clearSnackBars();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MaintenancePage(message: data['message']),
-            ),
-          );
+          setState(() => _isLoading = false);
+          context.showErrorSnackBar('Layanan server sedang penuh. Silakan coba beberapa saat lagi.');
+        }
+        return;
+      }
+
+      if (response.statusCode != 200) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          context.showErrorSnackBar('Layanan server sedang mengalami kendala (HTTP ${response.statusCode}). Silakan coba beberapa saat lagi.');
         }
         return;
       }
@@ -356,15 +375,15 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       } catch (_) {
         if (mounted) {
           setState(() => _isLoading = false);
-          context.showErrorSnackBar('Server sedang sibuk. Silakan tarik untuk menyegarkan.');
+          context.showErrorSnackBar('Format respon server tidak valid. Silakan tarik untuk menyegarkan.');
         }
         return;
       }
 
-      if (data['status'] == true) {
+      if (data is Map && data['status'] == true) {
         if (mounted) {
           setState(() {
-            _dashboardData = data['data'];
+            _dashboardData = data['data'] ?? {};
             // If customer, also fetch customer specific dashboard info
             final user = _dashboardData['user'] ?? widget.userData;
             if (user['user_type'] == 'customer' ||
@@ -379,8 +398,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       } else {
         if (mounted) {
           setState(() => _isLoading = false);
+          final errorMsg = (data is Map ? data['message'] : null) ?? 'dashboard.fetch_error'.tr(context);
           context.showErrorSnackBar(
-            data['message'] ?? 'dashboard.fetch_error'.tr(context),
+            errorMsg.toString(),
           );
         }
       }
@@ -403,18 +423,35 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
 
       final response = await http
           .get(Uri.parse(url))
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 25));
 
       if (response.statusCode == 503) {
-        final data = json.decode(response.body);
+        try {
+          final data = json.decode(response.body);
+          if (data is Map && data['message'] != null) {
+            if (mounted) {
+              context.clearSnackBars();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MaintenancePage(message: data['message'].toString()),
+                ),
+              );
+            }
+            return;
+          }
+        } catch (_) {}
         if (mounted) {
-          context.clearSnackBars();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MaintenancePage(message: data['message']),
-            ),
-          );
+          setState(() => _isLoading = false);
+          context.showErrorSnackBar('Layanan server sedang penuh. Silakan coba beberapa saat lagi.');
+        }
+        return;
+      }
+
+      if (response.statusCode != 200) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          context.showErrorSnackBar('Layanan server sedang mengalami kendala (HTTP ${response.statusCode}). Silakan coba beberapa saat lagi.');
         }
         return;
       }
@@ -425,14 +462,15 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       } catch (_) {
         if (mounted) {
           setState(() => _isLoading = false);
+          context.showErrorSnackBar('Format respon server tidak valid. Silakan tarik untuk menyegarkan.');
         }
         return;
       }
 
-      if (data['status'] == true) {
+      if (data is Map && data['status'] == true) {
         if (mounted) {
           setState(() {
-            _customerDashboardData = data['data'];
+            _customerDashboardData = data['data'] ?? {};
             _rentalOffset = 0;
             _purchaseOffset = 0;
             _hasMoreRental = _customerDashboardData['has_more_rental'] ?? false;
@@ -444,8 +482,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       } else {
         if (mounted) {
           setState(() => _isLoading = false);
+          final errorMsg = (data is Map ? data['message'] : null) ?? 'dashboard.fetch_error'.tr(context);
           context.showErrorSnackBar(
-            data['message'] ?? 'dashboard.fetch_error'.tr(context),
+            errorMsg.toString(),
           );
         }
       }
@@ -472,10 +511,19 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       
       final url = '${AppConstants.baseUrl}/get_customer_dashboard?user_id=$userId&rental_offset=$nextRentalOffset&purchase_offset=$nextPurchaseOffset';
 
-      final response = await http.get(Uri.parse(url));
-      final data = json.decode(response.body);
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 25));
 
-      if (data['status'] == true) {
+      dynamic data;
+      try {
+        data = json.decode(response.body);
+      } catch (_) {
+        if (mounted) setState(() => _isLoadingMore = false);
+        return;
+      }
+
+      if (data is Map && data['status'] == true) {
         if (mounted) {
           setState(() {
             final newData = data['data'];
