@@ -54,6 +54,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
   Map<String, dynamic> _dashboardData = {};
   Map<String, dynamic> _customerDashboardData = {};
   int _currentIndex = 0;
+  final Set<int> _loadedTabIndices = {0};
   final storage = const FlutterSecureStorage(
     aOptions: AppConstants.kAndroidOptions,
   );
@@ -72,6 +73,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     super.initState();
     instance = this;
     _currentIndex = widget.initialIndex ?? 0;
+    _loadedTabIndices.add(_currentIndex);
     _fetchDashboardData();
     _checkAppUpdate();
     SystemUiService.hideNavigationBar();
@@ -514,8 +516,9 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     if (isCustomer) {
       switch (tag) {
         case 'dashboard': index = 0; break;
-        case 'rent_plan': index = 1; break;
-        case 'profile': index = 2; break;
+        case 'transaction': index = 1; break;
+        case 'rent_plan': index = 2; break;
+        case 'profile': index = 3; break;
       }
     } else {
       switch (tag) {
@@ -526,6 +529,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       }
     }
     if (mounted) {
+      _loadedTabIndices.add(index);
       setState(() => _currentIndex = index);
     }
   }
@@ -544,19 +548,37 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
     final String roleName = (user['role_name'] ?? '').toString().toLowerCase();
     final bool isSuperAdmin = userType == 'super_user' || userType == 'company' || roleName == 'super admin';
 
+    final int maxIndex = isCustomer ? 3 : (hasPayroll ? 3 : 2);
+    if (_currentIndex > maxIndex) {
+      _currentIndex = maxIndex;
+    }
+    _loadedTabIndices.add(_currentIndex);
 
     final List<Widget> pages = isCustomer
         ? [
             _buildHomeContent(),
-            TransactionPage(userData: user),
-            client_rp.RentPlanPage(userData: user, isTab: true),
-            ProfilePage(userData: user, isTab: true),
+            _loadedTabIndices.contains(1)
+                ? TransactionPage(userData: user)
+                : const SizedBox.shrink(),
+            _loadedTabIndices.contains(2)
+                ? client_rp.RentPlanPage(userData: user, isTab: true)
+                : const SizedBox.shrink(),
+            _loadedTabIndices.contains(3)
+                ? ProfilePage(userData: user, isTab: true)
+                : const SizedBox.shrink(),
           ]
         : [
             _buildHomeContent(),
-            AttendancePage(userData: user),
-            if (hasPayroll) PayrollPage(userData: user),
-            ProfilePage(userData: user, isTab: true),
+            _loadedTabIndices.contains(1)
+                ? AttendancePage(userData: user)
+                : const SizedBox.shrink(),
+            if (hasPayroll)
+              _loadedTabIndices.contains(2)
+                  ? PayrollPage(userData: user)
+                  : const SizedBox.shrink(),
+            _loadedTabIndices.contains(hasPayroll ? 3 : 2)
+                ? ProfilePage(userData: user, isTab: true)
+                : const SizedBox.shrink(),
           ];
 
     // Ensure _currentIndex is within bounds if pages list changed
@@ -623,6 +645,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                       targetIndex = index - 1;
                     }
                   }
+                  _loadedTabIndices.add(targetIndex);
                   setState(() {
                     _currentIndex = targetIndex;
                   });
@@ -642,6 +665,7 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                   currentIndex: _currentIndex,
                   userData: user,
                   onTap: (index) {
+                    _loadedTabIndices.add(index);
                     setState(() {
                       _currentIndex = index;
                     });
@@ -705,7 +729,11 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       userData: widget.userData,
       dashboardData: _dashboardData,
       onRefresh: _fetchDashboardData,
-      onProfileTap: () => setState(() => _currentIndex = (hasPayroll ? 3 : 2)),
+      onProfileTap: () {
+        final targetIndex = hasPayroll ? 3 : 2;
+        _loadedTabIndices.add(targetIndex);
+        setState(() => _currentIndex = targetIndex);
+      },
       hasPermission: _hasPermission,
     );
   }
@@ -715,7 +743,10 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       userData: user,
       customerDashboardData: _customerDashboardData,
       onRefresh: _fetchCustomerDashboard,
-      onProfileTap: (index) => setState(() => _currentIndex = index),
+      onProfileTap: (index) {
+        _loadedTabIndices.add(index);
+        setState(() => _currentIndex = index);
+      },
       onLaunchWhatsApp: (phone, message) => _launchWhatsApp(phone, message),
       isSearchActive: _isSearchActive,
       onSearchToggle: (active) {

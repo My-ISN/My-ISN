@@ -316,13 +316,15 @@ class _ApprovalHubPageState extends State<ApprovalHubPage>
                   decoration: InputDecoration(
                     labelText: isApproved
                         ? 'Catatan Persetujuan (Opsional)'
-                        : 'Alasan Penolakan (Opsional)',
+                        : 'Alasan Penolakan (Wajib Diisi) *',
                     hintText: isApproved
                         ? 'Contoh: Lanjut merge ke branch main'
-                        : 'Contoh: Revisi kembali format data',
+                        : 'Tuliskan alasan penolakan agar agen dapat belajar...',
                     labelStyle: GoogleFonts.outfit(
                       fontSize: 13,
-                      color: isDark ? Colors.white70 : Colors.black54,
+                      color: !isApproved
+                          ? Colors.red
+                          : (isDark ? Colors.white70 : Colors.black54),
                     ),
                     hintStyle: GoogleFonts.outfit(
                       fontSize: 12,
@@ -381,6 +383,18 @@ class _ApprovalHubPageState extends State<ApprovalHubPage>
               ),
               onPressed: () {
                 final reason = reasonCtrl.text.trim();
+                if (!isApproved && reason.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Alasan penolakan wajib diisi agar agen dapat memahami dan belajar dari catatan Anda.',
+                      ),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                  return;
+                }
                 Navigator.pop(dialogCtx);
                 _handleDecision(item, decision, reason: reason);
               },

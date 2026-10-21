@@ -32,6 +32,13 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   static GlobalKey<NavigatorState>? navigatorKey;
 
+  static String getChannelId(String soundResource) {
+    if (soundResource == 'notification_tone_swift_gesture') {
+      return 'myisn_push_channel_notification_tone_swift_gesture_v2';
+    }
+    return 'myisn_push_channel_$soundResource';
+  }
+
   Future<void> initialize(GlobalKey<NavigatorState> key) async {
     navigatorKey = key;
     if (kIsWeb) return;
@@ -82,7 +89,7 @@ class NotificationService {
             ? 'notification_tone_swift_gesture' 
             : sound;
         
-        String channelId = 'myisn_push_channel_$soundResource';
+        String channelId = getChannelId(soundResource);
 
         final AndroidNotificationChannel channel = AndroidNotificationChannel(
           channelId,
@@ -131,7 +138,7 @@ class NotificationService {
         ? 'notification_tone_swift_gesture' 
         : sound;
     
-    String channelId = 'myisn_push_channel_$soundResource';
+    String channelId = getChannelId(soundResource);
     
     final AndroidNotificationChannel channel = AndroidNotificationChannel(
       channelId,
@@ -249,7 +256,7 @@ class NotificationService {
           ? 'notification_tone_swift_gesture' 
           : sound;
       
-      String channelId = 'myisn_push_channel_$soundResource';
+      String channelId = getChannelId(soundResource);
 
       // Get device info
       final deviceInfo = DeviceInfoPlugin();

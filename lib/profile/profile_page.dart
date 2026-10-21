@@ -57,7 +57,9 @@ class _ProfilePageState extends State<ProfilePage> {
       final url =
           '${AppConstants.baseUrl}/get_profile_details?user_id=$userId';
 
-      final response = await http.get(Uri.parse(url));
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
       final data = json.decode(response.body);
 
       if (data['status'] == true) {

@@ -46,7 +46,9 @@ class _AttendancePageState extends State<AttendancePage> {
 
       final url =
           '${AppConstants.baseUrl}/get_attendance?user_id=$userId&month=$month&year=$year';
-      final response = await http.get(Uri.parse(url));
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 15));
       
       if (response.statusCode == 503) {
         if (mounted) {
