@@ -105,13 +105,13 @@ jobs:
           ./gradlew --version
 
       - name: Build APK (release, dipakai untuk update staf)
-        run: flutter build apk --release --build-name=1.3.5 --build-number=2029
+        run: flutter build apk --release --build-name=1.3.6 --build-number=2030
 
       - name: Build APK (debug, untuk pemeriksaan)
-        run: flutter build apk --debug --build-name=1.3.5 --build-number=2029
+        run: flutter build apk --debug --build-name=1.3.6 --build-number=2030
 
       - name: Build AAB (release)
-        run: flutter build appbundle --release --build-name=1.3.5 --build-number=2029
+        run: flutter build appbundle --release --build-name=1.3.6 --build-number=2030
 
       - name: Sidik jari penandatangan APK (bukti kunci yang dipakai)
         id: sidik
@@ -155,20 +155,21 @@ jobs:
           SIDIK: ${{ steps.sidik.outputs.sidik }}
         run: |
           set -e
-          TAG="apk-1.3.5-2029"
-          NAMA="myisn-1.3.5-2029.apk"
+          TAG="apk-1.3.6-2030"
+          NAMA="myisn-1.3.6-2030.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "/tmp/$NAMA"
           ls -l "/tmp/$NAMA"
           cat > /tmp/catatan.md <<EOF
-          APK My-ISN **1.3.5 (build 2029)** untuk staf CV ISKOM.
+          APK My-ISN **1.3.6 (build 2030)** untuk staf CV ISKOM.
 
-          Nomor build mengikuti urutan rilis (1.3.4 = 2028, rilis ini = 2029) supaya APK baru selalu bisa menimpa
-          aplikasi yang sudah terpasang di HP staf tanpa uninstall.
+          Nomor build mengikuti urutan rilis (1.3.5 = 2029, rilis ini = 2030).
+          Bila sidik jari APK ini berbeda dengan yang terpasang, uninstall aplikasi lama
+          sekali saja sebelum memasang versi ini.
 
-          - Optimasi ketahanan jaringan & beban server Hostinger:
-            - Interval timer heartbeat diturunkan dari 1 menit ke 5 menit untuk meringankan beban server.
-            - Timeout HTTP request dashboard dinaikkan dari 15 detik menjadi 25 detik.
-            - Penanganan anggun status HTTP 503 & respon server non-JSON/HTML saat server sibuk/penuh agar tidak menimbulkan galat fatal.
+          - Fitur baru: **Panggil Suara** (khusus Super Admin)
+            - Kirim kalimat bebas (maks 200 karakter) atau pilih preset (Malam, Pagi, Pulang, Tamu, Kunci, Makan, Rapat).
+            - Pilih suara Wanita atau Pria; kalimat diucapkan oleh speaker PC kantor.
+            - PC kantor harus menyala agar perintah terdengar.
 
           Sidik jari penandatangan APK ini:
 
@@ -179,7 +180,7 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "/tmp/$NAMA" --clobber
           else
-            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.5 (Build 2029)" --notes-file /tmp/catatan.md
+            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.6 (Build 2030)" --notes-file /tmp/catatan.md
           fi
           gh release view "$TAG" --json assets,tagName,url
 

@@ -11,6 +11,7 @@ import 'package:myisn/ai_bot/ai_bot_page.dart';
 import 'package:myisn/ai_bot/ai_chat_isn_page.dart';
 import 'package:myisn/creative_idea/creative_idea_page.dart';
 import 'package:myisn/intercom/intercom_page.dart';
+import 'package:myisn/intercom/intercom_suara_page.dart';
 import 'package:myisn/profile/profile_page.dart';
 import 'package:myisn/dashboard/dashboard_page.dart';
 import 'package:myisn/quicksend/quick_send_page.dart';
@@ -76,6 +77,15 @@ class MenuRegistry {
           color: const Color(0xFF10B981),
           categoryKey: 'side_drawer.work',
           pageBuilder: (context, user) => ApprovalHubPage(userData: user),
+        ),
+      // Panggil Suara (speaker PC kantor) — hanya untuk Super Admin / Owner
+      if (isSuperAdmin)
+        AppModule(
+          titleKey: 'Panggil Suara',
+          icon: Icons.volume_up_rounded,
+          color: const Color(0xFFFF9A2E),
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => IntercomSuaraPage(userData: user),
         ),
       AppModule(
         titleKey: 'dashboard.quick_menu_rent_plan',
