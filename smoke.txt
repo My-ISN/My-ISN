@@ -1,0 +1,31 @@
+=== UJI ASAP: HTTP dari server statis lokal di runner ===
+URL dasar: http://127.0.0.1:8099/My-ISN/
+200  text/html  1507 bytes  index.html
+200  text/javascript  9975 bytes  flutter_bootstrap.js
+200  text/javascript  6614226 bytes  main.dart.js
+200  text/javascript  9553 bytes  flutter.js
+
+=== base href di index.html (harus /My-ISN/) ===
+<base href="/My-ISN/"
+
+=== bukti kode aplikasi ikut terkompilasi (marker API ISKOM) ===
+istanakomputer.com muncul: 175
+mobileapi muncul          : 168
+ukuran main.dart.js       : 6614226
+
+=== isi folder build/web ===
+total 6528
+drwxr-xr-x 5 runner runner    4096 Oct 24 10:47 .
+drwxr-xr-x 4 runner runner    4096 Oct 24 10:45 ..
+-rw-r--r-- 1 runner runner      32 Oct 24 10:47 .last_build_id
+drwxr-xr-x 6 runner runner    4096 Oct 24 10:47 assets
+drwxr-xr-x 3 runner runner    4096 Oct 24 10:45 canvaskit
+-rw-r--r-- 1 runner runner     917 Oct 24 10:47 favicon.png
+-rw-r--r-- 1 runner runner    9553 Oct 24 10:45 flutter.js
+-rw-r--r-- 1 runner runner    9975 Oct 24 10:45 flutter_bootstrap.js
+-rw-r--r-- 1 runner runner     784 Oct 24 10:47 flutter_service_worker.js
+drwxr-xr-x 2 runner runner    4096 Oct 24 10:47 icons
+-rw-r--r-- 1 runner runner    1507 Oct 24 10:45 index.html
+-rw-r--r-- 1 runner runner 6614226 Oct 24 10:47 main.dart.js
+-rw-r--r-- 1 runner runner     906 Oct 24 10:47 manifest.json
+-rw-r--r-- 1 runner runner      83 Oct 24 10:47 version.json
