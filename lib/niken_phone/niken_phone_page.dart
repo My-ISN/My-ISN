@@ -195,19 +195,22 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     });
 
     try {
-      // 1. Ambil ephemeral token dari OpenAI
+      // 1. Ambil ephemeral token dari OpenAI (GA Realtime client_secrets endpoint)
       final tokenResp = await http
           .post(
-            Uri.parse('https://api.openai.com/v1/realtime/sessions'),
+            Uri.parse('https://api.openai.com/v1/realtime/client_secrets'),
             headers: {
               'Authorization': 'Bearer $apiKey',
               'Content-Type': 'application/json',
             },
             body: jsonEncode({
-              'model': _model,
-              'voice': 'shimmer',
-              'instructions': _instruksi,
-              'modalities': ['audio', 'text'],
+              'session': {
+                'type': 'realtime',
+                'model': _model,
+                'voice': 'shimmer',
+                'instructions': _instruksi,
+                'modalities': ['audio', 'text'],
+              },
             }),
           )
           .timeout(const Duration(seconds: 15));
@@ -220,9 +223,8 @@ class _NikenPhonePageState extends State<NikenPhonePage>
       }
 
       final tokenData  = jsonDecode(tokenResp.body) as Map<String, dynamic>;
-      final ephKey     = (tokenData['client_secret'] as Map?)
-              ?['value'] as String? ??
-          '';
+      final ephKey     = (tokenData['value'] as String?) ??
+          ((tokenData['client_secret'] as Map?)?['value'] as String? ?? '');
       if (ephKey.isEmpty) throw Exception('Token kosong dari OpenAI');
 
       // 2. TODO: Buka RTCPeerConnection menggunakan flutter_webrtc
