@@ -32,6 +32,7 @@ import '../passwords/password_list_page.dart';
 import '../crm/crm_page.dart';
 import '../reminder/reminder_page.dart';
 import '../notes/notes_page.dart';
+import '../niken_phone/niken_phone_page.dart';
 
 import 'custom_app_bar.dart'; // For NotificationManager
 
@@ -105,6 +106,40 @@ class _SideDrawerState extends State<SideDrawer> {
         widget.userData['user_type'] == 'customer' ||
         widget.userData['user_role_id'] == 21 ||
         widget.userData['user_role_id'] == '21';
+
+    // ── Deteksi Super Admin / Owner (samakan dengan MenuRegistry) ──
+    final String userType =
+        (widget.userData['user_type'] ?? '').toString().toLowerCase();
+    final String roleName =
+        (widget.userData['role_name'] ?? '').toString().toLowerCase();
+    final dynamic roleId =
+        widget.userData['user_role_id'] ?? widget.userData['role_id'];
+    final String userId =
+        (widget.userData['user_id'] ?? widget.userData['id'] ?? '').toString();
+    final String username =
+        (widget.userData['username'] ?? widget.userData['user_name'] ?? '')
+            .toString()
+            .toLowerCase();
+    final String email =
+        (widget.userData['email'] ?? '').toString().toLowerCase();
+
+    // Pak Ridwan (Owner) di DB: user_id 152, user_type 'staff',
+    // role_name 'STRATEGIC', role_id 42 — bukan super_user.
+    final bool isOwnerRidwan = userId == '152' ||
+        username == 'ridwan' ||
+        (email.isNotEmpty && email.contains('ridwan')) ||
+        roleName.contains('strategic') ||
+        roleId == 42 ||
+        roleId == '42';
+
+    final bool isSuperAdmin = isOwnerRidwan ||
+        userType == 'super_user' ||
+        userType == 'company' ||
+        userType == 'superadmin' ||
+        userType == 'super_admin' ||
+        roleName.contains('super admin') ||
+        roleId == 1 ||
+        roleId == '1';
 
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.75,
@@ -225,6 +260,26 @@ class _SideDrawerState extends State<SideDrawer> {
                   },
                 ),
                 const Divider(indent: 16, endIndent: 16),
+
+                // Telepon Niken (Realtime voice AI) — khusus Super Admin / Owner
+                if (isSuperAdmin)
+                  _buildMenuItem(
+                    context,
+                    icon: Icons.phone_in_talk_rounded,
+                    title: 'Telepon Niken',
+                    isActive: widget.activePage == 'niken_phone',
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NikenPhonePage(
+                            userData: widget.userData,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
 
                 // Group: Work / Operational
                 if (_hasCategoryPermission([

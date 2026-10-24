@@ -27,6 +27,7 @@ import 'package:myisn/crm/crm_page.dart';
 import 'package:myisn/reminder/reminder_page.dart';
 import 'package:myisn/notes/notes_page.dart';
 import 'package:myisn/approval/approval_hub_page.dart';
+import 'package:myisn/niken_phone/niken_phone_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -59,8 +60,26 @@ class MenuRegistry {
         (userData['user_type'] ?? '').toString().toLowerCase();
     final String roleName =
         (userData['role_name'] ?? '').toString().toLowerCase();
-    final dynamic roleId = userData['user_role_id'];
-    final bool isSuperAdmin = userType == 'super_user' ||
+    final dynamic roleId = userData['user_role_id'] ?? userData['role_id'];
+    final String userId =
+        (userData['user_id'] ?? userData['id'] ?? '').toString();
+    final String username =
+        (userData['username'] ?? userData['user_name'] ?? '')
+            .toString()
+            .toLowerCase();
+    final String email = (userData['email'] ?? '').toString().toLowerCase();
+
+    // Pak Ridwan (Owner) TIDAK tercatat sebagai super_user di DB: dia
+    // user_id 152, user_type 'staff', role_name 'STRATEGIC', role_id 42.
+    final bool isOwnerRidwan = userId == '152' ||
+        username == 'ridwan' ||
+        (email.isNotEmpty && email.contains('ridwan')) ||
+        roleName.contains('strategic') ||
+        roleId == 42 ||
+        roleId == '42';
+
+    final bool isSuperAdmin = isOwnerRidwan ||
+        userType == 'super_user' ||
         userType == 'company' ||
         userType == 'superadmin' ||
         userType == 'super_admin' ||
@@ -77,6 +96,15 @@ class MenuRegistry {
           color: const Color(0xFF10B981),
           categoryKey: 'side_drawer.work',
           pageBuilder: (context, user) => ApprovalHubPage(userData: user),
+        ),
+      // Telepon Niken — GPT Realtime (hanya Super Admin / Owner)
+      if (isSuperAdmin)
+        AppModule(
+          titleKey: 'Telepon Niken',
+          icon: Icons.phone_in_talk_rounded,
+          color: const Color(0xFF10B981),
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => NikenPhonePage(userData: user),
         ),
       // Panggil Suara (speaker PC kantor) — hanya untuk Super Admin / Owner
       if (isSuperAdmin)

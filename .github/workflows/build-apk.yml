@@ -170,6 +170,9 @@ jobs:
             - Kirim kalimat bebas (maks 200 karakter) atau pilih preset (Malam, Pagi, Pulang, Tamu, Kunci, Makan, Rapat).
             - Pilih suara Wanita atau Pria; kalimat diucapkan oleh speaker PC kantor.
             - PC kantor harus menyala agar perintah terdengar.
+          - Fitur baru: **Telepon Niken** (khusus Super Admin / Owner)
+            - Intercom AI Voice Realtime via OpenAI Realtime API (WebRTC) dengan Niken AI CEO Virtual.
+            - Visualisasi status panggilan, transkrip percakapan langsung, dan penyimpanan API key terenkripsi.
 
           Sidik jari penandatangan APK ini:
 
