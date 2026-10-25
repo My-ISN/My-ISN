@@ -72,8 +72,15 @@ class _NikenPhonePageState extends State<NikenPhonePage>
   late final AnimationController _pulseCtrl;
   late final Animation<double>   _pulseAnim;
 
-  static const _prefKey = 'openai_rt_apikey';
-  static const _model   = 'gpt-4o-realtime-preview-2024-12-17';
+  static const _prefKey      = 'openai_rt_apikey';
+  static const _prefModelKey = 'openai_rt_model';
+  static const List<String> _daftarModel = [
+    'gpt-4o-realtime-preview',
+    'gpt-4o-mini-realtime-preview',
+    'gpt-realtime',
+    'gpt-realtime-mini',
+  ];
+  String _model = 'gpt-4o-realtime-preview';
   static const _instruksi =
       'Kamu adalah Niken, AI CEO Virtual PT ISKOM SARANA NUSANTARA. '
       'Kamu berbicara dengan Owner (Ridwan). Karakter kamu: proaktif, tegas, '
@@ -106,8 +113,13 @@ class _NikenPhonePageState extends State<NikenPhonePage>
   // ── API Key (FlutterSecureStorage / terenkripsi) ─────────────────────────
   Future<void> _muatApiKey() async {
     String key = '';
+    String model = _model;
     try {
       key = await _storage.read(key: _prefKey) ?? '';
+      final savedModel = await _storage.read(key: _prefModelKey);
+      if (savedModel != null && savedModel.isNotEmpty) {
+        model = savedModel;
+      }
     } catch (_) {
       key = '';
     }
@@ -115,6 +127,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     setState(() {
       _keyCtrl.text  = key;
       _keyTersimpan  = key.isNotEmpty;
+      _model         = model;
     });
   }
 
@@ -126,6 +139,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     }
     try {
       await _storage.write(key: _prefKey, value: key);
+      await _storage.write(key: _prefModelKey, value: _model);
     } catch (_) {
       if (!mounted) return;
       _snack('Gagal menyimpan API key di penyimpanan aman', gagal: true);
@@ -133,7 +147,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     }
     if (!mounted) return;
     setState(() => _keyTersimpan = true);
-    _snack('API key tersimpan ✓');
+    _snack('Pengaturan & API key tersimpan ✓');
   }
 
   Future<void> _hapusApiKey() async {
@@ -420,13 +434,47 @@ class _NikenPhonePageState extends State<NikenPhonePage>
                       const BorderSide(color: _W.oranye, width: 1.6)),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
+          const Text('Model Realtime',
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _W.coklat)),
+          const SizedBox(height: 5),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: _W.kremKartu,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _W.garis),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _daftarModel.contains(_model) ? _model : _daftarModel.first,
+                isExpanded: true,
+                dropdownColor: Colors.white,
+                style: const TextStyle(fontSize: 13, color: _W.coklat, fontWeight: FontWeight.w500),
+                items: _daftarModel.map((m) {
+                  return DropdownMenuItem<String>(
+                    value: m,
+                    child: Text(m),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _model = val);
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: _simpanApiKey,
               icon: const Icon(Icons.save_rounded, size: 17),
-              label: const Text('Simpan Key',
+              label: const Text('Simpan Pengaturan',
                   style: TextStyle(fontWeight: FontWeight.w700)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _W.oranye,
