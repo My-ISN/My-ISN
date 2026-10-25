@@ -105,13 +105,13 @@ jobs:
           ./gradlew --version
 
       - name: Build APK (release, dipakai untuk update staf)
-        run: flutter build apk --release --build-name=1.3.6 --build-number=2030
+        run: flutter build apk --release --build-name=1.3.6 --build-number=2031
 
       - name: Build APK (debug, untuk pemeriksaan)
-        run: flutter build apk --debug --build-name=1.3.6 --build-number=2030
+        run: flutter build apk --debug --build-name=1.3.6 --build-number=2031
 
       - name: Build AAB (release)
-        run: flutter build appbundle --release --build-name=1.3.6 --build-number=2030
+        run: flutter build appbundle --release --build-name=1.3.6 --build-number=2031
 
       - name: Sidik jari penandatangan APK (bukti kunci yang dipakai)
         id: sidik
@@ -155,14 +155,14 @@ jobs:
           SIDIK: ${{ steps.sidik.outputs.sidik }}
         run: |
           set -e
-          TAG="apk-1.3.6-2030"
-          NAMA="myisn-1.3.6-2030.apk"
+          TAG="apk-1.3.6-2031"
+          NAMA="myisn-1.3.6-2031.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "/tmp/$NAMA"
           ls -l "/tmp/$NAMA"
           cat > /tmp/catatan.md <<EOF
-          APK My-ISN **1.3.6 (build 2030)** untuk staf CV ISKOM.
+          APK My-ISN **1.3.6 (build 2031)** untuk staf CV ISKOM.
 
-          Nomor build mengikuti urutan rilis (1.3.5 = 2029, rilis ini = 2030).
+          Nomor build mengikuti urutan rilis (1.3.6 = 2030, rilis ini = 2031).
           Bila sidik jari APK ini berbeda dengan yang terpasang, uninstall aplikasi lama
           sekali saja sebelum memasang versi ini.
 
@@ -172,7 +172,7 @@ jobs:
             - PC kantor harus menyala agar perintah terdengar.
           - Fitur baru: **Telepon Niken** (khusus Super Admin / Owner)
             - Intercom AI Voice Realtime via OpenAI Realtime API (WebRTC) dengan Niken AI CEO Virtual.
-            - Visualisasi status panggilan, transkrip percakapan langsung, dan penyimpanan API key terenkripsi.
+            - Pembaruan model generic default (gpt-4o-realtime-preview) dan dropdown pilihan model di pengaturan.
 
           Sidik jari penandatangan APK ini:
 
@@ -183,7 +183,7 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "/tmp/$NAMA" --clobber
           else
-            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.6 (Build 2030)" --notes-file /tmp/catatan.md
+            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.6 (Build 2031)" --notes-file /tmp/catatan.md
           fi
           gh release view "$TAG" --json assets,tagName,url
 
