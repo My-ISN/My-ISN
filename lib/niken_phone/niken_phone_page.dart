@@ -232,8 +232,34 @@ class _NikenPhonePageState extends State<NikenPhonePage>
       if (!mounted) return;
 
       if (tokenResp.statusCode != 200) {
-        final body = jsonDecode(tokenResp.body);
-        throw Exception(body['error']?['message'] ?? 'Gagal ambil token');
+        String msg = 'Gagal mengambil token (HTTP ${tokenResp.statusCode})';
+        try {
+          final dynamic body = jsonDecode(tokenResp.body);
+          if (body is Map) {
+            final err = body['error'];
+            if (err is Map && err['message'] != null) {
+              msg = err['message'].toString();
+            } else if (err is String) {
+              msg = err;
+            } else if (body['message'] != null) {
+              msg = body['message'].toString();
+            }
+          }
+        } catch (_) {
+          if (tokenResp.body.trim().isNotEmpty) {
+            final clean = tokenResp.body
+                .replaceAll(RegExp(r'<[^>]*>'), ' ')
+                .replaceAll(RegExp(r'\s+'), ' ')
+                .trim();
+            if (clean.isNotEmpty) {
+              msg = clean.length > 120 ? clean.substring(0, 120) + '…' : clean;
+            }
+          }
+        }
+        if (tokenResp.statusCode == 403) {
+          msg = 'Akses ditolak (HTTP 403): $msg';
+        }
+        throw Exception(msg);
       }
 
       final tokenData  = jsonDecode(tokenResp.body) as Map<String, dynamic>;

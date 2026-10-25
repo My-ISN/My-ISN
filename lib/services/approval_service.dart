@@ -204,7 +204,13 @@ class ApprovalService {
           .post(uri, body: body)
           .timeout(const Duration(seconds: 25));
 
-      final dynamic decoded = json.decode(response.body);
+      dynamic decoded;
+      try {
+        decoded = json.decode(response.body);
+      } catch (_) {
+        decoded = null;
+      }
+
       if (decoded is Map<String, dynamic>) {
         final bool isSuccess =
             decoded['status'] == true || response.statusCode == 200;
@@ -213,8 +219,17 @@ class ApprovalService {
           'message': decoded['message']?.toString() ??
               (isSuccess
                   ? 'Keputusan berhasil disimpan.'
-                  : 'Gagal memproses keputusan.'),
+                  : (response.statusCode == 403
+                      ? 'Akses ditolak (HTTP 403): Akun tidak berwenang.'
+                      : 'Gagal memproses keputusan (HTTP ${response.statusCode}).')),
           'data': decoded,
+        };
+      }
+
+      if (response.statusCode == 403) {
+        return {
+          'status': false,
+          'message': 'Akses ditolak (HTTP 403): Memerlukan hak akses Super Admin/Owner.',
         };
       }
 

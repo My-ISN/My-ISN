@@ -108,6 +108,22 @@ class _LoginPageState extends State<LoginPage> {
         final preview = response.body.substring(0, min(300, response.body.length));
         debugPrint('Non-JSON response [${response.statusCode}]: $preview');
         if (!mounted) return;
+        if (response.statusCode == 403) {
+          context.showErrorSnackBar(
+            'Akses ditolak (HTTP 403). Akun atau perangkat dibatasi oleh server.',
+          );
+          return;
+        } else if (response.statusCode == 401) {
+          context.showErrorSnackBar(
+            'Autentikasi gagal (HTTP 401). Silakan periksa kredensial Anda.',
+          );
+          return;
+        } else if (response.statusCode >= 500) {
+          context.showErrorSnackBar(
+            'Layanan server sedang mengalami kendala teknis (HTTP ${response.statusCode}).',
+          );
+          return;
+        }
         context.showErrorSnackBar(
           'Gagal membaca respons server (${response.statusCode}). Coba lagi nanti.',
         );
@@ -165,7 +181,11 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         if (!mounted) return;
-        context.showErrorSnackBar(data['message'] ?? 'login.login_failed'.tr(context));
+        String errMsg = data['message'] ?? 'login.login_failed'.tr(context);
+        if (response.statusCode == 403) {
+          errMsg = 'Akses ditolak (HTTP 403): $errMsg';
+        }
+        context.showErrorSnackBar(errMsg);
       }
     } on TimeoutException {
       if (!mounted) return;
@@ -390,7 +410,24 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
 
-        final data = json.decode(response.body);
+        dynamic data;
+        try {
+          data = json.decode(response.body);
+        } catch (e) {
+          final preview = response.body.substring(0, min(300, response.body.length));
+          debugPrint('Biometric non-JSON response [${response.statusCode}]: $preview');
+          if (!mounted) return;
+          if (response.statusCode == 403) {
+            context.showErrorSnackBar(
+              'Akses ditolak (HTTP 403). Akun atau perangkat dibatasi oleh server.',
+            );
+          } else {
+            context.showErrorSnackBar(
+              'Gagal membaca respons server (${response.statusCode}).',
+            );
+          }
+          return;
+        }
         if (data['status'] == true) {
           if (!mounted) return;
           context.showSuccessSnackBar(
