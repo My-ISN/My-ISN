@@ -105,13 +105,13 @@ jobs:
           ./gradlew --version
 
       - name: Build APK (release, dipakai untuk update staf)
-        run: flutter build apk --release --build-name=1.3.6 --build-number=2032
+        run: flutter build apk --release --build-name=1.3.7 --build-number=2033
 
       - name: Build APK (debug, untuk pemeriksaan)
-        run: flutter build apk --debug --build-name=1.3.6 --build-number=2032
+        run: flutter build apk --debug --build-name=1.3.7 --build-number=2033
 
       - name: Build AAB (release)
-        run: flutter build appbundle --release --build-name=1.3.6 --build-number=2032
+        run: flutter build appbundle --release --build-name=1.3.7 --build-number=2033
 
       - name: Sidik jari penandatangan APK (bukti kunci yang dipakai)
         id: sidik
@@ -155,17 +155,20 @@ jobs:
           SIDIK: ${{ steps.sidik.outputs.sidik }}
         run: |
           set -e
-          TAG="apk-1.3.6-2032"
-          NAMA="myisn-1.3.6-2032.apk"
+          TAG="apk-1.3.7-2033"
+          NAMA="myisn-1.3.7-2033.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "/tmp/$NAMA"
           ls -l "/tmp/$NAMA"
           cat > /tmp/catatan.md <<EOF
-          APK My-ISN **1.3.6 (build 2032)** untuk staf CV ISKOM.
+          APK My-ISN **1.3.7 (build 2033)** untuk staf CV ISKOM.
 
-          Nomor build mengikuti urutan rilis (1.3.6 = 2031, rilis ini = 2032).
+          Nomor build mengikuti urutan rilis (1.3.7 = 2033).
           Bila sidik jari APK ini berbeda dengan yang terpasang, uninstall aplikasi lama
           sekali saja sebelum memasang versi ini.
 
+          - Fitur: **Model Realtime Baru di Telepon Niken**
+            - Penambahan model `gpt-live-1` dan `gpt-realtime-2.1` untuk fitur Telepon Niken.
+            - Fallback cerdas dan validasi model tersimpan.
           - Perbaikan: **Penanganan Respon HTTP Error 403 & Non-JSON**
             - Penanganan anggun respon non-JSON / HTML error page pada status HTTP 403 / 401 / 500+ di halaman login dan biometrik.
             - Pencegahan error FormatException pada pembacaan respon token Realtime AI Telepon Niken dan keputusan tiket agen.
@@ -181,7 +184,7 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "/tmp/$NAMA" --clobber
           else
-            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.6 (Build 2032)" --notes-file /tmp/catatan.md
+            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.7 (Build 2033)" --notes-file /tmp/catatan.md
           fi
           gh release view "$TAG" --json assets,tagName,url
 

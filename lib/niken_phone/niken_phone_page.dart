@@ -75,12 +75,14 @@ class _NikenPhonePageState extends State<NikenPhonePage>
   static const _prefKey      = 'openai_rt_apikey';
   static const _prefModelKey = 'openai_rt_model';
   static const List<String> _daftarModel = [
-    'gpt-4o-realtime-preview',
+    'gpt-live-1',
+    'gpt-realtime-2.1',
     'gpt-4o-mini-realtime-preview',
+    'gpt-4o-realtime-preview',
     'gpt-realtime',
     'gpt-realtime-mini',
   ];
-  String _model = 'gpt-4o-realtime-preview';
+  String _model = 'gpt-live-1';
   static const _instruksi =
       'Kamu adalah Niken, AI CEO Virtual PT ISKOM SARANA NUSANTARA. '
       'Kamu berbicara dengan Owner (Ridwan). Karakter kamu: proaktif, tegas, '
@@ -117,7 +119,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     try {
       key = await _storage.read(key: _prefKey) ?? '';
       final savedModel = await _storage.read(key: _prefModelKey);
-      if (savedModel != null && savedModel.isNotEmpty) {
+      if (savedModel != null && _daftarModel.contains(savedModel)) {
         model = savedModel;
       }
     } catch (_) {
