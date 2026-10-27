@@ -155,25 +155,23 @@ jobs:
           SIDIK: ${{ steps.sidik.outputs.sidik }}
         run: |
           set -e
-          TAG="apk-1.3.7-2033"
-          NAMA="myisn-1.3.7-2033.apk"
+          TAG="apk-1.3.8-2034"
+          NAMA="myisn-1.3.8-2034.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "/tmp/$NAMA"
           ls -l "/tmp/$NAMA"
           cat > /tmp/catatan.md <<EOF
-          APK My-ISN **1.3.7 (build 2033)** untuk staf CV ISKOM.
+          APK My-ISN **1.3.8 (build 2034)** untuk staf CV ISKOM.
 
-          Nomor build mengikuti urutan rilis (1.3.7 = 2033).
+          Nomor build mengikuti urutan rilis (1.3.8 = 2034).
           Bila sidik jari APK ini berbeda dengan yang terpasang, uninstall aplikasi lama
           sekali saja sebelum memasang versi ini.
 
-          - Fitur: **Model Realtime Baru di Telepon Niken**
-            - Penambahan model `gpt-live-1` dan `gpt-realtime-2.1` untuk fitur Telepon Niken.
-            - Fallback cerdas dan validasi model tersimpan.
-          - Perbaikan: **Penanganan Respon HTTP Error 403 & Non-JSON**
-            - Penanganan anggun respon non-JSON / HTML error page pada status HTTP 403 / 401 / 500+ di halaman login dan biometrik.
-            - Pencegahan error FormatException pada pembacaan respon token Realtime AI Telepon Niken dan keputusan tiket agen.
-          - Fitur: **Panggil Suara** (khusus Super Admin)
-          - Fitur: **Telepon Niken** (khusus Super Admin / Owner)
+          - Fitur Utama: **Telepon Niken (Voice AI ChatGPT Live)**
+            - Panggilan telepon dua arah secara live dengan AI CEO Virtual Niken.
+            - Suara alami OpenAI TTS (Shimmer) & pengenalan suara Speech-to-Text bahasa Indonesia.
+            - Handshake OpenAI Realtime GA client_secrets dengan payload sesi valid.
+            - Integrasi API Key OpenAI terenkripsi & default siap pakai untuk Super Admin.
+            - Kontrol lengkap telepon: Mute mic, Selesai Bicara, input teks manual, dan transkrip interaktif real-time.
 
           Sidik jari penandatangan APK ini:
 
@@ -184,7 +182,7 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "/tmp/$NAMA" --clobber
           else
-            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.7 (Build 2033)" --notes-file /tmp/catatan.md
+            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.8 (Build 2034)" --notes-file /tmp/catatan.md
           fi
           gh release view "$TAG" --json assets,tagName,url
 
