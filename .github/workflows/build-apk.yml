@@ -155,23 +155,22 @@ jobs:
           SIDIK: ${{ steps.sidik.outputs.sidik }}
         run: |
           set -e
-          TAG="apk-1.3.8-2034"
-          NAMA="myisn-1.3.8-2034.apk"
+          TAG="apk-1.3.9-2035"
+          NAMA="myisn-1.3.9-2035.apk"
           cp build/app/outputs/flutter-apk/app-release.apk "/tmp/$NAMA"
           ls -l "/tmp/$NAMA"
           cat > /tmp/catatan.md <<EOF
-          APK My-ISN **1.3.8 (build 2034)** untuk staf CV ISKOM.
+          APK My-ISN **1.3.9 (build 2035)** untuk staf CV ISKOM.
 
-          Nomor build mengikuti urutan rilis (1.3.8 = 2034).
+          Nomor build mengikuti urutan rilis (1.3.9 = 2035).
           Bila sidik jari APK ini berbeda dengan yang terpasang, uninstall aplikasi lama
           sekali saja sebelum memasang versi ini.
 
-          - Fitur Utama: **Telepon Niken (Voice AI ChatGPT Live)**
-            - Panggilan telepon dua arah secara live dengan AI CEO Virtual Niken.
-            - Suara alami OpenAI TTS (Shimmer) & pengenalan suara Speech-to-Text bahasa Indonesia.
-            - Handshake OpenAI Realtime GA client_secrets dengan payload sesi valid.
-            - Integrasi API Key OpenAI terenkripsi & default siap pakai untuk Super Admin.
-            - Kontrol lengkap telepon: Mute mic, Selesai Bicara, input teks manual, dan transkrip interaktif real-time.
+          - Fitur Baru: **Pilihan Jenis Suara & Auto Bahasa Indonesia di Telepon Niken**
+            - Pilihan karakter suara OpenAI TTS langsung di UI: Nova (Wanita ceria/natural), Shimmer (Wanita elegan), Alloy (Netral), Echo, Fable, Onyx.
+            - Fitur Coba Dengar / Pratinjau Suara langsung di layar sebelum melakukan panggilan.
+            - Optimalisasi Auto Bahasa Indonesia luwes anti-kaku (prompt sistem & deteksi locale mikrofon id_ID/in_ID).
+            - Penyaringan simbol teks/markdown agar pengucapan suara mengalir alami.
 
           Sidik jari penandatangan APK ini:
 
@@ -182,7 +181,7 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "/tmp/$NAMA" --clobber
           else
-            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.8 (Build 2034)" --notes-file /tmp/catatan.md
+            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.9 (Build 2035)" --notes-file /tmp/catatan.md
           fi
           gh release view "$TAG" --json assets,tagName,url
 

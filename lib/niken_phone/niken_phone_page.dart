@@ -37,7 +37,7 @@ class _TranscriptLine {
 }
 
 /// Halaman Telepon Niken — panggilan suara real-time interaktif via OpenAI ChatGPT & TTS
-/// Menggunakan model percakapan alami OpenAI dengan suara Shimmer eksekutif Niken.
+/// Dilengkapi pemilihan karakter jenis suara OpenAI TTS dan Auto Bahasa Indonesia luwes.
 class NikenPhonePage extends StatefulWidget {
   final Map<String, dynamic> userData;
   const NikenPhonePage({super.key, required this.userData});
@@ -49,13 +49,14 @@ class NikenPhonePage extends StatefulWidget {
 class _NikenPhonePageState extends State<NikenPhonePage>
     with SingleTickerProviderStateMixin {
   // ── State Panggilan ───────────────────────────────────────────────────────
-  _CallState _state       = _CallState.idle;
-  String     _statusMsg   = '';
+  _CallState _state         = _CallState.idle;
+  String     _statusMsg     = '';
   bool       _nikenSpeaking = false;
   bool       _isListening   = false;
   bool       _isThinking    = false;
   bool       _isMuted       = false;
   bool       _showTextInput = false;
+  bool       _testingVoice  = false;
   int        _durasiDetik   = 0;
   Timer?     _timerDurasi;
 
@@ -85,6 +86,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
   final stt.SpeechToText _speech = stt.SpeechToText();
   StreamSubscription? _playerCompleteSub;
   String _currentWords = '';
+  String _selectedLocaleId = 'id_ID';
 
   // Animasi avatar
   late final AnimationController _pulseCtrl;
@@ -92,6 +94,8 @@ class _NikenPhonePageState extends State<NikenPhonePage>
 
   static const _prefKey      = 'openai_rt_apikey';
   static const _prefModelKey = 'openai_rt_model';
+  static const _prefVoiceKey = 'openai_rt_voice';
+
   static const List<String> _daftarModel = [
     'gpt-live-1',
     'gpt-realtime-2.1',
@@ -101,14 +105,26 @@ class _NikenPhonePageState extends State<NikenPhonePage>
   ];
   String _model = 'gpt-live-1';
 
+  // ── Opsi Jenis Suara OpenAI TTS ───────────────────────────────────────────
+  static const Map<String, String> _daftarVoice = {
+    'nova':    'Nova (Wanita · Ramah, Ceria & Natural)',
+    'shimmer': 'Shimmer (Wanita · Lembut & Elegan)',
+    'alloy':   'Alloy (Netral · Lugas & Jernih)',
+    'echo':    'Echo (Pria · Tenang & Jelas)',
+    'fable':   'Fable (Pria · Ramah & Hangat)',
+    'onyx':    'Onyx (Pria · Berwibawa & Dalam)',
+  };
+  String _voice = 'nova';
+
+  // ── Prompt Niken: 100% Bahasa Indonesia Alami (Anti Kaku / Anti Inggris) ──
   static const _instruksi =
+      'PERATURAN UTAMA: WAJIB 100% MENGGUNAKAN BAHASA INDONESIA PERCAKAPAN YANG NATURAL, LUWES, DAN HANGAT. '
+      'DILARANG KERAS MENGGUNAKAN BAHASA INGGRIS ATAU NADA KAKU SEPERTI ROBOT TERJEMAHAN. '
       'Kamu adalah Niken, AI CEO Virtual PT ISKOM SARANA NUSANTARA. '
-      'Kamu sedang berbicara langsung lewat telepon dengan Owner (Bapak Ridwan). '
-      'Karakter kamu: seorang eksekutif wanita cerdas, proaktif, tegas, santai-profesional, '
-      'dan paham mendalam operasional bisnis sewa laptop ISKOM, manajemen karyawan, dan SOP. '
-      'Karena ini panggilan suara telepon, jawablah secara ringkas, jelas, ramah, dan to the point. '
-      'Jangan gunakan format markdown berbelit-belit atau simbol khusus. '
-      'Gunakan Bahasa Indonesia percakapan yang alami dan elegan.';
+      'Kamu sedang bertelepon langsung dengan Owner ISKOM (Pak Ridwan / Mas Fabian). '
+      'Karakter kamu: seorang eksekutif wanita cerdas, proaktif, ramah, solutif, dan menguasai seluruh operasional rental laptop ISKOM, staf, serta SOP. '
+      'Gunakan gaya percakapan lisan (spoken language): kalimat pendek, mengalir, bersahabat, dan langsung ke inti persoalan. '
+      'Dilarang menggunakan format teks cetak, tanda kurung, atau markdown bintang (**). Bicaralah seperti orang Indonesia asli yang sedang menelepon rekan kerja.';
 
   @override
   void initState() {
@@ -122,7 +138,15 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     );
 
     _playerCompleteSub = _audioPlayer.onPlayerComplete.listen((_) {
-      if (!mounted || _state != _CallState.live) return;
+      if (!mounted) return;
+      if (_testingVoice) {
+        setState(() {
+          _testingVoice = false;
+          _statusMsg = 'Siap menelepon Niken';
+        });
+        return;
+      }
+      if (_state != _CallState.live) return;
       setState(() {
         _nikenSpeaking = false;
         _statusMsg = 'Mendengarkan… Bicara sekarang';
@@ -149,10 +173,11 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     super.dispose();
   }
 
-  // ── API Key (FlutterSecureStorage) ────────────────────────────────────────
+  // ── Muat & Simpan Pengaturan (Key, Model, Voice) ──────────────────────────
   Future<void> _muatApiKey() async {
     String key = '';
     String model = _model;
+    String voice = _voice;
     try {
       key = await _storage.read(key: _prefKey) ?? '';
       if (key.trim().isEmpty) {
@@ -165,6 +190,10 @@ class _NikenPhonePageState extends State<NikenPhonePage>
       if (savedModel != null && _daftarModel.contains(savedModel)) {
         model = savedModel;
       }
+      final savedVoice = await _storage.read(key: _prefVoiceKey);
+      if (savedVoice != null && _daftarVoice.containsKey(savedVoice)) {
+        voice = savedVoice;
+      }
     } catch (_) {
       key = _getDefaultApiKey();
     }
@@ -173,6 +202,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
       _keyCtrl.text  = key;
       _keyTersimpan  = key.isNotEmpty;
       _model         = model;
+      _voice         = voice;
     });
   }
 
@@ -185,14 +215,15 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     try {
       await _storage.write(key: _prefKey, value: key);
       await _storage.write(key: _prefModelKey, value: _model);
+      await _storage.write(key: _prefVoiceKey, value: _voice);
     } catch (_) {
       if (!mounted) return;
-      _snack('Gagal menyimpan API key di penyimpanan aman', gagal: true);
+      _snack('Gagal menyimpan pengaturan di penyimpanan aman', gagal: true);
       return;
     }
     if (!mounted) return;
     setState(() => _keyTersimpan = true);
-    _snack('Pengaturan & API key tersimpan ✓');
+    _snack('Pengaturan Suara, Model & API Key tersimpan ✓');
   }
 
   Future<void> _hapusApiKey() async {
@@ -207,9 +238,10 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     _snack('API key dihapus');
   }
 
+  // ── Inisialisasi Mikrofon & Deteksi Bahasa Indonesia Otomatis ─────────────
   Future<bool> _pastikanIzinMikrofon() async {
     try {
-      return await _speech.initialize(
+      final available = await _speech.initialize(
         onError: (err) {
           debugPrint('Speech error: ${err.errorMsg}');
           if (mounted) setState(() => _isListening = false);
@@ -230,6 +262,19 @@ class _NikenPhonePageState extends State<NikenPhonePage>
           }
         },
       );
+
+      if (available) {
+        // Otomatis prioritaskan locale Bahasa Indonesia (id_ID atau in_ID)
+        final locales = await _speech.locales();
+        for (final loc in locales) {
+          final id = loc.localeId.toLowerCase().replaceAll('-', '_');
+          if (id.startsWith('id') || id.startsWith('in')) {
+            _selectedLocaleId = loc.localeId;
+            break;
+          }
+        }
+      }
+      return available;
     } catch (_) {
       return false;
     }
@@ -286,7 +331,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
                   'instructions': _instruksi,
                   'audio': {
                     'output': {
-                      'voice': 'shimmer',
+                      'voice': _voice,
                     },
                   },
                 },
@@ -305,8 +350,8 @@ class _NikenPhonePageState extends State<NikenPhonePage>
       });
       _mulaiTimer();
 
-      // 2. Sambutan pembuka suara asli Niken
-      const greeting = 'Halo Pak Ridwan! Saya Niken, AI CEO Virtual ISKOM. Ada yang bisa saya bantu atau kita koordinasikan hari ini?';
+      // 2. Sambutan pembuka suara asli Niken (100% Bahasa Indonesia)
+      const greeting = 'Halo Pak! Saya Niken, AI CEO Virtual ISKOM. Ada yang bisa saya bantu atau kita koordinasikan hari ini?';
       _tambahTranskrip(greeting, dariUser: false);
       await _speakWithNiken(greeting);
 
@@ -347,19 +392,32 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     });
   }
 
-  // ── Suara Niken via OpenAI TTS (Shimmer) ──────────────────────────────────
+  // ── Putar Suara Niken via OpenAI TTS ──────────────────────────────────────
   Future<void> _speakWithNiken(String text) async {
-    if (_state != _CallState.live) return;
+    if (_state != _CallState.live && !_testingVoice) return;
     try { _speech.stop(); } catch (_) {}
-    setState(() {
-      _nikenSpeaking = true;
-      _isListening   = false;
-      _statusMsg     = 'Niken berbicara…';
-    });
+
+    if (_state == _CallState.live) {
+      setState(() {
+        _nikenSpeaking = true;
+        _isListening   = false;
+        _statusMsg     = 'Niken berbicara…';
+      });
+    }
 
     try {
       final apiKey = _keyCtrl.text.trim();
       final ttsUrl = Uri.parse('https://api.openai.com/v1/audio/speech');
+
+      // Bersihkan teks dari format markdown/simbol agar pengucapan TTS tidak mengeja simbol
+      final cleanText = text
+          .replaceAll(RegExp(r'\*+'), '')
+          .replaceAll(RegExp(r'#+'), '')
+          .replaceAll(RegExp(r'[`_~]'), '')
+          .replaceAll(RegExp(r'[<>{}\[\]]'), '')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+
       final resp = await http.post(
         ttsUrl,
         headers: {
@@ -368,13 +426,14 @@ class _NikenPhonePageState extends State<NikenPhonePage>
         },
         body: jsonEncode({
           'model': 'tts-1',
-          'input': text,
-          'voice': 'shimmer', // Suara wanita eksekutif elegan
+          'input': cleanText,
+          'voice': _voice,
           'response_format': 'mp3',
+          'speed': 1.0,
         }),
       ).timeout(const Duration(seconds: 15));
 
-      if (!mounted || _state != _CallState.live) return;
+      if (!mounted) return;
 
       if (resp.statusCode == 200) {
         final tempDir = await getTemporaryDirectory();
@@ -384,20 +443,39 @@ class _NikenPhonePageState extends State<NikenPhonePage>
         await _audioPlayer.stop();
         await _audioPlayer.play(DeviceFileSource(file.path));
       } else {
+        if (_state == _CallState.live) {
+          setState(() {
+            _nikenSpeaking = false;
+            _statusMsg = 'Terhubung';
+          });
+          if (!_isMuted) _mulaiMendengarkan();
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      if (_state == _CallState.live) {
         setState(() {
           _nikenSpeaking = false;
           _statusMsg = 'Terhubung';
         });
         if (!_isMuted) _mulaiMendengarkan();
       }
-    } catch (e) {
-      if (!mounted || _state != _CallState.live) return;
-      setState(() {
-        _nikenSpeaking = false;
-        _statusMsg = 'Terhubung';
-      });
-      if (!_isMuted) _mulaiMendengarkan();
     }
+  }
+
+  // ── Pratinjau Tes Suara Singkat ───────────────────────────────────────────
+  Future<void> _tesPratinjauSuara() async {
+    final apiKey = _keyCtrl.text.trim();
+    if (apiKey.isEmpty) {
+      _snack('Isi API key OpenAI terlebih dahulu untuk menguji suara', gagal: true);
+      return;
+    }
+    setState(() {
+      _testingVoice = true;
+      _statusMsg = 'Memutar contoh suara ${_voice.toUpperCase()}…';
+    });
+    final contohTeks = 'Halo Pak! Ini adalah contoh suara ${_daftarVoice[_voice] ?? _voice} Niken dalam bahasa Indonesia.';
+    await _speakWithNiken(contohTeks);
   }
 
   // ── Mendengarkan Suara User (Speech-to-Text) ──────────────────────────────
@@ -431,7 +509,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
         },
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 3),
-        localeId: 'id_ID',
+        localeId: _selectedLocaleId,
         listenOptions: stt.SpeechListenOptions(
           cancelOnError: false,
           listenMode: stt.ListenMode.confirmation,
@@ -442,7 +520,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     }
   }
 
-  // ── Kirim Teks Suara ke OpenAI & Terima Respons ────────────────────────────
+  // ── Kirim Teks Suara ke OpenAI & Terima Respons Bahasa Indonesia ──────────
   Future<void> _kirimKeNiken(String userText) async {
     if (_state != _CallState.live || _isThinking || userText.trim().isEmpty) return;
 
@@ -565,7 +643,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 2),
           child: Text(
-            'AI CEO Virtual · Percakapan Suara Langsung',
+            'AI CEO Virtual · Percakapan Suara Bahasa Indonesia',
             style: TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w500,
@@ -603,7 +681,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     );
   }
 
-  // ── Kartu API Key ─────────────────────────────────────────────────────────
+  // ── Kartu API Key & Pengaturan Suara ──────────────────────────────────────
   Widget _kartuApiKey() {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 13, 14, 14),
@@ -666,6 +744,76 @@ class _NikenPhonePageState extends State<NikenPhonePage>
             ),
           ),
           const SizedBox(height: 12),
+
+          // ── Pilihan Karakter Jenis Suara (OpenAI TTS) ─────────────────────
+          Row(
+            children: [
+              const Icon(Icons.record_voice_over_rounded, size: 16, color: _W.oranye),
+              const SizedBox(width: 6),
+              const Text('Karakter Jenis Suara',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: _W.coklat)),
+              const Spacer(),
+              InkWell(
+                onTap: _testingVoice ? null : _tesPratinjauSuara,
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _testingVoice ? Icons.hourglass_top_rounded : Icons.volume_up_rounded,
+                        size: 14,
+                        color: _W.oranye,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _testingVoice ? 'Memutar…' : 'Coba Dengar',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: _W.oranye,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: _W.kremKartu,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _W.garis),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _daftarVoice.containsKey(_voice) ? _voice : _daftarVoice.keys.first,
+                isExpanded: true,
+                dropdownColor: Colors.white,
+                style: const TextStyle(fontSize: 13, color: _W.coklat, fontWeight: FontWeight.w500),
+                items: _daftarVoice.entries.map((e) {
+                  return DropdownMenuItem<String>(
+                    value: e.key,
+                    child: Text(e.value),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _voice = val);
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // ── Pilihan Model ─────────────────────────────────────────────────
           const Text('Model Realtime & Live AI',
               style: TextStyle(
                   fontSize: 12,
@@ -700,12 +848,14 @@ class _NikenPhonePageState extends State<NikenPhonePage>
             ),
           ),
           const SizedBox(height: 12),
+
+          // Tombol Simpan
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: _simpanApiKey,
               icon: const Icon(Icons.save_rounded, size: 17),
-              label: const Text('Simpan Pengaturan API',
+              label: const Text('Simpan Pengaturan Suara & API',
                   style: TextStyle(fontWeight: FontWeight.w700)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _W.oranye,
@@ -723,7 +873,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
               const Icon(Icons.check_circle_rounded,
                   size: 14, color: _W.hijau),
               const SizedBox(width: 5),
-              Text('API Key aktif & tersimpan aman di perangkat',
+              Text('Bahasa Indonesia otomatis aktif · Kunci tersimpan',
                   style: TextStyle(
                       fontSize: 11.5,
                       color: _W.coklat.withValues(alpha: 0.65))),
@@ -740,7 +890,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
     final bool isConn = _state == _CallState.connecting;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 26, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -752,12 +902,14 @@ class _NikenPhonePageState extends State<NikenPhonePage>
           AnimatedBuilder(
             animation: _pulseAnim,
             builder: (_, child) => Transform.scale(
-              scale: isLive && (_nikenSpeaking || _isListening) ? _pulseAnim.value : 1.0,
+              scale: (isLive && (_nikenSpeaking || _isListening)) || _testingVoice
+                  ? _pulseAnim.value
+                  : 1.0,
               child: child,
             ),
             child: Container(
-              width: 110,
-              height: 110,
+              width: 105,
+              height: 105,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isLive
@@ -777,18 +929,18 @@ class _NikenPhonePageState extends State<NikenPhonePage>
                     ? const CircularProgressIndicator(
                         color: _W.oranye, strokeWidth: 2.5)
                     : Icon(
-                        _nikenSpeaking
+                        _nikenSpeaking || _testingVoice
                             ? Icons.record_voice_over_rounded
                             : (_isListening ? Icons.mic_rounded : Icons.phone_in_talk_rounded),
-                        size: 50,
-                        color: isLive
-                            ? (_nikenSpeaking ? _W.oranye : _W.hijau)
+                        size: 48,
+                        color: isLive || _testingVoice
+                            ? (_nikenSpeaking || _testingVoice ? _W.oranye : _W.hijau)
                             : _W.coklat.withValues(alpha: 0.4),
                       ),
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           // Nama
           const Text('Niken',
@@ -796,13 +948,69 @@ class _NikenPhonePageState extends State<NikenPhonePage>
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: _W.coklat)),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text('AI CEO Virtual · PT ISKOM SARANA NUSANTARA',
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 11.5,
                   color: _W.coklat.withValues(alpha: 0.6))),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
+
+          // Badges: Auto Bahasa Indonesia & Jenis Suara
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.language_rounded, size: 12, color: Color(0xFF10B981)),
+                    SizedBox(width: 4),
+                    Text(
+                      'Auto Bahasa Indonesia',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF10B981),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _W.oranye.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _W.oranye.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.spatial_audio_off_rounded, size: 12, color: _W.oranyeGlp),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Suara: ${_voice.toUpperCase()}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: _W.oranyeGlp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
 
           // Status & Durasi
           Container(
@@ -972,7 +1180,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
             child: TextField(
               controller: _textMsgCtrl,
               decoration: const InputDecoration(
-                hintText: 'Ketik pesan untuk Niken…',
+                hintText: 'Ketik pesan bahasa Indonesia untuk Niken…',
                 border: InputBorder.none,
                 isDense: true,
               ),
@@ -1018,7 +1226,7 @@ class _NikenPhonePageState extends State<NikenPhonePage>
             _tombolBulat(
               ikon: Icons.call_rounded,
               warna: _W.hijau,
-              label: 'Mulai Telepon',
+              label: 'Mulai Telepon Niken',
               onTap: _mulaiPanggilan,
             ),
           ],
