@@ -307,11 +307,11 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         color: isDark
-            ? const Color(0xFF2E2823).withOpacity(0.8)
+            ? const Color(0xFF2E2823).withValues(alpha: 0.8)
             : const Color(0xFFFFF8F2),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFE5892D).withOpacity(0.3),
+          color: const Color(0xFFE5892D).withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -368,11 +368,11 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                     border: Border.all(
                       color: isDark
                           ? Colors.white10
-                          : Colors.grey.withOpacity(0.2),
+                          : Colors.grey.withValues(alpha: 0.2),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
+                        color: Colors.black.withValues(alpha: 0.03),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -386,7 +386,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                         padding: HtmlPaddings.zero,
                         fontSize: FontSize(13.5),
                         color: isDark
-                            ? Colors.white.withOpacity(0.9)
+                            ? Colors.white.withValues(alpha: 0.9)
                             : Colors.black87,
                       ),
                       "b": Style(fontWeight: FontWeight.bold),
@@ -446,7 +446,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFE5892D).withOpacity(0.2),
+                              color: const Color(0xFFE5892D).withValues(alpha: 0.2),
                               blurRadius: 6,
                               offset: const Offset(0, 3),
                             ),
@@ -463,11 +463,11 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                           border: Border.all(
                             color: isDark
                                 ? Colors.white10
-                                : Colors.grey.withOpacity(0.2),
+                                : Colors.grey.withValues(alpha: 0.2),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
+                              color: Colors.black.withValues(alpha: 0.03),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -490,7 +490,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                               padding: HtmlPaddings.zero,
                               fontSize: FontSize(13.5),
                               color: isDark
-                                  ? Colors.white.withOpacity(0.9)
+                                  ? Colors.white.withValues(alpha: 0.9)
                                   : Colors.black87,
                             ),
                             "b": Style(fontWeight: FontWeight.bold),
@@ -503,7 +503,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                               border: Border.all(
                                   color: isDark
                                       ? Colors.white10
-                                      : Colors.grey.withOpacity(0.3)),
+                                      : Colors.grey.withValues(alpha: 0.3)),
                             ),
                           },
                         ),
@@ -535,7 +535,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
             shape: BoxShape.circle,
             border: Border.all(
               color:
-                  isDark ? Colors.white10 : Colors.grey.withOpacity(0.2),
+                  isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -622,7 +622,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                     border: Border.all(
                       color: isDark
                           ? Colors.white10
-                          : Colors.grey.withOpacity(0.2),
+                          : Colors.grey.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Row(
@@ -702,7 +702,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
         color: isDark ? Colors.grey[900] : Colors.white,
         border: Border(
           top: BorderSide(
-            color: isDark ? Colors.white10 : Colors.grey.withOpacity(0.15),
+            color: isDark ? Colors.white10 : Colors.grey.withValues(alpha: 0.15),
           ),
         ),
       ),
@@ -721,13 +721,13 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                     ? const Color(0xFFE5892D)
                     : (isDark
                         ? Colors.white12
-                        : Colors.grey.withOpacity(0.3)),
+                        : Colors.grey.withValues(alpha: 0.3)),
                 width: 1.5,
               ),
               boxShadow: _isListening
                   ? [
                       BoxShadow(
-                        color: const Color(0xFFE5892D).withOpacity(0.4),
+                        color: const Color(0xFFE5892D).withValues(alpha: 0.4),
                         blurRadius: 12,
                         spreadRadius: 2,
                       )
@@ -762,7 +762,7 @@ class _AiChatIsnPageState extends State<AiChatIsnPage>
                 border: Border.all(
                   color: isDark
                       ? Colors.white10
-                      : Colors.grey.withOpacity(0.2),
+                      : Colors.grey.withValues(alpha: 0.2),
                   width: 1.5,
                 ),
               ),
