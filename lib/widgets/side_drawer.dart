@@ -26,6 +26,7 @@ import '../job_desk/job_desk_page.dart';
 import '../localization/app_localizations.dart';
 import '../constants.dart';
 import '../reports/reports_page.dart';
+import '../reports/kurir_report_page.dart';
 import '../projects/project_list_page.dart';
 import '../tasks/task_list_page.dart';
 import '../passwords/password_list_page.dart';
@@ -63,7 +64,7 @@ class _SideDrawerState extends State<SideDrawer> {
   void initState() {
     super.initState();
     // Auto-expand section if it contains the active page
-    if (['rent_plan', 'laptop_units', 'scan_laptop_barcode', 'send_laptop', 'receive_laptop', 'todo_list', 'reminder', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'passwords', 'crm'].contains(
+    if (['rent_plan', 'laptop_units', 'scan_laptop_barcode', 'send_laptop', 'receive_laptop', 'todo_list', 'reminder', 'employees', 'work_log', 'job_desk', 'projects', 'tasks', 'reports', 'kurir_report', 'passwords', 'crm'].contains(
       widget.activePage,
     )) {
       _expandedSections['work'] = true;
@@ -431,6 +432,30 @@ class _SideDrawerState extends State<SideDrawer> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => ReportsPage(
+                                  userData: widget.userData,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      if (!isCustomer &&
+                          (_hasPermission('hr_kurir') ||
+                           _hasPermission('kurir1') ||
+                           _hasPermission('mobile_reports_enable') ||
+                           isSuperAdmin ||
+                           userId == '184'))
+                        _buildMenuItem(
+                          context,
+                          icon: Icons.local_shipping_outlined,
+                          title: 'Laporan Kurir',
+                          isActive: widget.activePage == 'kurir_report',
+                          padding: const EdgeInsets.only(left: 32, right: 12),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => KurirReportPage(
                                   userData: widget.userData,
                                 ),
                               ),

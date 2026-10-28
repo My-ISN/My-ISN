@@ -28,6 +28,7 @@ import 'package:myisn/reminder/reminder_page.dart';
 import 'package:myisn/notes/notes_page.dart';
 import 'package:myisn/approval/approval_hub_page.dart';
 import 'package:myisn/niken_phone/niken_phone_page.dart';
+import 'package:myisn/reports/kurir_report_page.dart';
 
 class AppModule {
   final String titleKey;
@@ -86,6 +87,15 @@ class MenuRegistry {
         roleName.contains('super admin') ||
         roleId == 1 ||
         roleId == '1';
+
+    final bool isKurirOrAdmin = isSuperAdmin ||
+        userType == 'company' ||
+        userId == '184' ||
+        (userData['role_resources'] ?? '').toString().contains('hr_kurir') ||
+        (userData['role_resources'] ?? '').toString().contains('kurir1') ||
+        (userData['designation_name'] ?? '').toString().toLowerCase().contains('kurir') ||
+        (userData['designation_name'] ?? '').toString().toLowerCase().contains('courier') ||
+        (userData['designation_name'] ?? '').toString().toLowerCase().contains('driver');
 
     return [
       // Pusat Persetujuan (ACC) — hanya untuk Super Admin / Owner
@@ -264,6 +274,15 @@ class MenuRegistry {
         categoryKey: 'side_drawer.work',
         pageBuilder: (context, user) => ReportsPage(userData: user),
       ),
+      if (!isCustomer)
+        AppModule(
+          titleKey: 'Laporan Kurir',
+          icon: Icons.local_shipping_rounded,
+          color: const Color(0xFFFF7043),
+          permission: isKurirOrAdmin ? null : 'hr_kurir',
+          categoryKey: 'side_drawer.work',
+          pageBuilder: (context, user) => KurirReportPage(userData: user),
+        ),
       AppModule(
         titleKey: 'Proyek',
         icon: Icons.folder_copy_rounded,
