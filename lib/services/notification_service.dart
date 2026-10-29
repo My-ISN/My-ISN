@@ -192,8 +192,9 @@ class NotificationService {
           MaterialPageRoute(builder: (context) => PayrollPage(userData: userData)),
         );
       }
-    } else if (type == 'rental_agreement' && targetId != null) {
-      final rentId = int.tryParse(targetId.toString());
+    } else if (['rental_agreement', 'rental_expiry_reminder', 'rental_expiry_staff_alert', 'rental_expiry_today'].contains(type)) {
+      final rawId = data['rental_id'] ?? data['target_id'] ?? targetId;
+      final rentId = int.tryParse(rawId?.toString() ?? '');
       if (rentId != null) {
         Navigator.push(
           context,
