@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -152,9 +153,11 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
 
+  static const double kCustomToolbarHeight = 48.0;
+
   @override
   Size get preferredSize =>
-      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0.0));
+      Size.fromHeight(kCustomToolbarHeight + (bottom?.preferredSize.height ?? 0.0));
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
@@ -325,7 +328,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
-                                              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
+                                              color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
                                             ),
                                           ),
                                         ),
@@ -450,6 +453,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
       if (responses[0].statusCode == 200 && responses[1].statusCode == 200) {
         final annData = json.decode(responses[0].body);
         final todoData = json.decode(responses[1].body);
+        if (!mounted) return;
 
         _notifManager.updateCount(
           annData['unread_count'] ?? 0,
@@ -470,14 +474,22 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AppBar(
+      toolbarHeight: CustomAppBar.kCustomToolbarHeight,
       elevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      ),
       automaticallyImplyLeading: widget.showBackButton,
       shape: Border(
         bottom: BorderSide(
-          color: Theme.of(context).brightness == Brightness.dark
+          color: isDark
               ? Colors.white10
-              : Colors.grey.withOpacity(0.15),
+              : Colors.grey.withValues(alpha: 0.15),
           width: 1.0,
         ),
       ),
@@ -490,7 +502,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
-              fontSize: widget.subtitle != null ? 18 : 20,
+              fontSize: widget.subtitle != null ? 17 : 19,
             ),
           ),
           if (widget.subtitle != null) widget.subtitle!,
@@ -503,11 +515,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 Transform.translate(
                   offset: const Offset(8, 0), // Shift 8 pixels to the right
                   child: IconButton(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(6.0),
                     constraints: const BoxConstraints(),
                     icon: const Icon(
                       Icons.search,
                       color: Colors.grey,
+                      size: 22,
                     ),
                     onPressed: _showSearchOverlay,
                   ),
@@ -519,11 +532,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     alignment: Alignment.center,
                     children: [
                       IconButton(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(6.0),
                         constraints: const BoxConstraints(),
                         icon: const Icon(
                           Icons.notifications_none,
                           color: Colors.grey,
+                          size: 22,
                         ),
                         onPressed: () async {
                           await Navigator.push(
@@ -572,8 +586,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 },
                 child: ClipOval(
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: 32,
+                    height: 32,
                     color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
                     child:
                         (widget.userData['profile_photo'] != null &&
