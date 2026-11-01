@@ -1,0 +1,16 @@
+=== LAPORAN BUILD PREVIEW WEB ===
+repo      : My-ISN/My-ISN
+branch    : main
+commit    : 919aacd538029d10abcb0f7c17a4d33fb708ce08
+run id    : 41299010050
+waktu     : 2026-11-01 10:47:57 UTC
+
+=== TOOLCHAIN ===
+Flutter 3.41.9 • channel stable • https://github.com/flutter/flutter.git
+Framework • revision 00b0c91f06 (6 months ago) • 2026-04-29 10:03:19 -0700
+Engine • hash 9161402dc0e134b3fb5adee5046b6e84b1a5e1c1 (revision 42d3d75a56) (6 months ago) • 2026-04-28 17:31:55.000Z
+Tools • Dart 3.11.5 • DevTools 2.54.2
+Dart SDK version: 3.11.5 (stable) (Wed Apr 15 00:36:32 2026 -0700) on "linux_x64"
+openjdk version "17.0.21" 2026-10-20
+OpenJDK Runtime Environment Temurin-17.0.21+9 (build 17.0.21+9)
+OpenJDK 64-Bit Server VM Temurin-17.0.21+9 (build 17.0.21+9, mixed mode, sharing)

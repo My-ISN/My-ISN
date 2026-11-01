@@ -1,0 +1,179 @@
+=== LAPORAN BUILD PREVIEW WEB ===
+repo      : My-ISN/My-ISN
+branch    : main
+commit    : 919aacd538029d10abcb0f7c17a4d33fb708ce08
+run id    : 41299010050
+waktu     : 2026-11-01 10:47:57 UTC
+
+=== TOOLCHAIN ===
+Flutter 3.41.9 • channel stable • https://github.com/flutter/flutter.git
+Framework • revision 00b0c91f06 (6 months ago) • 2026-04-29 10:03:19 -0700
+Engine • hash 9161402dc0e134b3fb5adee5046b6e84b1a5e1c1 (revision 42d3d75a56) (6 months ago) • 2026-04-28 17:31:55.000Z
+Tools • Dart 3.11.5 • DevTools 2.54.2
+Dart SDK version: 3.11.5 (stable) (Wed Apr 15 00:36:32 2026 -0700) on "linux_x64"
+openjdk version "17.0.21" 2026-10-20
+OpenJDK Runtime Environment Temurin-17.0.21+9 (build 17.0.21+9)
+OpenJDK 64-Bit Server VM Temurin-17.0.21+9 (build 17.0.21+9, mixed mode, sharing)
+
+=== HASIL BUILD WEB ===
+build/web ADA, total: 43M
+
+=== 40 BARIS TERAKHIR LOG BUILD (termasuk galat bila ada) ===
+Compiling lib/main.dart for the Web...                          
+Wasm dry run findings:
+Found incompatibilities with WebAssembly.
+
+package:flutter_secure_storage_web/flutter_secure_storage_web.dart 5:1 - dart:html unsupported (0)
+package:flutter_secure_storage_web/flutter_secure_storage_web.dart 6:1 - dart:js_util unsupported (15)
+package:audioplayers_web/wrapped_player.dart 2:1 - dart:html unsupported (0)
+package:connectivity_plus/src/web/dart_html_connectivity_plugin.dart 2:1 - dart:html unsupported (0)
+package:flutter_secure_storage_web/src/subtle.dart 21:1 - dart:html unsupported (0)
+package:flutter_secure_storage_web/src/subtle.dart 22:1 - dart:js_util unsupported (15)
+package:flutter_secure_storage_web/src/subtle.dart 26:1 - package:js/js.dart unsupported (14)
+package:audioplayers_web/web_audio_js.dart 1:1 - dart:html unsupported (0)
+package:audioplayers_web/web_audio_js.dart 3:1 - package:js/js.dart unsupported (14)
+
+Consider addressing these issues to enable wasm builds. See docs for more info: https://docs.flutter.dev/platform-integration/web/wasm
+
+Use --no-wasm-dry-run to disable these warnings.
+Compiling lib/main.dart for the Web...                             54.9s
+✓ Built build/web
+
+=== BARIS 'Error' / 'dart:io' PADA LOG BUILD (bila ada) ===
+
+=== UJI ASAP: HTTP dari server statis lokal di runner ===
+URL dasar: http://127.0.0.1:8099/My-ISN/
+200  text/html  1507 bytes  index.html
+200  text/javascript  9975 bytes  flutter_bootstrap.js
+200  text/javascript  6726441 bytes  main.dart.js
+200  text/javascript  9553 bytes  flutter.js
+
+=== base href di index.html (harus /My-ISN/) ===
+<base href="/My-ISN/"
+
+=== bukti kode aplikasi ikut terkompilasi (marker API ISKOM) ===
+istanakomputer.com muncul: 176
+mobileapi muncul          : 169
+ukuran main.dart.js       : 6726441
+
+=== isi folder build/web ===
+total 6640
+drwxr-xr-x 5 runner runner    4096 Nov  1 10:48 .
+drwxr-xr-x 4 runner runner    4096 Nov  1 10:47 ..
+-rw-r--r-- 1 runner runner      32 Nov  1 10:48 .last_build_id
+drwxr-xr-x 6 runner runner    4096 Nov  1 10:48 assets
+drwxr-xr-x 3 runner runner    4096 Nov  1 10:47 canvaskit
+-rw-r--r-- 1 runner runner     917 Nov  1 10:48 favicon.png
+-rw-r--r-- 1 runner runner    9553 Nov  1 10:47 flutter.js
+-rw-r--r-- 1 runner runner    9975 Nov  1 10:47 flutter_bootstrap.js
+-rw-r--r-- 1 runner runner     784 Nov  1 10:48 flutter_service_worker.js
+drwxr-xr-x 2 runner runner    4096 Nov  1 10:48 icons
+-rw-r--r-- 1 runner runner    1507 Nov  1 10:47 index.html
+-rw-r--r-- 1 runner runner 6726441 Nov  1 10:48 main.dart.js
+-rw-r--r-- 1 runner runner     906 Nov  1 10:48 manifest.json
+-rw-r--r-- 1 runner runner      82 Nov  1 10:48 version.json
+
+=== UJI RENDER DI BROWSER (Chrome headless) ===
+url    : http://127.0.0.1:8099/My-ISN/
+chrome : /usr/bin/google-chrome
+curl index.html: HTTP 200
+[2635:2661:1101/104901.156956:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2635:2661:1101/104902.595379:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2635:2661:1101/104902.595417:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2670:2670:1101/104902.744206:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[2635:2661:1101/104902.801576:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2670:2670:1101/104902.815645:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[2635:2661:1101/104903.184464:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2635:2635:1101/104906.221567:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2635:2661:1101/104906.221643:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2635:2635:1101/104906.221712:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2635:2661:1101/104906.221743:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2635:2635:1101/104906.226312:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2733:2733:1101/104906.229948:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[2733:2733:1101/104906.230856:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[2635:2635:1101/104906.249423:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2635:2661:1101/104906.253312:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2635:2635:1101/104906.501115:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2635:2635:1101/104906.537944:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2635:2661:1101/104906.538460:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2635:2635:1101/104906.544349:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2764:2764:1101/104906.549691:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[2764:2764:1101/104906.551715:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[2635:2635:1101/104906.789868:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2635:2635:1101/104906.789927:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files
+[2635:2661:1101/104906.789957:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2794:2794:1101/104906.815055:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[2794:2794:1101/104906.819520:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[2635:2635:1101/104906.904605:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2635:2661:1101/104906.904795:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[2803:2803:1101/104906.945512:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[2803:2803:1101/104906.946810:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[2635:2635:1101/104906.952667:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[2817:2817:1101/104907.042289:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[2817:2817:1101/104907.044525:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[2837:2837:1101/104907.095467:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[2837:2837:1101/104907.096675:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[2722:2788:1101/104907.658925:ERROR:gpu/ipc/client/command_buffer_proxy_impl.cc:277] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[2826:2835:1101/104907.658976:ERROR:gpu/ipc/client/command_buffer_proxy_impl.cc:277] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[2848:2848:1101/104909.387265:ERROR:gpu/command_buffer/service/gl_utils.cc:431] [.WebGL-0x36ec0016ba00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[2848:2848:1101/104909.702127:ERROR:gpu/command_buffer/service/gl_utils.cc:431] [.WebGL-0x36ec03678800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[2848:2848:1101/104910.063857:ERROR:gpu/command_buffer/service/gl_utils.cc:431] [.WebGL-0x36ec03678800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[2848:2848:1101/104910.214822:ERROR:gpu/command_buffer/service/gl_utils.cc:431] [.WebGL-0x36ec03678800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+35395 bytes written to file /tmp/shot/preview.png
+[3067:3090:1101/104910.559431:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3067:3090:1101/104910.559966:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3067:3090:1101/104910.560642:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3067:3090:1101/104910.566236:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3104:3104:1101/104910.569945:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[3104:3104:1101/104910.575789:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[3067:3090:1101/104910.590230:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3067:3067:1101/104910.654978:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3067:3090:1101/104910.655046:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3067:3067:1101/104910.655100:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3067:3090:1101/104910.655197:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3067:3067:1101/104910.655446:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3067:3067:1101/104910.658541:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3067:3090:1101/104910.658821:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3154:3154:1101/104910.677998:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[3154:3154:1101/104910.681804:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[3067:3067:1101/104910.697959:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3067:3067:1101/104910.698172:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3067:3090:1101/104910.698619:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3067:3067:1101/104910.704912:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3205:3205:1101/104910.725881:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[3205:3205:1101/104910.727539:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[3067:3067:1101/104910.731157:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3067:3067:1101/104910.731379:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.Properties.GetAll: object_path= /org/freedesktop/UPower/devices/DisplayDevice: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.UPower was not provided by any .service files
+[3067:3090:1101/104910.731960:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3225:3225:1101/104910.759611:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[3225:3225:1101/104910.763004:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[3067:3067:1101/104910.763262:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3067:3090:1101/104910.763331:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[3067:3067:1101/104910.785034:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[3236:3236:1101/104910.798536:ERROR:ui/gl/init/gl_factory.cc:110] Requested GL implementation (gl=none,angle=none) not found in allowed implementations: [(gl=egl-angle,angle=default)].
+[3236:3236:1101/104910.802771:ERROR:components/viz/service/main/viz_main_impl.cc:192] Exiting GPU process due to errors during initialization
+[3152:3197:1101/104910.957251:ERROR:gpu/ipc/client/command_buffer_proxy_impl.cc:277] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[3240:3256:1101/104910.958136:ERROR:gpu/ipc/client/command_buffer_proxy_impl.cc:277] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
+[3276:3276:1101/104912.049014:ERROR:gpu/command_buffer/service/gl_utils.cc:431] [.WebGL-0x2abc00179600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[3276:3276:1101/104912.177551:ERROR:gpu/command_buffer/service/gl_utils.cc:431] [.WebGL-0x2abc07679600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[3276:3276:1101/104912.396082:ERROR:gpu/command_buffer/service/gl_utils.cc:431] [.WebGL-0x2abc07679600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+[3276:3276:1101/104912.453774:ERROR:gpu/command_buffer/service/gl_utils.cc:431] [.WebGL-0x2abc07679600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+--- penanda render Flutter di DOM ---
+      2 flt-glass-pane
+      1 flt-scene-host
+      8 flt-semantics
+     15 flutter-view
+--- ukuran DOM & screenshot ---
+dom.html: 14978 bytes
+35395
+
+=== STATUS GITHUB PAGES ===
+cek API     : https://api.github.com/repos/My-ISN/My-ISN/pages (dengan token run)
+kode HTTP   : 200
+build_type  : workflow (harus 'workflow' agar deploy atas kendali kita)
+html_url    : https://my-isn.github.io/My-ISN/
+status situs: tidak-ada | visibility: tidak-ada
+cuplikan    : {  "url": "https://api.github.com/repos/My-ISN/My-ISN/pages",  "status": null,  "cname": null,  "custom_404": false,  "html_url": "https://my-isn.github.io/My-ISN/",  "build_type": "workflow",  "source": {    "branch": "main",    "path": "/"  },  "public": true,  "protected_domain_state"
+tautan preview: https://my-isn.github.io/My-ISN/
+bukti render: lihat preview-runtime.png + dom.html di cabang ini (penanda flt-glass-pane/flutter-view)
+log build   : catat ringkas di bawah; log lengkap tidak dapat dibaca tanpa login
