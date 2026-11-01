@@ -153,7 +153,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
 
-  static const double kCustomToolbarHeight = 48.0;
+  static const double kCustomToolbarHeight = 40.0;
 
   @override
   Size get preferredSize =>
@@ -502,7 +502,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
-              fontSize: widget.subtitle != null ? 17 : 19,
+              fontSize: widget.subtitle != null ? 16 : 18,
             ),
           ),
           if (widget.subtitle != null) widget.subtitle!,
@@ -515,12 +515,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 Transform.translate(
                   offset: const Offset(8, 0), // Shift 8 pixels to the right
                   child: IconButton(
-                    padding: const EdgeInsets.all(6.0),
+                    padding: const EdgeInsets.all(4.0),
                     constraints: const BoxConstraints(),
                     icon: const Icon(
                       Icons.search,
                       color: Colors.grey,
-                      size: 22,
+                      size: 20,
                     ),
                     onPressed: _showSearchOverlay,
                   ),
@@ -532,12 +532,12 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     alignment: Alignment.center,
                     children: [
                       IconButton(
-                        padding: const EdgeInsets.all(6.0),
+                        padding: const EdgeInsets.all(4.0),
                         constraints: const BoxConstraints(),
                         icon: const Icon(
                           Icons.notifications_none,
                           color: Colors.grey,
-                          size: 22,
+                          size: 20,
                         ),
                         onPressed: () async {
                           await Navigator.push(
@@ -586,8 +586,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 },
                 child: ClipOval(
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    width: 28,
+                    height: 28,
                     color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
                     child:
                         (widget.userData['profile_photo'] != null &&

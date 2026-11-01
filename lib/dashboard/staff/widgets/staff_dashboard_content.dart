@@ -471,11 +471,10 @@ class _StaffDashboardContentState extends State<StaffDashboardContent> {
     return RefreshIndicator(
       onRefresh: widget.onRefresh,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
             DashboardProfileHeader(
               user: user,
               onTap: widget.onProfileTap,
