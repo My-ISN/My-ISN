@@ -1,0 +1,193 @@
+name: Build APK & AAB
+
+# Dibangun otomatis tanpa Android Studio.
+# Proyek ini adalah Flutter (bukan Android native murni), sehingga toolchain
+# utamanya `flutter`, dan Gradle dipanggil oleh Flutter di dalam folder android/.
+# Catatan: gradlew/gradle-wrapper.jar TIDAK ada di repo karena di-ignore oleh
+# android/.gitignore (bawaan template Flutter) - Flutter membangkitkannya
+# otomatis saat build pertama. Karena itu langkah `./gradlew --version`
+# dijalankan setelah wrapper dibangkitkan oleh Flutter.
+#
+# PENTING - KUNCI TANDATANGAN:
+# Aplikasi yang sudah terpasang di HP staf ditandatangani kunci debug milik
+# pemilik (sertifikat SHA-256 05:71:87:7E:61:BA:85:34:CA:BD:39:00:BE:7F:FA:56:
+# 48:FF:BD:9F:07:DA:AD:0F:3C:F0:3B:03:9F:86:E8:D0). Runner GitHub selalu
+# membuat kunci debug BARU di tiap run, sehingga APK dari runner TIDAK BISA
+# menimpa aplikasi yang sudah terpasang (Android menolak: tanda tangan beda).
+# Karena itu runner ini memakai kunci dari secret ANDROID_KEYSTORE_B64 bila ada.
+# Isi secret itu = `base64 -w0 ~/.android/debug.keystore` dari komputer pemilik.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write # perlu untuk menerbitkan Release publik (APK bisa diunduh tanpa login)
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build APK release + AAB + terbitkan APK publik
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-36 build-tools;36.0.0"
+          log-accepted-android-sdk-licenses: true
+
+      - name: Setup Gradle (cache)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      # Proyek dibuat dengan Flutter stable 3.41.9 (Dart 3.11.5).
+      # Pin versi ini agar hasil build identik dengan yang diharapkan pemilik.
+      - name: Setup Flutter 3.41.9 (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.9
+          channel: stable
+          cache: true
+
+      - name: Ambil dependensi
+        run: flutter pub get
+
+      - name: Info toolchain (bukti versi)
+        run: |
+          set -x
+          flutter --version
+          dart --version
+          java -version
+
+      # Agar APK hasil runner bisa menimpa aplikasi yang sudah ada di HP staf,
+      # pakai kunci debug milik pemilik (secret ANDROID_KEYSTORE_B64).
+      - name: Pasang kunci tanda tangan aplikasi
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          set -x
+          mkdir -p "$HOME/.android"
+          if [ -n "$KS_B64" ]; then
+            printf '%s' "$KS_B64" | base64 -d > "$HOME/.android/debug.keystore"
+            echo "Keystore pemilik dipasang dari secret ANDROID_KEYSTORE_B64."
+            keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android 2>/dev/null \
+              | grep -i "SHA256\|Alias name" || true
+          else
+            echo "::warning::secret ANDROID_KEYSTORE_B64 belum ada. APK ditandatangani kunci debug sekali-pakai runner, sehingga TIDAK BISA menimpa aplikasi yang sudah terpasang di HP staf (Android menolak tanda tangan berbeda)."
+          fi
+
+      - name: Versi Gradle wrapper (bukti toolchain)
+        run: |
+          set -x
+          if [ ! -f android/gradlew ]; then
+            echo "gradlew belum ada - normal di repo Flutter (di-ignore .gitignore)."
+            echo "Membangkitkan wrapper lewat konfigurasi Gradle Flutter..."
+            flutter build apk --debug --config-only
+          fi
+          cd android
+          chmod +x ./gradlew || true
+          ./gradlew --version
+
+      - name: Build APK (release, dipakai untuk update staf)
+        run: flutter build apk --release --build-name=1.3.7 --build-number=2033
+
+      - name: Build APK (debug, untuk pemeriksaan)
+        run: flutter build apk --debug --build-name=1.3.7 --build-number=2033
+
+      - name: Build AAB (release)
+        run: flutter build appbundle --release --build-name=1.3.7 --build-number=2033
+
+      - name: Sidik jari penandatangan APK (bukti kunci yang dipakai)
+        id: sidik
+        run: |
+          set -x
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/apksigner" verify --print-certs "$APK" | tee sidik-jari.txt || true
+          SIDIK=$(grep -i "certificate SHA-256 digest" sidik-jari.txt | head -1 || true)
+          echo "sidik=$SIDIK" >> "$GITHUB_OUTPUT"
+          echo "Sidik jari: $SIDIK"
+
+      - name: Unggah artifact APK & AAB (butuh login GitHub)
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-aab-hasil
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            app/build/outputs/**/*.apk
+            app/build/outputs/**/*.aab
+            build/app/outputs/**/*.apk
+            build/app/outputs/**/*.aab
+
+      # Rilis lama `apk-1.3.2-27` memakai versionCode 27. Nomor rilis aplikasi
+      # ini berbasis TAHUN (1.2.2 = 2024, 1.2.3 = 2025), jadi 27 lebih kecil
+      # dari versionCode yang terpasang di HP staf dan APK-nya ditolak Android.
+      # Hapus supaya tidak ada yang mengunduh versi yang tidak bisa dipasang.
+      - name: Hapus rilis usang apk-1.3.2-27 (versionCode salah)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          gh release delete apk-1.3.2-27 --yes --cleanup-tag || true
+
+      # Jalur ini membuat APK bisa diunduh TANPA login GitHub - supaya pemilik
+      # (atau agen di VPS) tidak lagi bergantung pada artifact yang butuh akun.
+      - name: Terbitkan APK ke Release publik
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SIDIK: ${{ steps.sidik.outputs.sidik }}
+        run: |
+          set -e
+          TAG="apk-1.3.9-2035"
+          NAMA="myisn-1.3.9-2035.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "/tmp/$NAMA"
+          ls -l "/tmp/$NAMA"
+          cat > /tmp/catatan.md <<EOF
+          APK My-ISN **1.3.9 (build 2035)** untuk staf CV ISKOM.
+
+          Nomor build mengikuti urutan rilis (1.3.9 = 2035).
+          Bila sidik jari APK ini berbeda dengan yang terpasang, uninstall aplikasi lama
+          sekali saja sebelum memasang versi ini.
+
+          - Fitur Baru: **Pilihan Jenis Suara & Auto Bahasa Indonesia di Telepon Niken**
+            - Pilihan karakter suara OpenAI TTS langsung di UI: Nova (Wanita ceria/natural), Shimmer (Wanita elegan), Alloy (Netral), Echo, Fable, Onyx.
+            - Fitur Coba Dengar / Pratinjau Suara langsung di layar sebelum melakukan panggilan.
+            - Optimalisasi Auto Bahasa Indonesia luwes anti-kaku (prompt sistem & deteksi locale mikrofon id_ID/in_ID).
+            - Penyaringan simbol teks/markdown agar pengucapan suara mengalir alami.
+
+          Sidik jari penandatangan APK ini:
+
+              ${SIDIK:-tidak terbaca}
+
+          Unduh berkas $NAMA pada Release ini (publik, tanpa login).
+          EOF
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "/tmp/$NAMA" --clobber
+          else
+            gh release create "$TAG" "/tmp/$NAMA" --title "Rilis APK MyISN 1.3.9 (Build 2035)" --notes-file /tmp/catatan.md
+          fi
+          gh release view "$TAG" --json assets,tagName,url
+
+      - name: Ringkasan berkas hasil build
+        if: always()
+        run: |
+          set -x
+          find build/app/outputs -type f \( -name '*.apk' -o -name '*.aab' \) -printf '%p  %s bytes\n' 2>/dev/null || true
+          cat sidik-jari.txt 2>/dev/null || true
