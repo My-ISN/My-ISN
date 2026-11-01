@@ -137,6 +137,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool showActions;
   final List<Widget>? extraActions;
   final Function(String)? onTabSelected;
+  final bool primary;
 
   const CustomAppBar({
     super.key,
@@ -148,6 +149,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.showActions = true,
     this.extraActions,
     this.onTabSelected,
+    this.primary = false,
   });
 
   @override
@@ -477,6 +479,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppBar(
+      primary: widget.primary,
       toolbarHeight: CustomAppBar.kCustomToolbarHeight,
       elevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle(
