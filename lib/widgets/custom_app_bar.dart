@@ -477,8 +477,13 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final double totalHeight = CustomAppBar.kCustomToolbarHeight +
+        (widget.bottom?.preferredSize.height ?? 0.0) +
+        (widget.primary ? MediaQuery.paddingOf(context).top : 0.0);
 
-    return AppBar(
+    return SizedBox(
+      height: totalHeight,
+      child: AppBar(
       primary: widget.primary,
       toolbarHeight: CustomAppBar.kCustomToolbarHeight,
       elevation: 0,
@@ -623,6 +628,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
               const SizedBox(width: 16),
             ]
           : [],
+      ),
     );
   }
 }
