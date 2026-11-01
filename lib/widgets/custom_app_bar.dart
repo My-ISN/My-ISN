@@ -155,7 +155,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
 
-  static const double kCustomToolbarHeight = 40.0;
+  static const double kCustomToolbarHeight = 48.0;
 
   @override
   Size get preferredSize =>
@@ -505,7 +505,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
-              fontSize: widget.subtitle != null ? 16 : 18,
+              fontSize: widget.subtitle != null ? 18 : 20,
             ),
           ),
           if (widget.subtitle != null) widget.subtitle!,
@@ -523,7 +523,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                     icon: const Icon(
                       Icons.search,
                       color: Colors.grey,
-                      size: 20,
+                      size: 24,
                     ),
                     onPressed: _showSearchOverlay,
                   ),
@@ -540,7 +540,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                         icon: const Icon(
                           Icons.notifications_none,
                           color: Colors.grey,
-                          size: 20,
+                          size: 24,
                         ),
                         onPressed: () async {
                           await Navigator.push(
@@ -589,8 +589,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 },
                 child: ClipOval(
                   child: Container(
-                    width: 28,
-                    height: 28,
+                    width: 36,
+                    height: 36,
                     color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
                     child:
                         (widget.userData['profile_photo'] != null &&
